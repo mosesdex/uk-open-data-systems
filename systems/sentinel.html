@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel — Dexter DCL</title>
+<meta name="description" content="Turns the Procurement Act’s new mandatory transparency data into a live map of who really wins public contracts — and who is connected to whom.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 01 &middot; Statutory data source live since January 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Sentinel</h1>
+<p class="lede" style="margin-top:.6rem">Public procurement integrity and collusion detection</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Turns the Procurement Act’s new mandatory transparency data into a live map of who really wins public contracts — and who is connected to whom.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Fraud &amp; integrity</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Government estimates fraud and error across the public sector at <strong>£55bn–£81bn a year</strong>, excluding tax and welfare. The Public Sector Fraud Authority reported <strong>£7.53bn saved</strong> in the last financial year and credited the result explicitly to AI and advanced data-matching — but that work concentrates on grants and payments, not on the award stage where procurement fraud originates.</p>
+<p>The classic red flags of bid-rigging are all detectable in data that is now public: single-bidder tenders, repeated runner-up patterns, suppliers sharing directors or registered addresses, contracts split just below thresholds, and award values clustering suspiciously close to estimates. Nobody in UK government is systematically looking for them across all buyers at once.</p>
+<p>The reason this is newly possible is the Procurement Act 2023. From <strong>1 January 2026</strong> contracting authorities must publish supplier performance for contracts over £5m via the UK9 Contract Performance Notice. From <strong>1 April 2026</strong> suppliers awarded below-threshold contracts must register on the Central Digital Platform and obtain a <strong>unique supplier identifier</strong>. For the first time there is a persistent, mandatory identifier linking a supplier across every buyer in the country.</p>
+<p>The Open Contracting Partnership’s one-year analysis found <strong>57 of 71 integrity indicators are now computable</strong>, up from 35 under the old regime — and that <strong>single-bid tenders cost around 7% more</strong>. It also found institutional variation nobody is acting on: <strong>Bristol awards 95% of below-threshold contracts non-competitively; Leeds under 30%</strong>. Transparency International identified <strong>135 COVID contracts worth £15.3bn carrying three or more corruption red flags</strong>.</p>
+<p>One structural obstacle explains why this has not been done. Companies House publishes free bulk files for companies and PSCs, but <strong>there is no free bulk officers file</strong> — the directorship graph can only be assembled company-by-company through a rate-limited API across 4.93 million active companies. That single asymmetry is why UK director-network analysis is dominated by commercial products rather than public ones.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">£55–81bn</div><div class="impact__l">Government’s own published estimate of annual fraud and error, excluding tax and welfare</div></div><div class="impact__cell"><div class="impact__n">£7.53bn</div><div class="impact__l">Counter-fraud savings government attributes to AI and data-matching in the last year</div></div><div class="impact__cell"><div class="impact__n">1 Apr 2026</div><div class="impact__l">Unique supplier identifiers become mandatory — the linkage key that makes this possible</div></div><div class="impact__cell"><div class="impact__n">0.5%</div><div class="impact__l">Recovery rate on procurement spend that would repay the platform many times over</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Sentinel ingests the full public procurement record — Find a Tender, Contracts Finder and the Central Digital Platform — and resolves every supplier to its Companies House entity using the new unique supplier identifier as the anchor. It then builds a national graph linking suppliers to their directors, persons with significant control, registered addresses and corporate parents.</p>
+<p>Against that graph it runs an indicator suite derived from established international practice — the EU’s Digital Whistleblower red-flag set, the World Bank’s procurement analytics, and Ukraine’s ProZorro/Dozorro monitoring model — scoring every award and every buyer for risk rather than accusing anyone of wrongdoing.</p>
+<p>Output is a triage queue for investigators, not a verdict. Each flag carries its evidence, its statistical basis and a plain-English explanation, so a commercial officer can dismiss it in thirty seconds or escalate it with a full audit trail.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Central Digital Platform</strong></td><td class="muted">Cabinet Office</td><td>Supplier registration, unique supplier identifiers, contract performance notices, payment performance. Mandatory below-threshold registration from 1 April 2026.</td></tr><tr><td><strong>Find a Tender Service</strong></td><td class="muted">Cabinet Office</td><td>Statutory notices for above-threshold procurement across the UK public sector.</td></tr><tr><td><strong>Contracts Finder</strong></td><td class="muted">Cabinet Office</td><td>Contract award notices, including below-threshold awards in England.</td></tr><tr><td><strong>Companies House API + bulk products</strong></td><td class="muted">Companies House</td><td>Company records, officer appointments, PSC register, filing history, dissolution status. Free API under OGL v3.</td></tr><tr><td><strong>Local authority spend over £500</strong></td><td class="muted">300+ councils</td><td>Transaction-level payments. Fragmented schemas — normalised by System 10.</td></tr><tr><td><strong>Charity Commission register</strong></td><td class="muted">Charity Commission</td><td>Trustee networks, for public bodies contracting with the voluntary sector.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Supplier identity resolution</div><div class="feat__d">Every award tied to a canonical legal entity using the statutory unique supplier identifier, surviving name changes, group restructures and typos.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Connection graph</div><div class="feat__d">Shared directors, PSCs, registered addresses and corporate parents across bidders on the same tender — the single strongest signal of a rigged competition.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Competition intensity index</div><div class="feat__d">Bidder counts by buyer, category and value band, benchmarked nationally. Persistent single-bidder categories surface automatically.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Threshold-splitting detection</div><div class="feat__d">Sequential awards to one supplier that individually fall below a procurement threshold and collectively exceed it.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Performance-to-award linkage</div><div class="feat__d">Ties the new contract performance notices back to award characteristics, so buyers can see whether cheap bids actually deliver.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Investigator case workspace</div><div class="feat__d">Flags triaged, assigned, annotated and closed with reasons, producing a defensible audit record and training data for calibration.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Buyer self-service</div><div class="feat__d">Every contracting authority sees its own risk profile benchmarked against comparable bodies before anyone else does.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the Public Sector Fraud Authority — now within DWP — an award-stage capability to sit alongside its existing payment-stage work.</li><li>Lets the Government Commercial Agency see competition health across the whole public estate rather than one framework at a time.</li><li>Provides evidence for debarment decisions under the Procurement Act, which currently rest on limited investigative capacity.</li><li>Turns a compliance burden — the new notice regime — into a management asset, which strengthens the case for the transparency rules themselves.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Money recovered or never lost is money not taken from services, using government’s own framing of savings as nurses and repaired roads.</li><li>Local journalists and researchers get a usable national view of who wins public money in their area.</li><li>Honest suppliers benefit: collusion suppresses competition and inflates prices, and SMEs are the main losers.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Public Sector Fraud Authority (DWP), Government Commercial Agency, Cabinet Office</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the detection engine, then G-Cloud 15 Lot 2b for the platform</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Ingest and resolve</div><div class="phase__meta">3 months</div><div class="phase__d">Full historical load of Find a Tender, Contracts Finder and Companies House. Entity resolution benchmarked against a hand-labelled sample.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Indicator calibration</div><div class="phase__meta">3 months</div><div class="phase__d">Red-flag suite tuned against known UK enforcement cases and international baselines. False-positive rate is the acceptance criterion, not flag volume.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Investigator pilot</div><div class="phase__meta">6 months</div><div class="phase__d">Deployed with one central department and one combined authority. Success measured by cases escalated and value recovered, not flags produced.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">National rollout</div><div class="phase__meta">12 months</div><div class="phase__d">Buyer self-service opened to all contracting authorities; public interface published under OGL.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">False accusation</div><p class="card__desc">Shared directors are common and usually innocent. The system scores risk and never asserts wrongdoing; every output is a prompt for human review with its evidence attached.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Data quality upstream</div><p class="card__desc">Companies House data has known accuracy problems. Identity verification under ECCTA is improving this, and Sentinel reports data-quality defects back as a by-product.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Gaming</div><p class="card__desc">Publishing the indicator logic teaches evasion. Core indicators are published for accountability; weightings and thresholds are held privately and rotated.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The bid-level ceiling — stated plainly</div><p class="card__desc">Textbook cartel screening needs every bid including losing ones. Public data publishes awards, and independent analysis found the tenderer-count field is frequently recorded as zero. Sentinel can therefore detect single-bidder concentration, threshold splitting, rotation patterns and bidder relatedness — but not classical bid-rigging signatures. Going deeper requires buyer cooperation to supply their own tender records, which is a design assumption, not an afterthought. Any proposal claiming full cartel detection from open data alone is overselling.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/procurement-act-2023-short-guides/the-procurement-act-2023-a-short-guide-for-suppliers-html" target="_blank" rel="noopener">Procurement Act 2023: guide for suppliers</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/news/crackdown-on-public-sector-fraud-delivers-over-75-billion-of-savings-to-the-taxpayer" target="_blank" rel="noopener">Counter-fraud savings of £7.53bn</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://assets.publishing.service.gov.uk/media/67b6f0dfbd116e3d7b1cf305/2025-02-11_PSFA_NFI_Strategy_final.pdf" target="_blank" rel="noopener">National Fraud Initiative Strategy 2024–2028</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.nao.org.uk/insights/estimating-and-reporting-fraud-and-error/" target="_blank" rel="noopener">NAO: estimating and reporting fraud and error</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.techuk.org/resource/procurement-act-change-from-1-april-2026-public-sector-supplier-update.html" target="_blank" rel="noopener">Procurement Act changes from 1 April 2026</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/junction.html">&larr; 10 Junction</a>
+<a class="btn btn--ghost" href="../systems/transit.html">02 Transit &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

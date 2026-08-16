@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Junction — Dexter DCL</title>
+<meta name="description" content="The transmission queue is genuinely open. Four of six distribution operators return zero rows to anonymous users, and the only national view is six months stale and named “test”.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 10 &middot; Gate 2 offers being issued through to March 2027</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Junction</h1>
+<p class="lede" style="margin-top:.6rem">Unified grid connection queue intelligence</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The transmission queue is genuinely open. Four of six distribution operators return zero rows to anonymous users, and the only national view is six months stale and named “test”.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Climate &amp; energy</span><span class="tag tag--accent">Operations</span><span class="tag tag--accent">Central government</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Britain reordered its grid connection queue. The old queue exceeded <strong>700 GW</strong> — roughly four times what is needed by 2030. The reformed pipeline published in December 2025 is <strong>381.5 GW</strong>, with over <strong>300 GW removed</strong>. Offers are being issued now and are running <strong>2.5 to 5.5 months late</strong>, continuing into March 2027.</p>
+<p>The transmission side of this is a genuine open data success. The Transmission Entry Capacity register is published twice weekly as CSV with an unauthenticated API — 2,205 project rows, retrievable in a single call, no registration.</p>
+<p>Distribution is the opposite. Of six distribution network operator groups, <strong>four return zero rows to anonymous clients</strong>: their portals require login, their APIs refuse access, and CSV exports return a header row and nothing else. One publishes a monthly spreadsheet. Only one is genuinely open. This is the majority of projects by count.</p>
+<p>The only national aggregation is worse than the parts. It combines all six operators, but it was <strong>last updated six months ago</strong> while every constituent register has refreshed since, it is described as a custom view, and its dataset identifier is literally <code>ecr_manual_combine_test</code>. Its connection queue field — the single most relevant column — reads <strong>"Data Not Available" for 92.5% of its 20,075 records</strong>.</p>
+<p>The joins are broken too. The transmission register carries <strong>no geocoding of any kind</strong> — the only location field is a free-text substation name. There is <strong>no shared identifier</strong> between transmission and distribution registers, so a project appearing in both cannot be reconciled except by fuzzy matching. And the reform status column is <strong>empty for 63% of transmission projects</strong>, because it only populates after agreements are countersigned.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">700 → 381.5 GW</div><div class="impact__l">Queue capacity before and after reform</div></div><div class="impact__cell"><div class="impact__n">4 of 6</div><div class="impact__l">Distribution operators returning zero rows to anonymous users</div></div><div class="impact__cell"><div class="impact__n">92.5%</div><div class="impact__l">National register records whose queue status reads “Data Not Available”</div></div><div class="impact__cell"><div class="impact__n">2.5–5.5 months</div><div class="impact__l">Current slippage in issuing Gate 2 offers</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Junction builds the national connection picture that neither government nor the market currently provides. It normalises all six distribution registers plus the transmission register into one schema, resolves entities across them, and maintains the join that does not exist.</p>
+<p>It geocodes the transmission queue by building and maintaining the substation gazetteer that the register lacks, turning free-text substation names into mappable locations — the single missing ingredient that prevents anyone from seeing where queue pressure actually sits.</p>
+<p>It normalises headroom to a single stated definition. The real barrier between operators is not file format but definitional inconsistency: each defines available capacity differently and publishes it as a picture rather than as data. Junction states its assumptions and applies them uniformly.</p>
+<p>And it tracks queue integrity through the reform. With Gate 2 having reordered everything and offers running months late, monitoring which projects hold capacity against which are actually progressing is both newly possible and politically salient — including the protected projects where the regulator has already refused the system operator relief.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Transmission Entry Capacity register</strong></td><td class="muted">NESO</td><td>CSV plus unauthenticated CKAN API, twice weekly. 2,205 rows. No geocoding, reform status 63% empty.</td></tr><tr><td><strong>Embedded Capacity Registers</strong></td><td class="muted">Six DNO groups</td><td>Mandated under DCUSA with a common ENA schema — but published across four platforms, four of six login-gated.</td></tr><tr><td><strong>Interconnector register</strong></td><td class="muted">NESO</td><td>Open CSV, 33 rows, same schema family as transmission.</td></tr><tr><td><strong>Connections reform results</strong></td><td class="muted">NESO</td><td>Existing Agreement Register and zonal breakdowns — published as unversioned spreadsheets off a web page, not as datasets.</td></tr><tr><td><strong>Grid Supply Point boundaries</strong></td><td class="muted">NESO</td><td>Coarse GSP polygons; newest file dates from January 2025.</td></tr><tr><td><strong>Clean Power 2030 Action Plan</strong></td><td class="muted">DESNZ</td><td>Zonal capacity ranges by technology, the basis for strategic alignment decisions.</td></tr><tr><td><strong>Local Area Energy Plans</strong></td><td class="muted">Combined authorities</td><td>The demand-side counterpart that currently cannot obtain consistent grid data.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Cross-register entity resolution</div><div class="feat__d">The transmission-to-distribution join that no shared identifier provides, with match confidence published.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Substation gazetteer</div><div class="feat__d">Free-text connection sites resolved to coordinates, making the transmission queue mappable for the first time.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Normalised headroom</div><div class="feat__d">One stated definition of available capacity applied across all operators, with assumptions published rather than buried.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Queue integrity tracking</div><div class="feat__d">Which projects hold capacity versus which are progressing, through the Gate 2 reordering and the offer backlog.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Capacity discovery</div><div class="feat__d">A direct answer to the question the market cannot currently answer: where can this much capacity connect, and by when.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Demand-side matching</div><div class="feat__d">Data centres, depots and electrolysers matched to genuine headroom — necessary because zonal pricing was rejected, so no market price signal performs this function.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Data quality reporting</div><div class="feat__d">Coverage, staleness and completeness published as first-class metrics and fed back to operators and the regulator.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the system operator and the regulator a single view of a queue currently visible only in fragments across seven publishers.</li><li>Supports the digitalisation and data best practice regime that already obliges network operators to publish this data usefully.</li><li>Serves combined authorities producing local area energy plans, who currently cannot obtain consistent grid data at all.</li><li>Because zonal pricing was rejected, locational efficiency must now be delivered informationally rather than through price — which makes transparent capacity data more valuable, not less.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Faster connection of clean generation means lower constraint costs, which reach households through bills.</li><li>Communities can see what is queued to connect near them, currently almost impossible below transmission level.</li><li>Smaller developers gain the visibility that only well-resourced firms can currently buy through consultancy.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">NESO, Ofgem, DESNZ Clean Power 2030, combined authorities</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for entity resolution and gazetteer, then G-Cloud 15 for the service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Transmission foundation</div><div class="phase__meta">3 months</div><div class="phase__d">Full ingest of the open registers plus substation gazetteer construction and geocoding.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Distribution normalisation</div><div class="phase__meta">5 months</div><div class="phase__d">All six embedded capacity registers ingested and normalised, with access arrangements agreed where portals are gated.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Cross-register resolution</div><div class="phase__meta">4 months</div><div class="phase__d">Entity matching between transmission and distribution, with published confidence.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Capacity discovery service</div><div class="phase__meta">6 months</div><div class="phase__d">Public interface and authority tooling released.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Access gating</div><p class="card__desc">Four operators do not serve anonymous clients. Registration appears to be free but is unconfirmed, and gated access breaks unattended pipelines. Resolving this with the regulator is a precondition, not an afterthought — and is itself a worthwhile policy outcome.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Entity resolution accuracy</div><p class="card__desc">Without a shared key, matching is probabilistic. Confidence is published per match and low-confidence links are never silently merged.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Moving target</div><p class="card__desc">The reform is mid-flight with offers issuing into 2027. Junction is designed to track a changing queue rather than describe a static one.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.neso.energy/industry-information/connections-reform/connections-reform-results" target="_blank" rel="noopener">NESO connections reform results</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.neso.energy/industry-information/connections-reform/connections-reform-timeline" target="_blank" rel="noopener">NESO connections reform timeline</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.ofgem.gov.uk/decision/decision-connections-reform-package-tm04" target="_blank" rel="noopener">Ofgem decision: connections reform package TM04+</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.energynetworks.org/industry/connecting-to-the-networks/connections-data" target="_blank" rel="noopener">ENA connections data dashboard</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.gov.uk/government/publications/clean-power-2030-action-plan" target="_blank" rel="noopener">Clean Power 2030 Action Plan</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/hearth.html">&larr; 09 Hearth</a>
+<a class="btn btn--ghost" href="../systems/sentinel.html">01 Sentinel &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

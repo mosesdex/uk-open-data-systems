@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transit — Dexter DCL</title>
+<meta name="description" content="The only system built for the single hardest deadline in UK local government: merging 134 councils into 38 by 1 April 2028 without losing the data that statutory services run on.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 02 &middot; Vesting day 1 April 2028 — fixed statutory deadline</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Transit</h1>
+<p class="lede" style="margin-top:.6rem">Local government reorganisation data continuity</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The only system built for the single hardest deadline in UK local government: merging 134 councils into 38 by 1 April 2028 without losing the data that statutory services run on.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Operations</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Local government reorganisation will abolish <strong>134 councils and create 38 unitary authorities</strong>, with shadow elections in May 2027 and <strong>vesting day on 1 April 2028</strong>. Surrey has already gone first. Fourteen further areas were confirmed on 16 July 2026.</p>
+<p>Every merger means combining social care records, council tax and business rates bases, planning histories, licensing registers, land charges, housing waiting lists, SEND caseloads and debt ledgers — held in different systems, with different schemas, different identifiers and different retention practices. There is no shared tooling for this. Each area is solving it alone, from scratch, with consultants.</p>
+<p>The sector does not believe it will work. Only <strong>13% of councils</strong> think reorganisation will improve their finances, and <strong>76% of reorganising councils</strong> call reorganisation costs a fairly or very big problem — a higher share than any other pressure they report, including SEND.</p>
+<p>The failure mode is not abstract. Birmingham’s Oracle implementation is the canonical example of what a botched local government data migration costs, and it is the case senior officers cite when justifying spend on migration assurance.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">134 → 38</div><div class="impact__l">Councils being merged into unitary authorities</div></div><div class="impact__cell"><div class="impact__n">1 Apr 2028</div><div class="impact__l">Vesting day — a fixed statutory deadline with no slippage available</div></div><div class="impact__cell"><div class="impact__n">13%</div><div class="impact__l">Councils that believe reorganisation will improve their finances</div></div><div class="impact__cell"><div class="impact__n">76%</div><div class="impact__l">Reorganising councils calling reorganisation costs a fairly or very big problem</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Transit is a reorganisation data platform: a shared, reusable toolkit that every merging area runs instead of inventing its own. It profiles the data estates of the predecessor councils, maps them to a common target schema, and tracks reconciliation to vesting day.</p>
+<p>It begins with discovery — automatically inventorying what data exists across predecessor authorities, in which systems, under which retention rules, and where identifiers collide. Two councils will both have a "Property 1042". Somebody has to resolve that before day one, and today nobody knows how many collisions exist until migration begins.</p>
+<p>It then provides golden-record reconciliation against national identifiers — UPRN for property, canonical person matching for caseloads — plus a continuity dashboard showing, service by service, whether the successor authority can lawfully deliver on 1 April 2028.</p>
+<p>Crucially it is built once and reused 38 times. That is the entire economic argument, and it is precisely the reuse-and-de-risking mission GDS Local was created to pursue.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>UPRN / AddressBase</strong></td><td class="muted">Ordnance Survey / GeoPlace</td><td>Unique Property Reference Numbers — the canonical key for reconciling property records across predecessor systems.</td></tr><tr><td><strong>Local Land Charges register</strong></td><td class="muted">HM Land Registry</td><td>Now digital and centralised, with 127 local authorities live — a working precedent for exactly this kind of consolidation.</td></tr><tr><td><strong>ONS geography portal</strong></td><td class="muted">ONS</td><td>Boundary changes, ward and output area lookups, successor authority geographies.</td></tr><tr><td><strong>Council tax and NDR base returns</strong></td><td class="muted">MHCLG</td><td>Taxbase and rating data by authority, used to reconcile revenue records.</td></tr><tr><td><strong>Local authority spend over £500</strong></td><td class="muted">Predecessor councils</td><td>Supplier and contract continuity — which contracts transfer, which duplicate, which lapse.</td></tr><tr><td><strong>Structural Changes Orders</strong></td><td class="muted">legislation.gov.uk</td><td>The statutory instrument for each area, defining precisely what transfers and when.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Estate discovery</div><div class="feat__d">Automated inventory of systems, schemas, volumes, retention rules and data owners across all predecessor authorities in an area.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Identifier collision detection</div><div class="feat__d">Finds every case where predecessor councils use the same key for different things, before it becomes a live service failure.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Common target schema</div><div class="feat__d">A published, versioned schema per service domain, developed once and reused by every reorganising area — the anti-lock-in asset.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Continuity dashboard</div><div class="feat__d">Service-by-service readiness against vesting day, with statutory duties mapped to the data required to discharge them.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Contract and liability register</div><div class="feat__d">Every supplier contract, lease, debt and known liability transferring to the successor, reconciled across predecessors.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Retention and disposal</div><div class="feat__d">Records management rules applied at merge, so the successor does not inherit an undocumented and unlawful data estate.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Reuse library</div><div class="feat__d">Every mapping, transform and lesson published openly so area 15 does not repeat the work of area 1.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Converts 38 separate, consultant-led migrations into one funded national programme with reusable components — exactly the model GDS Local was set up to champion.</li><li>Reduces the risk of a statutory service failure on 1 April 2028, which would be politically severe and legally exposed.</li><li>Produces, as a by-product, the first accurate national picture of what data local government actually holds.</li><li>Directly attacks the supplier lock-in that central government has named as the core problem in council technology.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Care packages, housing applications, school transport and benefits continue uninterrupted through reorganisation.</li><li>Fewer public pounds spent on duplicated consultancy — the six section 114 councils alone spent £207m on external consultants since 2020-21.</li><li>A cleaner, better-documented public record in the successor authority than in any of its predecessors.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">MHCLG, GDS Local (DCMS), individual reorganising areas</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1 Digital Outcomes, with MHCLG programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Discovery toolkit</div><div class="phase__meta">4 months</div><div class="phase__d">Estate inventory and collision detection, piloted with one confirmed reorganising area.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Schema and mapping library</div><div class="phase__meta">6 months</div><div class="phase__d">Common target schemas for the highest-risk domains: social care, revenues, planning, housing.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Continuity assurance</div><div class="phase__meta">6 months</div><div class="phase__d">Readiness dashboard in use across three areas ahead of the May 2027 shadow elections.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Scale to all areas</div><div class="phase__meta">12 months</div><div class="phase__d">Available to every reorganising area with sufficient lead time before vesting day.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Timing</div><p class="card__desc">Vesting day is fixed. A platform arriving late is worthless. Scope is deliberately narrowed to discovery and reconciliation rather than replacing line-of-business systems.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Incumbent resistance</div><p class="card__desc">Existing suppliers benefit from bespoke migration work. Mitigated by positioning Transit as assurance over migrations rather than a replacement for them.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Sensitive data</div><p class="card__desc">Social care and housing records are highly sensitive. Transit operates on schemas, metadata and reconciliation reports by default, with record-level processing only under the authority’s own controllership.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://commonslibrary.parliament.uk/research-briefings/cbp-10494/" target="_blank" rel="noopener">Local government reorganisation 2026 (Commons Library)</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://questions-statements.parliament.uk/written-statements/detail/2026-07-16/hcws286" target="_blank" rel="noopener">Written statement on reorganisation decisions, 16 July 2026</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://lgiu.org/2026-state-of-local-government-finance-in-england/" target="_blank" rel="noopener">LGIU State of Local Government Finance 2026</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://gds.blog.gov.uk/2026/04/15/gds-local-building-the-foundations-for-digital-collaboration/" target="_blank" rel="noopener">GDS Local: building foundations for digital collaboration</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://roadmap-for-modern-digital-government.campaign.gov.uk/digital-and-data-infrastructure/platforms-to-share-and-use-data" target="_blank" rel="noopener">HM Land Registry Local Land Charges programme</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/sentinel.html">&larr; 01 Sentinel</a>
+<a class="btn btn--ghost" href="../systems/compass.html">03 Compass &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

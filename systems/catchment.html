@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catchment — Dexter DCL</title>
+<meta name="description" content="England has 3,651 pupil planning areas and publishes the boundaries of none of them. Councils get capacity data they cannot map, while surplus and shortage sit side by side inside ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 07 &middot; NAO reported the mismatch in April 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Catchment</h1>
+<p class="lede" style="margin-top:.6rem">School place planning at the geography that matters</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">England has 3,651 pupil planning areas and publishes the boundaries of none of them. Councils get capacity data they cannot map, while surplus and shortage sit side by side inside the same authority.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Children &amp; families</span><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Operations</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The numbers look contradictory until you look below local authority level. England has <strong>1.2 million unfilled school places — 13% of all capacity</strong>, including <strong>680,000 unfilled primary places, the highest since collection began</strong>. At the same time <strong>about 3,000 schools are at or over capacity</strong>.</p>
+<p>The National Audit Office explained why in April 2026: <strong>"Of local authorities forecasting falling primary school pupil numbers, 66% expect to see numbers increase in one or more of the smaller areas for which they gather data."</strong> Surplus and shortage coexist inside single councils. It is a spatial allocation failure, invisible in every published statistic.</p>
+<p>The unit where it happens is the pupil planning area. There are <strong>3,651 of them across 153 authorities</strong>, each defined by its own council. DfE publishes school capacity data at planning-area level — and <strong>the boundaries are published nowhere as open geospatial data</strong>. No shapefile, no GeoJSON, no lookup to any standard geography. Councils receive rows they cannot map, compare, or join to anything.</p>
+<p>The inputs DfE expects councils to forecast from do not exist at that geography either. ONS publishes 2025 fertility at country level only. There is <strong>no national site-level housing completions dataset</strong>. And DfE’s own National Pupil Projections are <strong>national level only</strong>, with the horizon cut from ten years to five because of migration uncertainty.</p>
+<p>The consequence is measurable: the London Assembly had to send <strong>freedom of information requests to all 33 boroughs</strong> to count how many schools had closed and why, because the data does not exist. Meanwhile EHCPs reached 718,838 with <strong>211,400 pupils in special schools against 160,000 special school places</strong> — and the NAO records that DfE <strong>"does not know how many spaces are available in mainstream schools or other settings."</strong></p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">3,651</div><div class="impact__l">Pupil planning areas whose boundaries are published nowhere</div></div><div class="impact__cell"><div class="impact__n">1.2m</div><div class="impact__l">Unfilled school places — alongside 3,000 schools at or over capacity</div></div><div class="impact__cell"><div class="impact__n">66%</div><div class="impact__l">Councils with falling primary rolls that expect growth in one or more sub-areas</div></div><div class="impact__cell"><div class="impact__n">211,400 / 160,000</div><div class="impact__l">EHCP pupils in special schools against available special school places</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Catchment starts with the cheapest high-value fix in this entire portfolio: publishing an open, versioned geography for the 3,651 pupil planning areas, reconstructed from the school membership DfE already publishes, with a lookup to standard census geographies. One artefact, and every join in the domain becomes possible.</p>
+<p>On that foundation it builds small-area demand forecasting — apportioning births, internal migration and new-build completions to planning areas to project reception intake where it actually occurs, rather than at the authority level where the signal cancels out.</p>
+<p>It then makes the NAO’s finding visible: a national map of where surplus and shortage sit within the same authority, authority by authority and area by area.</p>
+<p>And it offers the one genuinely constructive answer to the surplus problem. Rather than closing schools that will be needed again when housing lands, it identifies mainstream schools with persistent surplus within travel distance of unmet specialist demand — converting empty classrooms into the scarcest asset in the system. DfE’s own estates strategy commits to re-using surplus space and has no tooling to find it.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>School Capacity (SCAP)</strong></td><td class="muted">DfE</td><td>Capacity, forecasts and planned changes at national, regional, authority, planning area and school level. Notably absent from the DfE statistics API.</td></tr><tr><td><strong>Get Information About Schools (GIAS)</strong></td><td class="muted">DfE</td><td>Daily bulk CSV, no authentication. 52,486 establishments, 135 fields, including closure dates and reasons.</td></tr><tr><td><strong>National Pupil Projections</strong></td><td class="muted">DfE</td><td>National level only — the gap Catchment fills locally.</td></tr><tr><td><strong>EHCP statistics</strong></td><td class="muted">DfE</td><td>Plans by placement type, for the specialist capacity gap analysis.</td></tr><tr><td><strong>ONS births and internal migration</strong></td><td class="muted">ONS</td><td>Cohort inputs, apportioned to planning areas.</td></tr><tr><td><strong>EPC new-build lodgements</strong></td><td class="muted">MHCLG</td><td>Address-level, near-real-time completion proxy — the only one available nationally.</td></tr><tr><td><strong>ONS Open Geography Portal</strong></td><td class="muted">ONS</td><td>Standard boundaries for the planning-area lookup.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Open planning-area geography</div><div class="feat__d">The 3,651 boundaries reconstructed and published openly with a lookup to census geographies — the missing key to the whole domain.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Small-area intake forecasting</div><div class="feat__d">Reception and Year 7 projections at planning-area level, not authority level.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Surplus–shortage adjacency map</div><div class="feat__d">The NAO’s 66% finding made specific: which areas within each council are growing while the council overall shrinks.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Specialist conversion finder</div><div class="feat__d">Mainstream schools with persistent surplus within travel distance of unmet EHCP demand.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Closure register with reasons</div><div class="feat__d">GIAS closures cleaned of academisation artefacts and joined to school organisation decisions — the dataset the London Assembly had to FOI.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Reversibility warning</div><div class="feat__d">Flags closures that the housing pipeline suggests would need reversing, given the projected demand trough.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Funding impact projection</div><div class="feat__d">School-level income falls modelled from roll projections, since roughly 90% of funding follows pupils.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Answers the NAO’s April 2026 findings directly, including that DfE does not use capacity data to monitor how schools respond.</li><li>Gives the DfE Pupil Place Planning team — the named owner of SCAP and Basic Need — the sub-authority evidence its own allocation formula depends on.</li><li>Supports the February 2026 ten-year estates strategy commitment to re-use surplus space, which currently has no supporting tooling.</li><li>Connects mainstream surplus to the specialist shortage driving high needs deficits, linking two problems currently managed on entirely separate tracks.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Fewer schools closed that are needed again five years later, and fewer children in overcrowded classrooms two miles from empty ones.</li><li>Specialist places created by converting surplus capacity, reducing both waiting times and transport distances for children with EHCPs.</li><li>Parents and governors can see the actual demand picture for their area rather than an authority-wide average that hides it.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">DfE Pupil Place Planning and Regions Group, councils, London Councils and the GLA</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with DfE capital and place-planning funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Planning-area geography</div><div class="phase__meta">3 months</div><div class="phase__d">Boundaries reconstructed, validated with a sample of authorities, published openly under OGL.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Demand nowcasting</div><div class="phase__meta">4 months</div><div class="phase__d">Small-area forecasts back-tested against actual intake across all authorities.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Mismatch mapping</div><div class="phase__meta">3 months</div><div class="phase__d">National surplus–shortage adjacency analysis published.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Conversion and closure tools</div><div class="phase__meta">6 months</div><div class="phase__d">Specialist conversion finder and national closure register released to DfE and councils.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Boundary accuracy</div><p class="card__desc">Reconstructed geographies are approximations of authority-defined areas. Published with explicit confidence and a correction route for councils to submit their true boundaries — which improves the asset over time.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Closure sensitivity</div><p class="card__desc">School closure is intensely political. Catchment provides evidence and explicitly models reversibility rather than recommending closures.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Schema instability</div><p class="card__desc">GIAS warns its bulk fields and field order can change without notice. Handled by schema-tolerant ingestion with change alerting.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.nao.org.uk/reports/responding-to-changing-demand-for-school-places/" target="_blank" rel="noopener">NAO: Responding to changing demand for school places, April 2026</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://explore-education-statistics.service.gov.uk/find-statistics/school-capacity/2024-25" target="_blank" rel="noopener">DfE School Capacity 2024/25</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/publications/local-authority-pupil-planning-areas-guide-for-local-authorities/local-authority-pupil-planning-areas-guidance" target="_blank" rel="noopener">Local authority pupil planning areas guidance</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.nao.org.uk/press-releases/special-educational-needs-system-is-financially-unsustainable/" target="_blank" rel="noopener">NAO: Support for children and young people with SEN</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.london.gov.uk/sites/default/files/2026-02/Read%20analysis%20of%20responses%20to%20FOIs.pdf" target="_blank" rel="noopener">London Assembly analysis of borough FOI responses</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/highwater.html">&larr; 06 Highwater</a>
+<a class="btn btn--ghost" href="../systems/waypoint.html">08 Waypoint &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

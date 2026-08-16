@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Highwater — Dexter DCL</title>
+<meta name="description" content="The Environment Agency does not know what councils decided in 30% of its own flood objections. That is 7,011 unanswered cases — and the number granted against its advice has more t">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 06 &middot; Computed from the published dataset, August 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Highwater</h1>
+<p class="lede" style="margin-top:.6rem">Floodplain development monitoring</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The Environment Agency does not know what councils decided in 30% of its own flood objections. That is 7,011 unanswered cases — and the number granted against its advice has more than tripled in three years.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Climate &amp; energy</span><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Central government</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The Environment Agency publishes a list of every planning application it objected to on flood risk grounds. Parsed in full, it contains <strong>23,336 records across 426 planning authorities</strong> for 2016-17 to 2024-25. Of those, <strong>67.2% show EA advice was followed</strong>, <strong>2.7% (635 applications, 2,949 homes) were granted against its advice</strong> — and for <strong>30.0%, or 7,011 applications, the outcome is simply unknown</strong>. The EA states plainly that it records the outcome of about 68% of applications and uses a sample.</p>
+<p>Inside that data is a trend nobody appears to have published. Permissions granted against EA flood advice went <strong>28 in 2021-22 to 102 in 2024-25</strong> — a 3.6-fold rise in three years, exactly as housing targets were raised.</p>
+<p>The EA reports "over 97% compliance" with its advice. Aviva, joining Ordnance Survey AddressBase to the national flood risk assessment, found <strong>one in nine new English homes built 2022–2024 is in a medium or high flood risk area</strong> — 43,937 homes. Both statements are true. The gap between them exists because the EA counts objections it made, not homes that were built, and because <strong>surface water flooding sits largely outside its objection trigger</strong> despite being the fastest-growing risk.</p>
+<p>Two structural defects make the official dataset nearly unusable. It carries <strong>no spatial reference of any kind</strong> — no coordinates, no UPRN, no postcode, no site address — so it cannot be joined to flood maps without scraping 426 council portals. And each annual release silently restates history with <strong>no versioned archive</strong>, so the trend above is not reconstructible from official sources by anyone who did not save previous years’ files.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">7,011</div><div class="impact__l">Objection outcomes the Environment Agency does not know — 30% of its own dataset</div></div><div class="impact__cell"><div class="impact__n">28 → 102</div><div class="impact__l">Permissions granted against EA flood advice, 2021-22 to 2024-25</div></div><div class="impact__cell"><div class="impact__n">1 in 9</div><div class="impact__l">New English homes built 2022–2024 in medium or high flood risk areas</div></div><div class="impact__cell"><div class="impact__n">6.3m</div><div class="impact__l">Properties in England currently at flood risk, rising toward 8m by mid-century</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Highwater turns a flat administrative list into a spatial, longitudinal evidence base. It resolves every objection record to a site location by matching authority planning references against council portals, producing the geocoded national dataset that does not currently exist.</p>
+<p>It then closes the outcome gap the EA does not close itself, retrieving decision notices for the 7,011 unknown cases. If the granted-against-advice rate in the unknown set even approximates the known set, the true national compliance figure is materially worse than the published one — and that is a finding government needs before it changes the policy.</p>
+<p>It maintains a versioned archive of every annual release, so trends survive the EA’s restatements. This matters urgently: the statutory consultee reform proposes <strong>removing the use of objections where flood directions do not apply</strong>, which would break the only national time series that exists, at the moment it is most needed.</p>
+<p>And it addresses the blind spot directly, cross-referencing new residential permissions against surface water risk — the category where the EA has no objection trigger and therefore no data exists at all, despite the December 2024 NPPF extending the sequential test to cover it.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>EA objections to planning applications</strong></td><td class="muted">Environment Agency</td><td>ODS, OGL v3, annual since 2015. 23,336 records, 426 authorities. No spatial reference — the core defect Highwater fixes.</td></tr><tr><td><strong>Flood Map for Planning (Zones 2 and 3)</strong></td><td class="muted">Environment Agency</td><td>Open OGC API Features endpoint, no API key required.</td></tr><tr><td><strong>NaFRA2 national flood risk assessment</strong></td><td class="muted">Environment Agency</td><td>OGL v3, 2m grid resolution, covers rivers, sea and surface water. 6.3 million properties currently at risk.</td></tr><tr><td><strong>planning.data.gov.uk</strong></td><td class="muted">MHCLG</td><td>Flood risk zone, flood storage area and flood risk level datasets. Planning applications remain incomplete — see Plumbline.</td></tr><tr><td><strong>EPC lodgements</strong></td><td class="muted">MHCLG</td><td>New-build certificates are the only near-national, address-level completion proxy.</td></tr><tr><td><strong>Net additional dwellings (Live Table 122)</strong></td><td class="muted">MHCLG</td><td>District-level completions for reconciliation.</td></tr><tr><td><strong>EA climate change allowances</strong></td><td class="muted">Environment Agency</td><td>Currently HTML tables only, last updated May 2022. Highwater publishes them as an open API keyed to catchment.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">National geocoding</div><div class="feat__d">Every objection resolved to site location and UPRN — beating the best existing volunteer effort, which stalls at 31% coverage.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Outcome gap closure</div><div class="feat__d">Decision retrieval for the 7,011 cases where the Environment Agency does not know what happened.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Versioned archive</div><div class="feat__d">Every annual release preserved, so trends survive silent restatement and the coming policy break stays measurable.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Surface water exposure</div><div class="feat__d">New permissions cross-referenced against surface water risk — the unmeasured category.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Cumulative catchment impact</div><div class="feat__d">Permissions aggregated by management catchment, the analysis the Environmental Audit Committee recommended and government declined to commission.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Developer accountability graph</div><div class="feat__d">Repeat applicants and agents across objected schemes, recoverable from portal documents and never yet assembled nationally.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Climate allowances API</div><div class="feat__d">The EA’s allowances liberated from four-year-old HTML tables into a queryable service for every flood risk assessment author in the country.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Lets the Environment Agency evidence its own claim that £1 of planning advice avoids £12 of future flood damage, which its 68% sample cannot currently support.</li><li>Gives Defra the evidence to judge whether statutory consultee reform degrades the flood evidence base before it enacts the change.</li><li>Supplies the Climate Change Committee with a defensible national adaptation indicator, which it currently lacks in any non-licensed form.</li><li>Supports the £4.2bn flood investment programme by showing where new liability is being created faster than defences are being built.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Homebuyers can see whether a new development was permitted against flood advice — currently almost impossible to discover.</li><li>New-build homes completed after 2009 are excluded from Flood Re, so every home built in a high-risk area is a future uninsurable liability for its owner.</li><li>Communities gain evidence for local scrutiny of decisions taken against expert advice.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Environment Agency (FCRM), Defra, MHCLG Planning, Climate Change Committee</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the geocoding and recovery engine, then DOS7 for the service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Parse and archive</div><div class="phase__meta">2 months</div><div class="phase__d">Full ingest of all published releases, versioned, with the trend analysis published as an open finding.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Geocoding at scale</div><div class="phase__meta">5 months</div><div class="phase__d">Portal resolution across all 426 authorities, targeting coverage well beyond the 31% volunteer ceiling.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Outcome recovery</div><div class="phase__meta">4 months</div><div class="phase__d">Decision retrieval for the unknown cohort, with the revised national compliance figure published.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Surface water and catchment</div><div class="phase__meta">6 months</div><div class="phase__d">Risk cross-referencing and cumulative catchment analytics released to EA, Defra and CCC.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Portal scraping fragility</div><p class="card__desc">Council portals change without notice. Mitigated by treating coverage as a published metric rather than a silent assumption, and by degrading gracefully to partial coverage with stated confidence.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Policy break</div><p class="card__desc">If objections are removed where flood directions do not apply, the series discontinues. Highwater’s archive makes the break visible rather than invisible — arguably its most valuable function.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Contested framing</div><p class="card__desc">Authorities will object to being ranked. Reporting presents context — housing pressure, viability, defence status — rather than a naked league table.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/environment-agency-objections-to-planning-on-the-basis-of-flood-risk" target="_blank" rel="noopener">EA objections to planning on the basis of flood risk</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/publications/environment-agency-objections-to-planning-on-the-basis-of-flood-risk/how-to-use-the-list-of-planning-objections" target="_blank" rel="noopener">How to use the list of planning objections (the 68% caveat)</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/publications/national-assessment-of-flood-and-coastal-erosion-risk-in-england-2024/national-assessment-of-flood-and-coastal-erosion-risk-in-england-2024" target="_blank" rel="noopener">National assessment of flood and coastal erosion risk 2024</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://publications.parliament.uk/pa/cm5901/cmselect/cmenvaud/1591/report.html" target="_blank" rel="noopener">EAC Flood resilience in England: government response</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.gov.uk/government/consultations/reforms-to-the-statutory-consultee-system/reforms-to-the-statutory-consultee-system" target="_blank" rel="noopener">Reforms to the statutory consultee system</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/plumbline.html">&larr; 05 Plumbline</a>
+<a class="btn btn--ghost" href="../systems/catchment.html">07 Catchment &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

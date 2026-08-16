@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threshold — Dexter DCL</title>
+<meta name="description" content="Record homelessness, a subsidy gap frozen at 2011 rates, and no national view of what councils are actually paying for the same room.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 04 &middot; Record levels every quarter for three years</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Threshold</h1>
+<p class="lede" style="margin-top:.6rem">Temporary accommodation cost and placement intelligence</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Record homelessness, a subsidy gap frozen at 2011 rates, and no national view of what councils are actually paying for the same room.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>At 31 March 2026 there were <strong>135,580 households in temporary accommodation</strong> including <strong>177,530 children</strong> — both records since the series began in 2004. Children in temporary accommodation have set a record for <strong>twelve consecutive quarters</strong>.</p>
+<p>The financial mechanism is specific and fixable. Housing benefit subsidy for temporary accommodation is capped at <strong>90% of January 2011 Local Housing Allowance rates</strong> — frozen for fifteen years. Councils have already absorbed <strong>£1.5bn more than they have been reimbursed</strong>, projected to exceed <strong>£3.9bn by 2030</strong>. Gross spend hit <strong>£2.8bn in 2024-25, up 25% in one year</strong>.</p>
+<p>The fastest-growing and most expensive category is nightly-paid self-contained accommodation, now <strong>37.9% of all placements</strong> and rising. <strong>43,180 households are placed out of area</strong>, 32% of the total, and London authorities account for <strong>82%</strong> of those.</p>
+<p>What does not exist anywhere is a national view of price. Neighbouring councils bid against each other for the same rooms from the same landlords, with no visibility of what anyone else is paying. It is a market with hundreds of buyers, no price discovery, and desperate demand.</p>
+<p>And a new statutory duty has just created a data-matching requirement with no system behind it. The National Plan to End Homelessness commits to <strong>requiring local authorities to notify schools, GPs and health visitors when a child is placed in temporary accommodation</strong>. That means matching 177,530 frequently-moved children, often placed across borough boundaries, to three separate public services in near real time. Nothing currently does this.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">135,580</div><div class="impact__l">Households in temporary accommodation, March 2026 — a record</div></div><div class="impact__cell"><div class="impact__n">177,530</div><div class="impact__l">Children in temporary accommodation — a record for twelve consecutive quarters</div></div><div class="impact__cell"><div class="impact__n">£1.5bn</div><div class="impact__l">Subsidy gap already absorbed by councils, heading for £3.9bn by 2030</div></div><div class="impact__cell"><div class="impact__n">£5.5m</div><div class="impact__l">Spent per day on homelessness by London boroughs in 2024-25</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Threshold creates the price transparency that this market lacks. It normalises temporary accommodation spend from council payment data, links it to placement and duty statistics, and produces comparable unit costs by accommodation type, geography and duration.</p>
+<p>On top of that it models the subsidy gap precisely — for each authority, the difference between what it pays and what it can reclaim at the frozen 2011 rate — turning a national advocacy figure into an auditable per-authority number that can support both budgeting and reform.</p>
+<p>It also maps procurement behaviour: which providers operate across which councils, where the same landlord is charging materially different prices to different authorities, and where cross-boundary bidding is inflating cost for everyone. Neighbouring authorities can then coordinate rather than compete.</p>
+<p>Finally it identifies the prevention economics — comparing the cost of a placement against the cost of the intervention that would have prevented it, using each authority’s own data.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Statutory homelessness statistics (H-CLIC)</strong></td><td class="muted">MHCLG</td><td>Quarterly duties, placements, accommodation type, out-of-area placements, by authority.</td></tr><tr><td><strong>Local authority revenue outturn (RO4)</strong></td><td class="muted">MHCLG</td><td>Homelessness and temporary accommodation expenditure, gross and net of subsidy.</td></tr><tr><td><strong>Local authority spend over £500</strong></td><td class="muted">300+ councils</td><td>Transaction-level payments to accommodation providers — the raw price signal.</td></tr><tr><td><strong>Local Housing Allowance rates</strong></td><td class="muted">VOA / DWP</td><td>Current and historic rates, including the frozen January 2011 baseline that governs subsidy.</td></tr><tr><td><strong>Companies House</strong></td><td class="muted">Companies House</td><td>Provider ownership structures, to see which landlords operate across multiple authorities.</td></tr><tr><td><strong>Energy Performance Certificates</strong></td><td class="muted">MHCLG</td><td>Property-level condition and efficiency evidence for accommodation standards.</td></tr><tr><td><strong>ONS private rental prices</strong></td><td class="muted">ONS</td><td>Market benchmark against which placement costs are assessed.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Unit cost benchmarking</div><div class="feat__d">Comparable nightly and weekly costs by accommodation type and area, so an authority can see whether it is paying above the going rate.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Subsidy gap calculator</div><div class="feat__d">Per-authority quantification of the gap between spend and reclaimable subsidy under the frozen 2011 cap.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Provider mapping</div><div class="feat__d">Which providers operate where, under what ownership, at what price to which councils.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Cross-boundary competition alerts</div><div class="feat__d">Where neighbouring authorities are bidding against each other for the same supply.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Out-of-area impact</div><div class="feat__d">Placement flows between authorities, and the receiving-area service pressures they create.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Prevention economics</div><div class="feat__d">Cost of placement against cost of the prevention measure that would have avoided it, using local data.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Statutory breach early warning</div><div class="feat__d">Flags approaching six-week B&amp;B limits for families before the limit is breached.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives MHCLG the evidence base for the National Plan to End Homelessness targets, including eliminating unlawful B&amp;B use beyond six weeks.</li><li>Quantifies the subsidy gap authority by authority, informing whether and how to relink the temporary accommodation subsidy to current rates.</li><li>Supports the new ringfence on prevention spend by showing what prevention actually costs against what placement costs.</li><li>Directly serves the Prime Minister’s stated first instruction on ending rough sleeping and the linked temporary accommodation pressures.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Fewer families in unsuitable accommodation, and fewer placed far from schools, work and support networks.</li><li>Money not lost to inflated placement prices is money available for prevention and for building.</li><li>Transparency on who profits from homelessness placements, which is currently almost entirely opaque.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">MHCLG, London Councils, individual billing authorities</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with MHCLG homelessness programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Cost normalisation</div><div class="phase__meta">4 months</div><div class="phase__d">Council payment data normalised into comparable unit costs across a representative sample of authorities.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Subsidy modelling</div><div class="phase__meta">3 months</div><div class="phase__d">Per-authority gap quantification validated against published outturn.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">London pilot</div><div class="phase__meta">6 months</div><div class="phase__d">Deployed across a group of London boroughs, where cost concentration and out-of-area placement are most severe.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">National rollout</div><div class="phase__meta">9 months</div><div class="phase__d">Extended to all authorities with significant temporary accommodation cohorts.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Commercial sensitivity</div><p class="card__desc">Providers will object to price transparency. The counter is that this is public money already published under transparency rules; Threshold aggregates what is already open.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Data quality</div><p class="card__desc">Council spend data is inconsistently coded. Depends on the normalisation layer built for System 10.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Perverse incentive</div><p class="card__desc">Published benchmarks can become a floor as well as a ceiling. Mitigated by publishing distributions rather than single reference prices.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/statistics/statutory-homelessness-in-england-january-to-march-2026/statutory-homelessness-in-england-january-to-march-2026" target="_blank" rel="noopener">Statutory homelessness in England, January to March 2026</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.local.gov.uk/publications/homelessness-and-rough-sleeping-strategy-position-statement-2026" target="_blank" rel="noopener">LGA homelessness and rough sleeping position statement 2026</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.instituteforgovernment.org.uk/publication/performance-tracker-2025/local-services/homelessness" target="_blank" rel="noopener">IfG Performance Tracker 2025: homelessness</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/publications/a-national-plan-to-end-homelessness/a-national-plan-to-end-homelessness" target="_blank" rel="noopener">A National Plan to End Homelessness</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.londoncouncils.gov.uk/news-and-press-releases/2025/ps740m-black-hole-londons-temporary-accommodation-crisis-draining" target="_blank" rel="noopener">London Councils: £740m temporary accommodation shortfall</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/compass.html">&larr; 03 Compass</a>
+<a class="btn btn--ghost" href="../systems/plumbline.html">05 Plumbline &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

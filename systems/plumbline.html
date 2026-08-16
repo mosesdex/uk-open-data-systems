@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumbline — Dexter DCL</title>
+<meta name="description" content="The headline says 91% of major applications are decided on time. The statutory figure is 19%. Plumbline measures what is actually happening.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 05 &middot; MHCLG planning data standards due summer 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Plumbline</h1>
+<p class="lede" style="margin-top:.6rem">Planning pipeline truth and delivery measurement</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The headline says 91% of major applications are decided on time. The statutory figure is 19%. Plumbline measures what is actually happening.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Operations</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Official statistics report that <strong>91% of major planning applications</strong> are decided within the statutory period <em>or an agreed extension</em>. Measured against the statutory 13-week deadline alone, the figure is <strong>19%</strong>. Around <strong>71% of major applications rely on extensions of time</strong>. The headline metric systematically conceals the real one.</p>
+<p>The measurement failures compound. The <strong>Housing Delivery Test’s latest official measurement is still 2023</strong>, published December 2024 — the mechanism that triggers presumption-in-favour sanctions is running three years stale. Only about <strong>30% of English planning authorities</strong> have an up-to-date adopted local plan.</p>
+<p>Meanwhile the pipeline is contracting. Planning permission was granted for <strong>209,781 homes in the year to September 2025 — the lowest 12-month total since 2013</strong>, against roughly 370,000 a year needed to support the target. Net additional dwellings were <strong>208,600 in 2024-25</strong>, and the government tracker records <strong>26% of the 1.5 million target</strong> delivered with the pledge rated off track.</p>
+<p>And 2025-26 outturn will not be published until around November 2026. The system that is meant to deliver 1.5 million homes cannot see its own current performance.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">19%</div><div class="impact__l">Major applications actually decided within the statutory 13 weeks — against a 91% headline</div></div><div class="impact__cell"><div class="impact__n">209,781</div><div class="impact__l">Homes permissioned in the year to September 2025 — lowest since 2013</div></div><div class="impact__cell"><div class="impact__n">2023</div><div class="impact__l">The year of the most recent official Housing Delivery Test measurement</div></div><div class="impact__cell"><div class="impact__n">26%</div><div class="impact__l">Of the 1.5 million homes target delivered, with the pledge rated off track</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Plumbline builds the honest measurement layer for the planning system, and does it in the window that MHCLG has itself created — planning data standards are due in <strong>summer 2026</strong>, with the National Infrastructure Spatial Tool entering private beta in <strong>November 2026</strong>.</p>
+<p>It reports determination performance against statutory deadlines and against extensions separately, always both, so that the gap is visible rather than hidden. It tracks extension-of-time usage as a first-class metric, since a system where 71% of major decisions need an extension has a capacity problem the headline denies.</p>
+<p>It maintains a live Housing Delivery Test estimate between official measurements, using permissions, starts, completions and building control data, so authorities and MHCLG can both see the trajectory rather than discovering it two years late.</p>
+<p>And it tracks the full pipeline from allocation through permission to completion, exposing where homes are being lost — refusal, appeal, viability, or permissions granted and never built.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Planning application statistics (PS1/PS2)</strong></td><td class="muted">MHCLG</td><td>Quarterly decisions, speed, and grant rates by authority.</td></tr><tr><td><strong>planning.data.gov.uk</strong></td><td class="muted">MHCLG</td><td>The emerging national planning data platform, with standards due summer 2026.</td></tr><tr><td><strong>Housing supply: net additional dwellings</strong></td><td class="muted">MHCLG</td><td>Annual outturn — the definitive delivery measure, published with a long lag.</td></tr><tr><td><strong>Indicators of new supply</strong></td><td class="muted">MHCLG</td><td>Quarterly starts and completions, the leading indicator.</td></tr><tr><td><strong>Local Land Charges register</strong></td><td class="muted">HM Land Registry</td><td>Digital, centralised, 127 authorities live, extending to building regulations.</td></tr><tr><td><strong>Planning Inspectorate statistics</strong></td><td class="muted">PINS</td><td>Appeal volumes, outcomes and decision times.</td></tr><tr><td><strong>EPC lodgements</strong></td><td class="muted">MHCLG</td><td>New dwelling completions with a much shorter lag than official statistics.</td></tr><tr><td><strong>Local plan status</strong></td><td class="muted">MHCLG / PINS</td><td>Adoption dates and plan stage by authority.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Dual-clock reporting</div><div class="feat__d">Every determination statistic reported against both statutory deadline and extended deadline, never one alone.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Extension-of-time analytics</div><div class="feat__d">Who requests extensions, for what, how long, and whether they correlate with capacity or complexity.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Live Housing Delivery Test</div><div class="feat__d">Continuous estimate between official measurements, so authorities see the trajectory rather than a retrospective verdict.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Pipeline attrition</div><div class="feat__d">Where homes leave the pipeline between allocation, permission, start and completion.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Capacity correlation</div><div class="feat__d">Determination performance against planning department staffing, linking delay to the resource gap.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Appeal outcome prediction</div><div class="feat__d">Historic appeal patterns by authority and development type, informing both applicants and authorities.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Standards conformance</div><div class="feat__d">Checks authority planning data against the MHCLG standards due summer 2026 and reports gaps back.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives MHCLG honest, current performance data on the delivery mechanism for its highest-profile housing commitment.</li><li>Supports and tests the planning data standards MHCLG is introducing in summer 2026, providing conformance feedback from day one.</li><li>Makes the case for planning capacity investment evidentially rather than anecdotally — 97% of planning departments reported a skills gap in the last survey, itself now three years old.</li><li>Complements rather than duplicates the National Infrastructure Spatial Tool, which addresses infrastructure rather than housing determination performance.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Applicants — including individual householders — can see realistic timelines for their authority rather than a misleading headline.</li><li>Communities can see whether their council is genuinely delivering its plan or quietly missing it.</li><li>Faster, better-resourced decisions mean homes built sooner for people who need them.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">MHCLG, planning authorities, Planning Inspectorate</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, aligned to the MHCLG planning data standards programme</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Measurement layer</div><div class="phase__meta">3 months</div><div class="phase__d">Dual-clock reporting built from published statistics for all English authorities.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Live delivery estimate</div><div class="phase__meta">4 months</div><div class="phase__d">Continuous Housing Delivery Test estimate validated against the 2023 official measurement.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Standards conformance</div><div class="phase__meta">6 months</div><div class="phase__d">Aligned to MHCLG planning data standards as published in summer 2026.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Authority rollout</div><div class="phase__meta">9 months</div><div class="phase__d">Self-service for all English planning authorities, with a public national view.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Political sensitivity</div><p class="card__desc">Publishing the gap between headline and statutory performance is uncomfortable. It is also already implicit in published statistics — Plumbline surfaces rather than reveals it.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Overlap with MHCLG</div><p class="card__desc">MHCLG is building planning data infrastructure. Plumbline is deliberately scoped to measurement and conformance, not to replacing the platform.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Attribution</div><p class="card__desc">Delay has many causes, not all within an authority’s control. Reporting separates authority-controlled from applicant-controlled and consultee-driven delay.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/statistics/planning-applications-in-england-january-to-march-2026/planning-applications-in-england-january-to-march-2026-statistical-release" target="_blank" rel="noopener">Planning applications in England, January to March 2026</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/statistics/housing-supply-net-additional-dwellings-england-2024-to-2025/housing-supply-net-additional-dwellings-england-2024-to-2025" target="_blank" rel="noopener">Housing supply: net additional dwellings 2024-25</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://fullfact.org/government-tracker/1-5-million-homes/" target="_blank" rel="noopener">Full Fact: 1.5 million homes tracker</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.hbf.co.uk/news/viability-crisis-sees-planning-permissions-for-new-homes-hit-15-year-low/" target="_blank" rel="noopener">HBF: planning permissions hit 15-year low</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.gov.uk/government/collections/housing-delivery-test" target="_blank" rel="noopener">Housing Delivery Test collection</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/threshold.html">&larr; 04 Threshold</a>
+<a class="btn btn--ghost" href="../systems/highwater.html">06 Highwater &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

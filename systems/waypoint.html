@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waypoint — Dexter DCL</title>
+<meta name="description" content="Every national accessibility measure assumes buses run to timetable. Real-time open data proves they do not — and the places that suffer most are scored as well connected.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 08 &middot; The gap the Connectivity Tool concedes in its own documentation</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Waypoint</h1>
+<p class="lede" style="margin-top:.6rem">Public transport accessibility measurement</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every national accessibility measure assumes buses run to timetable. Real-time open data proves they do not — and the places that suffer most are scored as well connected.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Transport</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Equity</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The Department for Transport discontinued Journey Time Statistics in March 2025, concluding there was "not a sufficient business case to continue production." The last data year was 2019. But it did not leave a vacuum — it shipped the <strong>Connectivity Tool Lite</strong>, free, covering England and Wales across roughly 15 million 100m grid squares, six travel purposes and four modes. That is a serious public tool, and any proposal claiming the government publishes nothing here is wrong.</p>
+<p>The gap is narrower and much sharper than "no accessibility statistic". It is stated in the tool’s own documentation: the model <strong>"assumes that all timetables are adhered to… will make areas with unreliable services appear more connected than they are."</strong> It also excludes fares and congestion, and rests on travel behaviour data from <strong>2011–2020</strong> that does not capture post-pandemic change.</p>
+<p>So the official measure systematically flatters exactly the places that are worst served. A neighbourhood with an hourly bus that arrives two times in three scores identically to one where it always arrives. Unreliability is invisible by construction, and it is concentrated in the same areas as deprivation and low car ownership.</p>
+<p>The consequences are not abstract. Bus journeys outside London fell from <strong>4.6 billion in 2009 to 3.6 billion in 2024</strong>, a 21.7% reduction; more than <strong>10,500 services were withdrawn between 2019 and 2024</strong>; and CPRE finds <strong>56% of small towns in the South West and North East</strong> are transport deserts or at risk of becoming one.</p>
+<p>What makes the fix newly possible is that the Bus Open Data Service is legally mandated and publishes <strong>real-time vehicle positions</strong> alongside timetables from 250+ operators. The difference between the two is measurable, continuously, at national scale — and nobody is measuring it.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">2019</div><div class="impact__l">The last data year of England’s discontinued journey time statistic</div></div><div class="impact__cell"><div class="impact__n">10,500+</div><div class="impact__l">Bus services withdrawn between 2019 and 2024</div></div><div class="impact__cell"><div class="impact__n">21.7%</div><div class="impact__l">Fall in bus journeys outside London, 2009 to 2024</div></div><div class="impact__cell"><div class="impact__n">56%</div><div class="impact__l">Small towns in the South West and North East that are transport deserts or at risk</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Waypoint rebuilds genuine door-to-service journey time measurement from Bus Open Data timetables, and then does what the discontinued statistic never could: recomputes continuously rather than annually.</p>
+<p>That single change transforms the product. Under the old regime a route withdrawal became visible in a statistic published up to two years later. With mandated open timetable data, a withdrawal shows up as a measured accessibility loss within days — and Waypoint publishes the delta: which neighbourhoods lost access to which class of service this quarter, and how many people live there.</p>
+<p>It layers the 2025 deprivation indices to produce a defensible, published definition of a transport desert tied to deprivation and car availability, replacing the ad-hoc definitions currently in circulation with something a minister can quote and a council can plan against.</p>
+<p>It is also the analysis that mayoral authorities currently buy from consultants to build bus franchising business cases. Building it once as a public asset removes a recurring cost from every authority pursuing franchising under the Bus Services Act.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Bus Open Data Service (BODS)</strong></td><td class="muted">DfT</td><td>Legally mandated timetables, fares and real-time location from 250+ operators. Obligations commenced 2021 and 2023.</td></tr><tr><td><strong>NaPTAN</strong></td><td class="muted">DfT</td><td>National public transport access nodes — every stop in Great Britain.</td></tr><tr><td><strong>OS Open Roads</strong></td><td class="muted">Ordnance Survey</td><td>Free network data for walk-access and interchange modelling.</td></tr><tr><td><strong>Census 2021</strong></td><td class="muted">ONS</td><td>Population, car availability and small-area demographics. Note travel-to-work variables are pandemic-affected.</td></tr><tr><td><strong>Indices of Deprivation 2025</strong></td><td class="muted">MHCLG</td><td>Published October 2025, replacing the 2019 indices most existing analysis still uses.</td></tr><tr><td><strong>NHS Organisation Data Service</strong></td><td class="muted">NHS England</td><td>Hospital, GP and pharmacy locations as destinations.</td></tr><tr><td><strong>Get Information About Schools</strong></td><td class="muted">DfE</td><td>School locations as destinations.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">True journey time surfaces</div><div class="feat__d">Door-to-service travel times by public transport at small-area level, computed from actual timetables and interchange.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Continuous recomputation</div><div class="feat__d">Weekly rather than annual, so service changes register immediately instead of years later.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Accessibility delta reporting</div><div class="feat__d">Which neighbourhoods lost access to which service class, and how many people live there — the headline nobody can currently produce.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Transport desert definition</div><div class="feat__d">A published, defensible national definition tied to deprivation and car availability.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Franchising business case pack</div><div class="feat__d">The accessibility analysis mayoral authorities currently commission from consultants, available as a public asset.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Service class coverage</div><div class="feat__d">Access to hospitals, GPs, secondary schools, further education and employment centres measured separately, since one is not a substitute for another.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Rural mobility evaluation</div><div class="feat__d">Before-and-after measurement for interventions such as demand-responsive transport schemes.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Restores a capability DfT retired for cost reasons, at a fraction of the original cost, using data that is already mandated and free.</li><li>Supports Bus Services Act implementation and the roughly £900m a year of bus funding by showing where it changes access and where it does not.</li><li>Gives DWP evidence on jobcentre accessibility, which bears directly on claimant conditionality decisions.</li><li>Provides the accessibility evidence base for the devolution agenda, where mayoral authorities are taking on transport powers without comparable data.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>People can see, before moving or taking a job, whether they can actually reach it without a car.</li><li>Communities losing services get measured evidence rather than anecdote when they challenge withdrawals.</li><li>Investment targeted at the places where access is genuinely worst, rather than where lobbying is loudest.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">DfT Buses and Taxis, mayoral combined authorities, DWP, rural authorities</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with DfT and combined authority co-funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Routing engine</div><div class="phase__meta">4 months</div><div class="phase__d">Journey time computation from BODS validated against known routes and timings.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">National surfaces</div><div class="phase__meta">3 months</div><div class="phase__d">Small-area accessibility published for all English destinations classes.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Delta reporting</div><div class="phase__meta">3 months</div><div class="phase__d">Continuous recomputation and change alerting operational.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Authority tooling</div><div class="phase__meta">6 months</div><div class="phase__d">Franchising and network planning tools released to mayoral and county authorities.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Destination data licensing</div><p class="card__desc">Jobcentre and retail locations are the weak link; food store data of usable quality is commercial. Scope begins with health, education and employment centres where open data exists, and states coverage honestly.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Data quality in BODS</div><p class="card__desc">Operator compliance varies. Coverage is published as a metric rather than assumed, and gaps are reported back to DfT as a by-product.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Duplication</div><p class="card__desc">Transport for the North’s social exclusion tool covers related ground. Waypoint differentiates on continuous recomputation, change deltas and national coverage.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/collections/journey-time-statistics" target="_blank" rel="noopener">Journey Time Statistics — discontinued</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/publications/transport-connectivity-metric" target="_blank" rel="noopener">Transport connectivity metric</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/collections/bus-open-data-service" target="_blank" rel="noopener">Bus Open Data Service</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://publications.parliament.uk/pa/cm5901/cmselect/cmtrans/494/report.html" target="_blank" rel="noopener">Transport Committee: buses connecting communities</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.cpre.org.uk/resources/transport-deserts-report/" target="_blank" rel="noopener">CPRE: transport deserts</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/catchment.html">&larr; 07 Catchment</a>
+<a class="btn btn--ghost" href="../systems/hearth.html">09 Hearth &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

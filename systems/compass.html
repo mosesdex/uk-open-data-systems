@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compass — Dexter DCL</title>
+<meta name="description" content="Parliament has formally found that government does not know whether £2.6bn of home-to-school transport is value for money. Compass is the missing evidence base.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 03 &middot; Named parliamentary data gap, March 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Compass</h1>
+<p class="lede" style="margin-top:.6rem">SEND demand forecasting and transport optimisation</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Parliament has formally found that government does not know whether £2.6bn of home-to-school transport is value for money. Compass is the missing evidence base.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Children &amp; families</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The Public Accounts Committee reported in March 2026 that <strong>"the Department does not know whether home to school transport is achieving value for money"</strong>, and that DfE <strong>lacks the data to oversee the service</strong> — it only began collecting who receives transport in February 2025, achieving a 75% response rate with partial answers.</p>
+<p>The spend is not marginal. Home-to-school transport cost <strong>£2.6bn in 2024-25</strong>, of which <strong>£2.0bn was SEND transport</strong>. SEND transport spending rose <strong>106% in real terms</strong> between 2015-16 and 2023-24. The median annual cost is <strong>£8,116 per SEND pupil</strong> against £1,526 for mainstream.</p>
+<p>The underlying driver is demand nobody forecasts well. EHCPs reached <strong>718,838 in January 2026, up 12.5% in a single year</strong> — the largest annual increase since plans were introduced in 2014. Only <strong>46.1%</strong> are issued within the statutory 20 weeks. Councils lose <strong>99% of SEND tribunal appeals</strong> while spending £153m a year defending them.</p>
+<p>Government has just written off <strong>90% of historic DSG deficits, worth over £5bn</strong>, conditional on councils submitting an approved local SEND reform plan. Those plans are due now, and most councils lack the analytical basis to write a credible one. New deficits continue to accrue on top.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">£2.0bn</div><div class="impact__l">Annual SEND home-to-school transport spend in England</div></div><div class="impact__cell"><div class="impact__n">718,838</div><div class="impact__l">EHCPs in force at January 2026, up 12.5% in one year</div></div><div class="impact__cell"><div class="impact__n">£8,116</div><div class="impact__l">Median annual SEND transport cost per pupil, against £1,526 mainstream</div></div><div class="impact__cell"><div class="impact__n">1.3%</div><div class="impact__l">Local authority success rate at SEND tribunal — 99% of appeals upheld against them</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Compass does two connected jobs. It forecasts SEND demand at local authority and settlement level, and it optimises the transport network that demand generates.</p>
+<p>The forecasting side combines births, migration, school census, EHCP flow rates and housing completions to project EHCP volumes and specialist placement need three to seven years ahead — the planning horizon for creating specialist places, which is the only durable way to reduce both transport cost and independent placement cost.</p>
+<p>The transport side treats school transport as the routing problem it actually is. Given pupil locations, placement locations, statutory eligibility and individual needs, it identifies achievable route consolidation, exposes the cost of each placement decision at the point the decision is made, and quantifies the transport consequence of opening a specialist unit in one location versus another.</p>
+<p>The connection between the two is the point. A placement made without visibility of its seven-year transport cost is how a council ends up paying five figures a year to move one child, and no current system shows that number at the moment it matters.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>EHCP statistics</strong></td><td class="muted">DfE</td><td>Plans in force, new plans, assessment requests, 20-week timeliness, by local authority. Published annually.</td></tr><tr><td><strong>School census / Get Information about Schools</strong></td><td class="muted">DfE</td><td>Pupil-level characteristics, SEN status, school capacity and location.</td></tr><tr><td><strong>SCAP school capacity survey</strong></td><td class="muted">DfE</td><td>Place planning capacity by authority and phase.</td></tr><tr><td><strong>ONS births and population projections</strong></td><td class="muted">ONS</td><td>Cohort sizes feeding the forecast, by small area.</td></tr><tr><td><strong>Housing completions and permissions</strong></td><td class="muted">MHCLG</td><td>New development driving future pupil numbers at settlement level.</td></tr><tr><td><strong>Indices of Multiple Deprivation</strong></td><td class="muted">MHCLG</td><td>Correlates strongly with SEN identification rates.</td></tr><tr><td><strong>OS Open Roads / journey routing</strong></td><td class="muted">Ordnance Survey</td><td>Network for genuine travel-time calculation rather than straight-line distance.</td></tr><tr><td><strong>SEND Tribunal statistics</strong></td><td class="muted">MoJ</td><td>Appeal volumes and outcomes, for measuring decision quality.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">EHCP demand forecast</div><div class="feat__d">Three to seven year projections by authority and settlement, with confidence intervals and explicit driver attribution.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Placement cost transparency</div><div class="feat__d">Full lifetime cost of a placement decision — fees plus transport plus review — surfaced at the point of decision.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Route optimisation</div><div class="feat__d">Consolidation opportunities across the whole transport cohort, respecting individual needs and statutory eligibility.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Specialist provision siting</div><div class="feat__d">Where to create places so that transport cost falls most, given projected demand geography.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Post-16 modelling</div><div class="feat__d">The fastest-growing segment and the one excluded from the new funding formula — modelled explicitly.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Tribunal risk signal</div><div class="feat__d">Decision patterns associated with appeals lost, so authorities can fix the decision rather than fund the defence.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Reform plan evidence pack</div><div class="feat__d">Generates the analytical basis councils need for the DfE-approved local SEND reform plan that conditions their deficit write-off.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Answers the PAC finding directly, giving DfE the oversight data Parliament has said it does not have.</li><li>Supports the condition attached to the £5bn deficit write-off — councils must submit credible SEND reform plans, and most currently cannot evidence them.</li><li>Addresses the fastest-growing local government cost line with a forecasting horizon long enough to actually change it.</li><li>Provides MHCLG with evidence on whether the new home-to-school transport funding formula works — which PAC noted it has no plan to monitor.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Children spend less time in taxis. Some SEND pupils currently travel hours a day.</li><li>Faster, better-evidenced placement decisions reduce the adversarial tribunal process families are forced into — 25% of families reduce working hours fighting for support.</li><li>Specialist places created where children actually live, rather than wherever capacity happened to exist.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">DfE, MHCLG, county councils and unitary authorities</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with DfE SEND reform programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Forecast engine</div><div class="phase__meta">4 months</div><div class="phase__d">National EHCP demand model validated against outturn across all English authorities.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Transport analytics</div><div class="phase__meta">4 months</div><div class="phase__d">Routing and consolidation modelling piloted with three county authorities.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Decision support</div><div class="phase__meta">6 months</div><div class="phase__d">Placement cost transparency embedded in live casework with pilot authorities.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">National availability</div><div class="phase__meta">12 months</div><div class="phase__d">Offered to all authorities with high needs deficits, aligned to reform plan submission cycles.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Optimisation versus need</div><p class="card__desc">Route consolidation must never override an individual child’s assessed needs. Needs constraints are hard limits in the model, not weighted factors.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Forecast credibility</div><p class="card__desc">EHCP growth has repeatedly outrun projections. Published back-testing against outturn, with intervals wide enough to be honest.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Sensitivity</div><p class="card__desc">Children’s data of the highest sensitivity. Operates on aggregate and pseudonymised data by default; record-level work only under the authority’s controllership.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://publications.parliament.uk/pa/cm5901/cmselect/cmpubacc/1238/report.html" target="_blank" rel="noopener">PAC 70th Report: home-to-school transport, 6 March 2026</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.nao.org.uk/reports/home-to-school-transport/" target="_blank" rel="noopener">NAO: home to school transport, 31 October 2025</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://explore-education-statistics.service.gov.uk/find-statistics/education-health-and-care-plans" target="_blank" rel="noopener">DfE: education, health and care plans, January 2026</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/publications/explanatory-note-on-the-governments-approach-to-dedicated-schools-grant-deficits/explanatory-note-on-the-governments-approach-dedicated-schools-grant-deficits" target="_blank" rel="noopener">Explanatory note on DSG deficits, 9 February 2026</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://commonslibrary.parliament.uk/research-briefings/cbp-10550/" target="_blank" rel="noopener">Schools White Paper 2026: SEND reform (Commons Library)</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/transit.html">&larr; 02 Transit</a>
+<a class="btn btn--ghost" href="../systems/threshold.html">04 Threshold &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

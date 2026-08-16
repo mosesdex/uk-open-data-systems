@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth — Dexter DCL</title>
+<meta name="description" content="£15bn to upgrade five million homes, and no public record of which properties got funded, by which scheme, at what cost, or whether it worked. 65,000 households found out the hard ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 09 &middot; Warm Homes Plan area-based delivery begins 2027/28</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Hearth</h1>
+<p class="lede" style="margin-top:.6rem">Retrofit outcome accountability</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">£15bn to upgrade five million homes, and no public record of which properties got funded, by which scheme, at what cost, or whether it worked. 65,000 households found out the hard way.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Climate &amp; energy</span><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The Warm Homes Plan commits <strong>£15bn</strong> to upgrade <strong>up to 5 million homes</strong> and lift <strong>up to 1 million families out of fuel poverty by 2030</strong>. The private rented sector must reach EPC band C by October 2030. Area-based delivery begins in 2027/28, tied to local energy plans.</p>
+<p>There is no unified eligibility framework behind it. Households are reached through separate scheme-specific routes, and ECO Flex still depends on individual councils issuing their own declarations — producing roughly three hundred inconsistent eligibility regimes for a single national objective.</p>
+<p>The targeting data is weaker than it looks. Energy Performance Certificates only cover properties transacted since 2008, so <strong>a large share of the housing stock has no certificate at all</strong>; scores are modelled rather than measured; and certificates last ten years, so many are stale. Nobody can currently target the un-certificated half of the stock.</p>
+<p>The absence of outcome verification has already produced a scandal. Around <strong>65,000 households</strong> received solid wall insulation under recent schemes; <strong>39 businesses were suspended</strong> and Ofgem was ordered to check every installation and write to all affected households. Defects included missing ventilation and exposed insulation. That failure surfaced through complaints, not data — because nothing checks whether an installed measure produced the predicted saving. Government has since said the scheme responsible was <strong>"the source of the majority of poor-quality installations."</strong></p>
+<p>The plan has a budget and no data plan. Searching the published Warm Homes Plan for <code>data sharing</code>, <code>data matching</code>, <code>DWP</code>, <code>HMRC</code> and <code>Digital Economy Act</code> returns <strong>zero hits in every case</strong>. Its only targeting commitment is hedged as a "potential opportunity", with no legal gateway named, no timeline and no funding line.</p>
+<p>Worse, the legal plumbing points at the wrong actor. The data-sharing gateway that makes household-level targeting lawful was built to push government data <strong>to energy suppliers</strong>, so they could deliver supplier obligations. Those obligations are being abolished — one scheme ended in March 2026, the other ends <strong>31 December 2026, with no successor</strong>. Delivery moves to local authorities and a new agency, and <strong>local authorities have no equivalent route to benefits data</strong>. The current eligibility checker is a self-service funnel relying on <strong>self-declared income</strong>, which government concedes <strong>"will sometimes tell users they are ineligible when they are eligible."</strong></p>
+<p>And the evidence base is fracturing beneath all of it. Certificates lost their primary key in March 2026 — government states plainly that <strong>"it is not possible to link certificate numbers to the former LMK_KEY"</strong> — the headline rating is replaced by four separate metrics from the second half of 2027, and the underlying calculation engine is being replaced too. Three discontinuities in a single programme.</p>
+<p>Meanwhile <strong>2.7 million households in England are in fuel poverty</strong>, the aggregate gap is £1.11bn, and cold and damp housing costs the NHS an estimated £900m a year.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">£15bn</div><div class="impact__l">Warm Homes Plan investment to 2030</div></div><div class="impact__cell"><div class="impact__n">5 million</div><div class="impact__l">Homes to be upgraded — requiring knowing which ones</div></div><div class="impact__cell"><div class="impact__n">65,000</div><div class="impact__l">Households with solid wall insulation now requiring inspection after quality failures</div></div><div class="impact__cell"><div class="impact__n">2.7m</div><div class="impact__l">Households in fuel poverty in England</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Hearth is deliberately not a targeting tool. Targeting requires household income and benefits data that cannot lawfully be published, so it belongs to councils and scheme administrators who hold it — and commercial products already serve them, at £20,000 to £80,000 a year. Building a public rival to those would duplicate a served market and run into a legal wall.</p>
+<p>What nobody does is hold the programme to account for its outcomes. Hearth tracks post-installation certificate re-lodgement against the uplift each measure predicted, by measure type, by scheme and by installer. Underperformance surfaces as a signal within months rather than as a scandal after 65,000 installations.</p>
+<p>It publishes the spend-to-outcome record: which areas received investment under which scheme, at what cost per property, and what measured improvement followed. That is the record a public accounts committee needs and cannot currently obtain, and it exists nowhere for a £15bn programme.</p>
+<p>It also fills a genuine data gap that helps everyone including the commercial tools — imputing energy performance for the substantial share of stock with no certificate, published openly with explicit uncertainty. Properties that have not been sold since 2008 are currently invisible to every scheme, which means the programme systematically misses homes for reasons that have nothing to do with need.</p>
+<p>Throughout, modelled and measured values are flagged distinctly. A system that hides the weakness of its own inputs is how £15bn gets spent on the wrong houses and reported as a success.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>EPC Open Data</strong></td><td class="muted">MHCLG</td><td>Bulk download and API. Partial stock coverage, modelled scores, ten-year validity — limitations Hearth models rather than ignores.</td></tr><tr><td><strong>Indices of Deprivation 2025</strong></td><td class="muted">MHCLG</td><td>Published October 2025. Most existing retrofit targeting still runs on the 2019 indices.</td></tr><tr><td><strong>Sub-regional fuel poverty</strong></td><td class="muted">DESNZ</td><td>Small-area fuel poverty estimates — the key targeting layer, openly published.</td></tr><tr><td><strong>Council tax base and bands</strong></td><td class="muted">MHCLG / VOA</td><td>Proxy for property size and value where certificate data is absent.</td></tr><tr><td><strong>Census 2021 housing</strong></td><td class="muted">ONS</td><td>Tenure, occupancy, heating type and household composition.</td></tr><tr><td><strong>UPRN / OS Open UPRN</strong></td><td class="muted">Ordnance Survey</td><td>Free property identifier for linking across all of the above.</td></tr><tr><td><strong>Local Area Energy Plans</strong></td><td class="muted">Combined authorities</td><td>The delivery geography for area-based rollout from 2027/28.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">National priority score</div><div class="feat__d">One auditable ranking at property level, replacing inconsistent local eligibility declarations.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Certificate imputation</div><div class="feat__d">Modelled performance for un-certificated stock, with published uncertainty — reaching properties currently invisible to every scheme.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Outcome verification</div><div class="feat__d">Post-install re-lodgement tracked against predicted uplift, by measure and installer.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Installer quality signal</div><div class="feat__d">Systematic underperformance surfaced early, from data rather than complaints.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Area-based planning</div><div class="feat__d">Street and neighbourhood-level targeting aligned to the 2027/28 delivery model and local energy plans.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Landlord compliance tracking</div><div class="feat__d">Progress toward the October 2030 private rented sector requirement, by area and portfolio.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Confidence flags</div><div class="feat__d">Modelled versus measured status shown on every property, so decisions are made with their uncertainty visible.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives DESNZ a defensible basis for allocating £15bn against a stated target of one million households, which requires identifying which households.</li><li>Supports Ofgem’s scheme administration and remediation with the outcome data that would have caught the insulation failures early.</li><li>Replaces three hundred inconsistent ECO Flex regimes with a single auditable framework, while preserving local override.</li><li>Provides the property-level evidence base the area-based delivery model needs before it starts in 2027/28.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Help reaches the coldest, poorest homes rather than the homes that happen to have a recent certificate.</li><li>Households are protected from botched installations by verification that operates continuously rather than after a scandal.</li><li>Lower bills and warmer homes, with measurable reductions in cold-related illness.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">DESNZ Warm Homes directorate, Ofgem, combined authorities, social landlords</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with DESNZ Warm Homes programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Data foundation</div><div class="phase__meta">4 months</div><div class="phase__d">Property-level linkage of certificates, deprivation, fuel poverty and tenure at national scale.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Imputation model</div><div class="phase__meta">5 months</div><div class="phase__d">Performance imputation for un-certificated stock, validated against held-out certificates.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Verification loop</div><div class="phase__meta">4 months</div><div class="phase__d">Outcome tracking operational with a pilot scheme administrator.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Area-based rollout</div><div class="phase__meta">9 months</div><div class="phase__d">Deployed with combined authorities ahead of the 2027/28 delivery model.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Imputation error</div><p class="card__desc">Wrongly imputed performance means wrongly targeted spend. Published accuracy, conservative thresholds, and imputation never used alone to deny support.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Certificate coverage</div><p class="card__desc">The underlying gap is structural and Hearth mitigates rather than solves it. Coverage is stated openly on every output.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Privacy</div><p class="card__desc">Property-level energy and deprivation data is sensitive in combination. Public outputs are aggregated; property-level access is restricted to the delivery bodies with a lawful basis.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/warm-homes-plan/warm-homes-plan-html" target="_blank" rel="noopener">Warm Homes Plan</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025/english-indices-of-deprivation-2025-statistical-release" target="_blank" rel="noopener">English Indices of Deprivation 2025</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/collections/fuel-poverty-statistics" target="_blank" rel="noopener">Fuel poverty statistics collection</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/news/action-taken-to-protect-households-with-poor-quality-insulation" target="_blank" rel="noopener">Action taken to protect households with poor quality insulation</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://get-energy-performance-data.communities.gov.uk/" target="_blank" rel="noopener">EPC open data service</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/waypoint.html">&larr; 08 Waypoint</a>
+<a class="btn btn--ghost" href="../systems/junction.html">10 Junction &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>
