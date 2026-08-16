@@ -13,13 +13,14 @@ export default [
   problem: [
     'Government estimates fraud and error across the public sector at <strong>£55bn–£81bn a year</strong>, excluding tax and welfare. The Public Sector Fraud Authority reported <strong>£7.53bn saved</strong> in the last financial year and credited the result explicitly to AI and advanced data-matching — but that work concentrates on grants and payments, not on the award stage where procurement fraud originates.',
     'The classic red flags of bid-rigging are all detectable in data that is now public: single-bidder tenders, repeated runner-up patterns, suppliers sharing directors or registered addresses, contracts split just below thresholds, and award values clustering suspiciously close to estimates. Nobody in UK government is systematically looking for them across all buyers at once.',
-    'The reason this is newly possible is the Procurement Act 2023. From <strong>1 January 2026</strong> contracting authorities must publish supplier performance for contracts over £5m via the UK9 Contract Performance Notice. From <strong>1 April 2026</strong> suppliers awarded below-threshold contracts must register on the Central Digital Platform and obtain a <strong>unique supplier identifier</strong>. For the first time there is a persistent, mandatory identifier linking a supplier across every buyer in the country.',
+    'The Procurement Act 2023 improved the raw material substantially. From <strong>1 January 2026</strong> contracting authorities must publish supplier performance for contracts over £5m, and from <strong>1 April 2026</strong> suppliers awarded below-threshold contracts must register on the Central Digital Platform and supply their Companies House number.',
+    'But the identifier is captured at registration and <strong>not published in the open feed</strong>. Measured directly against the live data in August 2026: <strong>65.2% of supplier records in Find a Tender carry no identifier scheme at all</strong>, the platform’s own supplier reference number appears <strong>exactly once in a hundred award releases, as free text</strong>, and in Contracts Finder <strong>100% of supplier entries inside award records have no identifier</strong>. Anyone told they can now simply join UK procurement data on company number should be shown those figures first.',
     'The Open Contracting Partnership’s one-year analysis found <strong>57 of 71 integrity indicators are now computable</strong>, up from 35 under the old regime — and that <strong>single-bid tenders cost around 7% more</strong>. It also found institutional variation nobody is acting on: <strong>Bristol awards 95% of below-threshold contracts non-competitively; Leeds under 30%</strong>. Transparency International identified <strong>135 COVID contracts worth £15.3bn carrying three or more corruption red flags</strong>.',
     'One structural obstacle explains why this has not been done. Companies House publishes free bulk files for companies and PSCs, but <strong>there is no free bulk officers file</strong> — the directorship graph can only be assembled company-by-company through a rate-limited API across 4.93 million active companies. That single asymmetry is why UK director-network analysis is dominated by commercial products rather than public ones.'
   ],
 
   solution: [
-    'Sentinel ingests the full public procurement record — Find a Tender, Contracts Finder and the Central Digital Platform — and resolves every supplier to its Companies House entity using the new unique supplier identifier as the anchor. It then builds a national graph linking suppliers to their directors, persons with significant control, registered addresses and corporate parents.',
+    'Sentinel ingests the full public procurement record — Find a Tender, Contracts Finder and the Central Digital Platform — and resolves suppliers to Companies House entities. Because roughly two-thirds of records carry no usable identifier, that resolution is the system’s hardest engineering problem rather than a given: identifier where present, probabilistic name and address matching where not, with match confidence published on every link and low-confidence links never silently merged. It then builds a national graph connecting suppliers to their directors, persons with significant control, registered addresses and corporate parents.',
     'Against that graph it runs an indicator suite derived from established international practice — the EU’s Digital Whistleblower red-flag set, the World Bank’s procurement analytics, and Ukraine’s ProZorro/Dozorro monitoring model — scoring every award and every buyer for risk rather than accusing anyone of wrongdoing.',
     'Output is a triage queue for investigators, not a verdict. Each flag carries its evidence, its statistical basis and a plain-English explanation, so a commercial officer can dismiss it in thirty seconds or escalate it with a full audit trail.'
   ],
@@ -34,7 +35,7 @@ export default [
   ],
 
   features: [
-    ['Supplier identity resolution', 'Every award tied to a canonical legal entity using the statutory unique supplier identifier, surviving name changes, group restructures and typos.'],
+    ['Supplier identity resolution', 'Every award tied to a canonical legal entity despite two-thirds of records lacking an identifier — surviving name changes, group restructures and typos, with confidence published per match. In one sample the same firm appeared as both “SOFTCAT LTD - FCA” and “SOFTCAT PLC”, with no company number on either.'],
     ['Connection graph', 'Shared directors, PSCs, registered addresses and corporate parents across bidders on the same tender — the single strongest signal of a rigged competition.'],
     ['Competition intensity index', 'Bidder counts by buyer, category and value band, benchmarked nationally. Persistent single-bidder categories surface automatically.'],
     ['Threshold-splitting detection', 'Sequential awards to one supplier that individually fall below a procurement threshold and collectively exceed it.'],
@@ -46,7 +47,7 @@ export default [
   impact: [
     ['£55–81bn', 'Government’s own published estimate of annual fraud and error, excluding tax and welfare'],
     ['£7.53bn', 'Counter-fraud savings government attributes to AI and data-matching in the last year'],
-    ['1 Apr 2026', 'Unique supplier identifiers become mandatory — the linkage key that makes this possible'],
+    ['65.2%', 'Supplier records in published procurement data carrying no resolvable identifier'],
     ['0.5%', 'Recovery rate on procurement spend that would repay the platform many times over']
   ],
 
