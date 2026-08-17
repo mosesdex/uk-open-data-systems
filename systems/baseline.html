@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baseline — Dexter DCL</title>
+<meta name="description" content="Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall — and a new regulator is being built right now">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">G</span>Groundtruth<span class="brand__sub">by Dexter DCL</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">The problem</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a class="hide-sm" href="../index.html#chains">How they connect</a>
+<a href="../platform.html">Architecture</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; Groundtruth</a>
+<div class="eyebrow">System 18 &middot; Both halves of the join are open and keyless</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Baseline</h1>
+<p class="lede" style="margin-top:.6rem">Sewage spills, adjusted for the weather</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall — and a new regulator is being built right now that will need to.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Climate &amp; energy</span><span class="tag tag--accent">Public money</span><span class="tag tag--accent">Operations</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Every storm overflow in England now has a monitor. The 2025 return covers <strong>14,302 overflows</strong>, and <strong>100% of them carry a grid reference</strong> — most to one-metre precision. That is an unusually complete national dataset, free and open.</p>
+<p>It reported <strong>291,492 spills</strong> in 2025 against <strong>450,398 in 2024</strong> — a 35% fall, with duration down 48%. That is the headline the sector has been running on.</p>
+<p>The Environment Agency’s own commentary concedes the problem with it. Its account of the year notes rainfall was <strong>"below average, with August recording just 62% of the UK's typical rainfall"</strong> and calls 2025 <strong>"a drier than average year"</strong>. It attributes the improvement to weather — and then publishes no weather-adjusted figure.</p>
+<p>Nor does anyone else. The economic regulator normalises environmental performance by <strong>sewer length, not rainfall</strong>. The charities and campaign groups that map spills do not adjust them either. So <strong>£22.1bn of committed investment is being justified against a number nobody has separated from the weather.</strong></p>
+<p>And the raw material to do it is sitting there. The Agency runs <strong>1,044 rainfall stations at 15-minute resolution</strong>, free and without a key, alongside the overflow data it publishes itself.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">100%</div><div class="impact__l">Monitored overflows carrying a grid reference — most to one-metre precision</div></div><div class="impact__cell"><div class="impact__n">35%</div><div class="impact__l">Reported fall in spills in a year the Agency itself calls drier than average</div></div><div class="impact__cell"><div class="impact__n">£22.1bn</div><div class="impact__l">Committed investment justified against an unadjusted number</div></div><div class="impact__cell"><div class="impact__n">0</div><div class="impact__l">Published rainfall-normalised spill metrics, by anyone</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Baseline computes what the sector cannot currently state: how much of the change in spill performance is investment, and how much is rain.</p>
+<p>It joins each overflow to its local rainfall record and models expected spill behaviour against actual rainfall, producing a normalised performance figure per overflow, per site, per company and per catchment. The headline stops being "spills fell 35%" and becomes "spills fell 35%, of which this much is weather and this much is not."</p>
+<p>It also fixes an identity problem the Agency created and has not solved. The published data carries a field named <code>old_unique_id_pre_2024</code>, because <strong>the overflow identifier scheme changed in 2024</strong>. That single break is why almost nobody publishes per-overflow trends — multi-year analysis requires resolving the same physical asset across two identifier systems, which is exactly what the entity spine does.</p>
+<p>And it captures what is being thrown away. The statutory near-real-time feeds publish only the <em>latest</em> event — a start time, an end time, and current status. There is no history and no archive. The law compels water companies to publish, not to retain. Anyone recording those feeds continuously builds an event-level spill history that cannot be reconstructed afterwards by anyone, at any price.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Storm overflow annual return</strong></td><td class="muted">Environment Agency</td><td>14,302 overflows, 48 fields, grid reference on 100%. Free bulk download and open feature service, no key. Verified 72,168 records across years.</td></tr><tr><td><strong>Rainfall monitoring stations</strong></td><td class="muted">Environment Agency</td><td>1,044 stations at 15-minute resolution. Open interface, no key, no registration.</td></tr><tr><td><strong>Rainfall daily archive</strong></td><td class="muted">Environment Agency</td><td>One national file per day. Roughly fourteen months of retention — older data must be captured as it passes.</td></tr><tr><td><strong>Near-real-time overflow feeds</strong></td><td class="muted">Water companies</td><td>Statutory since January 2025, published per company as open services. Current state and latest event only, with no history retained.</td></tr><tr><td><strong>Water body classification</strong></td><td class="muted">Environment Agency</td><td>Catchment geometry and ecological status, free and bulk downloadable — what the spills discharge into.</td></tr><tr><td><strong>Companies House</strong></td><td class="muted">Companies House</td><td>Resolving operators and their group structures, for the ownership side of performance.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Rainfall-normalised performance</div><div class="feat__d">Spill behaviour adjusted for actual local rainfall, per overflow and per company — the metric the sector lacks.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Weather versus investment decomposition</div><div class="feat__d">How much of a reported improvement is attributable to spend, and how much to a dry year.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Cross-year identity resolution</div><div class="feat__d">The same physical overflow tracked across the 2024 identifier break, which is why per-overflow trends are largely unpublished.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Event history capture</div><div class="feat__d">Continuous recording of the near-real-time feeds, building a spill history that the statutory duty does not require anyone to retain.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Monitor reliability</div><div class="feat__d">Overflows whose monitors were offline for material parts of the year — a spill count from a monitor that was not watching is not a low spill count.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Catchment and bathing water impact</div><div class="feat__d">Spills joined to the waters they discharge into, and to designated bathing and shellfish waters.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Regulatory reporting pack</div><div class="feat__d">Performance evidence in the form a new regulator would need to judge companies on day one.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the incoming water regulator a defensible performance metric at the moment it is being stood up, when it has none.</li><li>Lets investment be judged on effect rather than on a figure the Agency itself attributes to weather.</li><li>Identifies overflows whose apparent improvement is a monitor outage rather than a reduction in spilling.</li><li>Provides an evidence base for enforcement that survives the obvious challenge — that a wet year would have looked different.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>A spill figure that means something, rather than one that moves with the rain.</li><li>Communities can see whether the sewer serving them has genuinely improved.</li><li>Bill payers funding a very large investment programme can see what it bought.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">The incoming water regulator, Environment Agency, Defra, water companies</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the normalisation method, then G-Cloud for the service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Capture and archive</div><div class="phase__meta">1 month</div><div class="phase__d">Begin recording the near-real-time feeds immediately — every day not recorded is permanently lost.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Identity resolution</div><div class="phase__meta">3 months</div><div class="phase__d">Overflows resolved across the 2024 identifier break, producing the first per-overflow multi-year series.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Normalisation model</div><div class="phase__meta">4 months</div><div class="phase__d">Rainfall-adjusted performance, with method published openly and back-tested against wet and dry years.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Regulator engagement</div><div class="phase__meta">6 months</div><div class="phase__d">Delivered to the new regulator and the Agency as a candidate performance metric.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Attribution is genuinely hard</div><p class="card__desc">Rainfall is not the only confounder — groundwater, catchment characteristics, sewer condition and population all matter. The model must publish its assumptions and its uncertainty, and be honest that it narrows the question rather than settling it.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The regulator may build it</div><p class="card__desc">A new regulator with a statutory duty may develop its own metric. That would be the right national outcome, so the work should aim to inform the method rather than to be the only holder of it.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Archive decay cuts both ways</div><p class="card__desc">The rainfall archive retains roughly fourteen months and the live feeds retain nothing. That is the moat, but it also means the historical baseline can never be improved retrospectively.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://environment.data.gov.uk/dataset/21e15f12-0df8-4bfc-b763-45226c16a8ac" target="_blank" rel="noopener">Storm overflow annual return dataset</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://environment.data.gov.uk/flood-monitoring/doc/reference" target="_blank" rel="noopener">EA flood and rainfall monitoring interface</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://environmentagency.blog.gov.uk/2025/12/04/bathing-season-2025-storm-overflow-edm-data-analysed/" target="_blank" rel="noopener">EA analysis of the 2025 bathing season overflow data</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://commonslibrary.parliament.uk/water-reform-a-new-vision-for-water/" target="_blank" rel="noopener">Water reform: a new vision for water</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://environment.data.gov.uk/catchment-planning/" target="_blank" rel="noopener">Catchment data explorer</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/watchman.html">&larr; 17 Watchman</a>
+<a class="btn btn--ghost" href="../systems/sentinel.html">01 Sentinel &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Groundtruth systems</h4>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/baseline.html">18 &middot; Baseline</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#chains">How they work together</a>
+<a href="../index.html#sequence">Build order</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+<a href="../index.html#rejected">Out of scope</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

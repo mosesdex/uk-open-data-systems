@@ -1,14 +1,14 @@
 // Groundtruth — the unified platform. Consumed by build.js.
 export default {
   name: 'Groundtruth',
-  tagline: 'Twelve products. Two joins. One platform. No registration anywhere.',
-  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the twelve products stop being twelve builds.',
+  tagline: 'Thirteen products. Two joins. One platform. No registration anywhere.',
+  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the thirteen products stop being thirteen builds.',
 
   thesis: [
-    'The seventeen proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
+    'The eighteen proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
     'The Environment Agency cannot map its own flood objections because the dataset carries no spatial reference. Councils receive school capacity data at a geography whose boundaries are published nowhere. The housing delivery mechanism runs on a measurement three years stale. An insurer, not government, supplies Parliament with evidence on floodplain housebuilding — because the join required a paid Ordnance Survey field. Every one of those is the same missing asset: <strong>a national, resolved record of where development happens</strong>.',
     'On the other side, procurement supplier records resolve inconsistently to company numbers, grid connection registers share no key between transmission and distribution, council spending data carries no company identifiers at all, and there is <strong>no canonical register of UK public sector organisations</strong> — the one that existed was decommissioned and its domains no longer resolve.',
-    'Groundtruth builds those two resolution layers as open infrastructure, then runs twelve products on top. The products are the revenue. The spines are the moat.'
+    'Groundtruth builds those two resolution layers as open infrastructure, then runs thirteen products on top. The products are the revenue. The spines are the moat.'
   ],
 
   spines: [
@@ -60,6 +60,7 @@ export default {
       ['Bellwether', false, true, 'Provider owner names resolved to companies'],
       ['Watchman', false, true, 'Insolvency events resolved to public dependencies'],
       ['Compass', false, true, 'Authority and provider resolution for demand forecasting'],
+      ['Baseline', false, true, 'Overflow identity resolved across a 2024 scheme change'],
       ['Junction', true, true, 'Substation locations and cross-register project matching']
     ]
   },

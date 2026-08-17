@@ -1,65 +1,67 @@
-# Ten Open Data Systems for the United Kingdom
+# Groundtruth
 
-A research-backed portfolio of ten public service systems, each built on free, openly licensed UK government data, and each addressing a gap that government has documented in its own words.
+**One platform. Thirteen public data systems. No registration anywhere.**
 
-**Live site:** https://mosesdex.github.io/uk-open-data-systems/
+British government publishes records that say *what* happened but not, in any form a
+computer can match, *where* it happened or *who* it involved. Groundtruth resolves those
+two things — and thirteen systems become possible that are not possible today.
 
-Prepared by **Dexter DCL**, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.
+Live: **https://mosesdex.github.io/uk-open-data-systems/**
 
----
+## The two spines
 
-## The thesis
-
-The UK has some of the best open government data in the world, and a striking pattern of publishing data nobody joins, retiring measures it still needs, and running multi-billion pound programmes on evidence it admits is incomplete.
-
-That is not an outside opinion. It is government's own account of itself. The team running the national data portal wrote in 2026 that "the original approach has failed and led to broken links and low usage," with more than a quarter of links leading to error pages.
-
-Every system here starts from an admission like that — a National Audit Office report, a Public Accounts Committee finding, or a dataset whose own documentation concedes what it does not know.
-
-## The ten systems
-
-| # | System | Addresses |
+| Spine | Resolves | Systems |
 |---|---|---|
-| 01 | **Sentinel** | Procurement integrity and collusion detection |
-| 02 | **Transit** | Local government reorganisation data continuity |
-| 03 | **Compass** | SEND demand forecasting and transport optimisation |
-| 04 | **Threshold** | Temporary accommodation cost and placement intelligence |
-| 05 | **Plumbline** | Planning pipeline truth and delivery measurement |
-| 06 | **Highwater** | Floodplain development monitoring |
-| 07 | **Catchment** | School place planning at the geography that matters |
-| 08 | **Waypoint** | Public transport accessibility measurement |
-| 09 | **Hearth** | Retrofit outcome accountability |
-| 10 | **Junction** | Unified grid connection queue intelligence |
+| **Place** | Planning references, sites and assets to canonical property identifiers and coordinates | 7 |
+| **Entity** | Organisations and assets to canonical identifiers across registers | 4 |
+| **Both** | | 2 |
 
-## Selected findings
+## The thirteen systems
 
-Figures verified against primary sources in August 2026.
+| # | System | What it does |
+|---|---|---|
+| 01 | Sentinel | Public procurement integrity and collusion detection |
+| 03 | Compass | SEND demand forecasting (aggregate half) |
+| 05 | Plumbline | Honest planning performance measurement |
+| 06 | Highwater | Floodplain development monitoring |
+| 07 | Catchment | School place planning at the geography that matters |
+| 10 | Junction | Unified grid connection queue intelligence |
+| 11 | Ledger | Developer contributions, made mappable |
+| 12 | Bellwether | Provider concentration and failure exposure |
+| 13 | Sightline | Statutory consultee advice, and what happened to it |
+| 14 | Lastmile | Connectivity at new homes |
+| 16 | Bulwark | Flood defence ownership and condition |
+| 17 | Watchman | Insolvency exposure across public suppliers |
+| 18 | Baseline | Sewage spills, adjusted for the weather |
 
-- The Environment Agency's planning objections dataset contains **23,336 records across 426 authorities**, of which **7,011 — 30% — have an outcome recorded as unknown**. Permissions granted against its flood advice rose from **28 in 2021-22 to 102 in 2024-25**.
-- England has **3,651 pupil planning areas** and publishes the boundaries of none of them as open geospatial data.
-- The statutory debarment list contains **zero suppliers**, 21 months after the regime commenced. The Competition and Markets Authority withdrew its cartel screening tool in **January 2020** and never replaced it.
-- The Public Accounts Committee found that DfE **"does not know whether home to school transport is achieving value for money"** — a £2.6bn annual spend.
-- **134 councils** are being merged into **38 unitary authorities** with a vesting day of **1 April 2028**.
-- Four of six distribution network operators return **zero rows** to anonymous clients; the only national aggregation is six months stale and named `ecr_manual_combine_test`.
+Five further systems are published but sit outside Groundtruth — two need
+security-cleared UK staff, one needs a registered account, and two were rejected by the
+research itself. Reasons are stated on the site.
 
-## What was rejected, and why
+## The access standard
 
-The portfolio documents six ideas that were researched properly and left out — including retrofit targeting (blocked by data protection law and already served commercially), land ownership transparency (government committed to opening it in 2026), and a council financial distress tracker (more than 300 councils hold disclaimed audit opinions, so any model inherits the disclaimer).
+Every dataset these thirteen depend on was tested and returns data to an anonymous
+request: **no account, no API key, no application, no approval.** There is no
+registration to revoke and no licence to terminate.
 
 ## Build
-
-Static site, no framework, no build dependencies beyond Node.
 
 ```bash
 node build.js
 ```
 
-Content lives in `data/systems-a.js` and `data/systems-b.js`. `build.js` generates `index.html` and `systems/*.html`. Styles in `assets/style.css`; progressive-enhancement JS in `assets/app.js`.
+Static output. Content lives in `data/`; `build.js` generates `index.html`,
+`platform.html` and `systems/*.html`.
 
-## Sources and licence
+## Note on accuracy
 
-Every system brief carries its sources. Figures that could not be verified against a primary source were not used, and where underlying data is weak the brief says so rather than rounding the uncertainty away.
+Fifteen published claims were corrected during research, including one figure that was
+derived and then presented as though a source had stated it. Roughly half of what
+sounded solid needed correction once someone checked the primary source. Every system
+brief carries its sources for that reason.
 
-Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+---
 
-Code and content in this repository: [MIT](LICENSE).
+Prepared by Dexter DCL. A private proposal document — not a government publication, and
+carrying no government endorsement. Contains public sector information licensed under
+the Open Government Licence v3.0.

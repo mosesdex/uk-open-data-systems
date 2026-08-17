@@ -632,4 +632,95 @@ export default [
   ]
 }
 
+,
+
+{
+  id: 'baseline',
+  num: '18',
+  name: 'Baseline',
+  subtitle: 'Sewage spills, adjusted for the weather',
+  themes: ['climate', 'money', 'operations'],
+  tagline: 'Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall — and a new regulator is being built right now that will need to.',
+  status: 'Both halves of the join are open and keyless',
+
+  problem: [
+    'Every storm overflow in England now has a monitor. The 2025 return covers <strong>14,302 overflows</strong>, and <strong>100% of them carry a grid reference</strong> — most to one-metre precision. That is an unusually complete national dataset, free and open.',
+    'It reported <strong>291,492 spills</strong> in 2025 against <strong>450,398 in 2024</strong> — a 35% fall, with duration down 48%. That is the headline the sector has been running on.',
+    'The Environment Agency’s own commentary concedes the problem with it. Its account of the year notes rainfall was <strong>"below average, with August recording just 62% of the UK\'s typical rainfall"</strong> and calls 2025 <strong>"a drier than average year"</strong>. It attributes the improvement to weather — and then publishes no weather-adjusted figure.',
+    'Nor does anyone else. The economic regulator normalises environmental performance by <strong>sewer length, not rainfall</strong>. The charities and campaign groups that map spills do not adjust them either. So <strong>£22.1bn of committed investment is being justified against a number nobody has separated from the weather.</strong>',
+    'And the raw material to do it is sitting there. The Agency runs <strong>1,044 rainfall stations at 15-minute resolution</strong>, free and without a key, alongside the overflow data it publishes itself.'
+  ],
+
+  solution: [
+    'Baseline computes what the sector cannot currently state: how much of the change in spill performance is investment, and how much is rain.',
+    'It joins each overflow to its local rainfall record and models expected spill behaviour against actual rainfall, producing a normalised performance figure per overflow, per site, per company and per catchment. The headline stops being "spills fell 35%" and becomes "spills fell 35%, of which this much is weather and this much is not."',
+    'It also fixes an identity problem the Agency created and has not solved. The published data carries a field named <code>old_unique_id_pre_2024</code>, because <strong>the overflow identifier scheme changed in 2024</strong>. That single break is why almost nobody publishes per-overflow trends — multi-year analysis requires resolving the same physical asset across two identifier systems, which is exactly what the entity spine does.',
+    'And it captures what is being thrown away. The statutory near-real-time feeds publish only the <em>latest</em> event — a start time, an end time, and current status. There is no history and no archive. The law compels water companies to publish, not to retain. Anyone recording those feeds continuously builds an event-level spill history that cannot be reconstructed afterwards by anyone, at any price.'
+  ],
+
+  datasets: [
+    ['Storm overflow annual return', 'Environment Agency', '14,302 overflows, 48 fields, grid reference on 100%. Free bulk download and open feature service, no key. Verified 72,168 records across years.'],
+    ['Rainfall monitoring stations', 'Environment Agency', '1,044 stations at 15-minute resolution. Open interface, no key, no registration.'],
+    ['Rainfall daily archive', 'Environment Agency', 'One national file per day. Roughly fourteen months of retention — older data must be captured as it passes.'],
+    ['Near-real-time overflow feeds', 'Water companies', 'Statutory since January 2025, published per company as open services. Current state and latest event only, with no history retained.'],
+    ['Water body classification', 'Environment Agency', 'Catchment geometry and ecological status, free and bulk downloadable — what the spills discharge into.'],
+    ['Companies House', 'Companies House', 'Resolving operators and their group structures, for the ownership side of performance.']
+  ],
+
+  features: [
+    ['Rainfall-normalised performance', 'Spill behaviour adjusted for actual local rainfall, per overflow and per company — the metric the sector lacks.'],
+    ['Weather versus investment decomposition', 'How much of a reported improvement is attributable to spend, and how much to a dry year.'],
+    ['Cross-year identity resolution', 'The same physical overflow tracked across the 2024 identifier break, which is why per-overflow trends are largely unpublished.'],
+    ['Event history capture', 'Continuous recording of the near-real-time feeds, building a spill history that the statutory duty does not require anyone to retain.'],
+    ['Monitor reliability', 'Overflows whose monitors were offline for material parts of the year — a spill count from a monitor that was not watching is not a low spill count.'],
+    ['Catchment and bathing water impact', 'Spills joined to the waters they discharge into, and to designated bathing and shellfish waters.'],
+    ['Regulatory reporting pack', 'Performance evidence in the form a new regulator would need to judge companies on day one.']
+  ],
+
+  impact: [
+    ['100%', 'Monitored overflows carrying a grid reference — most to one-metre precision'],
+    ['35%', 'Reported fall in spills in a year the Agency itself calls drier than average'],
+    ['£22.1bn', 'Committed investment justified against an unadjusted number'],
+    ['0', 'Published rainfall-normalised spill metrics, by anyone']
+  ],
+
+  benefits: {
+    government: [
+      'Gives the incoming water regulator a defensible performance metric at the moment it is being stood up, when it has none.',
+      'Lets investment be judged on effect rather than on a figure the Agency itself attributes to weather.',
+      'Identifies overflows whose apparent improvement is a monitor outage rather than a reduction in spilling.',
+      'Provides an evidence base for enforcement that survives the obvious challenge — that a wet year would have looked different.'
+    ],
+    public: [
+      'A spill figure that means something, rather than one that moves with the rain.',
+      'Communities can see whether the sewer serving them has genuinely improved.',
+      'Bill payers funding a very large investment programme can see what it bought.'
+    ]
+  },
+
+  phases: [
+    ['Capture and archive', '1 month', 'Begin recording the near-real-time feeds immediately — every day not recorded is permanently lost.'],
+    ['Identity resolution', '3 months', 'Overflows resolved across the 2024 identifier break, producing the first per-overflow multi-year series.'],
+    ['Normalisation model', '4 months', 'Rainfall-adjusted performance, with method published openly and back-tested against wet and dry years.'],
+    ['Regulator engagement', '6 months', 'Delivered to the new regulator and the Agency as a candidate performance metric.']
+  ],
+
+  risks: [
+    ['Attribution is genuinely hard', 'Rainfall is not the only confounder — groundwater, catchment characteristics, sewer condition and population all matter. The model must publish its assumptions and its uncertainty, and be honest that it narrows the question rather than settling it.'],
+    ['The regulator may build it', 'A new regulator with a statutory duty may develop its own metric. That would be the right national outcome, so the work should aim to inform the method rather than to be the only holder of it.'],
+    ['Archive decay cuts both ways', 'The rainfall archive retains roughly fourteen months and the live feeds retain nothing. That is the moat, but it also means the historical baseline can never be improved retrospectively.']
+  ],
+
+  buyer: 'The incoming water regulator, Environment Agency, Defra, water companies',
+  route: 'SBRI for the normalisation method, then G-Cloud for the service',
+
+  sources: [
+    ['Storm overflow annual return dataset', 'https://environment.data.gov.uk/dataset/21e15f12-0df8-4bfc-b763-45226c16a8ac'],
+    ['EA flood and rainfall monitoring interface', 'https://environment.data.gov.uk/flood-monitoring/doc/reference'],
+    ['EA analysis of the 2025 bathing season overflow data', 'https://environmentagency.blog.gov.uk/2025/12/04/bathing-season-2025-storm-overflow-edm-data-analysed/'],
+    ['Water reform: a new vision for water', 'https://commonslibrary.parliament.uk/water-reform-a-new-vision-for-water/'],
+    ['Catchment data explorer', 'https://environment.data.gov.uk/catchment-planning/']
+  ]
+}
+
 ];
