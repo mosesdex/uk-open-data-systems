@@ -46,7 +46,7 @@ const nav = (depth = 0) => {
 <div class="nav__links">
 <a class="hide-sm" href="${p}index.html#thesis">The problem</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
-<a class="hide-sm" href="${p}index.html#chains">How they connect</a>
+<a class="hide-sm" href="${p}index.html#chains">How they help each other</a>
 <a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
 <a href="${p}platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
@@ -67,7 +67,7 @@ ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s
 </div>
 <div>
 <h4>Sections</h4>
-<a href="${p}index.html#chains">How they work together</a>
+<a href="${p}index.html#chains">How they help each other</a>
 <a href="${p}index.html#sequence">Build order</a>
 <a href="${p}index.html#delivery">Delivery and procurement</a>
 <a href="${p}index.html#rejected">Out of scope</a>
@@ -234,35 +234,68 @@ ${nav()}
 <div class="wrap">
 <div class="eyebrow">Dexter DCL</div>
 <h1 class="display hero__title mt-3">Groundtruth</h1>
-<p class="lede hero__lede">British government publishes records that say <em>what</em> happened but not, in any form a computer can match, <em>where</em> it happened or <em>who</em> it involved. Groundtruth resolves those two things — and thirteen systems become possible that are not possible today.</p>
+<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. Groundtruth closes it.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="#systems">The thirteen systems</a>
-<a class="btn btn--ghost" href="#chains">How they work together</a>
+<a class="btn btn--ghost" href="#chains">How they help each other</a>
 </div>
 </div>
 </header>
 
 <div class="wrap">
 <div class="statband">
-<div class="stat"><div class="stat__num">13</div><div class="stat__label">Systems running on one platform</div></div>
-<div class="stat"><div class="stat__num">2</div><div class="stat__label">Resolution layers underneath them</div></div>
-<div class="stat"><div class="stat__num">0</div><div class="stat__label">Accounts, keys or applications required</div></div>
-<div class="stat"><div class="stat__num">£0</div><div class="stat__label">Cost of every dataset they depend on</div></div>
+<div class="stat"><div class="stat__num">13</div><div class="stat__label">Systems it makes possible</div></div>
+<div class="stat"><div class="stat__num">2</div><div class="stat__label">Missing links it fixes: where, and who</div></div>
+<div class="stat"><div class="stat__num">0</div><div class="stat__label">Sign-ups, keys or permissions needed</div></div>
+<div class="stat"><div class="stat__num">£0</div><div class="stat__label">Cost of the data. All of it is free</div></div>
 </div>
 </div>
 
 <section class="section" id="thesis">
 <div class="wrap wrap--narrow">
 <div class="eyebrow">The problem</div>
-<h2 class="mt-3">Two missing joins</h2>
+<h2 class="mt-3">What is actually broken</h2>
 <div class="prose mt-4">
-<p>The Environment Agency publishes every planning application it objected to on flood risk grounds &mdash; <strong>23,336 records</strong> &mdash; with no address, no postcode and no coordinate. It cannot map its own objections, and for 7,011 of them it does not know what the council decided.</p>
-<p>The Ministry of Housing runs a national schema holding <strong>£1,491,818,575</strong> of developer obligations. Not one record carries a location. The property identifier field in the linked planning dataset is populated in <strong>0.0%</strong> of records; the address field, in the same records, is populated in <strong>98.1%</strong>.</p>
-<p>Councils receive school capacity data for <strong>3,651 pupil planning areas</strong> whose boundaries are published nowhere. The Environment Agency records the owner of its flood defences as unknown on <strong>73.7%</strong> of 141,629 assets.</p>
-<p>On the other side: procurement supplier records resolve inconsistently to companies, care providers are published by name with no company number, grid registers share no key between transmission and distribution, and <strong>the register of UK public sector organisations was decommissioned &mdash; its domains no longer resolve at all</strong>.</p>
-<p><strong>Every one of those is the same two problems.</strong> Resolving a place. Resolving an organisation. Groundtruth builds both as open infrastructure, and the systems above stop being impossible.</p>
+<p>Imagine a hospital where every file has a patient&rsquo;s name but no date of birth and no NHS number. You have three files for &ldquo;John Smith&rdquo;. One person, or three? The files are real. They are simply useless for anything that needs joining up.</p>
+<p>That is the state of a lot of UK government data. Four real examples:</p>
 </div>
-<div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The architecture in detail &rarr;</a></div>
+
+<div class="feat mt-4">
+<div class="feat__item"><div class="feat__ico">1</div><div>
+<div class="feat__t">The flood people don&rsquo;t know where</div>
+<div class="feat__d">The Environment Agency has objected to <strong>23,336</strong> building plans on flood risk grounds. The list has no address, no postcode and no map point. It cannot map its own objections &mdash; and for <strong>7,011</strong> of them it never found out what the council decided.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">2</div><div>
+<div class="feat__t">A ministry can&rsquo;t say which sites</div>
+<div class="feat__d">Housebuilders owe councils <strong>£1,491,818,575</strong> for schools, roads and affordable homes. The government&rsquo;s own database records every penny &mdash; and not one location. The field for the property reference is filled in on <strong>0.0%</strong> of records. The address field, in the same records, is filled in on <strong>98.1%</strong>.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">3</div><div>
+<div class="feat__t">Councils get maps they can&rsquo;t read</div>
+<div class="feat__d">School places are planned across <strong>3,651</strong> local areas. The boundaries of those areas are published nowhere, so councils receive data for a geography they cannot draw &mdash; while <strong>£1.096bn</strong> of school building money is handed out on it.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">4</div><div>
+<div class="feat__t">Nobody knows who owns the flood defences</div>
+<div class="feat__d">England has <strong>141,629</strong> recorded flood defences. The owner is listed as &ldquo;Unknown&rdquo; on <strong>73.7%</strong> of them. If one fails, nobody can say who was responsible for maintaining it.</div></div></div>
+</div>
+
+<div class="note mt-4">
+<div class="note__title">Here is the point</div>
+<p style="margin:0">None of those is a missing dataset. The data exists and is free. Each one is a <strong>missing link</strong> &mdash; and there are only two kinds.</p>
+</div>
+
+<div class="grid grid--2 mt-4">
+<div class="card"><div class="card__num" style="color:var(--accent)">LINK ONE</div>
+<h3 class="card__title">Where</h3>
+<p class="card__desc mt-2">Turning a messy reference like <em>&ldquo;East Devon 21/0751/FUL&rdquo;</em> into a point on a map. Seven of the thirteen systems need this.</p></div>
+<div class="card"><div class="card__num" style="color:var(--accent-2)">LINK TWO</div>
+<h3 class="card__title">Who</h3>
+<p class="card__desc mt-2">Turning a messy name like <em>&ldquo;SOFTCAT LTD - FCA&rdquo;</em> into one identified organisation. Five of the thirteen need this. One needs both.</p></div>
+</div>
+
+<div class="prose mt-4">
+<p>Groundtruth builds those two links once, and gives them away. It is not clever &mdash; it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
+</div>
+<div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The technical detail &rarr;</a></div>
 </div>
 </section>
 
@@ -280,7 +313,7 @@ ${Object.entries(THEMES).map(([k, v]) => `<button class="filter" data-filter="${
 ${GT.map(s => `<a class="card" href="systems/${s.id}.html" data-themes="${s.themes.join(' ')}">
 <div class="card__num">${s.num}</div>
 <h3 class="card__title">${s.name}</h3>
-<p class="card__desc">${esc(s.tagline)}</p>
+<p class="card__desc">${esc(s.subtitle)}</p>
 <div class="card__foot">${s.themes.map(t => `<span class="tag">${THEMES[t] || t}</span>`).join('')}</div>
 </a>`).join('\n')}
 </div>
@@ -290,11 +323,11 @@ ${GT.map(s => `<a class="card" href="systems/${s.id}.html" data-themes="${s.them
 <section class="section" id="chains">
 <div class="wrap">
 <div class="eyebrow">Compounding</div>
-<h2 class="mt-3">How they work together</h2>
+<h2 class="mt-3">How they help each other</h2>
 <div class="prose mt-4">${CHAINS.intro.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
 <div class="grid grid--2 mt-5">
 ${CHAINS.chains.map(c => `<div class="card">
-<div class="card__num">${c.spine === 'both' ? 'BOTH SPINES' : c.spine === 'place' ? 'PLACE SPINE' : 'ENTITY SPINE'}</div>
+<div class="card__num">${c.label}</div>
 <h3 class="card__title">${esc(c.trigger)}</h3>
 <div class="phases mt-3">
 ${c.steps.map((st, i) => `<div class="phase"><div class="phase__n">${i + 1}</div><div><div class="phase__t">${esc(st[0])}</div><div class="phase__d">${esc(st[1])}</div></div></div>`).join('\n')}
@@ -318,14 +351,14 @@ ${CHAINS.reuse.items.map((r, i) => `<div class="feat__item"><div class="feat__ic
 <div class="eyebrow">The whole point</div>
 <h2 class="mt-3">${EX.overall.heading}</h2>
 <div class="prose mt-4" style="color:#B4BAC6">${EX.overall.body.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
-<p class="small mt-4" style="color:#8A91A0">Twenty-six worked examples sit on the individual system pages &mdash; two apiece, each a situation somebody in government cannot currently resolve.</p>
+<p class="small mt-4" style="color:#8A91A0">There are twenty-six worked examples on the system pages &mdash; two each, every one a real situation somebody in government currently cannot get to the bottom of.</p>
 </div>
 </section>
 
 <section class="section section--alt" id="sequence">
 <div class="wrap wrap--narrow">
 <div class="eyebrow">Sequence</div>
-<h2 class="mt-3">Build order</h2>
+<h2 class="mt-3">What to build first</h2>
 <p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract &mdash; it wins one after it has visibly fixed something.</p>
 <div class="phases mt-5">
 ${P.sequence.map((s, i) => `<div class="phase">
@@ -339,7 +372,7 @@ ${P.sequence.map((s, i) => `<div class="phase">
 <section class="section" id="delivery">
 <div class="wrap">
 <div class="eyebrow">Delivery</div>
-<h2 class="mt-3">How government would actually buy this</h2>
+<h2 class="mt-3">How government would buy it</h2>
 <div class="prose mt-4">
 <p><strong>Central digital spend controls ended on 1 April ${YEAR}.</strong> Departments are now accountable for applying the functional standards themselves, and assurance applies only above their own delegated authority limits. A pilot is a departmental decision rather than a central one.</p>
 <p><strong>Framework entry reopens.</strong> The current digital outcomes framework was let as an open framework under the Procurement Act, with reopening cycles &mdash; so missing a window is no longer fatal. Product-shaped systems route through the cloud framework; delivery-shaped ones through digital outcomes; unproven research through the small business research initiative, where the department funds development and the supplier retains the intellectual property.</p>
@@ -354,7 +387,7 @@ ${P.sequence.map((s, i) => `<div class="phase">
 <section class="section section--alt" id="rejected">
 <div class="wrap">
 <div class="eyebrow">Out of scope</div>
-<h2 class="mt-3">Five systems that are not part of Groundtruth</h2>
+<h2 class="mt-3">Five we left out, and why</h2>
 <p class="lede mt-3">Researched, written up, and excluded &mdash; for three different reasons. They stay published because a rejected idea with a stated reason is worth more than a quiet deletion.</p>
 <div class="grid mt-4">
 ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
@@ -406,7 +439,7 @@ ${nav()}
 <div class="wrap">
 <div class="statband">
 <div class="stat"><div class="stat__num">5</div><div class="stat__label">Products, delivered from one platform</div></div>
-<div class="stat"><div class="stat__num">2</div><div class="stat__label">Resolution layers underneath them</div></div>
+<div class="stat"><div class="stat__num">2</div><div class="stat__label">Missing links it fixes: where, and who</div></div>
 <div class="stat"><div class="stat__num">3,651</div><div class="stat__label">Planning areas whose boundaries nobody publishes</div></div>
 <div class="stat"><div class="stat__num">0</div><div class="stat__label">Personal data records any of the five touch</div></div>
 </div>

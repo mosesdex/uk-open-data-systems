@@ -17,7 +17,7 @@
 <div class="nav__links">
 <a class="hide-sm" href="index.html#thesis">The problem</a>
 <a class="hide-sm" href="index.html#systems">Systems</a>
-<a class="hide-sm" href="index.html#chains">How they connect</a>
+<a class="hide-sm" href="index.html#chains">How they help each other</a>
 <a class="hide-sm" href="index.html#overall">Why one platform</a>
 <a href="platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
@@ -28,35 +28,68 @@
 <div class="wrap">
 <div class="eyebrow">Dexter DCL</div>
 <h1 class="display hero__title mt-3">Groundtruth</h1>
-<p class="lede hero__lede">British government publishes records that say <em>what</em> happened but not, in any form a computer can match, <em>where</em> it happened or <em>who</em> it involved. Groundtruth resolves those two things — and thirteen systems become possible that are not possible today.</p>
+<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. Groundtruth closes it.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="#systems">The thirteen systems</a>
-<a class="btn btn--ghost" href="#chains">How they work together</a>
+<a class="btn btn--ghost" href="#chains">How they help each other</a>
 </div>
 </div>
 </header>
 
 <div class="wrap">
 <div class="statband">
-<div class="stat"><div class="stat__num">13</div><div class="stat__label">Systems running on one platform</div></div>
-<div class="stat"><div class="stat__num">2</div><div class="stat__label">Resolution layers underneath them</div></div>
-<div class="stat"><div class="stat__num">0</div><div class="stat__label">Accounts, keys or applications required</div></div>
-<div class="stat"><div class="stat__num">£0</div><div class="stat__label">Cost of every dataset they depend on</div></div>
+<div class="stat"><div class="stat__num">13</div><div class="stat__label">Systems it makes possible</div></div>
+<div class="stat"><div class="stat__num">2</div><div class="stat__label">Missing links it fixes: where, and who</div></div>
+<div class="stat"><div class="stat__num">0</div><div class="stat__label">Sign-ups, keys or permissions needed</div></div>
+<div class="stat"><div class="stat__num">£0</div><div class="stat__label">Cost of the data. All of it is free</div></div>
 </div>
 </div>
 
 <section class="section" id="thesis">
 <div class="wrap wrap--narrow">
 <div class="eyebrow">The problem</div>
-<h2 class="mt-3">Two missing joins</h2>
+<h2 class="mt-3">What is actually broken</h2>
 <div class="prose mt-4">
-<p>The Environment Agency publishes every planning application it objected to on flood risk grounds &mdash; <strong>23,336 records</strong> &mdash; with no address, no postcode and no coordinate. It cannot map its own objections, and for 7,011 of them it does not know what the council decided.</p>
-<p>The Ministry of Housing runs a national schema holding <strong>£1,491,818,575</strong> of developer obligations. Not one record carries a location. The property identifier field in the linked planning dataset is populated in <strong>0.0%</strong> of records; the address field, in the same records, is populated in <strong>98.1%</strong>.</p>
-<p>Councils receive school capacity data for <strong>3,651 pupil planning areas</strong> whose boundaries are published nowhere. The Environment Agency records the owner of its flood defences as unknown on <strong>73.7%</strong> of 141,629 assets.</p>
-<p>On the other side: procurement supplier records resolve inconsistently to companies, care providers are published by name with no company number, grid registers share no key between transmission and distribution, and <strong>the register of UK public sector organisations was decommissioned &mdash; its domains no longer resolve at all</strong>.</p>
-<p><strong>Every one of those is the same two problems.</strong> Resolving a place. Resolving an organisation. Groundtruth builds both as open infrastructure, and the systems above stop being impossible.</p>
+<p>Imagine a hospital where every file has a patient&rsquo;s name but no date of birth and no NHS number. You have three files for &ldquo;John Smith&rdquo;. One person, or three? The files are real. They are simply useless for anything that needs joining up.</p>
+<p>That is the state of a lot of UK government data. Four real examples:</p>
 </div>
-<div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The architecture in detail &rarr;</a></div>
+
+<div class="feat mt-4">
+<div class="feat__item"><div class="feat__ico">1</div><div>
+<div class="feat__t">The flood people don&rsquo;t know where</div>
+<div class="feat__d">The Environment Agency has objected to <strong>23,336</strong> building plans on flood risk grounds. The list has no address, no postcode and no map point. It cannot map its own objections &mdash; and for <strong>7,011</strong> of them it never found out what the council decided.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">2</div><div>
+<div class="feat__t">A ministry can&rsquo;t say which sites</div>
+<div class="feat__d">Housebuilders owe councils <strong>£1,491,818,575</strong> for schools, roads and affordable homes. The government&rsquo;s own database records every penny &mdash; and not one location. The field for the property reference is filled in on <strong>0.0%</strong> of records. The address field, in the same records, is filled in on <strong>98.1%</strong>.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">3</div><div>
+<div class="feat__t">Councils get maps they can&rsquo;t read</div>
+<div class="feat__d">School places are planned across <strong>3,651</strong> local areas. The boundaries of those areas are published nowhere, so councils receive data for a geography they cannot draw &mdash; while <strong>£1.096bn</strong> of school building money is handed out on it.</div></div></div>
+
+<div class="feat__item"><div class="feat__ico">4</div><div>
+<div class="feat__t">Nobody knows who owns the flood defences</div>
+<div class="feat__d">England has <strong>141,629</strong> recorded flood defences. The owner is listed as &ldquo;Unknown&rdquo; on <strong>73.7%</strong> of them. If one fails, nobody can say who was responsible for maintaining it.</div></div></div>
+</div>
+
+<div class="note mt-4">
+<div class="note__title">Here is the point</div>
+<p style="margin:0">None of those is a missing dataset. The data exists and is free. Each one is a <strong>missing link</strong> &mdash; and there are only two kinds.</p>
+</div>
+
+<div class="grid grid--2 mt-4">
+<div class="card"><div class="card__num" style="color:var(--accent)">LINK ONE</div>
+<h3 class="card__title">Where</h3>
+<p class="card__desc mt-2">Turning a messy reference like <em>&ldquo;East Devon 21/0751/FUL&rdquo;</em> into a point on a map. Seven of the thirteen systems need this.</p></div>
+<div class="card"><div class="card__num" style="color:var(--accent-2)">LINK TWO</div>
+<h3 class="card__title">Who</h3>
+<p class="card__desc mt-2">Turning a messy name like <em>&ldquo;SOFTCAT LTD - FCA&rdquo;</em> into one identified organisation. Five of the thirteen need this. One needs both.</p></div>
+</div>
+
+<div class="prose mt-4">
+<p>Groundtruth builds those two links once, and gives them away. It is not clever &mdash; it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
+</div>
+<div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The technical detail &rarr;</a></div>
 </div>
 </section>
 
@@ -74,79 +107,79 @@
 <a class="card" href="systems/catchment.html" data-themes="children local operations">
 <div class="card__num">07</div>
 <h3 class="card__title">Catchment</h3>
-<p class="card__desc">England has 3,651 pupil planning areas and publishes the boundaries of none of them. Councils get capacity data they cannot map, while surplus and shortage sit side by side inside the same authority.</p>
+<p class="card__desc">School place planning at the geography that matters</p>
 <div class="card__foot"><span class="tag">Children &amp; families</span><span class="tag">Local government</span><span class="tag">Operations</span></div>
 </a>
 <a class="card" href="systems/sentinel.html" data-themes="fraud central money">
 <div class="card__num">01</div>
 <h3 class="card__title">Sentinel</h3>
-<p class="card__desc">Turns the Procurement Act’s new mandatory transparency data into a live map of who really wins public contracts — and who is connected to whom.</p>
+<p class="card__desc">Public procurement integrity and collusion detection</p>
 <div class="card__foot"><span class="tag">Fraud &amp; integrity</span><span class="tag">Central government</span><span class="tag">Public money</span></div>
 </a>
 <a class="card" href="systems/highwater.html" data-themes="climate housing central">
 <div class="card__num">06</div>
 <h3 class="card__title">Highwater</h3>
-<p class="card__desc">The Environment Agency does not know what councils decided in 30% of its own flood objections. That is 7,011 unanswered cases — and the number granted against its advice has more than tripled in three years.</p>
+<p class="card__desc">Floodplain development monitoring</p>
 <div class="card__foot"><span class="tag">Climate &amp; energy</span><span class="tag">Housing</span><span class="tag">Central government</span></div>
 </a>
 <a class="card" href="systems/plumbline.html" data-themes="housing central operations">
 <div class="card__num">05</div>
 <h3 class="card__title">Plumbline</h3>
-<p class="card__desc">The headline says 91% of major applications are decided on time. The statutory figure is 19%. Plumbline measures what is actually happening.</p>
+<p class="card__desc">Planning pipeline truth and delivery measurement</p>
 <div class="card__foot"><span class="tag">Housing</span><span class="tag">Central government</span><span class="tag">Operations</span></div>
 </a>
 <a class="card" href="systems/junction.html" data-themes="climate operations central">
 <div class="card__num">10</div>
 <h3 class="card__title">Junction</h3>
-<p class="card__desc">The transmission queue is genuinely open. Four of six distribution operators return zero rows to anonymous users, and the only national view is six months stale and named “test”.</p>
+<p class="card__desc">Unified grid connection queue intelligence</p>
 <div class="card__foot"><span class="tag">Climate &amp; energy</span><span class="tag">Operations</span><span class="tag">Central government</span></div>
 </a>
 <a class="card" href="systems/ledger.html" data-themes="housing local money">
 <div class="card__num">11</div>
 <h3 class="card__title">Ledger</h3>
-<p class="card__desc">The Ministry’s own schema holds £1.49bn of developer obligations. Not one record has a location. The property identifier field is populated in 0.0% of planning applications; the address field, in the same records, is populated in 98.1%.</p>
+<p class="card__desc">Developer contributions, made mappable</p>
 <div class="card__foot"><span class="tag">Housing</span><span class="tag">Local government</span><span class="tag">Public money</span></div>
 </a>
 <a class="card" href="systems/bellwether.html" data-themes="children local money">
 <div class="card__num">12</div>
 <h3 class="card__title">Bellwether</h3>
-<p class="card__desc">Parliament made computing this a statutory function in July 2026 — and the register deliberately withholds the company number needed to do it.</p>
+<p class="card__desc">Provider concentration and failure exposure</p>
 <div class="card__foot"><span class="tag">Children &amp; families</span><span class="tag">Local government</span><span class="tag">Public money</span></div>
 </a>
 <a class="card" href="systems/sightline.html" data-themes="housing central operations">
 <div class="card__num">13</div>
 <h3 class="card__title">Sightline</h3>
-<p class="card__desc">Active Travel England advised on 2,045 planning applications covering 521,000 homes last year. It published none of it. Government is reforming statutory consultees using almost no data on what they achieve.</p>
+<p class="card__desc">Statutory consultee advice, and what happened to it</p>
 <div class="card__foot"><span class="tag">Housing</span><span class="tag">Central government</span><span class="tag">Operations</span></div>
 </a>
 <a class="card" href="systems/lastmile.html" data-themes="housing central equity">
 <div class="card__num">14</div>
 <h3 class="card__title">Lastmile</h3>
-<p class="card__desc">Every new home has been required to be gigabit-ready since 2022. No compliance data is published anywhere. The only person tracking it nationally is one independent analyst.</p>
+<p class="card__desc">Connectivity at new homes</p>
 <div class="card__foot"><span class="tag">Housing</span><span class="tag">Central government</span><span class="tag">Equity</span></div>
 </a>
 <a class="card" href="systems/bulwark.html" data-themes="climate operations local">
 <div class="card__num">16</div>
 <h3 class="card__title">Bulwark</h3>
-<p class="card__desc">The Environment Agency cannot identify the owner of 73.7% of England’s flood defences, and has no condition grade for 75% of them. All 141,629 are geolocated and free to download.</p>
+<p class="card__desc">Flood defence ownership and condition</p>
 <div class="card__foot"><span class="tag">Climate &amp; energy</span><span class="tag">Operations</span><span class="tag">Local government</span></div>
 </a>
 <a class="card" href="systems/watchman.html" data-themes="fraud money operations">
 <div class="card__num">17</div>
 <h3 class="card__title">Watchman</h3>
-<p class="card__desc">Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.</p>
+<p class="card__desc">Insolvency exposure across public suppliers</p>
 <div class="card__foot"><span class="tag">Fraud &amp; integrity</span><span class="tag">Public money</span><span class="tag">Operations</span></div>
 </a>
 <a class="card" href="systems/compass.html" data-themes="local children money">
 <div class="card__num">03</div>
 <h3 class="card__title">Compass</h3>
-<p class="card__desc">Parliament has formally found that government does not know whether £2.6bn of home-to-school transport is value for money. Compass is the missing evidence base.</p>
+<p class="card__desc">SEND demand forecasting and transport optimisation</p>
 <div class="card__foot"><span class="tag">Local government</span><span class="tag">Children &amp; families</span><span class="tag">Public money</span></div>
 </a>
 <a class="card" href="systems/baseline.html" data-themes="climate money operations">
 <div class="card__num">18</div>
 <h3 class="card__title">Baseline</h3>
-<p class="card__desc">Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall — and a new regulator is being built right now that will need to.</p>
+<p class="card__desc">Sewage spills, adjusted for the weather</p>
 <div class="card__foot"><span class="tag">Climate &amp; energy</span><span class="tag">Public money</span><span class="tag">Operations</span></div>
 </a>
 </div>
@@ -156,63 +189,63 @@
 <section class="section" id="chains">
 <div class="wrap">
 <div class="eyebrow">Compounding</div>
-<h2 class="mt-3">How they work together</h2>
-<div class="prose mt-4"><p>Two resolution layers are what make thirteen systems one platform rather than thirteen products. But the reason it is worth building as a platform is not the shared plumbing — it is that a single event or a single reference reaches across several systems at once.</p>
-<p>Each chain below starts with one fact arriving. Nothing in any of them requires new data; every step runs on sources that return data to an anonymous request.</p></div>
+<h2 class="mt-3">How they help each other</h2>
+<div class="prose mt-4"><p>Sharing the same plumbing is not the interesting part. The interesting part is that one piece of news, or one reference number, sets off several systems at once.</p>
+<p>Each example below starts with a single fact arriving. None of them needs new data — every step uses something anyone can already download for free.</p></div>
 <div class="grid grid--2 mt-5">
 <div class="card">
-<div class="card__num">ENTITY SPINE</div>
-<h3 class="card__title">A company enters insolvency proceedings</h3>
+<div class="card__num">WHO</div>
+<h3 class="card__title">A company goes bust</h3>
 <div class="phases mt-3">
-<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Watchman</div><div class="phase__d">Reads the notice from the official insolvency record, which carries a structured company number — so the organisation is identified without name matching.</div></div></div>
-<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Bellwether</div><div class="phase__d">Checks that company against the care registers. If it operates care homes, children’s homes or special schools, the councils depending on it are known immediately — including any where it holds a large share of local capacity.</div></div></div>
-<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Sentinel</div><div class="phase__d">Checks the same company against the public procurement record. Which contracts does it hold, with which buyers, worth how much.</div></div></div>
-<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Ledger</div><div class="phase__d">If it is a developer, checks what contributions it owes and whether they have been paid.</div></div></div>
+<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Watchman spots it</div><div class="phase__d">The official insolvency notice includes the company number, so there is no guessing about which company it is.</div></div></div>
+<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Bellwether checks care</div><div class="phase__d">Does it run care homes, children’s homes or special schools? If so, which councils just lost capacity — and does any council depend on it heavily?</div></div></div>
+<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Sentinel checks contracts</div><div class="phase__d">Which public contracts does it hold, with whom, and worth how much?</div></div></div>
+<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Ledger checks building</div><div class="phase__d">If it is a housebuilder, what did it still owe councils, and had it paid?</div></div></div>
 </div>
-<div class="note mt-2"><div class="note__title">What that gives you</div>An exposure answer in minutes, for an event the public sector currently discovers by reading the news. This is the capability whose absence was the lesson of the 2018 contractor collapse.</div>
+<div class="note mt-2"><div class="note__title">What that gives you</div>You know the damage within minutes. Today the public sector usually finds out by reading the news — which is exactly what went wrong when a major government contractor collapsed in 2018.</div>
 </div>
 <div class="card">
-<div class="card__num">PLACE SPINE</div>
-<h3 class="card__title">A planning permission is granted</h3>
+<div class="card__num">WHERE</div>
+<h3 class="card__title">A council approves a housing development</h3>
 <div class="phases mt-3">
-<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Plumbline</div><div class="phase__d">Records the decision and how long it actually took — against the statutory deadline, not the extended one.</div></div></div>
-<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Ledger</div><div class="phase__d">Attaches the developer contributions agreed with it, and tracks whether they are received and spent.</div></div></div>
-<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Sightline</div><div class="phase__d">Checks whether a statutory consultee objected, and whether the objection was followed.</div></div></div>
-<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Highwater</div><div class="phase__d">Checks whether the site sits in a flood zone, and whether the Environment Agency advised against it.</div></div></div>
-<div class="phase"><div class="phase__n">5</div><div><div class="phase__t">Catchment</div><div class="phase__d">Feeds the homes into school place forecasting for the planning area it falls in.</div></div></div>
-<div class="phase"><div class="phase__n">6</div><div><div class="phase__t">Lastmile</div><div class="phase__d">Checks whether the site has gigabit infrastructure, and whether the homes were built connectable.</div></div></div>
+<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Plumbline</div><div class="phase__d">Records how long the decision really took — measured against the legal deadline, not an extended one.</div></div></div>
+<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Ledger</div><div class="phase__d">Picks up what the builder agreed to pay for schools and roads, and whether that money ever arrives.</div></div></div>
+<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Sightline</div><div class="phase__d">Checks whether an expert body objected, and whether the council listened.</div></div></div>
+<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Highwater</div><div class="phase__d">Checks whether it is in a flood zone, and whether the Environment Agency warned against it.</div></div></div>
+<div class="phase"><div class="phase__n">5</div><div><div class="phase__t">Catchment</div><div class="phase__d">Adds the new homes to the school places forecast for that neighbourhood.</div></div></div>
+<div class="phase"><div class="phase__n">6</div><div><div class="phase__t">Lastmile</div><div class="phase__d">Checks whether the homes will actually have decent broadband.</div></div></div>
 </div>
-<div class="note mt-2"><div class="note__title">What that gives you</div>Six systems reading one planning reference. Today each of those questions is answered separately, by different bodies, at different geographies, mostly not at all.</div>
+<div class="note mt-2"><div class="note__title">What that gives you</div>Six systems, one reference number. Today those six questions are handled by different bodies, at different scales, and mostly not at all.</div>
 </div>
 <div class="card">
-<div class="card__num">BOTH SPINES</div>
-<h3 class="card__title">An asset has no recorded owner</h3>
+<div class="card__num">WHERE + WHO</div>
+<h3 class="card__title">Nobody knows who owns a flood defence</h3>
 <div class="phases mt-3">
-<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Bulwark</div><div class="phase__d">Holds 141,629 flood defences, 73.7% with owner recorded as unknown, all geolocated.</div></div></div>
-<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Place spine</div><div class="phase__d">Resolves each asset to the land parcel it sits on.</div></div></div>
-<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Entity spine</div><div class="phase__d">Resolves that parcel to an organisation, where one is registered.</div></div></div>
-<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Watchman</div><div class="phase__d">Flags where that organisation is in financial distress — because a defence owned by a failing company is a different risk from one owned by a solvent one.</div></div></div>
+<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">The problem</div><div class="phase__d">England has 141,629 flood defences. The owner is recorded as “Unknown” on nearly three-quarters of them.</div></div></div>
+<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">The where link</div><div class="phase__d">Works out which piece of land each defence sits on.</div></div></div>
+<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">The who link</div><div class="phase__d">Works out who owns that land, where an owner is registered.</div></div></div>
+<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Watchman</div><div class="phase__d">Flags if that owner is in financial trouble — a defence owned by a failing company is a different risk from one owned by a healthy one.</div></div></div>
 </div>
-<div class="note mt-2"><div class="note__title">What that gives you</div>Closing a gap the Environment Agency reports on three-quarters of its own asset register, using only the resolution capability the platform already has.</div>
+<div class="note mt-2"><div class="note__title">What that gives you</div>A gap the Environment Agency reports on its own records, closed using only what the platform already does for everything else.</div>
 </div>
 <div class="card">
-<div class="card__num">ENTITY SPINE</div>
-<h3 class="card__title">A regulator changes its identifier scheme</h3>
+<div class="card__num">WHO</div>
+<h3 class="card__title">A regulator changes its reference numbers</h3>
 <div class="phases mt-3">
-<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Baseline</div><div class="phase__d">Storm overflow identifiers changed in 2024 — the published data still carries the old identifier in a separate field, and multi-year analysis breaks across the change.</div></div></div>
-<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Junction</div><div class="phase__d">Grid connection registers share no identifier between transmission and distribution, so the same project appears twice with no link.</div></div></div>
-<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Entity spine</div><div class="phase__d">The same resolution technique applied to physical assets rather than organisations, with match confidence published rather than asserted.</div></div></div>
-<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Bellwether</div><div class="phase__d">The same problem again in care — owner names published without company numbers.</div></div></div>
+<div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Sewage</div><div class="phase__d">Storm overflow reference numbers changed in 2024. The old ones sit in a separate column, so nobody can track an overflow across the change.</div></div></div>
+<div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Electricity</div><div class="phase__d">Grid connection projects appear in two registers with different numbers and no link, so the same project gets counted twice.</div></div></div>
+<div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Care</div><div class="phase__d">Care providers are listed by owner name with no company number, so one group looks like three.</div></div></div>
+<div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Same fix, every time</div><div class="phase__d">Match them up, and say how confident the match is rather than pretending it is certain.</div></div></div>
 </div>
-<div class="note mt-2"><div class="note__title">What that gives you</div>One capability, four sectors. Identity breaks are the single most common reason a national dataset cannot be analysed over time, and almost nobody fixes them.</div>
+<div class="note mt-2"><div class="note__title">What that gives you</div>One skill, four industries. Changed reference numbers are the most common reason a national dataset cannot be tracked over time — and almost nobody fixes them.</div>
 </div>
 </div>
 
 <div class="wrap--narrow mt-5" style="margin-inline:auto">
 <h3>And the work compounds backwards</h3>
-<p class="prose mt-2">The compounding also runs the other way. Work done for one system lowers the cost of the next.</p>
+<p class="prose mt-2">It also works in reverse. Whatever gets built for one system makes the next one cheaper.</p>
 <div class="feat mt-4">
-<div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">The planning reference resolver</div><div class="feat__d">Built for Ledger, reused by Highwater, Sightline, Plumbline and Catchment. Five systems, one hard problem solved once.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">The corporate graph</div><div class="feat__d">Assembled for Sentinel, reused by Bellwether, Watchman and Freehold. The beneficial ownership register is a free daily download, so the marginal cost of the fourth consumer is near zero.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Coverage reporting</div><div class="feat__d">Every system publishes what share of England it actually represents. Built once as a discipline, applied everywhere — and it is the thing that makes the outputs trustworthy to a statistician.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Match confidence</div><div class="feat__d">No system asserts a resolution it cannot evidence. The same confidence machinery serves all thirteen, and it is what makes the work defensible when a named organisation objects.</div></div></div>
+<div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Turning planning references into map points</div><div class="feat__d">Built for Ledger. Reused straight away by Highwater, Sightline, Plumbline and Catchment. Five systems, one hard problem solved once.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Working out who owns which company</div><div class="feat__d">Built for Sentinel. Reused by Bellwether and Watchman. The ownership register is a free daily download, so the third and fourth users cost almost nothing.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Saying how much of the country is covered</div><div class="feat__d">Every system says plainly what share of England it actually represents. Built once as a habit, applied everywhere — and it is what makes a statistician trust the numbers.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Saying how sure we are</div><div class="feat__d">No system claims a match it cannot prove. The same machinery serves all thirteen, and it is what holds up when a named company objects.</div></div></div>
 </div>
 </div>
 </div>
@@ -222,19 +255,19 @@
 <div class="wrap wrap--narrow">
 <div class="eyebrow">The whole point</div>
 <h2 class="mt-3">One problem, thirteen times</h2>
-<div class="prose mt-4" style="color:#B4BAC6"><p>Read the twenty-six examples below and the same sentence appears in every one: <em>the record exists, but it cannot be joined to anything.</em></p>
+<div class="prose mt-4" style="color:#B4BAC6"><p>Read the twenty-six examples on the system pages and the same sentence turns up in all of them: <em>the record exists, but it cannot be matched to anything else.</em></p>
 <p>The Environment Agency knows it objected to an application. It does not know where. A ministry knows a developer owes £1.49bn. It cannot say for which sites. A council knows a company runs its care homes. It cannot see the other eleven councils that depend on the same company. A regulator knows spills fell 35%. It cannot say how much of that was rain.</p>
-<p>None of these is a missing dataset. Every one is a <strong>missing join</strong> — and there are only two of them. Resolve a place. Resolve an organisation.</p>
-<p>That is why thirteen systems are one platform rather than thirteen products. The hard part is not the flood analysis, the procurement analysis or the care analysis; each of those is straightforward once the data lines up. The hard part is making the data line up, and it is the <em>same</em> hard part every time.</p>
-<p>Build the two resolutions once as open infrastructure and thirteen questions that cannot currently be answered become answerable — then they compound, because a single event reaches several systems at once and each new system costs less than the last.</p></div>
-<p class="small mt-4" style="color:#8A91A0">Twenty-six worked examples sit on the individual system pages &mdash; two apiece, each a situation somebody in government cannot currently resolve.</p>
+<p>None of these is a missing dataset. Every one is a <strong>missing link</strong> — and there are only two kinds. Work out <em>where</em>. Work out <em>who</em>.</p>
+<p>That is why this is one platform and not thirteen separate products. The flood work, the contracts work and the care work are each fairly simple once the data lines up. Getting it to line up is the hard bit — and it is the <em>same</em> hard bit every time.</p>
+<p>Fix those two links once, give them away, and thirteen questions nobody can currently answer become answerable. After that it snowballs: one piece of news reaches several systems at once, and every new system costs less than the one before it.</p></div>
+<p class="small mt-4" style="color:#8A91A0">There are twenty-six worked examples on the system pages &mdash; two each, every one a real situation somebody in government currently cannot get to the bottom of.</p>
 </div>
 </section>
 
 <section class="section section--alt" id="sequence">
 <div class="wrap wrap--narrow">
 <div class="eyebrow">Sequence</div>
-<h2 class="mt-3">Build order</h2>
+<h2 class="mt-3">What to build first</h2>
 <p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract &mdash; it wins one after it has visibly fixed something.</p>
 <div class="phases mt-5">
 <div class="phase">
@@ -264,7 +297,7 @@
 <section class="section" id="delivery">
 <div class="wrap">
 <div class="eyebrow">Delivery</div>
-<h2 class="mt-3">How government would actually buy this</h2>
+<h2 class="mt-3">How government would buy it</h2>
 <div class="prose mt-4">
 <p><strong>Central digital spend controls ended on 1 April 2026.</strong> Departments are now accountable for applying the functional standards themselves, and assurance applies only above their own delegated authority limits. A pilot is a departmental decision rather than a central one.</p>
 <p><strong>Framework entry reopens.</strong> The current digital outcomes framework was let as an open framework under the Procurement Act, with reopening cycles &mdash; so missing a window is no longer fatal. Product-shaped systems route through the cloud framework; delivery-shaped ones through digital outcomes; unproven research through the small business research initiative, where the department funds development and the supplier retains the intellectual property.</p>
@@ -279,7 +312,7 @@
 <section class="section section--alt" id="rejected">
 <div class="wrap">
 <div class="eyebrow">Out of scope</div>
-<h2 class="mt-3">Five systems that are not part of Groundtruth</h2>
+<h2 class="mt-3">Five we left out, and why</h2>
 <p class="lede mt-3">Researched, written up, and excluded &mdash; for three different reasons. They stay published because a rejected idea with a stated reason is worth more than a quiet deletion.</p>
 <div class="grid mt-4">
 <a class="card" href="systems/transit.html">
@@ -355,7 +388,7 @@
 </div>
 <div>
 <h4>Sections</h4>
-<a href="index.html#chains">How they work together</a>
+<a href="index.html#chains">How they help each other</a>
 <a href="index.html#sequence">Build order</a>
 <a href="index.html#delivery">Delivery and procurement</a>
 <a href="index.html#rejected">Out of scope</a>

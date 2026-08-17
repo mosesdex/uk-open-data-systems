@@ -1,66 +1,70 @@
-// How the thirteen systems compound. Consumed by build.js.
+// How the thirteen systems help each other. Consumed by build.js.
 export default {
   intro: [
-    'Two resolution layers are what make thirteen systems one platform rather than thirteen products. But the reason it is worth building as a platform is not the shared plumbing — it is that a single event or a single reference reaches across several systems at once.',
-    'Each chain below starts with one fact arriving. Nothing in any of them requires new data; every step runs on sources that return data to an anonymous request.'
+    'Sharing the same plumbing is not the interesting part. The interesting part is that one piece of news, or one reference number, sets off several systems at once.',
+    'Each example below starts with a single fact arriving. None of them needs new data — every step uses something anyone can already download for free.'
   ],
 
   chains: [
     {
-      trigger: 'A company enters insolvency proceedings',
+      trigger: 'A company goes bust',
       spine: 'entity',
+      label: 'WHO',
       steps: [
-        ['Watchman', 'Reads the notice from the official insolvency record, which carries a structured company number — so the organisation is identified without name matching.'],
-        ['Bellwether', 'Checks that company against the care registers. If it operates care homes, children’s homes or special schools, the councils depending on it are known immediately — including any where it holds a large share of local capacity.'],
-        ['Sentinel', 'Checks the same company against the public procurement record. Which contracts does it hold, with which buyers, worth how much.'],
-        ['Ledger', 'If it is a developer, checks what contributions it owes and whether they have been paid.']
+        ['Watchman spots it', 'The official insolvency notice includes the company number, so there is no guessing about which company it is.'],
+        ['Bellwether checks care', 'Does it run care homes, children’s homes or special schools? If so, which councils just lost capacity — and does any council depend on it heavily?'],
+        ['Sentinel checks contracts', 'Which public contracts does it hold, with whom, and worth how much?'],
+        ['Ledger checks building', 'If it is a housebuilder, what did it still owe councils, and had it paid?']
       ],
-      outcome: 'An exposure answer in minutes, for an event the public sector currently discovers by reading the news. This is the capability whose absence was the lesson of the 2018 contractor collapse.'
+      outcome: 'You know the damage within minutes. Today the public sector usually finds out by reading the news — which is exactly what went wrong when a major government contractor collapsed in 2018.'
     },
     {
-      trigger: 'A planning permission is granted',
+      trigger: 'A council approves a housing development',
       spine: 'place',
+      label: 'WHERE',
       steps: [
-        ['Plumbline', 'Records the decision and how long it actually took — against the statutory deadline, not the extended one.'],
-        ['Ledger', 'Attaches the developer contributions agreed with it, and tracks whether they are received and spent.'],
-        ['Sightline', 'Checks whether a statutory consultee objected, and whether the objection was followed.'],
-        ['Highwater', 'Checks whether the site sits in a flood zone, and whether the Environment Agency advised against it.'],
-        ['Catchment', 'Feeds the homes into school place forecasting for the planning area it falls in.'],
-        ['Lastmile', 'Checks whether the site has gigabit infrastructure, and whether the homes were built connectable.']
+        ['Plumbline', 'Records how long the decision really took — measured against the legal deadline, not an extended one.'],
+        ['Ledger', 'Picks up what the builder agreed to pay for schools and roads, and whether that money ever arrives.'],
+        ['Sightline', 'Checks whether an expert body objected, and whether the council listened.'],
+        ['Highwater', 'Checks whether it is in a flood zone, and whether the Environment Agency warned against it.'],
+        ['Catchment', 'Adds the new homes to the school places forecast for that neighbourhood.'],
+        ['Lastmile', 'Checks whether the homes will actually have decent broadband.']
       ],
-      outcome: 'Six systems reading one planning reference. Today each of those questions is answered separately, by different bodies, at different geographies, mostly not at all.'
+      outcome: 'Six systems, one reference number. Today those six questions are handled by different bodies, at different scales, and mostly not at all.'
     },
     {
-      trigger: 'An asset has no recorded owner',
+      trigger: 'Nobody knows who owns a flood defence',
       spine: 'both',
+      label: 'WHERE + WHO',
       steps: [
-        ['Bulwark', 'Holds 141,629 flood defences, 73.7% with owner recorded as unknown, all geolocated.'],
-        ['Place spine', 'Resolves each asset to the land parcel it sits on.'],
-        ['Entity spine', 'Resolves that parcel to an organisation, where one is registered.'],
-        ['Watchman', 'Flags where that organisation is in financial distress — because a defence owned by a failing company is a different risk from one owned by a solvent one.']
+        ['The problem', 'England has 141,629 flood defences. The owner is recorded as “Unknown” on nearly three-quarters of them.'],
+        ['The where link', 'Works out which piece of land each defence sits on.'],
+        ['The who link', 'Works out who owns that land, where an owner is registered.'],
+        ['Watchman', 'Flags if that owner is in financial trouble — a defence owned by a failing company is a different risk from one owned by a healthy one.']
       ],
-      outcome: 'Closing a gap the Environment Agency reports on three-quarters of its own asset register, using only the resolution capability the platform already has.'
+      outcome: 'A gap the Environment Agency reports on its own records, closed using only what the platform already does for everything else.'
     },
     {
-      trigger: 'A regulator changes its identifier scheme',
+      trigger: 'A regulator changes its reference numbers',
       spine: 'entity',
+      label: 'WHO',
       steps: [
-        ['Baseline', 'Storm overflow identifiers changed in 2024 — the published data still carries the old identifier in a separate field, and multi-year analysis breaks across the change.'],
-        ['Junction', 'Grid connection registers share no identifier between transmission and distribution, so the same project appears twice with no link.'],
-        ['Entity spine', 'The same resolution technique applied to physical assets rather than organisations, with match confidence published rather than asserted.'],
-        ['Bellwether', 'The same problem again in care — owner names published without company numbers.']
+        ['Sewage', 'Storm overflow reference numbers changed in 2024. The old ones sit in a separate column, so nobody can track an overflow across the change.'],
+        ['Electricity', 'Grid connection projects appear in two registers with different numbers and no link, so the same project gets counted twice.'],
+        ['Care', 'Care providers are listed by owner name with no company number, so one group looks like three.'],
+        ['Same fix, every time', 'Match them up, and say how confident the match is rather than pretending it is certain.']
       ],
-      outcome: 'One capability, four sectors. Identity breaks are the single most common reason a national dataset cannot be analysed over time, and almost nobody fixes them.'
+      outcome: 'One skill, four industries. Changed reference numbers are the most common reason a national dataset cannot be tracked over time — and almost nobody fixes them.'
     }
   ],
 
   reuse: {
-    intro: 'The compounding also runs the other way. Work done for one system lowers the cost of the next.',
+    intro: 'It also works in reverse. Whatever gets built for one system makes the next one cheaper.',
     items: [
-      ['The planning reference resolver', 'Built for Ledger, reused by Highwater, Sightline, Plumbline and Catchment. Five systems, one hard problem solved once.'],
-      ['The corporate graph', 'Assembled for Sentinel, reused by Bellwether, Watchman and Freehold. The beneficial ownership register is a free daily download, so the marginal cost of the fourth consumer is near zero.'],
-      ['Coverage reporting', 'Every system publishes what share of England it actually represents. Built once as a discipline, applied everywhere — and it is the thing that makes the outputs trustworthy to a statistician.'],
-      ['Match confidence', 'No system asserts a resolution it cannot evidence. The same confidence machinery serves all thirteen, and it is what makes the work defensible when a named organisation objects.']
+      ['Turning planning references into map points', 'Built for Ledger. Reused straight away by Highwater, Sightline, Plumbline and Catchment. Five systems, one hard problem solved once.'],
+      ['Working out who owns which company', 'Built for Sentinel. Reused by Bellwether and Watchman. The ownership register is a free daily download, so the third and fourth users cost almost nothing.'],
+      ['Saying how much of the country is covered', 'Every system says plainly what share of England it actually represents. Built once as a habit, applied everywhere — and it is what makes a statistician trust the numbers.'],
+      ['Saying how sure we are', 'No system claims a match it cannot prove. The same machinery serves all thirteen, and it is what holds up when a named company objects.']
     ]
   }
 };
