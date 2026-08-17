@@ -2,13 +2,13 @@
 export default {
   name: 'Groundtruth',
   tagline: 'Twelve products. Two joins. One platform. No registration anywhere.',
-  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the five products stop being five builds.',
+  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the twelve products stop being twelve builds.',
 
   thesis: [
-    'The ten proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
+    'The seventeen proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
     'The Environment Agency cannot map its own flood objections because the dataset carries no spatial reference. Councils receive school capacity data at a geography whose boundaries are published nowhere. The housing delivery mechanism runs on a measurement three years stale. An insurer, not government, supplies Parliament with evidence on floodplain housebuilding — because the join required a paid Ordnance Survey field. Every one of those is the same missing asset: <strong>a national, resolved record of where development happens</strong>.',
     'On the other side, procurement supplier records resolve inconsistently to company numbers, grid connection registers share no key between transmission and distribution, council spending data carries no company identifiers at all, and there is <strong>no canonical register of UK public sector organisations</strong> — the one that existed was decommissioned and its domains no longer resolve.',
-    'Groundtruth builds those two resolution layers as open infrastructure, then runs the five products on top. The products are the revenue. The spines are the moat.'
+    'Groundtruth builds those two resolution layers as open infrastructure, then runs twelve products on top. The products are the revenue. The spines are the moat.'
   ],
 
   spines: [
@@ -19,7 +19,7 @@ export default {
       problem: 'England has no open, national, site-level record of where homes are permitted and built. The Ministry’s own planning application dataset holds 100,627 records from four contributing councils — effectively three, since two are a shared service — and its collection has not run since <strong>17 September 2025</strong>, while every other dataset on the platform collected yesterday. The April 2026 planning data regulations mandate three things: local plan timetables, minerals and waste timetables, and housing requirement figures. <strong>Planning applications are not among them.</strong>',
       builds: [
         ['Planning reference resolution', 'Authority planning references resolved to site location and property identifier, across the fragmented estate of council portals.'],
-        ['Completion signal', 'New-build energy certificates as the address-level, near-real-time completion proxy — the only national one that exists. Keyed on report type, which distinguishes new build from existing stock.'],
+        ['Completion signal', 'Price paid transactions as the address-level completion proxy — free, no account, and carrying an old/new flag that identifies newly built homes. Energy certificates would be timelier but sit behind a sign-in, so they are excluded.'],
         ['Pupil planning area geography', 'The 3,651 planning areas reconstructed from the school membership table the Department already publishes, with a back-series to 2012/13.'],
         ['Substation gazetteer', 'Free-text connection site names resolved to coordinates, making the grid queue mappable.']
       ],
@@ -49,10 +49,17 @@ export default {
   matrix: {
     head: ['System', 'Place spine', 'Entity spine', 'What it needs that nothing else provides'],
     rows: [
-      ['Catchment', true, false, 'Planning area geography and small-area completions'],
+      ['Catchment', true, false, 'Planning area geography and small-area demand'],
       ['Highwater', true, false, 'Objection records resolved to sites and flood zones'],
-      ['Plumbline', true, false, 'Completion signal faster than annual statistics'],
+      ['Plumbline', true, false, 'Honest determination measurement and a live delivery estimate'],
+      ['Ledger', true, false, 'Free-text addresses resolved so contributions can be mapped'],
+      ['Sightline', true, false, 'Consultee advice resolved to sites and outcomes'],
+      ['Lastmile', true, false, 'New homes matched to property-level connectivity status'],
+      ['Bulwark', true, false, 'Flood assets resolved to parcels and responsible owners'],
       ['Sentinel', false, true, 'Organisation resolution and the corporate graph'],
+      ['Bellwether', false, true, 'Provider owner names resolved to companies'],
+      ['Watchman', false, true, 'Insolvency events resolved to public dependencies'],
+      ['Compass', false, true, 'Authority and provider resolution for demand forecasting'],
       ['Junction', true, true, 'Substation locations and cross-register project matching']
     ]
   },
