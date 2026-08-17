@@ -47,6 +47,7 @@ const nav = (depth = 0) => {
 <a class="hide-sm" href="${p}index.html#thesis">The problem</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
 <a class="hide-sm" href="${p}index.html#chains">How they help each other</a>
+<a href="${p}examples.html">Problems &amp; solutions</a>
 <a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
 <a href="${p}platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
@@ -568,8 +569,65 @@ ${foot()}`;
 
 /* ---------------- Write ---------------- */
 mkdirSync('systems', { recursive: true });
+const examples = `${head('Problems and solutions — all thirteen Groundtruth systems',
+  'Two real situations for every one of the thirteen Groundtruth systems: what goes wrong today, and what the system does about it.')}
+${nav()}
+
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<div class="eyebrow">Problems &amp; solutions</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Twenty-six situations</h1>
+<p class="lede" style="margin-top:.6rem">Two for each of the thirteen systems. On the left, what goes wrong today. On the right, what the system does about it.</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every situation below is real, and every one is caused by the same thing: a record exists, but nothing can be matched to it. No new data is collected anywhere on this page.</p>
+</div></header>
+
+<div class="wrap section">
+
+<div class="eyebrow">Jump to a system</div>
+<div class="grid grid--3 mt-3">
+${GT.map((s, i) => `<a class="card" href="#${s.id}" style="padding:1rem 1.15rem">
+<div class="card__num">${String(i + 1).padStart(2, '0')}</div>
+<div class="feat__t mt-1">${s.name}</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">${esc(s.subtitle)}</p>
+</a>`).join('\n')}
+</div>
+
+${GT.map((s, i) => EX.bySystem[s.id] ? `
+<hr class="hr">
+
+<section id="${s.id}">
+<div class="eyebrow">${String(i + 1).padStart(2, '0')} &middot; ${s.themes.map(t => THEMES[t] || t).join(' &middot; ')}</div>
+<h2 class="mt-2">${s.name}</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">${esc(s.subtitle)}</p>
+
+<div class="grid grid--2 mt-4">
+${EX.bySystem[s.id].map((e, n) => `<div class="card">
+<div class="card__num">SITUATION ${n + 1}</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">${esc(e.problem)}</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What ${s.name} does</div>
+<p class="card__desc mt-1" style="flex:none">${esc(e.solution)}</p></div>
+</div>`).join('\n')}
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/${s.id}.html">Full detail on ${s.name} &rarr;</a></p>
+</section>` : '').join('\n')}
+
+<hr class="hr">
+
+<section id="overall">
+<div class="eyebrow">The pattern</div>
+<h2 class="mt-3">${EX.overall.heading}</h2>
+<div class="prose mt-4">${EX.overall.body.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
+<p class="mt-4"><a class="backlink" href="platform.html">How the platform is built &rarr;</a></p>
+</section>
+
+</div>
+${foot()}`;
+
 writeFileSync('index.html', index);
 writeFileSync('platform.html', platform);
+writeFileSync('examples.html', examples);
 SYSTEMS.forEach((s, i) => writeFileSync(`systems/${s.id}.html`, detailPage(s, i)));
 console.log(`Built index.html + ${SYSTEMS.length} system pages:`);
 SYSTEMS.forEach(s => console.log(`  systems/${s.id}.html  ${s.num} ${s.name}`));

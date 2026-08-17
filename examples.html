@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problems and solutions — all thirteen Groundtruth systems</title>
+<meta name="description" content="Two real situations for every one of the thirteen Groundtruth systems: what goes wrong today, and what the system does about it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="index.html"><span class="brand__mark">G</span>Groundtruth<span class="brand__sub">by Dexter DCL</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="index.html#thesis">The problem</a>
+<a class="hide-sm" href="index.html#systems">Systems</a>
+<a class="hide-sm" href="index.html#chains">How they help each other</a>
+<a href="examples.html">Problems &amp; solutions</a>
+<a class="hide-sm" href="index.html#overall">Why one platform</a>
+<a href="platform.html">Architecture</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<div class="eyebrow">Problems &amp; solutions</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Twenty-six situations</h1>
+<p class="lede" style="margin-top:.6rem">Two for each of the thirteen systems. On the left, what goes wrong today. On the right, what the system does about it.</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every situation below is real, and every one is caused by the same thing: a record exists, but nothing can be matched to it. No new data is collected anywhere on this page.</p>
+</div></header>
+
+<div class="wrap section">
+
+<div class="eyebrow">Jump to a system</div>
+<div class="grid grid--3 mt-3">
+<a class="card" href="#catchment" style="padding:1rem 1.15rem">
+<div class="card__num">01</div>
+<div class="feat__t mt-1">Catchment</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">School place planning at the geography that matters</p>
+</a>
+<a class="card" href="#sentinel" style="padding:1rem 1.15rem">
+<div class="card__num">02</div>
+<div class="feat__t mt-1">Sentinel</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Public procurement integrity and collusion detection</p>
+</a>
+<a class="card" href="#highwater" style="padding:1rem 1.15rem">
+<div class="card__num">03</div>
+<div class="feat__t mt-1">Highwater</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Floodplain development monitoring</p>
+</a>
+<a class="card" href="#plumbline" style="padding:1rem 1.15rem">
+<div class="card__num">04</div>
+<div class="feat__t mt-1">Plumbline</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Planning pipeline truth and delivery measurement</p>
+</a>
+<a class="card" href="#junction" style="padding:1rem 1.15rem">
+<div class="card__num">05</div>
+<div class="feat__t mt-1">Junction</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Unified grid connection queue intelligence</p>
+</a>
+<a class="card" href="#ledger" style="padding:1rem 1.15rem">
+<div class="card__num">06</div>
+<div class="feat__t mt-1">Ledger</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Developer contributions, made mappable</p>
+</a>
+<a class="card" href="#bellwether" style="padding:1rem 1.15rem">
+<div class="card__num">07</div>
+<div class="feat__t mt-1">Bellwether</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Provider concentration and failure exposure</p>
+</a>
+<a class="card" href="#sightline" style="padding:1rem 1.15rem">
+<div class="card__num">08</div>
+<div class="feat__t mt-1">Sightline</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Statutory consultee advice, and what happened to it</p>
+</a>
+<a class="card" href="#lastmile" style="padding:1rem 1.15rem">
+<div class="card__num">09</div>
+<div class="feat__t mt-1">Lastmile</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Connectivity at new homes</p>
+</a>
+<a class="card" href="#bulwark" style="padding:1rem 1.15rem">
+<div class="card__num">10</div>
+<div class="feat__t mt-1">Bulwark</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Flood defence ownership and condition</p>
+</a>
+<a class="card" href="#watchman" style="padding:1rem 1.15rem">
+<div class="card__num">11</div>
+<div class="feat__t mt-1">Watchman</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Insolvency exposure across public suppliers</p>
+</a>
+<a class="card" href="#compass" style="padding:1rem 1.15rem">
+<div class="card__num">12</div>
+<div class="feat__t mt-1">Compass</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">SEND demand forecasting and transport optimisation</p>
+</a>
+<a class="card" href="#baseline" style="padding:1rem 1.15rem">
+<div class="card__num">13</div>
+<div class="feat__t mt-1">Baseline</div>
+<p class="card__desc mt-1" style="flex:none;font-size:.92rem">Sewage spills, adjusted for the weather</p>
+</a>
+</div>
+
+
+<hr class="hr">
+
+<section id="catchment">
+<div class="eyebrow">01 &middot; Children &amp; families &middot; Local government &middot; Operations</div>
+<h2 class="mt-2">Catchment</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">School place planning at the geography that matters</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A council with falling rolls closes a primary school. Two miles away another is over capacity and turning children away. Both facts are true, and neither is visible in council-level statistics.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Catchment does</div>
+<p class="card__desc mt-1" style="flex:none">Catchment publishes the missing boundaries for all 3,651 areas, so empty seats and overcrowding show up side by side inside the same council.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Basic Need capital is allocated at planning area and year group with no offsetting between areas — so £1.096bn is distributed on a geography that is published nowhere and cannot be mapped.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Catchment does</div>
+<p class="card__desc mt-1" style="flex:none">Catchment rebuilds those boundaries from a list the department already publishes, and gives them away free.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/catchment.html">Full detail on Catchment &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="sentinel">
+<div class="eyebrow">02 &middot; Fraud &amp; integrity &middot; Central government &middot; Public money</div>
+<h2 class="mt-2">Sentinel</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Public procurement integrity and collusion detection</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Three companies bid for a £4m council contract. Two of them share a director. Nobody notices, because neither record carries a company number and the buyer has no way to check.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Sentinel does</div>
+<p class="card__desc mt-1" style="flex:none">Sentinel works out which real companies the three bidders are, sees that two of them share a director, and flags the bid as connected — before the contract is awarded, not after an investigation.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A framework worth £200m produces 400 call-offs across dozens of authorities. Six suppliers win most of them. No single buyer sees the pattern, because each call-off is one record in one authority.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Sentinel does</div>
+<p class="card__desc mt-1" style="flex:none">Sentinel adds up every order placed under that framework across every authority, and shows that six firms are taking most of it. This is the clearest warning sign available in UK data.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/sentinel.html">Full detail on Sentinel &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="highwater">
+<div class="eyebrow">03 &middot; Climate &amp; energy &middot; Housing &middot; Central government</div>
+<h2 class="mt-2">Highwater</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Floodplain development monitoring</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">The Environment Agency objects to 47 homes on flood risk grounds. The council approves them anyway. The Agency never learns the outcome — one of 7,011 cases where it does not know what was decided.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Highwater does</div>
+<p class="card__desc mt-1" style="flex:none">Highwater finds the decision on the council’s own public planning website and fills the gap — giving a true national figure instead of the partial sample the Agency relies on now.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A journalist asks how many homes were built in flood zones against expert advice. Nobody can answer, because the objections file carries no address, postcode or coordinate.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Highwater does</div>
+<p class="card__desc mt-1" style="flex:none">Highwater works out where each objection was, puts it on the flood map, and answers the question. Right now an insurance company supplies that answer to Parliament, using data it had to buy.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/highwater.html">Full detail on Highwater &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="plumbline">
+<div class="eyebrow">04 &middot; Housing &middot; Central government &middot; Operations</div>
+<h2 class="mt-2">Plumbline</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Planning pipeline truth and delivery measurement</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A council reports 91% of major applications decided on time and is judged compliant. Measured against the actual statutory deadline it is 19%, because more than three-quarters used an agreed extension.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Plumbline does</div>
+<p class="card__desc mt-1" style="flex:none">Plumbline always shows both numbers side by side, and shows how often extensions are being used to make the headline look better.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">The Housing Delivery Test that triggers presumption-in-favour sanctions was last measured on data ending March 2023. Councils and the department are both flying blind on the mechanism meant to deliver 1.5 million homes.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Plumbline does</div>
+<p class="card__desc mt-1" style="flex:none">Plumbline keeps a running estimate going between official measurements, so everyone can see where housing delivery is heading instead of finding out two years later.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/plumbline.html">Full detail on Plumbline &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="junction">
+<div class="eyebrow">05 &middot; Climate &amp; energy &middot; Operations &middot; Central government</div>
+<h2 class="mt-2">Junction</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Unified grid connection queue intelligence</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A developer asks where they can connect 5MW within two years. Two network operators both report "available capacity" — computed on incompatible bases, because the specification delegates the calculation to each of them.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Junction does</div>
+<p class="card__desc mt-1" style="flex:none">Junction converts everyone’s figures to one clear definition, and publishes each operator’s own method next to it — so the numbers can finally be compared.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">The same project appears in both the transmission and distribution registers under different identifiers, with no shared key. Counting either register alone is wrong; counting both double-counts.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Junction does</div>
+<p class="card__desc mt-1" style="flex:none">Junction matches the two records to the same project and says how confident it is, rather than quietly guessing.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/junction.html">Full detail on Junction &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="ledger">
+<div class="eyebrow">06 &middot; Housing &middot; Local government &middot; Public money</div>
+<h2 class="mt-2">Ledger</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Developer contributions, made mappable</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A community was promised a school alongside a 400-home development. Six years on there is no school, and nobody can show whether the money was collected, spent, or is still sitting.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Ledger does</div>
+<p class="card__desc mt-1" style="flex:none">Ledger ties the money to the site it was promised for, and shows whether it was ever collected and whether it was ever spent.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A council holds around £19m of unspent developer contributions and is asked publicly why. It cannot produce a spatial account of what was promised, for what, and where.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Ledger does</div>
+<p class="card__desc mt-1" style="flex:none">Ledger puts every promise on a map — by council, by ward, by site, by what it was for. £1.49bn becomes visible for the first time.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/ledger.html">Full detail on Ledger &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="bellwether">
+<div class="eyebrow">07 &middot; Children &amp; families &middot; Local government &middot; Public money</div>
+<h2 class="mt-2">Bellwether</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Provider concentration and failure exposure</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A care operator running more than two-thirds of one borough’s care home beds gets into difficulty. The council finds out when it reaches the news.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bellwether does</div>
+<p class="card__desc mt-1" style="flex:none">Bellwether tracks that dependency all the time. The regulator’s own public list already names the company behind 93.9% of care home beds — nobody adds it up.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A children’s home group appears in the register under three slightly different owner names, so its true size is invisible — and statute now requires geographical concentration to be assessed.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bellwether does</div>
+<p class="card__desc mt-1" style="flex:none">Bellwether recognises the three names as one company. The same fix takes the biggest special school group from an apparent 30 schools to its real 51.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/bellwether.html">Full detail on Bellwether &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="sightline">
+<div class="eyebrow">08 &middot; Housing &middot; Central government &middot; Operations</div>
+<h2 class="mt-2">Sightline</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Statutory consultee advice, and what happened to it</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Active Travel England advised on planning applications covering 521,000 homes in a single year and published none of it. Government is now cutting consultee involvement by around 40%, with no data on what that advice achieved.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Sightline does</div>
+<p class="card__desc mt-1" style="flex:none">Sightline records what was advised, what was decided and what got built — so the change can be judged on evidence rather than assumption.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A council overrides expert advice on a development. Residents want to know whether that is unusual. No published source can tell them.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Sightline does</div>
+<p class="card__desc mt-1" style="flex:none">Sightline publishes how often each council overrules expert advice, with the context — including that the rate has actually been flat for nine years, even though the raw numbers rose.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/sightline.html">Full detail on Sightline &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="lastmile">
+<div class="eyebrow">09 &middot; Housing &middot; Central government &middot; Equity</div>
+<h2 class="mt-2">Lastmile</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Connectivity at new homes</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A family buys a new-build and discovers there is no gigabit connection and none planned. Building regulations have required every new home to be built connectable since 2022, and nobody checks.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Lastmile does</div>
+<p class="card__desc mt-1" style="flex:none">Lastmile matches new homes to house-by-house broadband records, producing the compliance picture that has never existed for that rule.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Public subsidy is targeted at premises that new development has already made commercially viable, because the intervention list and the development pipeline are never compared.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Lastmile does</div>
+<p class="card__desc mt-1" style="flex:none">Lastmile shows the overlap, so public money goes where companies genuinely will not build on their own.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/lastmile.html">Full detail on Lastmile &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="bulwark">
+<div class="eyebrow">10 &middot; Climate &amp; energy &middot; Operations &middot; Local government</div>
+<h2 class="mt-2">Bulwark</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Flood defence ownership and condition</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A flood defence fails. The council needs to know who was responsible for maintaining it. The national record says "Unknown" — as it does for 73.7% of 141,629 assets.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bulwark does</div>
+<p class="card__desc mt-1" style="flex:none">Bulwark works out which piece of land each defence sits on, then who owns that land — and separates genuinely unowned defences from ones where nobody simply wrote it down.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Maintenance is prioritised using a national condition figure quoted as though it covered the estate. It is computed on the quarter of assets that have a condition grade at all.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bulwark does</div>
+<p class="card__desc mt-1" style="flex:none">Bulwark states how much of the country each figure actually covers, and flags defences whose next inspection date has already gone past.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/bulwark.html">Full detail on Bulwark &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="watchman">
+<div class="eyebrow">11 &middot; Fraud &amp; integrity &middot; Public money &middot; Operations</div>
+<h2 class="mt-2">Watchman</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Insolvency exposure across public suppliers</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A supplier enters administration on a Friday afternoon. Which departments, councils and services depend on it? Nobody can say before Monday, and possibly not for weeks.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Watchman does</div>
+<p class="card__desc mt-1" style="flex:none">Watchman reads the notice, which includes the company number, and immediately lists everything the public sector relies on that company for. No guesswork about which company it is.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A small supplier files accounts late two years running and takes on new charges over its assets. Both are published signals of difficulty. Nobody is watching, because the standard financial models need profit data small companies never file.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Watchman does</div>
+<p class="card__desc mt-1" style="flex:none">Watchman treats those as facts that have happened rather than a prediction, and warns the buyers who depend on that supplier.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/watchman.html">Full detail on Watchman &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="compass">
+<div class="eyebrow">12 &middot; Local government &middot; Children &amp; families &middot; Public money</div>
+<h2 class="mt-2">Compass</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">SEND demand forecasting and transport optimisation</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A county forecasts falling pupil numbers and closes a specialist unit. Two years later demand in one district has risen sharply and children are placed forty miles away at roughly £65,000 a place.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Compass does</div>
+<p class="card__desc mt-1" style="flex:none">Compass forecasts neighbourhood by neighbourhood instead of county-wide, so the rising district shows up even while the county falls. The National Audit Office found this mismatch in two-thirds of councils.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">A council must submit a SEND reform plan to unlock its share of a £5bn deficit write-off. It cannot evidence where demand will sit in three years, so the plan is assertion rather than analysis.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Compass does</div>
+<p class="card__desc mt-1" style="flex:none">Compass produces the forecast the plan needs — how many children, needing what, and where — using only published figures. No individual children’s records are touched.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/compass.html">Full detail on Compass &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="baseline">
+<div class="eyebrow">13 &middot; Climate &amp; energy &middot; Public money &middot; Operations</div>
+<h2 class="mt-2">Baseline</h2>
+<p class="lede" style="margin-top:.5rem;font-size:1.1rem">Sewage spills, adjusted for the weather</p>
+
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">SITUATION 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">Spills fell 35% in a year the Environment Agency itself describes as drier than average. A regulator being stood up now must decide whether £22.1bn of investment is working, and has no weather-adjusted figure to judge it by.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Baseline does</div>
+<p class="card__desc mt-1" style="flex:none">Baseline compares spills against how much rain actually fell nearby, using 1,044 free rain gauges — separating what the money achieved from what the weather did.</p></div>
+</div>
+<div class="card">
+<div class="card__num">SITUATION 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">What goes wrong today</div>
+<p class="card__desc mt-1" style="flex:none">An overflow’s recorded spill count halves — because its monitor was offline for four months. The improvement is an artefact, and the published figure does not say so.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Baseline does</div>
+<p class="card__desc mt-1" style="flex:none">Baseline shows how long each monitor was actually working next to every spill count, so an unwatched overflow is never mistaken for a quiet one.</p></div>
+</div>
+</div>
+
+<p class="mt-3"><a class="backlink" href="systems/baseline.html">Full detail on Baseline &rarr;</a></p>
+</section>
+
+<hr class="hr">
+
+<section id="overall">
+<div class="eyebrow">The pattern</div>
+<h2 class="mt-3">One problem, thirteen times</h2>
+<div class="prose mt-4"><p>Read the twenty-six examples on the system pages and the same sentence turns up in all of them: <em>the record exists, but it cannot be matched to anything else.</em></p>
+<p>The Environment Agency knows it objected to an application. It does not know where. A ministry knows a developer owes £1.49bn. It cannot say for which sites. A council knows a company runs its care homes. It cannot see the other eleven councils that depend on the same company. A regulator knows spills fell 35%. It cannot say how much of that was rain.</p>
+<p>None of these is a missing dataset. Every one is a <strong>missing link</strong> — and there are only two kinds. Work out <em>where</em>. Work out <em>who</em>.</p>
+<p>That is why this is one platform and not thirteen separate products. The flood work, the contracts work and the care work are each fairly simple once the data lines up. Getting it to line up is the hard bit — and it is the <em>same</em> hard bit every time.</p>
+<p>Fix those two links once, give them away, and thirteen questions nobody can currently answer become answerable. After that it snowballs: one piece of news reaches several systems at once, and every new system costs less than the one before it.</p></div>
+<p class="mt-4"><a class="backlink" href="platform.html">How the platform is built &rarr;</a></p>
+</section>
+
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Groundtruth systems</h4>
+<a href="systems/catchment.html">07 &middot; Catchment</a>
+<a href="systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="systems/highwater.html">06 &middot; Highwater</a>
+<a href="systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="systems/junction.html">10 &middot; Junction</a>
+<a href="systems/ledger.html">11 &middot; Ledger</a>
+<a href="systems/bellwether.html">12 &middot; Bellwether</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="systems/sightline.html">13 &middot; Sightline</a>
+<a href="systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="systems/watchman.html">17 &middot; Watchman</a>
+<a href="systems/compass.html">03 &middot; Compass</a>
+<a href="systems/baseline.html">18 &middot; Baseline</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="index.html#chains">How they help each other</a>
+<a href="index.html#sequence">Build order</a>
+<a href="index.html#delivery">Delivery and procurement</a>
+<a href="index.html#rejected">Out of scope</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="assets/app.js"></script>
+</body></html>
