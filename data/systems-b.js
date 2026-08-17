@@ -376,8 +376,9 @@ export default [
   problem: [
     'Britain reordered its grid connection queue. The old queue exceeded <strong>700 GW</strong> — roughly four times what is needed by 2030. The reformed pipeline published in December 2025 is <strong>381.5 GW</strong>, with over <strong>300 GW removed</strong>. Offers are being issued now and are running <strong>2.5 to 5.5 months late</strong>, continuing into March 2027.',
     'The transmission side of this is a genuine open data success. The Transmission Entry Capacity register is published twice weekly as CSV with an unauthenticated API — 2,205 project rows, retrievable in a single call, no registration.',
-    'Distribution is the opposite. Of six distribution network operator groups, <strong>four return zero rows to anonymous clients</strong>: their portals require login, their APIs refuse access, and CSV exports return a header row and nothing else. One publishes a monthly spreadsheet. Only one is genuinely open. This is the majority of projects by count.',
-    'The only national aggregation is worse than the parts. It combines all six operators, but it was <strong>last updated six months ago</strong> while every constituent register has refreshed since, it is described as a custom view, and its dataset identifier is literally <code>ecr_manual_combine_test</code>. Its connection queue field — the single most relevant column — reads <strong>"Data Not Available" for 92.5% of its 20,075 records</strong>.',
+    'Distribution improved sharply in 2026, and the standard story about it is now out of date. Ofgem digitalised the Long-Term Development Statement by direction in April 2024, mandating a common information model built on the international grid exchange standard. In the <strong>May 2026 cycle, five of six distribution operator groups published standardised capacity heatmaps openly</strong> against that model. One group published nothing publicly discoverable.',
+    'But the standardisation is thinner than it looks, and the reason is in the specification itself. Ofgem defines the fields and then <strong>explicitly delegates the calculation to each operator</strong>: available capacity is computed "based on more detailed analysis and internal policies", and a utility "should provide details on how this RAG status is calculated as part of the accompanying documentation." <strong>GB has a common schema for grid capacity. It has no common methodology, and the specification does not require one.</strong> Two operators can be fully compliant and return numbers that cannot be compared.',
+    'The serialisation diverges too. Only two of five emit the specified nested structure; the others flatten it or return a bare array. One operator’s master resource identifiers are sequential integers rather than the globally unique identifiers the standard exists to provide, defeating the entire point of the field. Another uses a transposed field name. Constraint status comes back as <code>"Red"</code>, <code>"GREEN"</code> and <code>"green"</code> from three different operators, against a specification that types it as an enumeration. One operator is inconsistent between its own two licence areas.',
     'The joins are broken too. The transmission register carries <strong>no geocoding of any kind</strong> — the only location field is a free-text substation name. There is <strong>no shared identifier</strong> between transmission and distribution registers, so a project appearing in both cannot be reconciled except by fuzzy matching. And the reform status column is <strong>empty for 63% of transmission projects</strong>, because it only populates after agreements are countersigned.'
   ],
 
@@ -401,7 +402,7 @@ export default [
   features: [
     ['Cross-register entity resolution', 'The transmission-to-distribution join that no shared identifier provides, with match confidence published.'],
     ['Substation gazetteer', 'Free-text connection sites resolved to coordinates, making the transmission queue mappable for the first time.'],
-    ['Normalised headroom', 'One stated definition of available capacity applied across all operators, with assumptions published rather than buried.'],
+    ['Normalised headroom', 'One stated definition of available capacity applied across all operators, with each operator’s own methodology documented alongside it rather than buried in accompanying PDFs. This is the core contribution: the schema is already mandated, the methodology is explicitly not.'],
     ['Queue integrity tracking', 'Which projects hold capacity versus which are progressing, through the Gate 2 reordering and the offer backlog.'],
     ['Capacity discovery', 'A direct answer to the question the market cannot currently answer: where can this much capacity connect, and by when.'],
     ['Demand-side matching', 'Data centres, depots and electrolysers matched to genuine headroom — necessary because zonal pricing was rejected, so no market price signal performs this function.'],
@@ -410,8 +411,8 @@ export default [
 
   impact: [
     ['700 → 381.5 GW', 'Queue capacity before and after reform'],
-    ['4 of 6', 'Distribution operators returning zero rows to anonymous users'],
-    ['92.5%', 'National register records whose queue status reads “Data Not Available”'],
+    ['5 of 6', 'Operators publishing a standardised capacity heatmap — with five different serialisations'],
+    ['0', 'Common methodologies behind the common schema'],
     ['2.5–5.5 months', 'Current slippage in issuing Gate 2 offers']
   ],
 
@@ -437,7 +438,7 @@ export default [
   ],
 
   risks: [
-    ['Access gating', 'Four operators do not serve anonymous clients. Registration appears to be free but is unconfirmed, and gated access breaks unattended pipelines. Resolving this with the regulator is a precondition, not an afterthought — and is itself a worthwhile policy outcome.'],
+    ['Being overtaken by the mandate', 'The obvious risk is that Ofgem tightens the specification to require a common methodology, removing the need. That would be a good outcome for the country and a bad one for the product — so the work should be positioned to inform that tightening rather than to depend on its absence.'],
     ['Entity resolution accuracy', 'Without a shared key, matching is probabilistic. Confidence is published per match and low-confidence links are never silently merged.'],
     ['Moving target', 'The reform is mid-flight with offers issuing into 2027. Junction is designed to track a changing queue rather than describe a static one.']
   ],
