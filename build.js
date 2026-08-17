@@ -5,8 +5,8 @@ import B from './data/systems-b.js';
 import C from './data/systems-c.js';
 import P from './data/platform.js';
 
-// The five systems deliverable with no buyer-controlled personal data.
-const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'freehold', 'bulwark', 'watchman'];
+// The twelve Groundtruth systems: every source fetchable anonymously, no account, no key, no application.
+const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass'];
 const sysById = Object.fromEntries([...A, ...B, ...C].map(s => [s.id, s]));
 
 const SYSTEMS = [...A, ...B, ...C];
@@ -307,7 +307,7 @@ ${cards}
 <div class="wrap">
 <div class="eyebrow">The unified platform</div>
 <h2 class="mt-3">Twelve of these are one system</h2>
-<p class="lede mt-3">Twelve of the seventeen break at the same two joins &mdash; resolving places, and resolving organisations. Built once as shared infrastructure, they stop being twelve separate builds. All twelve touch no buyer-controlled personal data, which makes them deliverable without a UK-resident cleared operations tier.</p>
+<p class="lede mt-3">Twelve of the seventeen break at the same two joins &mdash; resolving places, and resolving organisations. Built once as shared infrastructure, they stop being twelve separate builds. Every source these twelve depend on was tested and returns data to an anonymous request: <strong>no account, no API key, no application, no approval</strong>.</p>
 <div class="grid mt-4">
 ${DELIVERABLE.map(id => {
   const s = sysById[id];

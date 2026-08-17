@@ -1,8 +1,8 @@
 // Groundtruth — the unified platform. Consumed by build.js.
 export default {
   name: 'Groundtruth',
-  tagline: 'Five products. Two joins. One platform.',
-  standfirst: 'Every system Dexter DCL can deliver today fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the five products stop being five builds.',
+  tagline: 'Twelve products. Two joins. One platform. No registration anywhere.',
+  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the five products stop being five builds.',
 
   thesis: [
     'The ten proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',

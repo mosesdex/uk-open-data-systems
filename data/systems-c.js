@@ -297,7 +297,7 @@ export default [
   datasets: [
     ['Open market review premises data', 'Building Digital UK', 'Property-level gigabit status with subsidy classification, contracted supplier and delivery date. Free, open licence, refreshed every four months. England and Wales.'],
     ['Connected Nations', 'Ofcom', 'Coverage at postcode for fixed and 100-metre grid for mobile. Free and open — computed per premises, published aggregated.'],
-    ['New-build energy certificates', 'MHCLG', 'Property identifier plus a report type field distinguishing new build from existing stock.'],
+    ['Price paid transactions', 'HM Land Registry', 'Free, open, no account. Carries an old/new flag identifying newly built homes at address level — the new-build signal, without a sign-in.'],
     ['Open property identifiers', 'Ordnance Survey', 'The free identifier file, 41.6 million records. Carries no status field, so cannot distinguish a plot from a house.'],
     ['Linked identifiers', 'Ordnance Survey', 'The free crosswalk between property, street and topographic identifiers.'],
     ['Planning applications', 'MHCLG and authority portals', 'Development pipeline, for forward-looking connectivity planning.']
@@ -342,7 +342,7 @@ export default [
   ],
 
   risks: [
-    ['Certificates are a proxy, not a register', 'New-build certificates indicate completion, imperfectly and with an undocumented lag. That lag must be measured empirically before any latency claim is made.'],
+    ['Transactions are a proxy, not a register', 'A first sale indicates completion imperfectly, and self-build and rented stock may never transact. The lag and the coverage gap must be measured empirically before any claim about either.'],
     ['Coverage is not connection', 'Infrastructure passing a property is not the same as a working service in the home. The data supports the former; claims must not overreach into the latter.'],
     ['Geographic scope', 'The property-level subsidy data covers England and Wales. Scotland and Northern Ireland publish separately and must be assembled, not assumed.']
   ],
@@ -365,8 +365,8 @@ export default [
   name: 'Freehold',
   subtitle: 'Land ownership resolution',
   themes: ['money', 'central', 'housing'],
-  tagline: 'Free ownership data on one side. Free boundary geometry on the other. The key that joins them is a paid product. The paywall sits precisely in the middle.',
-  status: 'Government committed to free release during 2026',
+  tagline: 'Free ownership data on one side, free geometry on the other, and a paid key between them. Included for completeness, but the ownership file needs a registered account and a restrictive licence — so it sits outside the no-registration set.',
+  status: 'Requires a registered account — outside the free-data set',
 
   problem: [
     'You can find out, for free, which companies own land in England and Wales. You can also download, for free, <strong>8,220,990 land parcel boundaries</strong> under an open licence. What you cannot do is connect the two.',
