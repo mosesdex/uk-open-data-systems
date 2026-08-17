@@ -18,6 +18,7 @@
 <a class="hide-sm" href="../index.html#thesis">The problem</a>
 <a class="hide-sm" href="../index.html#systems">Systems</a>
 <a class="hide-sm" href="../index.html#chains">How they connect</a>
+<a class="hide-sm" href="../index.html#overall">Why one platform</a>
 <a href="../platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
 </div></div></nav>
@@ -54,6 +55,29 @@
 <p>It geocodes the transmission queue by building and maintaining the substation gazetteer that the register lacks, turning free-text substation names into mappable locations — the single missing ingredient that prevents anyone from seeing where queue pressure actually sits.</p>
 <p>It normalises headroom to a single stated definition. The real barrier between operators is not file format but definitional inconsistency: each defines available capacity differently and publishes it as a picture rather than as data. Junction states its assumptions and applies them uniformly.</p>
 <p>And it tracks queue integrity through the reform. With Gate 2 having reordered everything and offers running months late, monitoring which projects hold capacity against which are actually progressing is both newly possible and politically salient — including the protected projects where the regulator has already refused the system operator relief.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="examples">
+<div class="eyebrow">Worked examples</div>
+<h3 class="mt-2">Two situations this system answers</h3>
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">EXAMPLE 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">The problem</div>
+<p class="card__desc mt-1" style="flex:none">A developer asks where they can connect 5MW within two years. Two network operators both report "available capacity" — computed on incompatible bases, because the specification delegates the calculation to each of them.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Junction does</div>
+<p class="card__desc mt-1" style="flex:none">Junction normalises to one stated definition and publishes each operator’s own method alongside it, so the numbers can finally be compared.</p></div>
+</div>
+<div class="card">
+<div class="card__num">EXAMPLE 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">The problem</div>
+<p class="card__desc mt-1" style="flex:none">The same project appears in both the transmission and distribution registers under different identifiers, with no shared key. Counting either register alone is wrong; counting both double-counts.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Junction does</div>
+<p class="card__desc mt-1" style="flex:none">Junction resolves projects across registers with match confidence published per link, and never silently merges a low-confidence match.</p></div>
+</div>
+</div>
 </section>
 
 <hr class="hr">
@@ -120,6 +144,7 @@
 <div class="toc"><div class="toc__title">On this page</div>
 <a href="#problem">The problem</a>
 <a href="#solution">The system</a>
+<a href="#examples">Worked examples</a>
 <a href="#data">Data foundation</a>
 <a href="#features">Capabilities</a>
 <a href="#benefits">Benefits</a>

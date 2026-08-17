@@ -5,6 +5,7 @@ import B from './data/systems-b.js';
 import C from './data/systems-c.js';
 import P from './data/platform.js';
 import CHAINS from './data/chains.js';
+import EX from './data/examples.js';
 
 // The thirteen Groundtruth systems: every source fetchable anonymously, no account, no key, no application.
 const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass', 'baseline'];
@@ -46,6 +47,7 @@ const nav = (depth = 0) => {
 <a class="hide-sm" href="${p}index.html#thesis">The problem</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
 <a class="hide-sm" href="${p}index.html#chains">How they connect</a>
+<a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
 <a href="${p}platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
 </div></div></nav>`;
@@ -90,7 +92,7 @@ function detailPage(s, i) {
   const next = SYSTEMS[(i + 1) % SYSTEMS.length];
 
   const toc = [
-    ['problem', 'The problem'], ['solution', 'The system'], ['data', 'Data foundation'],
+    ['problem', 'The problem'], ['solution', 'The system'], ['examples', 'Worked examples'], ['data', 'Data foundation'],
     ['features', 'Capabilities'], ['benefits', 'Benefits'], ['delivery', 'Delivery'],
     ['risks', 'Risks &amp; mitigations'], ['sources', 'Sources']
   ];
@@ -122,6 +124,22 @@ ${nav(1)}
 <div class="eyebrow">The system</div>
 <div class="prose mt-2">${s.solution.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
 </section>
+
+${EX.bySystem[s.id] ? `<hr class="hr">
+
+<section id="examples">
+<div class="eyebrow">Worked examples</div>
+<h3 class="mt-2">Two situations this system answers</h3>
+<div class="grid grid--2 mt-4">
+${EX.bySystem[s.id].map((e, n) => `<div class="card">
+<div class="card__num">EXAMPLE ${n + 1}</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">The problem</div>
+<p class="card__desc mt-1" style="flex:none">${esc(e.problem)}</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What ${s.name} does</div>
+<p class="card__desc mt-1" style="flex:none">${esc(e.solution)}</p></div>
+</div>`).join('\n')}
+</div>
+</section>` : ''}
 
 <hr class="hr">
 
@@ -292,6 +310,15 @@ ${c.steps.map((st, i) => `<div class="phase"><div class="phase__n">${i + 1}</div
 ${CHAINS.reuse.items.map((r, i) => `<div class="feat__item"><div class="feat__ico">${String(i + 1).padStart(2, '0')}</div><div><div class="feat__t">${esc(r[0])}</div><div class="feat__d">${esc(r[1])}</div></div></div>`).join('')}
 </div>
 </div>
+</div>
+</section>
+
+<section class="section section--ink" id="overall">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">The whole point</div>
+<h2 class="mt-3">${EX.overall.heading}</h2>
+<div class="prose mt-4" style="color:#B4BAC6">${EX.overall.body.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
+<p class="small mt-4" style="color:#8A91A0">Twenty-six worked examples sit on the individual system pages &mdash; two apiece, each a situation somebody in government cannot currently resolve.</p>
 </div>
 </section>
 

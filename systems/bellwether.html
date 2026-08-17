@@ -18,6 +18,7 @@
 <a class="hide-sm" href="../index.html#thesis">The problem</a>
 <a class="hide-sm" href="../index.html#systems">Systems</a>
 <a class="hide-sm" href="../index.html#chains">How they connect</a>
+<a class="hide-sm" href="../index.html#overall">Why one platform</a>
 <a href="../platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
 </div></div></nav>
@@ -53,6 +54,29 @@
 <p>Where the regulator already publishes a company number, the join is direct — that covers most of adult social care. Where it does not, resolution is the product: matching owner names to companies through the corporate graph, handling the variants that defeat simple normalisation, and publishing match confidence rather than asserting certainty.</p>
 <p>It then produces the exposure view: for each council, which operators hold what share of local capacity, and for each operator, how many councils depend on it and how concentrated that dependency is. One operator in the data runs over four thousand beds across only twelve councils — a very different risk shape from one running more beds across fifty-seven.</p>
 <p>Financial distress signals attach on top, drawn from insolvency notices, charges and overdue filings rather than from accounting ratios, for reasons set out under risks.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="examples">
+<div class="eyebrow">Worked examples</div>
+<h3 class="mt-2">Two situations this system answers</h3>
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num">EXAMPLE 1</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">The problem</div>
+<p class="card__desc mt-1" style="flex:none">A care operator running more than two-thirds of one borough’s care home beds gets into difficulty. The council finds out when it reaches the news.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bellwether does</div>
+<p class="card__desc mt-1" style="flex:none">Bellwether computes that concentration continuously from the regulator’s own published register, where 93.9% of beds already carry a company identifier.</p></div>
+</div>
+<div class="card">
+<div class="card__num">EXAMPLE 2</div>
+<div class="mt-3"><div class="feat__t" style="color:var(--hot)">The problem</div>
+<p class="card__desc mt-1" style="flex:none">A children’s home group appears in the register under three slightly different owner names, so its true size is invisible — and statute now requires geographical concentration to be assessed.</p></div>
+<div class="mt-3"><div class="feat__t" style="color:var(--cool)">What Bellwether does</div>
+<p class="card__desc mt-1" style="flex:none">Bellwether resolves the name variants to one organisation. The same correction raises the largest special school group from an apparent 30 schools to its real 51.</p></div>
+</div>
+</div>
 </section>
 
 <hr class="hr">
@@ -119,6 +143,7 @@
 <div class="toc"><div class="toc__title">On this page</div>
 <a href="#problem">The problem</a>
 <a href="#solution">The system</a>
+<a href="#examples">Worked examples</a>
 <a href="#data">Data foundation</a>
 <a href="#features">Capabilities</a>
 <a href="#benefits">Benefits</a>
