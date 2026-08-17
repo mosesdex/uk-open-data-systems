@@ -2,6 +2,11 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import A from './data/systems-a.js';
 import B from './data/systems-b.js';
+import P from './data/platform.js';
+
+// The five systems deliverable with no buyer-controlled personal data.
+const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction'];
+const sysById = Object.fromEntries([...A, ...B].map(s => [s.id, s]));
 
 const SYSTEMS = [...A, ...B];
 const YEAR = '2026';
@@ -38,6 +43,7 @@ const nav = (depth = 0) => {
 <div class="nav__links">
 <a class="hide-sm" href="${p}index.html#thesis">Thesis</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
+<a href="${p}platform.html">Platform</a>
 <a class="hide-sm" href="${p}index.html#method">Method</a>
 <a class="hide-sm" href="${p}index.html#rejected">Rejected</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
@@ -296,6 +302,28 @@ ${cards}
 </div>
 </section>
 
+<section class="section section--alt">
+<div class="wrap">
+<div class="eyebrow">The unified platform</div>
+<h2 class="mt-3">Five of these are one system</h2>
+<p class="lede mt-3">Implementation research showed that five of the ten break at the same two joins &mdash; resolving places, and resolving organisations. Built once as shared infrastructure, they stop being five separate builds. These five also touch no personal data at all, which makes them deliverable without a UK-resident cleared operations tier.</p>
+<div class="grid mt-4">
+${DELIVERABLE.map(id => {
+  const s = sysById[id];
+  return `<a class="card" href="systems/${s.id}.html">
+<div class="card__num">${s.num}</div>
+<h3 class="card__title">${s.name}</h3>
+<p class="card__desc">${s.subtitle}</p>
+<div class="card__foot"><span class="tag tag--accent">Groundtruth</span><span class="tag">No personal data</span></div>
+</a>`;
+}).join('\n')}
+</div>
+<div class="flexrow mt-4">
+<a class="btn btn--primary" href="platform.html">See the platform architecture &rarr;</a>
+</div>
+</div>
+</section>
+
 <section class="section" id="delivery">
 <div class="wrap">
 <div class="eyebrow">Delivery</div>
@@ -325,9 +353,158 @@ ${cards}
 
 ${foot()}`;
 
+/* ---------------- Platform page ---------------- */
+const platform = `${head(`${P.name} — the unified platform | Dexter DCL`,
+  'Five open-data systems delivered as one platform, on a shared place and entity resolution layer.')}
+${nav()}
+
+<header class="hero">
+<div class="hero__grid"></div>
+<div class="wrap">
+<div class="eyebrow">The unified platform</div>
+<h1 class="display hero__title mt-3">${P.name} <em>resolves what<br>nothing else resolves.</em></h1>
+<p class="lede hero__lede">${P.standfirst}</p>
+<div class="hero__cta">
+<a class="btn btn--primary" href="#spines">The two spines</a>
+<a class="btn btn--ghost" href="#sequence">Build sequence</a>
+</div>
+</div>
+</header>
+
+<div class="wrap">
+<div class="statband">
+<div class="stat"><div class="stat__num">5</div><div class="stat__label">Products, delivered from one platform</div></div>
+<div class="stat"><div class="stat__num">2</div><div class="stat__label">Resolution layers underneath them</div></div>
+<div class="stat"><div class="stat__num">3,651</div><div class="stat__label">Planning areas whose boundaries nobody publishes</div></div>
+<div class="stat"><div class="stat__num">0</div><div class="stat__label">Personal data records any of the five touch</div></div>
+</div>
+</div>
+
+<section class="section" id="thesis">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Why one platform</div>
+<h2 class="mt-3">Five products that break in the same two places</h2>
+<div class="prose mt-4">
+${P.thesis.map(t => `<p>${t}</p>`).join('\n')}
+</div>
+</div>
+</section>
+
+<section class="section section--alt" id="spines">
+<div class="wrap">
+<div class="eyebrow">Architecture</div>
+<h2 class="mt-3">The two spines</h2>
+<div class="grid grid--2 mt-4">
+${P.spines.map(sp => `<div class="card" id="${sp.id}">
+<div class="card__num">${sp.name.toUpperCase()}</div>
+<h3 class="card__title">${sp.role}</h3>
+<p class="card__desc mt-2">${sp.problem}</p>
+<div class="mt-3 feat">
+${sp.builds.map((b, i) => `<div class="feat__item">
+<div class="feat__ico">${i + 1}</div>
+<div><div class="feat__t">${b[0]}</div><div class="feat__d">${b[1]}</div></div>
+</div>`).join('\n')}
+</div>
+<div class="note note--warn mt-3">
+<div class="note__title">Binding constraint</div>
+${sp.constraint}
+</div>
+${sp.gotchas ? `<div class="mt-3">
+<div class="note__title" style="color:var(--hot)">What the spine has to survive</div>
+<ul class="small muted mt-2" style="padding-left:1.2em">
+${sp.gotchas.map(g => `<li style="margin-top:.45em">${g}</li>`).join('\n')}
+</ul>
+</div>` : ''}
+</div>`).join('\n')}
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap">
+<div class="eyebrow">Dependency</div>
+<h2 class="mt-3">Which product needs which spine</h2>
+<p class="lede mt-3">Junction needs both, which is the useful test that this is a real architecture rather than a story told after the fact.</p>
+<div class="tablewrap mt-4">
+<table>
+<thead><tr>${P.matrix.head.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+<tbody>
+${P.matrix.rows.map(r => {
+  const s = sysById[r[0].toLowerCase()];
+  return `<tr>
+<td><a href="systems/${s.id}.html" style="color:var(--accent);text-decoration:none;font-weight:600">${s.num} &middot; ${r[0]}</a></td>
+<td>${r[1] ? '<span class="tag tag--accent">Place</span>' : '<span class="muted">&mdash;</span>'}</td>
+<td>${r[2] ? '<span class="tag tag--cool">Entity</span>' : '<span class="muted">&mdash;</span>'}</td>
+<td>${r[3]}</td>
+</tr>`;
+}).join('\n')}
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="section section--alt">
+<div class="wrap">
+<div class="eyebrow">Reality check</div>
+<h2 class="mt-3">What is buildable, and what is not</h2>
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num" style="color:var(--cool)">BUILDABLE TODAY</div>
+<div class="mt-3 feat">
+${P.buildable.now.map(b => `<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">${b[0]}</div><div class="feat__d">${b[1]}</div></div>
+</div>`).join('\n')}
+</div>
+</div>
+<div class="card">
+<div class="card__num" style="color:var(--hot)">GENUINELY BLOCKED</div>
+<div class="mt-3 feat">
+${P.buildable.blocked.map(b => `<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">${b[0]}</div><div class="feat__d">${b[1]}</div></div>
+</div>`).join('\n')}
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="sequence">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Sequence</div>
+<h2 class="mt-3">Build order, and why</h2>
+<p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract; it wins one after it has visibly fixed something.</p>
+<div class="phases mt-5">
+${P.sequence.map((s, i) => `<div class="phase">
+<div class="phase__n">${i + 1}</div>
+<div>
+<div class="phase__t">${s[0]}</div>
+<div class="phase__meta">${s[1]}</div>
+<div class="phase__d">${s[2]}</div>
+</div>
+</div>`).join('\n')}
+</div>
+</div>
+</section>
+
+<section class="section section--ink">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Before anyone writes code</div>
+<h2 class="mt-3">Three things that would sink this</h2>
+<div class="prose mt-4" style="color:#B4BAC6">
+${P.honesty.map(h => `<p>${h}</p>`).join('\n')}
+</div>
+</div>
+</section>
+
+${foot()}`;
+
 /* ---------------- Write ---------------- */
 mkdirSync('systems', { recursive: true });
 writeFileSync('index.html', index);
+writeFileSync('platform.html', platform);
 SYSTEMS.forEach((s, i) => writeFileSync(`systems/${s.id}.html`, detailPage(s, i)));
 console.log(`Built index.html + ${SYSTEMS.length} system pages:`);
 SYSTEMS.forEach(s => console.log(`  systems/${s.id}.html  ${s.num} ${s.name}`));

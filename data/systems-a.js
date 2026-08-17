@@ -14,7 +14,8 @@ export default [
     'Government estimates fraud and error across the public sector at <strong>£55bn–£81bn a year</strong>, excluding tax and welfare. The Public Sector Fraud Authority reported <strong>£7.53bn saved</strong> in the last financial year and credited the result explicitly to AI and advanced data-matching — but that work concentrates on grants and payments, not on the award stage where procurement fraud originates.',
     'The classic red flags of bid-rigging are all detectable in data that is now public: single-bidder tenders, repeated runner-up patterns, suppliers sharing directors or registered addresses, contracts split just below thresholds, and award values clustering suspiciously close to estimates. Nobody in UK government is systematically looking for them across all buyers at once.',
     'The Procurement Act 2023 improved the raw material substantially. From <strong>1 January 2026</strong> contracting authorities must publish supplier performance for contracts over £5m, and from <strong>1 April 2026</strong> suppliers awarded below-threshold contracts must register on the Central Digital Platform and supply their Companies House number.',
-    'But the identifier is captured at registration and <strong>not published in the open feed</strong>. Measured directly against the live data in August 2026: <strong>65.2% of supplier records in Find a Tender carry no identifier scheme at all</strong>, the platform’s own supplier reference number appears <strong>exactly once in a hundred award releases, as free text</strong>, and in Contracts Finder <strong>100% of supplier entries inside award records have no identifier</strong>. Anyone told they can now simply join UK procurement data on company number should be shown those figures first.',
+    'Identifier coverage is contested, and the disagreement is itself the finding. Two independent measurements against the live feed in August 2026 disagreed sharply — roughly <strong>65% of supplier records carrying no scheme</strong> when counting company numbers on supplier entries alone, against roughly <strong>8%</strong> when counting the Procurement Act’s own organisation number across all parties. Both are defensible. The identifier exists; it is not where most consumers look for it. That organisation number is the key worth building on — it exists for councils, NHS trusts and unincorporated bodies with no company number, it survives group restructuring, and <strong>the debarment list is keyed on it</strong>. What nothing publishes is the mapping between it and Companies House.',
+    'One constraint eliminates most of the academic literature. <strong>Individual bid prices are never published in UK procurement data</strong> — only aggregate statistics, and bidder counts appear on roughly 30% of awards. That rules out the entire statistical screen family: coefficient of variation, relative distance, normalised distance and the missing-bids test. Sentinel is designed around what exists rather than what the papers assume.',
     'The Open Contracting Partnership’s one-year analysis found <strong>57 of 71 integrity indicators are now computable</strong>, up from 35 under the old regime — and that <strong>single-bid tenders cost around 7% more</strong>. It also found institutional variation nobody is acting on: <strong>Bristol awards 95% of below-threshold contracts non-competitively; Leeds under 30%</strong>. Transparency International identified <strong>135 COVID contracts worth £15.3bn carrying three or more corruption red flags</strong>.',
     'One structural obstacle explains why this has not been done. Companies House publishes free bulk files for companies and PSCs, but <strong>there is no free bulk officers file</strong> — the directorship graph can only be assembled company-by-company through a rate-limited API across 4.93 million active companies. That single asymmetry is why UK director-network analysis is dominated by commercial products rather than public ones.'
   ],
@@ -37,7 +38,8 @@ export default [
   features: [
     ['Supplier identity resolution', 'Every award tied to a canonical legal entity despite two-thirds of records lacking an identifier — surviving name changes, group restructures and typos, with confidence published per match. In one sample the same firm appeared as both “SOFTCAT LTD - FCA” and “SOFTCAT PLC”, with no company number on either.'],
     ['Connection graph', 'Shared directors, PSCs, registered addresses and corporate parents across bidders on the same tender — the single strongest signal of a rigged competition.'],
-    ['Competition intensity index', 'Bidder counts by buyer, category and value band, benchmarked nationally. Persistent single-bidder categories surface automatically.'],
+    ['Framework call-off concentration', 'The strongest collusion signal actually available in UK data. The related-processes field works reliably, exposing small supplier rings winning a disproportionate share of call-offs under one framework.'],
+    ['Competition intensity index', 'Bidder counts by buyer, category and value band where published, benchmarked nationally. Coverage is reported as a metric rather than assumed.'],
     ['Threshold-splitting detection', 'Sequential awards to one supplier that individually fall below a procurement threshold and collectively exceed it.'],
     ['Performance-to-award linkage', 'Ties the new contract performance notices back to award characteristics, so buyers can see whether cheap bids actually deliver.'],
     ['Investigator case workspace', 'Flags triaged, assigned, annotated and closed with reasons, producing a defensible audit record and training data for calibration.'],
@@ -47,7 +49,7 @@ export default [
   impact: [
     ['£55–81bn', 'Government’s own published estimate of annual fraud and error, excluding tax and welfare'],
     ['£7.53bn', 'Counter-fraud savings government attributes to AI and data-matching in the last year'],
-    ['65.2%', 'Supplier records in published procurement data carrying no resolvable identifier'],
+    ['0', 'Suppliers on the debarment list after 18 months of the regime'],
     ['0.5%', 'Recovery rate on procurement spend that would repay the platform many times over']
   ],
 
@@ -433,7 +435,7 @@ export default [
 
   risks: [
     ['Political sensitivity', 'Publishing the gap between headline and statutory performance is uncomfortable. It is also already implicit in published statistics — Plumbline surfaces rather than reveals it.'],
-    ['Overlap with MHCLG', 'MHCLG is building planning data infrastructure. Plumbline is deliberately scoped to measurement and conformance, not to replacing the platform.'],
+    ['Overlap with MHCLG', 'Smaller than it appears. The April 2026 regulations mandate local plan timetables and housing requirement figures — <strong>not planning applications</strong>. The platform’s application dataset holds records from four councils, effectively three, and its collection has not run since 17 September 2025 while every other dataset collects daily. The gap is durable, not closing.'],
     ['Attribution', 'Delay has many causes, not all within an authority’s control. Reporting separates authority-controlled from applicant-controlled and consultee-driven delay.']
   ],
 

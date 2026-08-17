@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth — the unified platform | Dexter DCL</title>
+<meta name="description" content="Five open-data systems delivered as one platform, on a shared place and entity resolution layer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="index.html#thesis">Thesis</a>
+<a class="hide-sm" href="index.html#systems">Systems</a>
+<a href="platform.html">Platform</a>
+<a class="hide-sm" href="index.html#method">Method</a>
+<a class="hide-sm" href="index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+
+<header class="hero">
+<div class="hero__grid"></div>
+<div class="wrap">
+<div class="eyebrow">The unified platform</div>
+<h1 class="display hero__title mt-3">Groundtruth <em>resolves what<br>nothing else resolves.</em></h1>
+<p class="lede hero__lede">Every system Dexter DCL can deliver today fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the five products stop being five builds.</p>
+<div class="hero__cta">
+<a class="btn btn--primary" href="#spines">The two spines</a>
+<a class="btn btn--ghost" href="#sequence">Build sequence</a>
+</div>
+</div>
+</header>
+
+<div class="wrap">
+<div class="statband">
+<div class="stat"><div class="stat__num">5</div><div class="stat__label">Products, delivered from one platform</div></div>
+<div class="stat"><div class="stat__num">2</div><div class="stat__label">Resolution layers underneath them</div></div>
+<div class="stat"><div class="stat__num">3,651</div><div class="stat__label">Planning areas whose boundaries nobody publishes</div></div>
+<div class="stat"><div class="stat__num">0</div><div class="stat__label">Personal data records any of the five touch</div></div>
+</div>
+</div>
+
+<section class="section" id="thesis">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Why one platform</div>
+<h2 class="mt-3">Five products that break in the same two places</h2>
+<div class="prose mt-4">
+<p>The ten proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.</p>
+<p>The Environment Agency cannot map its own flood objections because the dataset carries no spatial reference. Councils receive school capacity data at a geography whose boundaries are published nowhere. The housing delivery mechanism runs on a measurement three years stale. An insurer, not government, supplies Parliament with evidence on floodplain housebuilding — because the join required a paid Ordnance Survey field. Every one of those is the same missing asset: <strong>a national, resolved record of where development happens</strong>.</p>
+<p>On the other side, procurement supplier records resolve inconsistently to company numbers, grid connection registers share no key between transmission and distribution, council spending data carries no company identifiers at all, and there is <strong>no canonical register of UK public sector organisations</strong> — the one that existed was decommissioned and its domains no longer resolve.</p>
+<p>Groundtruth builds those two resolution layers as open infrastructure, then runs the five products on top. The products are the revenue. The spines are the moat.</p>
+</div>
+</div>
+</section>
+
+<section class="section section--alt" id="spines">
+<div class="wrap">
+<div class="eyebrow">Architecture</div>
+<h2 class="mt-3">The two spines</h2>
+<div class="grid grid--2 mt-4">
+<div class="card" id="place">
+<div class="card__num">THE PLACE SPINE</div>
+<h3 class="card__title">Resolves development to canonical spatial identifiers</h3>
+<p class="card__desc mt-2">England has no open, national, site-level record of where homes are permitted and built. The Ministry’s own planning application dataset holds 100,627 records from four contributing councils — effectively three, since two are a shared service — and its collection has not run since <strong>17 September 2025</strong>, while every other dataset on the platform collected yesterday. The April 2026 planning data regulations mandate three things: local plan timetables, minerals and waste timetables, and housing requirement figures. <strong>Planning applications are not among them.</strong></p>
+<div class="mt-3 feat">
+<div class="feat__item">
+<div class="feat__ico">1</div>
+<div><div class="feat__t">Planning reference resolution</div><div class="feat__d">Authority planning references resolved to site location and property identifier, across the fragmented estate of council portals.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">2</div>
+<div><div class="feat__t">Completion signal</div><div class="feat__d">New-build energy certificates as the address-level, near-real-time completion proxy — the only national one that exists. Keyed on report type, which distinguishes new build from existing stock.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">3</div>
+<div><div class="feat__t">Pupil planning area geography</div><div class="feat__d">The 3,651 planning areas reconstructed from the school membership table the Department already publishes, with a back-series to 2012/13.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">4</div>
+<div><div class="feat__t">Substation gazetteer</div><div class="feat__d">Free-text connection site names resolved to coordinates, making the grid queue mappable.</div></div>
+</div>
+</div>
+<div class="note note--warn mt-3">
+<div class="note__title">Binding constraint</div>
+Ordnance Survey’s agreement permits publishing <em>identifiers</em> appended to your own data. It prohibits publishing address strings or coordinates derived from its address products. Groundtruth therefore emits a resolution index — reference to identifier — and lets consumers join to the free identifier file themselves. That is the only architecture that is unambiguously publishable, and it has to be designed in from the start.
+</div>
+<div class="mt-3">
+<div class="note__title" style="color:var(--hot)">What the spine has to survive</div>
+<ul class="small muted mt-2" style="padding-left:1.2em">
+<li style="margin-top:.45em">The free identifier file carries <strong>no status field</strong>. Its 41.6 million records match the licensed product’s entire property table, which means plots with planning permission, occupied houses and demolished buildings are all present and <strong>indistinguishable</strong>. Anyone treating it as a list of real dwellings is wrong.</li>
+<li style="margin-top:.45em">The successor table that should record splits and merges is <strong>empty nationally — zero records</strong>. When a house converts into flats, the old identifier goes historical and new ones appear with no machine-readable link between them. Lineage has to be inferred.</li>
+<li style="margin-top:.45em">Status changed meaning in 2025. It now records whether street naming is complete, not whether the building exists — that moved to a separate field. Any time series spanning 2024 to 2026 contains an artefactual shift.</li>
+<li style="margin-top:.45em">Publication lag is measurable at <strong>34 to 76 days</strong>. The lag before that — from a house existing to a council recording it — has no service level, no target, and no published measurement anywhere.</li>
+</ul>
+</div>
+</div>
+<div class="card" id="entity">
+<div class="card__num">THE ENTITY SPINE</div>
+<h3 class="card__title">Resolves organisations to canonical identifiers across registers</h3>
+<p class="card__desc mt-2">The identifier that actually persists across UK public sector systems is not the company number. It is the <strong>Public Procurement Organisation Number</strong>, introduced by the Procurement Act — because it exists for councils, NHS trusts and unincorporated bodies that have no company number, and because the debarment list is keyed on it. Meanwhile the register of UK public sector organisations that government built has been decommissioned; its domains fail to resolve at all.</p>
+<div class="mt-3 feat">
+<div class="feat__item">
+<div class="feat__ico">1</div>
+<div><div class="feat__t">Procurement number to company number</div><div class="feat__d">The mapping between the Procurement Act’s organisation number and Companies House, which nothing currently publishes.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">2</div>
+<div><div class="feat__t">Public sector organisation register</div><div class="feat__d">Reconstructed from the central government organisations interface — which carries stable identifiers and, unusually, machine-readable succession chains — plus health, education and charity registers.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">3</div>
+<div><div class="feat__t">Beneficial ownership graph</div><div class="feat__d">The full persons-with-significant-control register is a free daily bulk download. That is the graph backbone at zero API cost.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico">4</div>
+<div><div class="feat__t">Directorship graph</div><div class="feat__d">Seeded from organisations that actually appear in the data rather than the whole register, then expanded — roughly 100,000 calls for 20,000 seeds, inside one day’s rate limit.</div></div>
+</div>
+</div>
+<div class="note note--warn mt-3">
+<div class="note__title">Binding constraint</div>
+Succession is the hard part, and it is about to get harder: 134 councils merge into 38 unitary authorities on 1 April 2028. Area codes and organisational identity diverge precisely at a merger, so an entity spine that conflates the two will break exactly when it is most needed.
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap">
+<div class="eyebrow">Dependency</div>
+<h2 class="mt-3">Which product needs which spine</h2>
+<p class="lede mt-3">Junction needs both, which is the useful test that this is a real architecture rather than a story told after the fact.</p>
+<div class="tablewrap mt-4">
+<table>
+<thead><tr><th>System</th><th>Place spine</th><th>Entity spine</th><th>What it needs that nothing else provides</th></tr></thead>
+<tbody>
+<tr>
+<td><a href="systems/catchment.html" style="color:var(--accent);text-decoration:none;font-weight:600">07 &middot; Catchment</a></td>
+<td><span class="tag tag--accent">Place</span></td>
+<td><span class="muted">&mdash;</span></td>
+<td>Planning area geography and small-area completions</td>
+</tr>
+<tr>
+<td><a href="systems/highwater.html" style="color:var(--accent);text-decoration:none;font-weight:600">06 &middot; Highwater</a></td>
+<td><span class="tag tag--accent">Place</span></td>
+<td><span class="muted">&mdash;</span></td>
+<td>Objection records resolved to sites and flood zones</td>
+</tr>
+<tr>
+<td><a href="systems/plumbline.html" style="color:var(--accent);text-decoration:none;font-weight:600">05 &middot; Plumbline</a></td>
+<td><span class="tag tag--accent">Place</span></td>
+<td><span class="muted">&mdash;</span></td>
+<td>Completion signal faster than annual statistics</td>
+</tr>
+<tr>
+<td><a href="systems/sentinel.html" style="color:var(--accent);text-decoration:none;font-weight:600">01 &middot; Sentinel</a></td>
+<td><span class="muted">&mdash;</span></td>
+<td><span class="tag tag--cool">Entity</span></td>
+<td>Organisation resolution and the corporate graph</td>
+</tr>
+<tr>
+<td><a href="systems/junction.html" style="color:var(--accent);text-decoration:none;font-weight:600">10 &middot; Junction</a></td>
+<td><span class="tag tag--accent">Place</span></td>
+<td><span class="tag tag--cool">Entity</span></td>
+<td>Substation locations and cross-register project matching</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="section section--alt">
+<div class="wrap">
+<div class="eyebrow">Reality check</div>
+<h2 class="mt-3">What is buildable, and what is not</h2>
+<div class="grid grid--2 mt-4">
+<div class="card">
+<div class="card__num" style="color:var(--cool)">BUILDABLE TODAY</div>
+<div class="mt-3 feat">
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Pupil planning area geography</div><div class="feat__d">Every input is open and published. 20,426 school-to-area assignments verified, matching the Department’s own count of 3,651 exactly. Coordinates present for 99.9% of relevant schools. No freedom of information request, no scraping.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Honest planning performance measurement</div><div class="feat__d">Both figures are already published side by side — 91% of major applications decided "in time", 19% within the actual statutory deadline. The product is presentation, not extraction. Extension usage is published too: 43% of all decisions, 77% of majors.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Procurement process indicators</div><div class="feat__d">The corruption risk indicators that need no bid prices — procedure type, whether a call for tenders was published, submission and decision periods, supplier concentration.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Framework call-off concentration</div><div class="feat__d">The related-processes field genuinely works, making this the most tractable collusion signal available in UK data.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Beneficial ownership graph</div><div class="feat__d">Free daily bulk download of the full persons-with-significant-control register.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">Flood objection archive and trend</div><div class="feat__d">The objections dataset parses cleanly. The 30% unknown-outcome gap and the flat rate behind rising counts are both publishable findings on day one.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--cool-soft);color:var(--cool)">&check;</div>
+<div><div class="feat__t">The address lag nobody measures</div><div class="feat__d">How long between a home existing and its identifier appearing? The publication half is documented at 34 to 76 days. The council half is unmeasured by anyone — and measurable by joining energy certificate or land registry dates to property identifiers. A cheap, original, publishable statistic that no institution currently produces.</div></div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card__num" style="color:var(--hot)">GENUINELY BLOCKED</div>
+<div class="mt-3 feat">
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">Individual bid prices</div><div class="feat__d">Not published in UK procurement data at any point. This eliminates the entire statistical screen family the academic literature is built on, and four of the standard collusion indicators. Design around it rather than hoping.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">Small-area internal migration</div><div class="feat__d">Nothing exists below local authority level. The detailed origin-destination series was discontinued in 2020. Must be synthesised, and the synthesis must be labelled as such.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">National planning application data</div><div class="feat__d">Not mandated, specification still a working draft, platform dataset a three-council alpha with dead collection. This is a multi-year gap, not a near-term one — which is precisely why the place spine has value.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">Record-level building control completions</div><div class="feat__d">The data exists and feeds the official statistics. It is never published below aggregate.</div></div>
+</div>
+<div class="feat__item">
+<div class="feat__ico" style="background:var(--hot-soft);color:var(--hot)">&times;</div>
+<div><div class="feat__t">Address text at scale</div><div class="feat__d">Locked behind Ordnance Survey and Royal Mail licensing. The energy certificate register is the only open route to an identifier-to-address link, and it covers roughly half the housing stock.</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="sequence">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Sequence</div>
+<h2 class="mt-3">Build order, and why</h2>
+<p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract; it wins one after it has visibly fixed something.</p>
+<div class="phases mt-5">
+<div class="phase">
+<div class="phase__n">1</div>
+<div>
+<div class="phase__t">Publish the planning area geography</div>
+<div class="phase__meta">Months 1–3</div>
+<div class="phase__d">Open, unpaid, under an open licence. It is weeks of work, demonstrably missing, and it converts an unknown supplier into the people who fixed something government wanted fixed. The named team that owns the survey is the buyer for everything after.</div>
+</div>
+</div>
+<div class="phase">
+<div class="phase__n">2</div>
+<div>
+<div class="phase__t">Ship Catchment on top of it</div>
+<div class="phase__meta">Months 3–9</div>
+<div class="phase__d">Small-area demand forecasting and the surplus-shortage adjacency map. The National Audit Office has already written the thesis: national projections are accurate, the failure is spatial.</div>
+</div>
+</div>
+<div class="phase">
+<div class="phase__n">3</div>
+<div>
+<div class="phase__t">Build the entity spine and Sentinel</div>
+<div class="phase__meta">Months 6–15</div>
+<div class="phase__d">Organisation resolution first, then process indicators and framework concentration. Route findings through the compliance service, which is open to anyone, rather than the review service, which is not.</div>
+</div>
+</div>
+<div class="phase">
+<div class="phase__n">4</div>
+<div>
+<div class="phase__t">Extend the place spine to Highwater and Plumbline</div>
+<div class="phase__meta">Months 12–24</div>
+<div class="phase__d">Both consume the same asset. Two further buyers in two further departments, at marginal cost.</div>
+</div>
+</div>
+<div class="phase">
+<div class="phase__n">5</div>
+<div>
+<div class="phase__t">Junction last</div>
+<div class="phase__meta">Months 18–30</div>
+<div class="phase__d">It needs both spines mature, and four of six network operators must first be persuaded to serve data to anonymous clients.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section section--ink">
+<div class="wrap wrap--narrow">
+<div class="eyebrow">Before anyone writes code</div>
+<h2 class="mt-3">Three things that would sink this</h2>
+<div class="prose mt-4" style="color:#B4BAC6">
+<p>The place spine depends on resolving planning references across roughly 400 council portals. That is the exact failure mode which killed the original planning alerts project in 2011 and is currently degrading its volunteer successor — which has lost 20-plus councils to bot protection since June 2026 and has authorities frozen as far back as January 2019. Any plan that treats this as solved is wrong. Coverage must be published as a metric, not assumed.</p>
+<p>Groundtruth cannot be built on a public sector contractor licence. That instrument permits using address data for one named client’s purposes, prohibits commercial exploitation of any product incorporating the results, and requires destruction within 30 days. A multi-client product needs a partner licence or the addressing agreement that exists by name in Ordnance Survey’s own template and is published nowhere. <strong>Resolve this before writing code, not after.</strong></p>
+<p>Two independent measurements of supplier identifier coverage in procurement data disagree — roughly 65% missing when counting company numbers on supplier records only, roughly 8% when counting the Procurement Act organisation number across all parties. Both were measured against the live feed. The discrepancy is itself the finding: the identifier exists, but not where most consumers look for it.</p>
+</div>
+</div>
+</section>
+
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="systems/transit.html">02 &middot; Transit</a>
+<a href="systems/compass.html">03 &middot; Compass</a>
+<a href="systems/threshold.html">04 &middot; Threshold</a>
+<a href="systems/plumbline.html">05 &middot; Plumbline</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="systems/highwater.html">06 &middot; Highwater</a>
+<a href="systems/catchment.html">07 &middot; Catchment</a>
+<a href="systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="systems/hearth.html">09 &middot; Hearth</a>
+<a href="systems/junction.html">10 &middot; Junction</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="index.html#thesis">The thesis</a>
+<a href="index.html#method">How these were chosen</a>
+<a href="index.html#rejected">What we rejected</a>
+<a href="index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="assets/app.js"></script>
+</body></html>
