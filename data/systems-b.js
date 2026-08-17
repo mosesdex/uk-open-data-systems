@@ -18,10 +18,11 @@ export default [
   ],
 
   solution: [
-    'Highwater turns a flat administrative list into a spatial, longitudinal evidence base. It resolves every objection record to a site location by matching authority planning references against council portals, producing the geocoded national dataset that does not currently exist.',
-    'It then closes the outcome gap the EA does not close itself, retrieving decision notices for the 7,011 unknown cases. If the granted-against-advice rate in the unknown set even approximates the known set, the true national compliance figure is materially worse than the published one — and that is a finding government needs before it changes the policy.',
+    'Highwater leads with the outcome gap, not with mapping. The existing volunteer planning aggregator already carries decision status and decision date alongside coordinates, retrievable free and anonymously — so the 7,011 unknown cases can be closed without scraping a single council portal. If the granted-against-advice rate in the unknown set even approximates the known set, the true national compliance figure is materially worse than the published one, and that is the finding government needs before it changes the policy.',
+    'Geocoding follows from the same source rather than driving the work. Where portal retrieval is unavoidable, the Agency’s own dataset supplies a current directory of every authority’s planning portal, and its guidance explicitly tells users to look applications up that way. One trap is load-bearing: authority reference formats are <strong>not nationally unique</strong> — the same reference exists in four different councils — so any lookup must be constrained by authority or it will silently geocode records to the wrong county while appearing perfectly healthy.',
     'It maintains a versioned archive of every annual release, so trends survive the EA’s restatements. This matters urgently: the statutory consultee reform proposes <strong>removing the use of objections where flood directions do not apply</strong>, which would break the only national time series that exists, at the moment it is most needed.',
-    'And it addresses the blind spot directly, cross-referencing new residential permissions against surface water risk — the category where the EA has no objection trigger and therefore no data exists at all, despite the December 2024 NPPF extending the sequential test to cover it.'
+    'And it addresses the blind spot directly. The Environment Agency’s statutory trigger is, as a matter of law, <strong>fluvial and tidal only</strong> — the flood zones that trigger consultation are defined purely by river and sea probability. Surface water consultation falls to lead local flood authorities, whose responses sit on roughly three hundred separate portals with no central register, no dataset and no reporting requirement. Crucially, the ministerial referral that applies when a council overrides the Agency <strong>does not apply to surface water objections</strong>. No escalation trigger, no referral, no record.',
+    'The policy history has three steps and must be told in full. Planning guidance brought other flood sources in during <strong>2022</strong>; the <strong>December 2024</strong> framework codified it for individual applications; then <strong>September 2025</strong> guidance created an escape hatch available to no other flood source, allowing the sequential test to be disapplied where a site-specific assessment shows occupiers would remain safe from surface water for the lifetime of the development. Surface water was brought in, hardened, and then singled out for an exemption. That is a stronger finding than a simple extension — and stating it as a simple extension invites immediate correction.'
   ],
 
   datasets: [
@@ -73,7 +74,8 @@ export default [
   ],
 
   risks: [
-    ['Portal scraping fragility', 'Council portals change without notice. Mitigated by treating coverage as a published metric rather than a silent assumption, and by degrading gracefully to partial coverage with stated confidence.'],
+    ['Portal access, where it is still needed', 'Around 28% of authority portals serve a blanket exclusion in their robots file, and 21 councils on one vendor’s hosted estate now return a hard denial rather than a solvable challenge. Defeating an interposed control would materially strengthen an unauthorised-access argument, so it is out of scope. Coverage is published as a metric and the gap is reported as a finding — which is more valuable than the data.'],
+    ['Surface water data access', 'The rivers and sea risk layers are genuinely open and bulk-downloadable. <strong>The surface water layers are view-only</strong>, available in bulk only through a negotiated file-transfer arrangement with the Agency. The data gap mirrors the policy gap exactly. Securing that access is a first-phase dependency, not a detail.'],
     ['Policy break', 'If objections are removed where flood directions do not apply, the series discontinues. Highwater’s archive makes the break visible rather than invisible — arguably its most valuable function.'],
     ['Contested framing', 'Authorities will object to being ranked. Reporting presents context — housing pressure, viability, defence status — rather than a naked league table.']
   ],
@@ -392,17 +394,17 @@ export default [
 
   datasets: [
     ['Transmission Entry Capacity register', 'NESO', 'CSV plus unauthenticated CKAN API, twice weekly. 2,205 rows. No geocoding, reform status 63% empty.'],
-    ['Embedded Capacity Registers', 'Six DNO groups', 'Mandated under DCUSA with a common ENA schema — but published across four platforms, four of six login-gated.'],
+    ['Embedded Capacity Registers', 'Six DNO groups', 'A common 57-column schema whose columns 11 and 12 carry <strong>eastings and northings</strong> — so distribution needs no gazetteer at all. Three of six serve anonymous users; the other three require free registration. Column names diverge wildly but the order is stable, so parse positionally.'],
     ['Interconnector register', 'NESO', 'Open CSV, 33 rows, same schema family as transmission.'],
     ['Connections reform results', 'NESO', 'Published as attachments on a web page, not as datasets. The files behind the links are silently replaced with no version history or changelog. The register of existing agreements is an opt-in applicant directory, not a list of reform outcomes — its own header says so.'],
-    ['Grid Supply Point boundaries', 'NESO', 'Coarse GSP polygons; newest file dates from January 2025.'],
+    ['Grid Supply Point boundaries and lookup', 'NESO', 'Polygons current to February 2026, plus an under-advertised lookup carrying actual point coordinates for 376 of 380 nodes — though that file has not been refreshed since 2018.'],
     ['Clean Power 2030 Action Plan', 'DESNZ', 'Zonal capacity ranges by technology, the basis for strategic alignment decisions.'],
     ['Local Area Energy Plans', 'Combined authorities', 'The demand-side counterpart that currently cannot obtain consistent grid data.']
   ],
 
   features: [
     ['Cross-register entity resolution', 'The transmission-to-distribution join that no shared identifier provides, with match confidence published.'],
-    ['Substation gazetteer', 'Free-text connection sites resolved to coordinates, making the transmission queue mappable for the first time.'],
+    ['Substation gazetteer', 'Free-text connection sites resolved to coordinates, making the transmission queue mappable for the first time. Around 45% matches from three open sources today; a realistic ceiling is 70–75%, because roughly a fifth of the queue is unbuilt placeholder nodes and privately-owned generator substations that no gazetteer can ever match. Say so plainly — a stakeholder told “we will geocode the queue” hears 100%.'],
     ['Normalised headroom', 'One stated definition of available capacity applied across all operators, with each operator’s own methodology documented alongside it rather than buried in accompanying PDFs. This is the core contribution: the schema is already mandated, the methodology is explicitly not.'],
     ['Queue integrity tracking', 'Which projects hold capacity versus which are progressing, through the Gate 2 reordering and the offer backlog.'],
     ['Capacity discovery', 'A direct answer to the question the market cannot currently answer: where can this much capacity connect, and by when.'],
@@ -439,7 +441,8 @@ export default [
   ],
 
   risks: [
-    ['Being overtaken by the mandate', 'The obvious risk is that Ofgem tightens the specification to require a common methodology, removing the need. That would be a good outcome for the country and a bad one for the product — so the work should be positioned to inform that tightening rather than to depend on its absence.'],
+    ['The regulator may close the data, not open it', 'The most serious risk, and the one most likely to be missed. Ofgem consulted through mid-2026 on tightening open data triage on security grounds, stating that the changes are <strong>"likely to increase the proportion of data being triaged as shared rather than open"</strong>. An argument resting on openness obligations is running into a headwind. The counter is in Ofgem’s own text: it names impediment to <em>"connection reform, connection planning, and local energy planning"</em> as a consequence of withdrawal, and invites concrete use cases with quantified impacts. Responding to that process with measured evidence is cheap and high-leverage.'],
+    ['Being overtaken by the mandate', 'Ofgem could tighten the specification to require a common methodology, removing the need. That would be good for the country and fatal for the product — so the work should inform that tightening rather than depend on its absence.'],
     ['Entity resolution accuracy', 'Without a shared key, matching is probabilistic. Confidence is published per match and low-confidence links are never silently merged.'],
     ['Moving target', 'The reform is mid-flight with offers issuing into 2027. Junction is designed to track a changing queue rather than describe a static one.']
   ],
