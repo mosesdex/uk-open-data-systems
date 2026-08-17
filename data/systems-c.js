@@ -373,7 +373,9 @@ export default [
     'The ownership data is keyed on title numbers. The free boundaries are keyed on a different spatial identifier. The crosswalk between them is a paid product. Free data on both sides, paywall exactly in the middle.',
     'The government has committed to changing this. The Land Use Framework, published March 2026, states it will work with the registry <strong>"this year"</strong> to provide <strong>"free, spatial land ownership data for larger properties covering the vast majority of England and Wales, excluding almost all homeowners."</strong>',
     'Two things make that commitment worth watching rather than waiting on. No size threshold is defined. And <strong>the registry’s own business plan does not mention the commitment at all</strong> — it commits instead to adding identifiers to more free datasets and to "initial design work" on more clearly identifying the parties recorded on the register.',
-    'That last phrase is the entity spine problem, stated by the registry itself, and still at design stage. Roughly <strong>10% of land in England remains unregistered</strong> despite compulsory registration since 1990.'
+    'That last phrase is the entity spine problem, stated by the registry itself, and still at design stage. Roughly <strong>10% of land in England remains unregistered</strong> despite compulsory registration since 1990.',
+    'And the register meant to reveal who owns property through offshore structures is barely enforced. Of roughly <strong>£23.5m in penalties ever issued</strong> for failing to register, <strong>£1.18m has been collected — about 5%</strong>. In one recent financial year the registrar levied <strong>no penalties at all</strong>; in the next it levied <strong>one</strong>, worth £70,000, while reversing nineteen. Civil sanction revenue has been <strong>negative for two consecutive years</strong> — more written off than levied.',
+    'Most telling of all: a written parliamentary answer confirms that <strong>no penalty has ever been issued for beneficial ownership non-compliance</strong>. Every one of the 445 penalties was for outright failure to register. Nothing for false, evasive or absent ownership statements — and independent analysis finds entities claiming to have <strong>no beneficial owner rose from 9% to 19%</strong>, with 181 of 201 registered professional trustees never having disclosed an individual owner at all.'
   ],
 
   solution: [
@@ -397,6 +399,7 @@ export default [
     ['Ownership-to-organisation resolution', 'Registered parties resolved to canonical companies, connecting land to the corporate graph.'],
     ['Landholding aggregation', 'Total holdings by organisation and by group, rather than title by title.'],
     ['Corporate and overseas exposure', 'Which land is held through companies, and where control sits.'],
+    ['Ownership-declaration anomaly detection', 'Entities declaring no beneficial owner, trustee structures that have never named an individual, and registrations whose declared ownership is inconsistent with the corporate graph — the category against which no penalty has ever been issued.'],
     ['Development pipeline linkage', 'Ownership joined to permissions, contributions and completions across the platform.'],
     ['Unregistered land mapping', 'Where the roughly 10% of unregistered land sits, which is itself unmapped.'],
     ['Commitment tracking', 'Public monitoring of whether the free spatial ownership release actually arrives during 2026.']
@@ -406,7 +409,7 @@ export default [
     ['8.2m', 'Land parcel boundaries free under an open licence'],
     ['~10%', 'Of English land still unregistered after 35 years of compulsory registration'],
     ['2026', 'Year the government committed to free spatial ownership data for larger properties'],
-    ['0', 'Mentions of that commitment in the registry’s own business plan']
+    ['5%', 'Share of overseas-entity penalties ever issued that has actually been collected']
   ],
 
   benefits: {
