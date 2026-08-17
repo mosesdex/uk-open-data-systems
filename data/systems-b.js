@@ -374,7 +374,8 @@ export default [
   status: 'Gate 2 offers being issued through to March 2027',
 
   problem: [
-    'Britain reordered its grid connection queue. The old queue exceeded <strong>700 GW</strong> — roughly four times what is needed by 2030. The reformed pipeline published in December 2025 is <strong>381.5 GW</strong>, with over <strong>300 GW removed</strong>. Offers are being issued now and are running <strong>2.5 to 5.5 months late</strong>, continuing into March 2027.',
+    'Britain reordered its grid connection queue. The commonly quoted comparison — 700 GW down to 381.5 GW — is not like for like, and the error runs through most coverage. The pre-reform figure of <strong>more than 700 GW covers generation and storage only</strong>. The 381.5 GW reformed pipeline is <strong>283 GW of generation and storage plus 98.5 GW of transmission-connected demand</strong>. On a like-for-like basis the reduction is <strong>700+ GW to 283 GW</strong>, with over 300 GW not proceeding.',
+    'Offers are running late, and the regulator has intervened twice in opposite directions — a distinction routinely conflated. In <strong>February 2026 Ofgem refused</strong> relief on protected projects’ connection dates, disclosing that 210 of 340 protected projects were affected and stating it was "frustrated and disappointed". In <strong>June 2026 it granted</strong> an alternative timetable, setting hard deadlines of <strong>30 September 2026 for Phase 1 offers</strong> and 31 January 2027 for Phase 2. Progress against the first of those looks strained: the industry dashboard showed <strong>94 of 633 Phase 1 offers issued</strong> in mid-August 2026.',
     'The transmission side of this is a genuine open data success. The Transmission Entry Capacity register is published twice weekly as CSV with an unauthenticated API — 2,205 project rows, retrievable in a single call, no registration.',
     'Distribution improved sharply in 2026, and the standard story about it is now out of date. Ofgem digitalised the Long-Term Development Statement by direction in April 2024, mandating a common information model built on the international grid exchange standard. In the <strong>May 2026 cycle, five of six distribution operator groups published standardised capacity heatmaps openly</strong> against that model. One group published nothing publicly discoverable.',
     'But the standardisation is thinner than it looks, and the reason is in the specification itself. Ofgem defines the fields and then <strong>explicitly delegates the calculation to each operator</strong>: available capacity is computed "based on more detailed analysis and internal policies", and a utility "should provide details on how this RAG status is calculated as part of the accompanying documentation." <strong>GB has a common schema for grid capacity. It has no common methodology, and the specification does not require one.</strong> Two operators can be fully compliant and return numbers that cannot be compared.',
@@ -393,7 +394,7 @@ export default [
     ['Transmission Entry Capacity register', 'NESO', 'CSV plus unauthenticated CKAN API, twice weekly. 2,205 rows. No geocoding, reform status 63% empty.'],
     ['Embedded Capacity Registers', 'Six DNO groups', 'Mandated under DCUSA with a common ENA schema — but published across four platforms, four of six login-gated.'],
     ['Interconnector register', 'NESO', 'Open CSV, 33 rows, same schema family as transmission.'],
-    ['Connections reform results', 'NESO', 'Existing Agreement Register and zonal breakdowns — published as unversioned spreadsheets off a web page, not as datasets.'],
+    ['Connections reform results', 'NESO', 'Published as attachments on a web page, not as datasets. The files behind the links are silently replaced with no version history or changelog. The register of existing agreements is an opt-in applicant directory, not a list of reform outcomes — its own header says so.'],
     ['Grid Supply Point boundaries', 'NESO', 'Coarse GSP polygons; newest file dates from January 2025.'],
     ['Clean Power 2030 Action Plan', 'DESNZ', 'Zonal capacity ranges by technology, the basis for strategic alignment decisions.'],
     ['Local Area Energy Plans', 'Combined authorities', 'The demand-side counterpart that currently cannot obtain consistent grid data.']
@@ -410,10 +411,10 @@ export default [
   ],
 
   impact: [
-    ['700 → 381.5 GW', 'Queue capacity before and after reform'],
+    ['700+ → 283 GW', 'Generation and storage queue, like for like, before and after reform'],
     ['5 of 6', 'Operators publishing a standardised capacity heatmap — with five different serialisations'],
     ['0', 'Common methodologies behind the common schema'],
-    ['2.5–5.5 months', 'Current slippage in issuing Gate 2 offers']
+    ['94 of 633', 'Phase 1 offers issued by mid-August, against a 30 September deadline']
   ],
 
   benefits: {
