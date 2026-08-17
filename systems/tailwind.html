@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tailwind — Dexter DCL</title>
+<meta name="description" content="England decides where to invest in walking and cycling using commuting patterns recorded in 2011. Scotland built a maintained replacement. England did not.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<div class="eyebrow">System 16 &middot; Evidence base frozen since 2020</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Tailwind</h1>
+<p class="lede" style="margin-top:.6rem">Active travel evidence, brought up to date</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">England decides where to invest in walking and cycling using commuting patterns recorded in 2011. Scotland built a maintained replacement. England did not.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Transport</span><span class="tag tag--accent">Equity</span><span class="tag tag--accent">Central government</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>The standard evidence tool for active travel business cases in England is built on <strong>2011 Census commuting data</strong>. Its data repositories were last updated in <strong>May 2020</strong>, and its geography codes are still the 2011 set. It has never been rebuilt on the 2021 Census.</p>
+<p>So a 2026 English cycling scheme is justified using how people travelled to work fifteen years ago — before the pandemic reshaped commuting entirely, and before a decade of housing development changed where people live.</p>
+<p>Scotland faced the same problem and solved it, building a maintained, open-source successor on current mapping data, updated in 2025 and actively developed since. <strong>There is no English equivalent.</strong> Active Travel England publishes design and scheme review tools, which are different instruments entirely.</p>
+<p>The supporting data is in similar condition. There is <strong>no national dataset for footway condition</strong> — road condition statistics cover carriageways only, and effectively one council publishes footway surveys openly. There is no national crossing dataset and no national register of school streets.</p>
+<p>Meanwhile the cycle network data itself is genuinely excellent: an open licence, weekly updates, 37,208 segments with surface, lighting and traffic-free attributes. The network is well mapped. The demand model is fifteen years old.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">2011</div><div class="impact__l">Census year underpinning English active travel business cases in 2026</div></div><div class="impact__cell"><div class="impact__n">May 2020</div><div class="impact__l">Last update to the tool’s data repositories</div></div><div class="impact__cell"><div class="impact__n">37,208</div><div class="impact__l">Cycle network segments available free, weekly, with quality attributes</div></div><div class="impact__cell"><div class="impact__n">1</div><div class="impact__l">Councils publishing footway condition data openly</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Tailwind rebuilds active travel demand evidence on current data, at the geography where schemes are actually designed.</p>
+<p>It starts by replacing the 2011 commuting base with 2021 Census travel patterns, current population, and the development that has happened since — which is where the platform’s completion signal earns its place.</p>
+<p>It joins that to the network data that already exists and is well maintained, so route quality, surface, lighting and traffic separation inform demand rather than sitting in a separate map.</p>
+<p>And it fills the pedestrian gap as far as open data allows, being explicit that footway condition is not nationally collected. Where the only national source is volunteer-maintained mapping, that is stated rather than obscured.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>National cycle network</strong></td><td class="muted">Walk Wheel Cycle Trust</td><td>37,208 segments, open licence, updated weekly, with surface, lighting, traffic-free and quality attributes. Genuinely best in class.</td></tr><tr><td><strong>Census 2021 travel data</strong></td><td class="muted">ONS</td><td>Current commuting and travel patterns, replacing the 2011 base.</td></tr><tr><td><strong>Walking and cycling statistics</strong></td><td class="muted">DfT</td><td>Local authority level participation from the national activity survey. Spreadsheet only, no interface.</td></tr><tr><td><strong>Transport access nodes</strong></td><td class="muted">DfT</td><td>Every stop and station with coordinates, free and keyless.</td></tr><tr><td><strong>New-build completions</strong></td><td class="muted">MHCLG</td><td>Development since 2011, which the frozen model cannot see.</td></tr><tr><td><strong>Deprivation indices</strong></td><td class="muted">MHCLG</td><td>The 2025 indices, for equity analysis — most existing work still uses the 2019 set.</td></tr><tr><td><strong>Open street mapping</strong></td><td class="muted">OpenStreetMap</td><td>The only national picture of footways and crossings. Share-alike licensed, so used for analysis rather than shipped.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Current demand modelling</div><div class="feat__d">Active travel potential rebuilt on 2021 data at neighbourhood level.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Development-aware forecasting</div><div class="feat__d">New housing since 2011 included, which the existing tool structurally cannot do.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Network quality integration</div><div class="feat__d">Surface, lighting and traffic separation joined to demand rather than mapped separately.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Equity analysis</div><div class="feat__d">Access and provision against current deprivation, not the superseded indices.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Scheme evidence packs</div><div class="feat__d">The business case evidence councils currently build by hand or commission.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Pedestrian data honesty</div><div class="feat__d">Where footway and crossing data does not exist nationally, that gap is published as a finding rather than filled with assumptions.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Open method</div><div class="feat__d">Published methodology and open source, matching the standard the Scottish successor set.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Replaces a fifteen-year-old evidence base underpinning current investment decisions.</li><li>Gives Active Travel England the demand analysis its design and review tools assume but do not provide.</li><li>Brings England level with Scotland, which already has a maintained open successor.</li><li>Makes development-aware active travel planning possible, which the frozen tool cannot support.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Investment targeted at where people would walk and cycle now, not where they commuted in 2011.</li><li>New developments assessed for active travel access as they are built.</li><li>Communities can see the evidence behind schemes proposed in their area.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Active Travel England, DfT, combined authorities, individual councils</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, with active travel programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Rebuild the base</div><div class="phase__meta">4 months</div><div class="phase__d">Demand model reconstructed on 2021 data with published methodology.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Network integration</div><div class="phase__meta">3 months</div><div class="phase__d">Quality attributes joined to demand at route level.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Equity layer</div><div class="phase__meta">3 months</div><div class="phase__d">Provision against current deprivation, published openly.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Authority tooling</div><div class="phase__meta">6 months</div><div class="phase__d">Scheme evidence packs released to councils and combined authorities.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Pandemic-affected inputs</div><p class="card__desc">Census 2021 travel-to-work data was collected under pandemic conditions and is flagged by the statistics authority. Using it as a normal-times baseline would repeat the existing tool’s error in a new direction. Treatment must be explicit.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Share-alike licensing</div><p class="card__desc">The only national footway and crossing data carries share-alike obligations that would attach to a derived database. Used for analysis and gap-finding, never shipped in the product.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Being overtaken</div><p class="card__desc">Government could fund an English successor directly. That would be the right outcome nationally, so the work is positioned to inform it rather than depend on its absence.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://data-sustrans-uk.opendata.arcgis.com/" target="_blank" rel="noopener">National cycle network open data</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.pct.bike/" target="_blank" rel="noopener">Propensity to cycle tool</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.npt.scot/" target="_blank" rel="noopener">Scotland network planning tool</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/statistical-data-sets/walking-and-cycling-statistics-cw" target="_blank" rel="noopener">Walking and cycling statistics</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.gov.uk/government/collections/ate-scheme-design-and-review-tools" target="_blank" rel="noopener">Active Travel England scheme tools</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/freehold.html">&larr; 15 Freehold</a>
+<a class="btn btn--ghost" href="../systems/watchman.html">17 Watchman &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/tailwind.html">16 &middot; Tailwind</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

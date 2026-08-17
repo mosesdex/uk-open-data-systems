@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sightline — Dexter DCL</title>
+<meta name="description" content="Active Travel England advised on 2,045 planning applications covering 521,000 homes last year. It published none of it. Government is reforming statutory consultees using almost no">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 13 &middot; Consultee reform consulted on, January 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Sightline</h1>
+<p class="lede" style="margin-top:.6rem">Statutory consultee advice, and what happened to it</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Active Travel England advised on 2,045 planning applications covering 521,000 homes last year. It published none of it. Government is reforming statutory consultees using almost no data on what they achieve.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Operations</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Certain expert bodies must be consulted on planning applications. They give advice, councils decide, and almost none of that advice is published as data.</p>
+<p>Active Travel England became a statutory consultee in 2023. In 2025-26 it <strong>responded to 2,045 consultations covering more than 521,000 homes</strong> and recommended improvements on applications comprising <strong>191,000 homes</strong>. It holds every one of these in a casework system. Of its 79 publications, exactly two are transparency releases and both concern funding. Even its council capability ratings are published as a PDF.</p>
+<p>Its own independent reviewer recommended creating a framework to record outcomes — meaning the body was not systematically tracking what happened to its advice, let alone publishing it.</p>
+<p>The Environment Agency shows the other failure mode. It <strong>does</strong> publish flood objections at application level — <strong>23,336 records across 426 authorities</strong>, including 633 where permission was granted against its advice, covering 347,425 homes. But the file carries <strong>no location of any kind</strong>, and for 7,011 records the Agency does not know what the council decided. Published and unmappable.</p>
+<p>Meanwhile government consulted through January 2026 on cutting statutory consultee involvement by around 40%. A reform premised on consultee burden, conducted with essentially no public data on consultee outcomes.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">2,045</div><div class="impact__l">Active Travel England consultations last year, none published as data</div></div><div class="impact__cell"><div class="impact__n">521,000</div><div class="impact__l">Homes covered by that advice</div></div><div class="impact__cell"><div class="impact__n">7,011</div><div class="impact__l">Flood objections where the Agency does not know the outcome</div></div><div class="impact__cell"><div class="impact__n">~40%</div><div class="impact__l">Proposed reduction in consultee involvement, consulted on with no outcome data</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Sightline builds the outcome layer for statutory consultee advice: what was advised, what was decided, and what was built.</p>
+<p>It starts with the Environment Agency data because it is already published and needs only resolution — the objections become mappable, the unknown outcomes get recovered, and the compliance picture becomes checkable rather than asserted.</p>
+<p>It then extends the same template to Active Travel England. The casework exists in a structured system; the ask is publication, not creation. A working demonstration on flood data is the strongest possible argument for it.</p>
+<p>And it gives the consultee reform an evidence base. If the case for cutting consultee involvement is that it delays development without improving it, that is a testable claim — and nobody can currently test it.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Flood risk objections</strong></td><td class="muted">Environment Agency</td><td>23,336 records, 426 authorities, open licence. No spatial reference. Outcome unknown for 30%.</td></tr><tr><td><strong>Water quality objections</strong></td><td class="muted">Environment Agency</td><td>A second, smaller sheet in the same file with an objection reason field — largely untouched.</td></tr><tr><td><strong>Active Travel England casework</strong></td><td class="muted">ATE</td><td>Over 2,000 responses a year covering 521,000 homes. Held in a structured system, published nowhere.</td></tr><tr><td><strong>Planning applications</strong></td><td class="muted">MHCLG and authority portals</td><td>The decisions that consultee advice was given on.</td></tr><tr><td><strong>Flood zones</strong></td><td class="muted">Environment Agency</td><td>Open geospatial services with no key required — the layer objections need joining to.</td></tr><tr><td><strong>New-build energy certificates</strong></td><td class="muted">MHCLG</td><td>Whether advised-against development was actually completed and occupied.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Advice-to-outcome chain</div><div class="feat__d">Consultee advice resolved to a site, joined to the decision, and followed through to completion.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Outcome recovery</div><div class="feat__d">The 7,011 cases where the Environment Agency does not know what the council decided.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Override analysis</div><div class="feat__d">Which authorities grant against expert advice, in what circumstances, and with what context — housing pressure, viability, defence status.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Reform evidence</div><div class="feat__d">Whether consultee involvement changes outcomes, which is the premise of the reform now under way.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Publication template</div><div class="feat__d">A worked demonstration of what a consultee outcome dataset looks like, usable by any consultee body.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Versioned archive</div><div class="feat__d">Each annual release preserved, since the source silently restates history and the reform may break the series entirely.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Coverage metric</div><div class="feat__d">Resolution coverage published rather than assumed.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the consultee reform the evidence base it currently lacks, before the reform is enacted.</li><li>Lets consultee bodies demonstrate their own value, which they presently cannot.</li><li>Supplies the Environment Agency with the outcome data its own sampling approach cannot produce.</li><li>Creates a reusable publication template for every statutory consultee, not just two.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Communities can see whether expert advice about a development near them was followed.</li><li>The trade-off between development speed and expert scrutiny becomes measurable rather than asserted.</li><li>Bodies giving advice on public safety become accountable for whether it lands.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Environment Agency, Active Travel England, MHCLG Planning, Defra</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for resolution and recovery, then DOS7 for the service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Flood objections</div><div class="phase__meta">4 months</div><div class="phase__d">Resolve, map and archive the already-published dataset. Publish the recovered compliance figure.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Outcome recovery</div><div class="phase__meta">4 months</div><div class="phase__d">Close the unknown-outcome gap and report the corrected national position.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Template and advocacy</div><div class="phase__meta">4 months</div><div class="phase__d">Publish the consultee outcome specification and take it to Active Travel England.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Second consultee</div><div class="phase__meta">6 months</div><div class="phase__d">Extend to active travel casework, subject to publication being agreed.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Publication is a decision, not a build</div><p class="card__desc">The active travel half depends on a body agreeing to publish. The flood half does not, which is why it comes first and carries the argument.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The series may break</div><p class="card__desc">Consultee reform proposes removing objections in some circumstances, which would discontinue the only national indicator. The archive makes that break visible rather than invisible.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Contested framing</div><p class="card__desc">Authorities will object to being ranked on overrides. Context is reported alongside, and the finding that the override rate has been flat for nine years is published as prominently as the rising counts.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/environment-agency-objections-to-planning-on-the-basis-of-flood-risk" target="_blank" rel="noopener">EA objections to planning on the basis of flood risk</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/publications/active-travel-england-annual-report-and-accounts-2025-to-2026" target="_blank" rel="noopener">Active Travel England annual report and accounts</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/consultations/reforms-to-the-statutory-consultee-system" target="_blank" rel="noopener">Reforms to the statutory consultee system</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.activetravelengland.gov.uk/planning" target="_blank" rel="noopener">Active Travel England planning guidance</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://environment.data.gov.uk/" target="_blank" rel="noopener">Flood map for planning</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/bellwether.html">&larr; 12 Bellwether</a>
+<a class="btn btn--ghost" href="../systems/lastmile.html">14 Lastmile &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

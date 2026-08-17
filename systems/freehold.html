@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Freehold — Dexter DCL</title>
+<meta name="description" content="Free ownership data on one side. Free boundary geometry on the other. The key that joins them is a paid product. The paywall sits precisely in the middle.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 15 &middot; Government committed to free release during 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Freehold</h1>
+<p class="lede" style="margin-top:.6rem">Land ownership resolution</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Free ownership data on one side. Free boundary geometry on the other. The key that joins them is a paid product. The paywall sits precisely in the middle.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Public money</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Housing</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>You can find out, for free, which companies own land in England and Wales. You can also download, for free, <strong>8,220,990 land parcel boundaries</strong> under an open licence. What you cannot do is connect the two.</p>
+<p>The ownership data is keyed on title numbers. The free boundaries are keyed on a different spatial identifier. The crosswalk between them is a paid product. Free data on both sides, paywall exactly in the middle.</p>
+<p>The government has committed to changing this. The Land Use Framework, published March 2026, states it will work with the registry <strong>"this year"</strong> to provide <strong>"free, spatial land ownership data for larger properties covering the vast majority of England and Wales, excluding almost all homeowners."</strong></p>
+<p>Two things make that commitment worth watching rather than waiting on. No size threshold is defined. And <strong>the registry’s own business plan does not mention the commitment at all</strong> — it commits instead to adding identifiers to more free datasets and to "initial design work" on more clearly identifying the parties recorded on the register.</p>
+<p>That last phrase is the entity spine problem, stated by the registry itself, and still at design stage. Roughly <strong>10% of land in England remains unregistered</strong> despite compulsory registration since 1990.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">8.2m</div><div class="impact__l">Land parcel boundaries free under an open licence</div></div><div class="impact__cell"><div class="impact__n">~10%</div><div class="impact__l">Of English land still unregistered after 35 years of compulsory registration</div></div><div class="impact__cell"><div class="impact__n">2026</div><div class="impact__l">Year the government committed to free spatial ownership data for larger properties</div></div><div class="impact__cell"><div class="impact__n">0</div><div class="impact__l">Mentions of that commitment in the registry’s own business plan</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Freehold builds the resolution layer between land, boundaries and organisations — the join that free data on both sides currently cannot make.</p>
+<p>On the spatial side it resolves parcels to properties and to the identifiers that other datasets use, so land can be joined to development, flood risk, contributions and everything else in the platform.</p>
+<p>On the organisational side it resolves the parties named on ownership records to canonical organisations, connecting land to the corporate graph. That is what turns a list of owners into an answer to who actually controls what.</p>
+<p>And it is positioned for the commitment landing. If free spatial ownership data is published during 2026, whoever already has a working resolution layer has a large head start. If it slips, the resolution layer is what makes the existing free data usable in the meantime — which is the stronger position either way.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Title boundaries</strong></td><td class="muted">HM Land Registry via MHCLG</td><td>8,220,990 polygons under an open licence, refreshed regularly. Keyed on a spatial identifier, not a title number.</td></tr><tr><td><strong>UK companies that own property</strong></td><td class="muted">HM Land Registry</td><td>Free with registration. Keyed on title number. Terms are not open-data terms.</td></tr><tr><td><strong>Overseas companies ownership data</strong></td><td class="muted">HM Land Registry</td><td>Roughly 100,000 records, monthly, free with registration.</td></tr><tr><td><strong>Price paid data</strong></td><td class="muted">HM Land Registry</td><td>Free and open. Transaction history at address level.</td></tr><tr><td><strong>Companies House</strong></td><td class="muted">Companies House</td><td>The organisational side of the join, including ownership and control.</td></tr><tr><td><strong>Land use and designation layers</strong></td><td class="muted">Defra and MHCLG</td><td>Protected sites, green belt, agricultural classification and nutrient catchments, largely open.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Parcel-to-property resolution</div><div class="feat__d">Land boundaries connected to the property identifiers the rest of the platform uses.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Ownership-to-organisation resolution</div><div class="feat__d">Registered parties resolved to canonical companies, connecting land to the corporate graph.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Landholding aggregation</div><div class="feat__d">Total holdings by organisation and by group, rather than title by title.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Corporate and overseas exposure</div><div class="feat__d">Which land is held through companies, and where control sits.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Development pipeline linkage</div><div class="feat__d">Ownership joined to permissions, contributions and completions across the platform.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Unregistered land mapping</div><div class="feat__d">Where the roughly 10% of unregistered land sits, which is itself unmapped.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Commitment tracking</div><div class="feat__d">Public monitoring of whether the free spatial ownership release actually arrives during 2026.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Delivers the practical capability behind a published land use commitment that the delivery body has not yet planned for.</li><li>Supports the registry’s own stated intention to identify parties on the register more clearly.</li><li>Gives land use policy a spatial view of ownership concentration, which it currently commissions rather than holds.</li><li>Provides the foundation for nature markets and biodiversity requirements, both of which need to know who controls land.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Who owns land, and how much of it, becomes answerable without buying the answer.</li><li>Communities can see the ownership behind development proposals in their area.</li><li>The land held through offshore and corporate structures becomes visible spatially rather than only as a list.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Defra land use, MHCLG, HM Land Registry, combined authorities</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for resolution, then DOS7 aligned to the land use programme</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Spatial resolution</div><div class="phase__meta">4 months</div><div class="phase__d">Boundaries resolved to property identifiers, published as an open index.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Organisational resolution</div><div class="phase__meta">4 months</div><div class="phase__d">Registered parties resolved to companies with confidence published.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Aggregation and analysis</div><div class="phase__meta">4 months</div><div class="phase__d">Landholding by organisation and group, with corporate and overseas exposure.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Commitment readiness</div><div class="phase__meta">ongoing</div><div class="phase__d">Positioned to ingest the free spatial ownership release the moment it lands.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The commitment may slip</div><p class="card__desc">It is conditional on an impact assessment and absent from the delivery body’s plan. Freehold is designed to be useful without it and better with it.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Registration terms are not open terms</div><p class="card__desc">The ownership datasets are free but gated, with terms that are not open-data terms. Redistribution rights must be established before anything derived is published.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Identifier mismatch is the whole problem</div><p class="card__desc">Boundaries and ownership use different keys by design. Resolution is probabilistic at the margins and must publish confidence rather than assert certainty.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/land-use-framework" target="_blank" rel="noopener">Land Use Framework for England</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/publications/hm-land-registry-business-plan-2026/hm-land-registry-business-plan-2026" target="_blank" rel="noopener">HM Land Registry business plan 2026</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://use-land-property-data.service.gov.uk/" target="_blank" rel="noopener">Use land and property data service</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.planning.data.gov.uk/dataset/title-boundary" target="_blank" rel="noopener">Title boundary dataset</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.gov.uk/government/collections/price-paid-data" target="_blank" rel="noopener">Price paid data</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/lastmile.html">&larr; 14 Lastmile</a>
+<a class="btn btn--ghost" href="../systems/bulwark.html">16 Bulwark &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

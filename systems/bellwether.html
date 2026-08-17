@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bellwether — Dexter DCL</title>
+<meta name="description" content="Parliament made computing this a statutory function in July 2026 — and the register deliberately withholds the company number needed to do it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 12 &middot; Statutory duty live since 15 July 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Bellwether</h1>
+<p class="lede" style="margin-top:.6rem">Provider concentration and failure exposure</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Parliament made computing this a statutory function in July 2026 — and the register deliberately withholds the company number needed to do it.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Children &amp; families</span><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Councils buy care from companies. When a large operator collapses, councils discover their exposure afterwards. The care home sector has done this twice at national scale, and each time the state absorbed the consequences.</p>
+<p>The data to see it coming mostly exists. The adult social care regulator publishes <strong>57,009 active locations</strong> with a Companies House number attached to <strong>91.1% of care home locations and 93.9% of beds</strong>. That is enough to compute, today, which councils depend on which operators. Measured directly: <strong>40 council-and-company pairs where one company runs more than 15% of an area’s care home beds</strong>, including one London borough at <strong>67.4%</strong>.</p>
+<p>Children’s social care is where it becomes urgent. The <strong>Children’s Wellbeing and Schools Act 2026 came into force on 15 July 2026</strong>, and its financial oversight provision sets out how to decide which providers get monitored. The criteria include <strong>"the geographical concentration of those establishments or agencies"</strong> and <strong>"the share of any market within England"</strong>. Somebody now has a legal duty to compute exactly this.</p>
+<p>And the children’s register <strong>publishes owner names but no company numbers</strong>. The same is true of independent special schools, where the identifier field exists and is populated in 13 of 52,486 records. Measured consequence: naive name counting <strong>understates the largest special school group by 70%</strong> — 30 schools where the real figure is 51 — because the same owner appears as three different strings.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">93.9%</div><div class="impact__l">Care home beds already carrying a resolvable company identifier</div></div><div class="impact__cell"><div class="impact__n">67.4%</div><div class="impact__l">Share of one London borough’s care home beds run by a single company</div></div><div class="impact__cell"><div class="impact__n">15 July 2026</div><div class="impact__l">Date the statutory financial oversight duty came into force</div></div><div class="impact__cell"><div class="impact__n">70%</div><div class="impact__l">Understatement of the largest special school group under naive name counting</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Bellwether resolves care providers to canonical organisations across three registers, then computes concentration and exposure at council level.</p>
+<p>Where the regulator already publishes a company number, the join is direct — that covers most of adult social care. Where it does not, resolution is the product: matching owner names to companies through the corporate graph, handling the variants that defeat simple normalisation, and publishing match confidence rather than asserting certainty.</p>
+<p>It then produces the exposure view: for each council, which operators hold what share of local capacity, and for each operator, how many councils depend on it and how concentrated that dependency is. One operator in the data runs over four thousand beds across only twelve councils — a very different risk shape from one running more beds across fifty-seven.</p>
+<p>Financial distress signals attach on top, drawn from insolvency notices, charges and overdue filings rather than from accounting ratios, for reasons set out under risks.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Active locations register</strong></td><td class="muted">Care Quality Commission</td><td>57,009 locations, 122 fields. Carries company number, charity number, bed counts, council and coordinates. Free, no key.</td></tr><tr><td><strong>Children’s social care providers</strong></td><td class="muted">Ofsted</td><td>Provider-level data with owner name at 99.4%, places and sector. No company number. Home names and addresses redacted.</td></tr><tr><td><strong>Schools register</strong></td><td class="muted">DfE</td><td>Independent special schools with proprietor name at 100%, capacity and pupil counts. Company number field effectively empty.</td></tr><tr><td><strong>Academy trust membership</strong></td><td class="muted">DfE</td><td>Company number on 100% of open trusts — the cleanest identifier join available in the sector.</td></tr><tr><td><strong>Companies House bulk and streams</strong></td><td class="muted">Companies House</td><td>Company data, persons of significant control, charges and insolvency. Free.</td></tr><tr><td><strong>Insolvency notices</strong></td><td class="muted">The Gazette</td><td>Free JSON interface, over three million notices, each carrying a structured company number.</td></tr><tr><td><strong>Registered provider list</strong></td><td class="muted">Regulator of Social Housing</td><td>Corporate form field routes each provider to the correct identifier authority — under half are Companies House entities.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Council exposure map</div><div class="feat__d">For every council, which operators hold what share of local capacity — the analysis the new statutory criteria describe.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Operator concentration profile</div><div class="feat__d">For every operator, how many councils depend on it and how tightly, distinguishing broad from concentrated footprints.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Name resolution across variants</div><div class="feat__d">The specific failure that understates the largest special school group by 70%, corrected and measured.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Dual registration handling</div><div class="feat__d">Care home records registered twice during ownership transfer inflate national bed counts by 6.4% if counted naively. Deduplicated, with the flag respected.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Mixed-authority identifiers</div><div class="feat__d">Roughly 2.5% of published identifiers are not Companies House numbers at all but mutual society, royal charter or charity references. Routed to the correct register rather than failing silently.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Event-based distress signals</div><div class="feat__d">Insolvency notices, charge filings, strike-off action and overdue accounts — observable for every company regardless of size.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Statutory oversight pack</div><div class="feat__d">Concentration and market share computed to the criteria now written into law.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Supplies the concentration and market share analysis that the new financial oversight criteria explicitly require.</li><li>Gives adult social care market oversight a council-level exposure view rather than a provider-level one.</li><li>Lets councils see their own dependency before an operator fails rather than after.</li><li>Corrects a measurement error that materially understates consolidation in the special school market.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Fewer people moved at short notice when a care operator collapses, because the exposure was visible in advance.</li><li>Transparency over who owns the providers delivering publicly funded care to children and vulnerable adults.</li><li>Better-targeted regulation of a market where the competition authority has already found margins well above competitive levels.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">DfE children’s social care, DHSC and CQC market oversight, ADASS, individual councils</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the resolution engine, then DOS7 for the oversight service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Adult social care first</div><div class="phase__meta">3 months</div><div class="phase__d">Where identifiers already exist, the exposure map is buildable immediately at high coverage.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Children’s resolution</div><div class="phase__meta">5 months</div><div class="phase__d">Owner names resolved to companies, with confidence published, against the statutory criteria.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Special schools</div><div class="phase__meta">3 months</div><div class="phase__d">Proprietor resolution and the corrected concentration picture.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Distress signals</div><div class="phase__meta">4 months</div><div class="phase__d">Event-based early warning attached across all three sectors.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Financial models do not work here</div><p class="card__desc">The standard corporate failure ratios depend on profit and loss data that small companies do not file — roughly two-thirds of the model’s power is unavailable. Published tests also show such models flagging around a quarter of all companies, of which the overwhelming majority never fail. Bellwether uses event signals and treats any score as triage, never as a prediction of failure.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Capacity is not commissioned volume</div><p class="card__desc">A bed in one council may be occupied by someone placed by another, and self-funded beds are not council exposure at all. Bellwether measures physical capacity by location and says so — the commissioning layer is not in open data.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Property structures are invisible</div><p class="card__desc">Both historic care home collapses ran through the property and lease side, not the operating company. The regulator registers only the operator. Group structure must be reconstructed, and some of it cannot be.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Naming a company as at risk</div><p class="card__desc">Publication could itself precipitate difficulty. Concentration is published; distress scoring stays in a restricted tier for oversight bodies.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.cqc.org.uk/about-us/transparency/using-cqc-data" target="_blank" rel="noopener">CQC data and HSCA active locations</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.legislation.gov.uk/ukpga/2026/21/contents" target="_blank" rel="noopener">Children’s Wellbeing and Schools Act 2026</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/statistics/childrens-social-care-in-england-2026" target="_blank" rel="noopener">Children’s social care in England 2026</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://assets.publishing.service.gov.uk/media/6228726cd3bf7f158c844f65/Final_report.pdf" target="_blank" rel="noopener">CMA children’s social care market study</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.thegazette.co.uk/data" target="_blank" rel="noopener">The Gazette data services</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/ledger.html">&larr; 11 Ledger</a>
+<a class="btn btn--ghost" href="../systems/sightline.html">13 Sightline &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

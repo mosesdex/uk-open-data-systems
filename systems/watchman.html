@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watchman — Dexter DCL</title>
+<meta name="description" content="Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 17 &middot; Free interface, structured identifiers, unused</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Watchman</h1>
+<p class="lede" style="margin-top:.6rem">Insolvency exposure across public suppliers</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Fraud &amp; integrity</span><span class="tag tag--accent">Public money</span><span class="tag tag--accent">Operations</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>When a company holding public contracts fails, the consequences land on whoever depended on it. The failure of a major government contractor in 2018 remains the defining example, and the lesson drawn afterwards was that nobody had a consolidated view of exposure.</p>
+<p>The raw material to build that view is free and better than expected. The official insolvency record publishes a <strong>JSON interface with no key required</strong>, carrying <strong>over three million notices</strong>. Critically, each notice carries a <strong>structured company number</strong> — a direct identifier join, with no name matching required.</p>
+<p>On the other side sit the public procurement record, the care provider registers, the school trust register and the social housing register — millions of contractual and regulatory relationships between the state and companies.</p>
+<p>Nobody joins them. So the question "which public contracts and regulated services are currently held by companies in insolvency proceedings" has no answer, despite both halves being free and one of them carrying a clean identifier.</p>
+<p>And the standard alternative does not work. Predicting failure from filed accounts requires profit and loss data that small companies do not publish — a requirement that was <strong>paused in January 2026 and pushed to 2028, with an opt-out from publication attached</strong>. Roughly two-thirds of the standard model’s power is unavailable, and published testing shows such models flagging around a quarter of all companies, of which the overwhelming majority never fail.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">3m+</div><div class="impact__l">Insolvency notices available free, each carrying a company number</div></div><div class="impact__cell"><div class="impact__n">0</div><div class="impact__l">Systems joining them to the register of public contracts</div></div><div class="impact__cell"><div class="impact__n">2028</div><div class="impact__l">Earliest date small company accounts might carry profit and loss — with an opt-out attached</div></div><div class="impact__cell"><div class="impact__n">~1 in 198</div><div class="impact__l">Annual company failure rate, against which any predictive model must justify itself</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Watchman abandons prediction and does something more useful: it watches events, and it knows who depends on whom.</p>
+<p>It ingests insolvency notices continuously, resolves each to an organisation through the entity spine, and checks that organisation against every public relationship the platform knows about — contracts, care registrations, school trusts, social housing, land holdings.</p>
+<p>The output is an exposure alert rather than a risk score. Not "this company might fail" but "this company has entered administration, and here are the seventeen contracts and four hundred care beds that depend on it."</p>
+<p>It layers earlier signals underneath — charge filings, strike-off action, overdue accounts — all observable for every company regardless of size, and all events rather than inferences.</p>
+<p>And it inverts for planning: for any council or department, which of its suppliers show distress signals, and what would be lost if each failed.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Insolvency notices</strong></td><td class="muted">The Gazette</td><td>Free JSON interface, no key, over three million notices, each with a structured company number and a direct link to the company record.</td></tr><tr><td><strong>Companies House bulk and streams</strong></td><td class="muted">Companies House</td><td>Company data, charges, insolvency and control. Free bulk downloads plus resumable event streams.</td></tr><tr><td><strong>Procurement record</strong></td><td class="muted">Cabinet Office</td><td>Contract awards and performance across the public sector.</td></tr><tr><td><strong>Care provider registers</strong></td><td class="muted">CQC and Ofsted</td><td>Regulated services and their operators.</td></tr><tr><td><strong>Academy trust membership</strong></td><td class="muted">DfE</td><td>Company numbers on every open trust.</td></tr><tr><td><strong>Registered providers</strong></td><td class="muted">Regulator of Social Housing</td><td>Social housing providers, with a corporate form field routing each to the right identifier authority.</td></tr><tr><td><strong>Local authority spending</strong></td><td class="muted">Councils</td><td>Payments to suppliers, once normalised and resolved.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Event ingestion</div><div class="feat__d">Insolvency notices processed continuously, resolved to organisations by identifier rather than by name.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Exposure alerting</div><div class="feat__d">When an organisation enters proceedings, everything the public sector depends on it for, immediately.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Early signals</div><div class="feat__d">Charge filings, strike-off action and overdue accounts — observable for every company, including those filing minimal accounts.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Buyer-side view</div><div class="feat__d">For any council or department, which suppliers show distress and what each failure would cost.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Concentration risk</div><div class="feat__d">Where many public bodies depend on one organisation, or one group behind several apparent suppliers.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Group awareness</div><div class="feat__d">Distress in a parent or sibling company that the contracting entity’s own record would not show.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Historical validation</div><div class="feat__d">Back-tested against known failures, with performance published rather than claimed.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the public sector the consolidated supplier exposure view whose absence was the lesson of the 2018 contractor collapse.</li><li>Works for small suppliers, where accounts-based models cannot, because it uses events rather than ratios.</li><li>Supports the care market oversight duties that now sit in statute, from the supplier side.</li><li>Lets buyers act before a failure rather than discovering exposure afterwards.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Services less likely to stop abruptly when a provider fails.</li><li>Public money less likely to be committed to organisations already in difficulty.</li><li>Transparency over which public services depend on which private companies.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Cabinet Office commercial, Public Sector Fraud Authority, CQC and Ofsted oversight, individual councils</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the resolution and alerting engine, then G-Cloud for the service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Ingest and resolve</div><div class="phase__meta">3 months</div><div class="phase__d">Insolvency notices flowing and resolving to organisations by identifier.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Exposure joins</div><div class="phase__meta">4 months</div><div class="phase__d">Connected to procurement and provider registers across the platform.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Early signals</div><div class="phase__meta">3 months</div><div class="phase__d">Charges, strike-off and filing delinquency added as leading indicators.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Buyer tooling</div><div class="phase__meta">5 months</div><div class="phase__d">Council and department supplier risk views released.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Do not build a failure predictor</div><p class="card__desc">The base rate is roughly one in two hundred companies a year. Any model flagging a meaningful share will be wrong the overwhelming majority of the time. Watchman reports events that have happened and dependencies that exist, not probabilities of future failure.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Reputational harm</div><p class="card__desc">Publishing that a company shows distress signals could itself precipitate difficulty. Exposure analysis stays in a restricted tier for public bodies; only aggregate concentration is published.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Identifier gaps</div><p class="card__desc">Several provider registers carry no company number, and under half of social housing providers are Companies House entities at all. Coverage is reported per register rather than assumed uniform.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.thegazette.co.uk/data" target="_blank" rel="noopener">The Gazette data services</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/guidance/companies-house-data-products" target="_blank" rel="noopener">Companies House data products</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/news/companies-house-to-bring-in-changes-to-accounts-filing-from-april-2028" target="_blank" rel="noopener">Changes to accounts filing from April 2028</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/publications/current-registered-providers-of-social-housing" target="_blank" rel="noopener">Registered providers of social housing</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.cqc.org.uk/about-us/transparency/using-cqc-data" target="_blank" rel="noopener">CQC data and transparency</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/bulwark.html">&larr; 16 Bulwark</a>
+<a class="btn btn--ghost" href="../systems/sentinel.html">01 Sentinel &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

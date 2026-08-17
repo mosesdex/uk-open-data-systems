@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulwark — Dexter DCL</title>
+<meta name="description" content="The Environment Agency cannot identify the owner of 73.7% of England’s flood defences, and has no condition grade for 75% of them. All 141,629 are geolocated and free to download.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 16 &middot; Measured directly from the published data</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Bulwark</h1>
+<p class="lede" style="margin-top:.6rem">Flood defence ownership and condition</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The Environment Agency cannot identify the owner of 73.7% of England’s flood defences, and has no condition grade for 75% of them. All 141,629 are geolocated and free to download.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Climate &amp; energy</span><span class="tag tag--accent">Operations</span><span class="tag tag--accent">Local government</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>England has <strong>141,629 recorded flood defence assets</strong>, published free and openly with full geometry. Anyone can download them today.</p>
+<p>Two fields in that dataset describe a national failure. <strong>Asset owner reads "Unknown" on 104,439 of them — 73.7%.</strong> And <strong>current condition is blank on 106,179 — 75.0%</strong>, covering <strong>43,601 kilometres</strong> of defence.</p>
+<p>Where condition is recorded, the picture is worse than it first looks: of the 35,263 assets carrying both a current and a target grade, <strong>5,877 are below their target</strong>. But that 16.7% is computed on a quarter of the asset base. Nobody knows about the rest.</p>
+<p>A third field compounds it. Whether an asset should be reflected in the national flood map — which underpins planning decisions and insurance pricing — reads <strong>"Not Yet Considered" on 53.4%</strong> of assets. A majority of England’s flood defences have never been assessed for whether they belong in the map that governs where houses get built.</p>
+<p>The consequence is already documented. The National Audit Office found that for the lack of <strong>£34m in annual maintenance funding</strong>, more than <strong>200,000 properties</strong> were at increased flood risk — while the Agency <strong>underspent its capital programme by £310m</strong> over two years.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">73.7%</div><div class="impact__l">Flood defence assets whose owner the Environment Agency records as unknown</div></div><div class="impact__cell"><div class="impact__n">75.0%</div><div class="impact__l">Assets with no current condition grade, covering 43,601 km</div></div><div class="impact__cell"><div class="impact__n">53.4%</div><div class="impact__l">Assets never assessed for inclusion in the national flood map</div></div><div class="impact__cell"><div class="impact__n">200,000</div><div class="impact__l">Properties the auditor found at increased risk for want of £34m of maintenance</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Bulwark resolves flood defence assets to the land they sit on and the organisations responsible for them — which is precisely the join the Agency cannot currently make.</p>
+<p>The assets are geolocated lines. Land parcel boundaries are free and open. Property identifiers are free and open. Corporate ownership records exist. Nothing in that chain is paywalled at the point where Bulwark operates, and yet the ownership field sits empty on three-quarters of the estate.</p>
+<p>It then makes the condition gap visible rather than averaged away. A national figure computed on a quarter of assets is not a national figure, and reporting it as one obscures the problem. Bulwark publishes coverage alongside every statistic.</p>
+<p>And it surfaces the operational signals already present in the data. Asset records carry inspection histories with next-inspection dates — some of them already in the past. Overdue inspection is computable from published data and reported by nobody.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Spatial flood defences</strong></td><td class="muted">Environment Agency</td><td>141,629 assets with polyline geometry and 37 fields including current and target condition, standard of protection, owner and inspection dates. Free, open, bulk.</td></tr><tr><td><strong>Asset management interface</strong></td><td class="muted">Environment Agency</td><td>Per-asset inspection history, maintenance activities with planned versus actual dates, and condition over time.</td></tr><tr><td><strong>Title boundaries</strong></td><td class="muted">HM Land Registry via MHCLG</td><td>8.2 million parcels under an open licence — the land the assets sit on.</td></tr><tr><td><strong>Open property identifiers</strong></td><td class="muted">Ordnance Survey</td><td>Free identifier and coordinate file for resolving assets to properties.</td></tr><tr><td><strong>Corporate and overseas ownership</strong></td><td class="muted">HM Land Registry</td><td>Who owns the land, once parcels are resolved. Free with registration, restrictive terms.</td></tr><tr><td><strong>National flood risk assessment</strong></td><td class="muted">Environment Agency</td><td>What the defences protect, and what happens if they fail.</td></tr><tr><td><strong>Companies House</strong></td><td class="muted">Companies House</td><td>Resolving named owners to organisations, and detecting distress among them.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Ownership resolution</div><div class="feat__d">Assets matched to parcels and parcels to owners — closing the 73.7% unknown-owner gap that the Agency itself reports.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Condition coverage reporting</div><div class="feat__d">Every condition statistic published with its denominator, so a quarter-coverage figure is never presented as national.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Overdue inspection detection</div><div class="feat__d">Next-inspection dates already in the past, computable from published data and currently reported by nobody.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Flood map completeness</div><div class="feat__d">The 53.4% of assets never assessed for inclusion in the map that governs planning and insurance.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Failure consequence modelling</div><div class="feat__d">What each poorly-conditioned or unowned asset protects, joined to properties at risk.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Maintenance versus capital</div><div class="feat__d">Planned against actual maintenance activity, against the backdrop of a documented underspend.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Third-party asset register</div><div class="feat__d">The privately owned defences — nearly 18% of the estate — identified and attributable for the first time.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Closes an ownership gap the Agency reports on three-quarters of its own asset register.</li><li>Lets maintenance spending be targeted at assets whose condition is actually known, and identifies where knowledge is missing.</li><li>Establishes who is responsible for privately owned defences, which is unanswerable today and decisive when one fails.</li><li>Supports the flood investment programme by showing where liability is being created faster than it is being maintained.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Communities can find out who is responsible for the defence protecting them.</li><li>Properties relying on defences in unknown condition become visible to their owners and insurers.</li><li>Maintenance money directed by evidence rather than by whichever assets happen to have been inspected.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Environment Agency, Defra, lead local flood authorities, insurers</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for resolution, then DOS7 for the asset service</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Baseline and gaps</div><div class="phase__meta">2 months</div><div class="phase__d">Full ingest, with the condition and ownership coverage gaps published as findings.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Ownership resolution</div><div class="phase__meta">5 months</div><div class="phase__d">Assets resolved to parcels and owners, with match confidence published per asset.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Inspection and condition</div><div class="phase__meta">3 months</div><div class="phase__d">Overdue inspections and condition trajectories surfaced to the Agency and lead local flood authorities.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Consequence layer</div><div class="phase__meta">5 months</div><div class="phase__d">Failure consequence modelled against properties at risk.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Unknown may mean unowned</div><p class="card__desc">Some assets genuinely have no identifiable responsible party — a finding in itself, not a resolution failure. The two must be distinguished and reported separately.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Attribution is consequential</div><p class="card__desc">Naming a private owner as responsible for a defence has legal weight. Confidence is published per match, and low-confidence attributions are never asserted.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Condition data may be absent for good reason</div><p class="card__desc">Some assets may not warrant inspection. The product reports the gap and asks the question rather than assuming neglect.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://environment.data.gov.uk/spatialdata/spatial-flood-defences-including-standardised-attributes/wfs" target="_blank" rel="noopener">Spatial flood defences including standardised attributes</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://environment.data.gov.uk/asset-management/" target="_blank" rel="noopener">Environment Agency asset management service</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.nao.org.uk/reports/resilience-to-flooding/" target="_blank" rel="noopener">NAO: resilience to flooding</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/publications/national-assessment-of-flood-and-coastal-erosion-risk-in-england-2024" target="_blank" rel="noopener">National assessment of flood and coastal erosion risk</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.planning.data.gov.uk/dataset/title-boundary" target="_blank" rel="noopener">Title boundary dataset</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/freehold.html">&larr; 15 Freehold</a>
+<a class="btn btn--ghost" href="../systems/watchman.html">17 Watchman &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

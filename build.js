@@ -2,13 +2,14 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import A from './data/systems-a.js';
 import B from './data/systems-b.js';
+import C from './data/systems-c.js';
 import P from './data/platform.js';
 
 // The five systems deliverable with no buyer-controlled personal data.
-const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction'];
-const sysById = Object.fromEntries([...A, ...B].map(s => [s.id, s]));
+const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'freehold', 'bulwark', 'watchman'];
+const sysById = Object.fromEntries([...A, ...B, ...C].map(s => [s.id, s]));
 
-const SYSTEMS = [...A, ...B];
+const SYSTEMS = [...A, ...B, ...C];
 const YEAR = '2026';
 const esc = s => String(s).replace(/&(?![a-zA-Z#][a-zA-Z0-9]*;)/g, '&amp;');
 
@@ -56,11 +57,11 @@ const foot = (depth = 0) => {
 <div class="foot__grid">
 <div>
 <h4>Portfolio</h4>
-${SYSTEMS.slice(0, 5).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
+${SYSTEMS.slice(0, 9).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
 <h4>&nbsp;</h4>
-${SYSTEMS.slice(5).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
+${SYSTEMS.slice(9).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
 <h4>Sections</h4>
@@ -97,7 +98,7 @@ function detailPage(s, i) {
   return `${head(`${s.name} — Dexter DCL`, esc(s.tagline).slice(0, 180), 1)}
 ${nav(1)}
 <header class="sysHead"><div class="wrap">
-<a class="backlink" href="../index.html">&larr; All ten systems</a>
+<a class="backlink" href="../index.html">&larr; All systems</a>
 <div class="eyebrow">System ${s.num} &middot; ${s.status}</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">${s.name}</h1>
 <p class="lede" style="margin-top:.6rem">${esc(s.subtitle)}</p>
@@ -202,17 +203,17 @@ const cards = SYSTEMS.map(s => `<a class="card" href="systems/${s.id}.html" data
 <div class="card__foot">${s.themes.map(t => `<span class="tag">${THEMES[t] || t}</span>`).join('')}</div>
 </a>`).join('\n');
 
-const index = `${head('Dexter DCL — Ten Open Data Systems for the United Kingdom', 'Ten systems built on free UK government data, each addressing a documented gap where government has published that it cannot answer its own question.')}
+const index = `${head('Dexter DCL — Seventeen Open Data Systems for the United Kingdom', 'Seventeen systems built on free UK government data, each addressing a documented gap where government has published that it cannot answer its own question.')}
 ${nav()}
 
 <header class="hero">
 <div class="hero__grid"></div>
 <div class="wrap">
 <div class="eyebrow">Dexter DCL &middot; Public service data portfolio &middot; August ${YEAR}</div>
-<h1 class="display hero__title">Ten systems the UK<br>government cannot<br>currently <em>build itself</em>.</h1>
+<h1 class="display hero__title">Seventeen systems the UK<br>government cannot<br>currently <em>build itself</em>.</h1>
 <p class="lede hero__lede">Each one runs on free, openly licensed government data. Each one closes a gap that government has documented in its own words &mdash; in a National Audit Office report, a Public Accounts Committee finding, or a dataset that admits what it does not know.</p>
 <div class="hero__cta">
-<a class="btn btn--primary" href="#systems">See the ten systems</a>
+<a class="btn btn--primary" href="#systems">See the systems</a>
 <a class="btn btn--ghost" href="#method">How they were chosen</a>
 </div>
 </div>
@@ -249,10 +250,10 @@ ${nav()}
 <section class="section section--alt" id="systems">
 <div class="wrap">
 <div class="eyebrow">The portfolio</div>
-<h2 class="mt-3">Ten systems</h2>
+<h2 class="mt-3">Seventeen systems</h2>
 <p class="lede mt-3">Filter by the part of government each one serves. Every system has a full brief covering the problem, the data, the capabilities, the delivery phasing, the risks and the sources.</p>
 <div class="filters mt-4">
-<button class="filter is-on" data-filter="all">All ten</button>
+<button class="filter is-on" data-filter="all">All seventeen</button>
 ${allThemes.map(t => `<button class="filter" data-filter="${t}">${THEMES[t] || t}</button>`).join('\n')}
 </div>
 <p class="tiny muted mb-3" data-filter-count>10 systems</p>
@@ -305,8 +306,8 @@ ${cards}
 <section class="section section--alt">
 <div class="wrap">
 <div class="eyebrow">The unified platform</div>
-<h2 class="mt-3">Five of these are one system</h2>
-<p class="lede mt-3">Implementation research showed that five of the ten break at the same two joins &mdash; resolving places, and resolving organisations. Built once as shared infrastructure, they stop being five separate builds. These five also touch no personal data at all, which makes them deliverable without a UK-resident cleared operations tier.</p>
+<h2 class="mt-3">Twelve of these are one system</h2>
+<p class="lede mt-3">Twelve of the seventeen break at the same two joins &mdash; resolving places, and resolving organisations. Built once as shared infrastructure, they stop being twelve separate builds. All twelve touch no buyer-controlled personal data, which makes them deliverable without a UK-resident cleared operations tier.</p>
 <div class="grid mt-4">
 ${DELIVERABLE.map(id => {
   const s = sysById[id];

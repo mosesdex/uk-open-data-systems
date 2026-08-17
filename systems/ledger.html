@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledger — Dexter DCL</title>
+<meta name="description" content="The Ministry’s own schema holds £1.49bn of developer obligations. Not one record has a location. The property identifier field is populated in 0.0% of planning applications; the ad">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 11 &middot; Schema designed, unpopulated</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Ledger</h1>
+<p class="lede" style="margin-top:.6rem">Developer contributions, made mappable</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">The Ministry’s own schema holds £1.49bn of developer obligations. Not one record has a location. The property identifier field is populated in 0.0% of planning applications; the address field, in the same records, is populated in 98.1%.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Local government</span><span class="tag tag--accent">Public money</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>When housebuilders get permission, they pay councils for the schools, roads and affordable housing the development will need. These are Section 106 agreements, and the money is enormous. Roughly <strong>£9bn sits unspent</strong> across English councils, including about <strong>£817m of affordable housing money — some 11,000 homes</strong> — with one London borough holding over £250m.</p>
+<p>The Ministry already runs a national schema for this. It holds <strong>39,325 contribution records totalling £1,491,818,575</strong>, models purposes from affordable housing to education to highways, and even tracks whether money has been received or spent. Councils are being asked publicly why the money is sitting there.</p>
+<p>Every one of those 39,325 records has <strong>zero geometry</strong>. Not sparse — none. And the reason traces to one field: in the linked planning application dataset, the <strong>property identifier is populated in 0.0% of 100,627 records</strong>, while the free-text address field is populated in <strong>98.1%</strong>.</p>
+<p>That single contrast is the whole argument. The Ministry has already agreed the identifier belongs there. It cannot fill it. Coverage compounds the problem — 67 of roughly 330 authorities publish agreements, and 4 publish applications.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">£1.49bn</div><div class="impact__l">Recorded contributions currently carrying no location at all</div></div><div class="impact__cell"><div class="impact__n">0.0% / 98.1%</div><div class="impact__l">Property identifier versus address field population in the same records</div></div><div class="impact__cell"><div class="impact__n">~£9bn</div><div class="impact__l">Developer contributions estimated unspent across English councils</div></div><div class="impact__cell"><div class="impact__n">67 of ~330</div><div class="impact__l">Authorities publishing agreements to the national schema</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Ledger resolves the addresses that exist into the identifiers that do not, then attaches contributions to sites. The moment that join is made, £1.49bn of recorded obligations becomes mappable for the first time — by council, by ward, by development, by purpose.</p>
+<p>It then answers the question councils are actually being asked: what was promised, what was received, what was spent, and what is sitting. The schema already carries funding status; nothing currently reads it spatially.</p>
+<p>It also fixes the identity problem underneath. Agreements link to authority-local application references that are not nationally unique, so the same reference string exists in multiple councils. Resolution must be constrained by authority or the entire dataset silently mislocates.</p>
+<p>And it publishes coverage as a headline metric rather than a footnote. A national picture built from a fifth of authorities is useful only if it says so.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Developer agreement contributions</strong></td><td class="muted">MHCLG</td><td>39,325 records, £1.49bn, purpose-coded. Open licence, live API. No geometry on any record.</td></tr><tr><td><strong>Developer agreement transactions</strong></td><td class="muted">MHCLG</td><td>49,891 records carrying received and spent status — the promised-versus-delivered signal, already modelled.</td></tr><tr><td><strong>Planning applications</strong></td><td class="muted">MHCLG</td><td>100,627 records. Address text 98.1% populated, property identifier 0.0%. Four contributing authorities.</td></tr><tr><td><strong>Infrastructure funding statements</strong></td><td class="muted">MHCLG</td><td>236 records from 172 authorities — but each is a link to a PDF, not data.</td></tr><tr><td><strong>Title boundaries</strong></td><td class="muted">HM Land Registry via MHCLG</td><td>8,220,990 polygons republished under an open licence. Keyed on a spatial identifier, not a title number.</td></tr><tr><td><strong>New-build energy certificates</strong></td><td class="muted">MHCLG</td><td>Address-level completion signal, for testing whether contributed-for development actually happened.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Address-to-identifier resolution</div><div class="feat__d">The 98,713 free-text addresses converted into property identifiers — the specific gap the Ministry cannot close itself.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Contribution mapping</div><div class="feat__d">Every recorded obligation placed, by council, ward and site.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Promised versus delivered</div><div class="feat__d">Received and spent status read spatially, answering the question councils are being asked publicly.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Purpose analysis</div><div class="feat__d">Affordable housing, education, transport, open space and monitoring fees separated and compared across authorities.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Authority-constrained matching</div><div class="feat__d">Application references resolved within their own authority, because the same reference exists in several.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Coverage reporting</div><div class="feat__d">Which authorities publish, which do not, and what share of England the picture actually represents.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Standards feedback</div><div class="feat__d">Resolution failures reported back to the Ministry as data-quality defects, improving the source.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Answers the unspent-contributions question spatially for the first time, for a Ministry already under pressure on it.</li><li>Fills a field the Ministry designed and cannot populate, improving its own platform rather than competing with it.</li><li>Gives councils an audit position on money they hold — an average of roughly £19m each is a real liability.</li><li>Produces the evidence base for whether developer contributions are delivering the infrastructure they were collected for.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Communities can see what was promised for a development near them, and whether it arrived.</li><li>Affordable housing money that has sat unspent becomes visible and therefore accountable.</li><li>Councils under scrutiny can demonstrate where money has gone rather than being unable to answer.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">MHCLG Digital Planning, individual planning authorities, the Home Builders Federation</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">DOS7 Lot 1, aligned to the planning data standards programme</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Resolve and map</div><div class="phase__meta">3 months</div><div class="phase__d">Address resolution across the published application set, with match confidence reported per record.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Contribution layer</div><div class="phase__meta">3 months</div><div class="phase__d">Obligations attached to sites and published by council and purpose.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Delivery tracking</div><div class="phase__meta">4 months</div><div class="phase__d">Received and spent status surfaced, with the unspent position by authority.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Coverage campaign</div><div class="phase__meta">ongoing</div><div class="phase__d">Work with non-publishing authorities to raise coverage from a fifth toward national.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Coverage, not capability</div><p class="card__desc">The limiting factor is that most authorities do not publish. Ledger can resolve everything published and must state plainly how much of England that represents.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Reference collisions</div><p class="card__desc">Authority-local references are not nationally unique. Matching must be constrained by authority; failing to do so produces confidently wrong output.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Political sensitivity</div><p class="card__desc">Mapping unspent money names councils. Reporting presents context — money is often legitimately committed but not yet drawn — rather than a naked league table.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.planning.data.gov.uk/dataset/developer-agreement-contribution" target="_blank" rel="noopener">Planning Data Platform — developer agreement contributions</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.planning.data.gov.uk/dataset/planning-application" target="_blank" rel="noopener">Planning Data Platform — planning applications</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.planning.data.gov.uk/dataset/infrastructure-funding-statement" target="_blank" rel="noopener">Infrastructure funding statement dataset</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.planning.data.gov.uk/dataset/" target="_blank" rel="noopener">Planning Data Platform dataset index</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.planning.data.gov.uk/dataset/title-boundary" target="_blank" rel="noopener">Title boundary dataset</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/junction.html">&larr; 10 Junction</a>
+<a class="btn btn--ghost" href="../systems/bellwether.html">12 Bellwether &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>

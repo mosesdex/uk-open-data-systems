@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lastmile — Dexter DCL</title>
+<meta name="description" content="Every new home has been required to be gigabit-ready since 2022. No compliance data is published anywhere. The only person tracking it nationally is one independent analyst.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>D</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="../index.html"><span class="brand__mark">D</span>Dexter DCL<span class="brand__sub">Open Data Systems</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="../index.html#thesis">Thesis</a>
+<a class="hide-sm" href="../index.html#systems">Systems</a>
+<a href="../platform.html">Platform</a>
+<a class="hide-sm" href="../index.html#method">Method</a>
+<a class="hide-sm" href="../index.html#rejected">Rejected</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="../index.html">&larr; All systems</a>
+<div class="eyebrow">System 14 &middot; Regulation in force, unmonitored</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Lastmile</h1>
+<p class="lede" style="margin-top:.6rem">Connectivity at new homes</p>
+<p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every new home has been required to be gigabit-ready since 2022. No compliance data is published anywhere. The only person tracking it nationally is one independent analyst.</p>
+<div class="flexrow mt-3"><span class="tag tag--accent">Housing</span><span class="tag tag--accent">Central government</span><span class="tag tag--accent">Equity</span></div>
+</div></header>
+
+<div class="wrap section">
+<div class="sysLayout">
+<main>
+
+<section id="problem">
+<div class="eyebrow">The problem</div>
+<div class="prose mt-2"><p>Building Regulations have required gigabit-ready infrastructure in new dwellings in England since December 2022, with a cost cap per dwelling and a connectivity plan required alongside the building notice. Scotland and Wales followed.</p>
+<p><strong>There is no published compliance dataset.</strong> A regulation with a per-dwelling duty, a cost cap and a plan requirement, and no monitoring data at all.</p>
+<p>The raw material to check it is free and unusually good. The broadband subsidy programme publishes property-level data — every record carrying a property identifier, a status flag, and the contracted supplier where one exists. A status of "White" means no gigabit infrastructure and none expected within three years. It refreshes every four months.</p>
+<p>The regulator computes coverage per premises, using a licensed address product, and then <strong>publishes it aggregated to postcode</strong>. In mixed postcodes — common in rural areas and on new estates — knowing 83% of a postcode has gigabit tells you nothing about a specific house.</p>
+<p>So the property-level truth exists on the subsidy side, the property-level truth is computed and discarded on the coverage side, and the compliance question nobody is asking is entirely property-shaped.</p></div>
+<div class="impact mt-4"><div class="impact__cell"><div class="impact__n">Dec 2022</div><div class="impact__l">Gigabit-readiness duty in force for every new English dwelling</div></div><div class="impact__cell"><div class="impact__n">0</div><div class="impact__l">Published datasets on compliance with it</div></div><div class="impact__cell"><div class="impact__n">4 months</div><div class="impact__l">Refresh cycle of the free property-level subsidy data</div></div><div class="impact__cell"><div class="impact__n">1</div><div class="impact__l">People tracking new-build connectivity nationally, independently</div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="solution">
+<div class="eyebrow">The system</div>
+<div class="prose mt-2"><p>Lastmile joins property-level gigabit status to newly completed homes, and answers the question the regulation implies but nobody monitors: are new homes actually being built connectable, and are they being connected?</p>
+<p>The subsidy dataset supplies one side of the join for free, already keyed on property identifiers. The other side — which properties are new homes — comes from new-build energy certificates, which carry the same identifier and a field distinguishing new build from existing stock.</p>
+<p>That produces a national compliance picture at property level: new homes in areas with no gigabit infrastructure, new homes in subsidy intervention areas, and new developments where connectivity was planned but not delivered.</p>
+<p>It also flags the inverse, which matters for public money: subsidised interventions targeting premises that new development has already made commercially viable.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="data">
+<div class="eyebrow">Data foundation</div>
+<h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
+<div class="tablewrap mt-3">
+<table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
+<tbody><tr><td><strong>Open market review premises data</strong></td><td class="muted">Building Digital UK</td><td>Property-level gigabit status with subsidy classification, contracted supplier and delivery date. Free, open licence, refreshed every four months. England and Wales.</td></tr><tr><td><strong>Connected Nations</strong></td><td class="muted">Ofcom</td><td>Coverage at postcode for fixed and 100-metre grid for mobile. Free and open — computed per premises, published aggregated.</td></tr><tr><td><strong>New-build energy certificates</strong></td><td class="muted">MHCLG</td><td>Property identifier plus a report type field distinguishing new build from existing stock.</td></tr><tr><td><strong>Open property identifiers</strong></td><td class="muted">Ordnance Survey</td><td>The free identifier file, 41.6 million records. Carries no status field, so cannot distinguish a plot from a house.</td></tr><tr><td><strong>Linked identifiers</strong></td><td class="muted">Ordnance Survey</td><td>The free crosswalk between property, street and topographic identifiers.</td></tr><tr><td><strong>Planning applications</strong></td><td class="muted">MHCLG and authority portals</td><td>Development pipeline, for forward-looking connectivity planning.</td></tr></tbody></table>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="features">
+<div class="eyebrow">Capabilities</div>
+<div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">New-build connectivity compliance</div><div class="feat__d">Whether homes completed under the gigabit-readiness duty are in areas with gigabit infrastructure.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Property-level notspot mapping</div><div class="feat__d">Premises with no gigabit and none expected, joined to development pipeline.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Subsidy efficiency check</div><div class="feat__d">Interventions targeting premises that development has already made commercially viable.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Developer performance</div><div class="feat__d">Connectivity outcomes by developer and by authority, which no published source currently allows.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Forward pipeline</div><div class="feat__d">Permitted but unbuilt development matched against planned network build.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Coverage disaggregation</div><div class="feat__d">The postcode-level published picture reconciled against property-level subsidy data, exposing mixed postcodes.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Devolved coverage gap</div><div class="feat__d">Scotland and Northern Ireland publish separately; the national picture is assembled rather than assumed.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="benefits">
+<div class="eyebrow">Benefits</div>
+<div class="grid grid--2 mt-3">
+<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Creates the compliance evidence base for a building regulation that has run unmonitored since 2022.</li><li>Improves subsidy targeting by identifying interventions overtaken by commercial development.</li><li>Gives the broadband programme a development-aware view rather than a static premises view.</li><li>Supports building control and planning authorities enforcing a duty they currently cannot check.</li></ul></div>
+<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Buyers of new homes can see connectivity status before purchase rather than after moving in.</li><li>Households in genuine notspots become visible individually rather than averaged into a postcode.</li><li>Public subsidy targeted where commercial build genuinely will not reach.</li></ul></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section id="delivery">
+<div class="eyebrow">Delivery</div>
+<div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Building Digital UK, DCMS, building control authorities, network operators</div></div>
+<div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">G-Cloud for the service, with broadband programme funding</div></div>
+<h3 class="mt-4 mb-3">Phasing</h3>
+<div class="phases"><div class="phase"><div class="phase__n">1</div><div><div class="phase__t">Join and baseline</div><div class="phase__meta">3 months</div><div class="phase__d">Subsidy data joined to new-build certificates, national baseline published.</div></div></div><div class="phase"><div class="phase__n">2</div><div><div class="phase__t">Compliance picture</div><div class="phase__meta">3 months</div><div class="phase__d">New-home connectivity status by authority and developer.</div></div></div><div class="phase"><div class="phase__n">3</div><div><div class="phase__t">Subsidy efficiency</div><div class="phase__meta">3 months</div><div class="phase__d">Overlap analysis delivered to the broadband programme.</div></div></div><div class="phase"><div class="phase__n">4</div><div><div class="phase__t">Pipeline view</div><div class="phase__meta">6 months</div><div class="phase__d">Forward development matched to planned network build.</div></div></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="risks">
+<div class="eyebrow">Risks &amp; mitigations</div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Certificates are a proxy, not a register</div><p class="card__desc">New-build certificates indicate completion, imperfectly and with an undocumented lag. That lag must be measured empirically before any latency claim is made.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Coverage is not connection</div><p class="card__desc">Infrastructure passing a property is not the same as a working service in the home. The data supports the former; claims must not overreach into the latter.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Geographic scope</div><p class="card__desc">The property-level subsidy data covers England and Wales. Scotland and Northern Ireland publish separately and must be assembled, not assumed.</p></div></div>
+</section>
+
+<hr class="hr">
+
+<section id="sources">
+<div class="eyebrow">Sources</div>
+<div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.gov.uk/government/publications/january-2026-omr-and-premises-in-bduk-plans-england-and-wales" target="_blank" rel="noopener">Open market review and premises in BDUK plans</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/government/publications/may-2025-omr-and-premises-in-bduk-plans-england-and-wales/uprn-level-release-user-guide-and-technical-note-for-premises-in-bduk-plans" target="_blank" rel="noopener">Property-level release user guide</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.ofcom.org.uk/phones-and-broadband/coverage-and-speeds/data-downloads2" target="_blank" rel="noopener">Ofcom Connected Nations data downloads</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://get-energy-performance-data.communities.gov.uk/" target="_blank" rel="noopener">Energy performance data service</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.ordnancesurvey.co.uk/products/os-open-uprn" target="_blank" rel="noopener">OS Open UPRN</a></span></div></div>
+<p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
+</section>
+
+<hr class="hr">
+<div class="flexrow" style="justify-content:space-between">
+<a class="btn btn--ghost" href="../systems/sightline.html">&larr; 13 Sightline</a>
+<a class="btn btn--ghost" href="../systems/freehold.html">15 Freehold &rarr;</a>
+</div>
+
+</main>
+<aside class="sysLayout__aside">
+<div class="toc"><div class="toc__title">On this page</div>
+<a href="#problem">The problem</a>
+<a href="#solution">The system</a>
+<a href="#data">Data foundation</a>
+<a href="#features">Capabilities</a>
+<a href="#benefits">Benefits</a>
+<a href="#delivery">Delivery</a>
+<a href="#risks">Risks &amp; mitigations</a>
+<a href="#sources">Sources</a>
+</div>
+</aside>
+</div>
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Portfolio</h4>
+<a href="../systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="../systems/transit.html">02 &middot; Transit</a>
+<a href="../systems/compass.html">03 &middot; Compass</a>
+<a href="../systems/threshold.html">04 &middot; Threshold</a>
+<a href="../systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="../systems/highwater.html">06 &middot; Highwater</a>
+<a href="../systems/catchment.html">07 &middot; Catchment</a>
+<a href="../systems/waypoint.html">08 &middot; Waypoint</a>
+<a href="../systems/hearth.html">09 &middot; Hearth</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="../systems/junction.html">10 &middot; Junction</a>
+<a href="../systems/ledger.html">11 &middot; Ledger</a>
+<a href="../systems/bellwether.html">12 &middot; Bellwether</a>
+<a href="../systems/sightline.html">13 &middot; Sightline</a>
+<a href="../systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="../systems/freehold.html">15 &middot; Freehold</a>
+<a href="../systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="../systems/watchman.html">17 &middot; Watchman</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="../index.html#thesis">The thesis</a>
+<a href="../index.html#method">How these were chosen</a>
+<a href="../index.html#rejected">What we rejected</a>
+<a href="../index.html#delivery">Delivery and procurement</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="../assets/app.js"></script>
+</body></html>
