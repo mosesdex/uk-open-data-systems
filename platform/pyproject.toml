@@ -1,0 +1,8 @@
+[project]
+name = "groundtruth"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["duckdb>=1.5", "requests>=2.31"]
+
+[project.scripts]
+gt = "groundtruth.cli:main"

@@ -6,3 +6,7 @@ node_modules/
 # Large re-downloadable research intermediates
 research/gias.csv
 research/lad-raw.geojson
+
+# Platform working data
+platform/data/
+platform/.venv/
