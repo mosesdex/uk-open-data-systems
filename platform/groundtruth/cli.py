@@ -186,6 +186,42 @@ def cmd_catchment(args) -> int:
     return 0
 
 
+def cmd_watchman(args) -> int:
+    from .systems import watchman as W
+    con = store.connect(DB)
+    gaz = BRONZE / ("gazette_insolvency_bulk.json"
+                    if (BRONZE / "gazette_insolvency_bulk.json").exists()
+                    else "gazette_insolvency.json")
+    ocds = [p for p in (BRONZE / "contracts_finder_bulk.json",
+                        BRONZE / "contracts_finder.json",
+                        BRONZE / "find_a_tender.json") if p.exists()]
+    if not gaz.exists() or not ocds:
+        print(f"{RED}missing feeds{OFF} -- run: gt fetch gazette_insolvency contracts_finder find_a_tender")
+        con.close(); return 1
+
+    stats = W.register_suppliers(con, W.load_suppliers(*ocds))
+    print(f"{BOLD}supplier register{OFF}  {DIM}(cumulative -- the register is the asset){OFF}")
+    print(f"  awards recorded        {stats['rows']:>9,}   {GREEN}+{stats['added']:,} this run{OFF}")
+    print(f"  distinct companies     {stats['distinct_names']:>9,} by name, "
+          f"{stats['distinct_numbers']:,} by company number")
+
+    exposures = W.check_against_register(con, gaz)
+    print(f"\n{BOLD}exposure{OFF}")
+    print(f"  insolvency notices checked against the register")
+    print(f"  exposures found        {len(exposures):>9,}")
+    for e in exposures[:args.limit]:
+        v = f"£{e.supplier.value:,.0f}" if e.supplier.value else "value not published"
+        print(f"    {e.notice.title[:34]:<36} {e.supplier.buyer[:32]:<34} {v:>18}  {e.method} {e.confidence:.2f}")
+    if not exposures:
+        n = stats["distinct_names"] or 1
+        need = 875 * n / 5_400_000
+        print(f"    {DIM}none -- expected about {need:.1f} per three weeks at this register size.{OFF}")
+        print(f"    {DIM}A register of 100,000 suppliers would surface roughly 16.{OFF}")
+        print(f"    {DIM}Backfilling historic award notices is the operational requirement.{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -233,6 +269,10 @@ def main(argv=None) -> int:
     pcat = sub.add_parser("catchment", help="build and report the Catchment system")
     pcat.add_argument("--limit", type=int, default=8)
     pcat.set_defaults(fn=cmd_catchment)
+
+    pw = sub.add_parser("watchman", help="build the supplier register and check exposure")
+    pw.add_argument("--limit", type=int, default=10)
+    pw.set_defaults(fn=cmd_watchman)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

@@ -81,7 +81,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M2 place spine | **done** — 1,749,109 postcodes, validated at 64 m median |
 | M3 entity spine | **done** — identifier-first, ambiguity reported not guessed |
 | M4 Catchment end to end | **done** — 26,605 schools resolved, masking exposed |
-| M5–M9 remaining systems | next |
+| M5 Watchman | **done** — cumulative supplier register, exposure checking |
+| M6–M9 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -208,3 +209,48 @@ Blending the two produces a utilisation figure that means nothing, so mainstream
 and specialist are now counted separately everywhere, and the split is covered
 by tests. The specialist figure is worth having in its own right — it is the
 SEND pressure in the research, measured.
+
+## M5 — Watchman
+
+```bash
+./.venv/bin/python -m groundtruth.cli watchman
+```
+
+Reuses the entity spine and the Gazette parser built in M3, which is the
+compounding argument in practice: the system itself is a few hundred lines.
+
+### The finding that changed the design
+
+Run against three weeks of live data, Watchman found **zero** exposures — and
+that is the correct answer, not a bug:
+
+| | |
+|---|---|
+| Companies entering insolvency | 609 |
+| Distinct companies appearing as public suppliers | 448 |
+| Overlap | **0** |
+
+With roughly 5.4 million UK companies, 609 insolvencies against a 448-company
+register gives an expected overlap of about 0.05. Zero is what chance predicts.
+
+| Register size | Expected hits per three weeks |
+|---|---|
+| 1,264 (three weeks of notices) | 0.2 |
+| 10,000 | 1.6 |
+| 100,000 | 16.2 |
+| 250,000 | 40.5 |
+
+So **the register is the asset, not the fetch**. `register_suppliers` accumulates
+and deduplicates into a persistent table across runs rather than rebuilding from
+the latest download, and backfilling historic award notices is the operational
+requirement before the system produces signal.
+
+### Measured on the way
+
+- Supplier records carry a Companies House identifier **30.9%** of the time
+  across both feeds — 33.9% on Contracts Finder, 55% on Find a Tender. Identifier
+  matching alone cannot close the loop, which is why the name route exists and
+  why every link is scored.
+- Contracts Finder pages by **date cursor** (`publishedTo`), not page number. A
+  `&page=` parameter is silently ignored and returns the same 100 releases: an
+  early collection produced 1,500 rows containing 93 distinct notices.

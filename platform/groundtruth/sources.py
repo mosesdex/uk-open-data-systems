@@ -229,6 +229,38 @@ REGISTRY: tuple[Source, ...] = (
         systems=("baseline",),
         notes="1,044 stations. The weather normaliser for sewage spill statistics.",
     ),
+    Source(
+        id="contracts_finder",
+        name="Contracts Finder (OCDS)",
+        publisher="Cabinet Office",
+        url="https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search?limit=100",
+        fmt="json",
+        role="domain",
+        licence="OGL v3",
+        cadence="realtime",
+        expect_content=("application/json",),
+        systems=("sentinel", "watchman"),
+        notes=(
+            "Award notices including below-threshold. Measured 17 Aug 2026: 41 of 121 "
+            "supplier parties (33.9%) carry a Companies House identifier."
+        ),
+    ),
+    Source(
+        id="find_a_tender",
+        name="Find a Tender (OCDS)",
+        publisher="Cabinet Office",
+        url="https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages?limit=100",
+        fmt="json",
+        role="domain",
+        licence="OGL v3",
+        cadence="realtime",
+        expect_content=("application/json",),
+        systems=("sentinel", "watchman"),
+        notes=(
+            "Statutory notices above threshold. Carries the Procurement Act GB-PPON "
+            "identifier; 44 of 80 suppliers (55%) also carry a Companies House number."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",
