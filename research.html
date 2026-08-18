@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research findings — what is actually open in UK government data</title>
+<meta name="description" content="An access audit of 101 UK government endpoints. 69 returned data to an anonymous request. What that makes possible, and what it rules out.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+</head>
+<body>
+<nav class="nav"><div class="wrap nav__inner">
+<a class="brand" href="index.html"><span class="brand__mark">G</span>Groundtruth<span class="brand__sub">by Dexter DCL</span></a>
+<div class="nav__links">
+<a class="hide-sm" href="index.html#thesis">The problem</a>
+<a class="hide-sm" href="index.html#systems">Systems</a>
+<a class="hide-sm" href="index.html#chains">How they help each other</a>
+<a class="hide-sm" href="research.html">Research</a>
+<a href="examples.html">Problems &amp; solutions</a>
+<a href="app/index.html">Prototype</a>
+<a class="hide-sm" href="index.html#overall">Why one platform</a>
+<a href="platform.html">Architecture</a>
+<button class="themetoggle" aria-label="Toggle theme"></button>
+</div></div></nav>
+
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<div class="eyebrow">Research findings &middot; 17 August 2026</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">What is actually open</h1>
+<p class="lede" style="margin-top:.9rem;font-size:1.1rem">The binding constraint on this platform is not modelling skill or computing power. It is <strong>access</strong>. A source that needs an account cannot be part of Groundtruth, because the whole proposition is that a government body can reproduce every number without asking anyone&rsquo;s permission.</p>
+<p class="lede" style="margin-top:.9rem;font-size:1.1rem">So the research began by testing access rather than by reading documentation. 101 endpoints were probed from a clean client &mdash; no account, no key, no subscription, no cookie. <strong>69 returned HTTP 200.</strong> Everything downstream follows from that result.</p>
+</div></header>
+
+<div class="wrap section">
+
+<div class="impact">
+<div class="impact__cell"><div class="impact__n">69</div><div class="impact__l">of 101 endpoints returned data to an anonymous request</div></div><div class="impact__cell"><div class="impact__n">0</div><div class="impact__l">accounts, keys or subscriptions needed</div></div><div class="impact__cell"><div class="impact__n">96.5%</div><div class="impact__l">of open schools already carry a property reference</div></div><div class="impact__cell"><div class="impact__n">45.4%</div><div class="impact__l">carry an organisation identifier &mdash; the gap</div></div>
+</div>
+
+<hr class="hr">
+
+<div class="eyebrow">The findings</div>
+<h2 class="mt-2">Four things testing found that reading would not</h2>
+
+
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING 01</div>
+<h3 class="mt-2" style="font-size:1.35rem">The place spine is free, and needs no registration</h3>
+<p class="lede mt-2" style="font-size:1.02rem">This is the single most important finding in the study.</p>
+<div class="prose mt-3"><p>Ordnance Survey documentation steers you to the OS Data Hub, which wants an account. The downloads path does not. A range request against it returned <span class="mono">HTTP 206</span> and real archive bytes with no key of any kind.</p>
+<p>That releases the entire free portfolio &mdash; including OS Open UPRN and, critically, <strong>OS Open Linked Identifiers</strong>, which is exactly the property-to-street-to-topographic crosswalk the place spine needs.</p></div>
+<div class="note mt-3">The earlier working assumption &mdash; that the place spine required a licensed addressing product &mdash; was wrong for the identifier layer. The licensing line still holds for addresses, which is why Groundtruth emits identifiers and never address strings.</div>
+<div class="tablewrap mt-4">
+<table><thead><tr><th>Product</th><th>Format</th><th>Size</th><th>Role</th></tr></thead>
+<tbody><tr><td>OS Open UPRN</td><td class="small">CSV</td><td class="small">618.5 MB</td><td>Every property reference in GB, with coordinates</td></tr><tr><td>OS Open Linked Identifiers</td><td class="small">CSV</td><td class="small">672.0 MB</td><td>The crosswalk: property &harr; street &harr; topographic</td></tr><tr><td>OS Open USRN</td><td class="small">GeoPackage</td><td class="small">296.9 MB</td><td>Street references</td></tr><tr><td>OS Open TOID</td><td class="small">CSV</td><td class="small">1.4 MB</td><td>Topographic identifiers</td></tr><tr><td>Code-Point Open</td><td class="small">CSV</td><td class="small">14.5 MB</td><td>Postcode centroids</td></tr><tr><td>OS Open Names</td><td class="small">CSV</td><td class="small">103.3 MB</td><td>Place and street gazetteer</td></tr><tr><td>Boundary-Line</td><td class="small">Shapefile</td><td class="small">736.9 MB</td><td>Administrative boundaries</td></tr><tr><td>OS Open Roads</td><td class="small">Shapefile</td><td class="small">606.1 MB</td><td>Road network</td></tr></tbody></table></div>
+</div></div>
+</section>
+
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING 02</div>
+<h3 class="mt-2" style="font-size:1.35rem">Grid connection data is far more open than the sector says</h3>
+<p class="lede mt-2" style="font-size:1.02rem">Four of the six network operators publish through a full query API, anonymously.</p>
+<div class="prose mt-3"><p>UK Power Networks, SP Energy Networks, Northern Powergrid and Electricity North West each expose an Opendatasoft catalogue with filtering, aggregation and geospatial querying. UK Power Networks alone publishes 137 datasets, including its embedded capacity register.</p>
+<p>This corrects the premise Junction was built on. The gap is <em>not</em> access. The gap is that each operator computes &ldquo;available capacity&rdquo; on its own basis, so the published numbers cannot be compared with each other.</p></div>
+
+
+</div></div>
+</section>
+
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING 03</div>
+<h3 class="mt-2" style="font-size:1.35rem">The flood asset register is reachable, with condition data</h3>
+<p class="lede mt-2" style="font-size:1.02rem">A direct upgrade to Bulwark.</p>
+<div class="prose mt-3"><p>The Environment Agency asset-management interface answers anonymously and carries condition, last inspection date, asset type, primary purpose and protection type per asset.</p>
+<p>That means the overdue-inspection question and the coverage-qualified condition statistic can both be answered today, rather than being a future ambition.</p></div>
+
+
+</div></div>
+</section>
+
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING 04</div>
+<h3 class="mt-2" style="font-size:1.35rem">Some sources described as open are not</h3>
+<p class="lede mt-2" style="font-size:1.02rem">The trap case, and the reason the audit was worth running.</p>
+<div class="prose mt-3"><p>The energy performance register returns <span class="mono">HTTP 200</span> to an anonymous client &mdash; and serves a sign-in page. A system built on documentation alone would have shipped with a dependency that silently returns nothing.</p>
+<p>It was removed rather than assumed to work. Lastmile now uses Price Paid Data, which carries a new-build flag at address level and is genuinely open.</p></div>
+
+
+</div></div>
+</section>
+
+<hr class="hr">
+
+<section id="baseline">
+<div class="eyebrow">Measured baseline</div>
+<h2 class="mt-2">The thesis, measured</h2>
+<p class="lede mt-2" style="font-size:1.02rem">Computed from the full school register on 17 August 2026 &mdash; 52,486 establishments, of which 27,167 are open.</p>
+<div class="tablewrap mt-4">
+<table><thead><tr><th>Measure</th><th>Value</th><th>Meaning</th></tr></thead>
+<tbody><tr>
+<td>Open schools</td>
+<td class="small">27,167</td>
+<td>The denominator</td></tr><tr>
+<td>Carrying a property reference</td>
+<td class="small" style="color:var(--cool);font-weight:600">96.5%</td>
+<td>The <em>where</em> link is nearly solved here</td></tr><tr>
+<td>Carrying coordinates</td>
+<td class="small" style="color:var(--cool);font-weight:600">97.7%</td>
+<td></td></tr><tr>
+<td>Carrying an organisation identifier</td>
+<td class="small" style="color:var(--hot);font-weight:600">45.4%</td>
+<td>The <em>who</em> link is barely half solved</td></tr><tr>
+<td>Total capacity</td>
+<td class="small">9,928,858</td>
+<td>places</td></tr><tr>
+<td>Pupils on roll</td>
+<td class="small">8,857,132</td>
+<td></td></tr><tr>
+<td>National utilisation</td>
+<td class="small">89.2%</td>
+<td></td></tr><tr>
+<td>Distinct academy trusts</td>
+<td class="small">2,185</td>
+<td>Largest runs 96 schools</td></tr></tbody></table></div>
+<div class="note mt-4">This is the whole argument in one table. In the dataset with the best identifier hygiene in UK government, <em>where</em> is 96.5% solved and <em>who</em> is 45.4% solved. Most datasets are far worse on both.</div>
+</section>
+
+<hr class="hr">
+
+<section id="mismatch">
+<div class="eyebrow">Geography</div>
+<h2 class="mt-2">A finding worth stating plainly</h2>
+<div class="prose mt-3"><p>Joining those authorities to the national boundary set by name matched <strong>152 of 316</strong> districts.</p>
+<p>The thirty that fail are two-tier counties &mdash; Kent, Lancashire, Hampshire, Essex, Surrey, Norfolk, Staffordshire and others &mdash; whose schools are planned across several districts at once.</p>
+<p>That is not a data-cleaning nuisance. It is exactly the defect Catchment exists to fix: school planning happens on a geography that is published nowhere and does not line up with the administrative geography everything else uses. The prototype shows this on click rather than papering over it.</p></div>
+</section>
+
+<hr class="hr">
+
+<section id="blocked">
+<div class="eyebrow">Honest limits</div>
+<h2 class="mt-2">What failed, and why it stays visible</h2>
+<p class="lede mt-2" style="font-size:1.02rem">A system that quietly drops a source it cannot reach is a system whose coverage figures cannot be trusted. These are published in the platform&rsquo;s own console.</p>
+<div class="tablewrap mt-4">
+<table><thead><tr><th>Source</th><th>Response</th><th>Position</th></tr></thead>
+<tbody><tr><td>Care regulator syndication</td>
+<td class="small" style="color:var(--hot)">401</td><td>Needs a key. The published location file is still free &mdash; use that.</td></tr><tr><td>Charity register interface</td>
+<td class="small" style="color:var(--hot)">401</td><td>Needs a key. Bulk extracts remain downloadable.</td></tr><tr><td>Bus open data service</td>
+<td class="small" style="color:var(--hot)">401</td><td>Needs a free account &mdash; still excluded by the rule.</td></tr><tr><td>Energy performance register</td>
+<td class="small" style="color:var(--hot)">200</td><td>Serves a sign-in page anonymously. Replaced by Price Paid Data.</td></tr><tr><td>Communications coverage data</td>
+<td class="small" style="color:var(--hot)">403</td><td>Blocks automated retrieval; needs a manual step.</td></tr><tr><td>School register download page</td>
+<td class="small" style="color:var(--hot)">403</td><td>Page blocks automation &mdash; but the underlying file is directly reachable.</td></tr><tr><td>Benefits statistics interface</td>
+<td class="small" style="color:var(--hot)">503</td><td>Account required.</td></tr><tr><td>Local land charges search</td>
+<td class="small" style="color:var(--hot)">403</td><td>Search service blocks automation.</td></tr></tbody></table></div>
+</section>
+
+<hr class="hr">
+
+<section id="cannot">
+<div class="eyebrow">Ceiling</div>
+<h2 class="mt-2">What free data cannot do</h2>
+<div class="grid grid--2 mt-4">
+<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">Bid prices</div>
+<p class="card__desc mt-1" style="flex:none">Never published in UK procurement data. This kills the entire family of price-based collusion tests, so Sentinel relies on structural signals instead &mdash; shared directors, shared owners, framework concentration.</p></div></div>
+<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">Active travel casework</div>
+<p class="card__desc mt-1" style="flex:none">Held in a structured system covering over 2,000 responses a year, and published nowhere. Sightline cannot use it until it is released.</p></div></div>
+<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">Energy certificate tracking</div>
+<p class="card__desc mt-1" style="flex:none">Not reachable without signing in, so it cannot serve as the national completion signal.</p></div></div>
+<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">Communications coverage automation</div>
+<p class="card__desc mt-1" style="flex:none">Blocked to machines. Usable, but only with a manual download step.</p></div></div>
+<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">Anything about an individual</div>
+<p class="card__desc mt-1" style="flex:none">Excluded by design rather than by capability. Compass forecasts from published aggregates and touches no personal record.</p></div></div>
+</div>
+<div class="note mt-4">The ceiling is set by what government chooses to publish, not by what can be computed. Groundtruth&rsquo;s proposition is that the published material already supports far more than is currently extracted from it &mdash; because the two joins that would unlock it have never been built.</div>
+</section>
+
+<hr class="hr">
+
+<section id="rules">
+<div class="eyebrow">Consequences</div>
+<h2 class="mt-2">Rules that follow from the evidence</h2>
+<div class="mt-4">
+<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">01</div>
+<div><div class="feat__t">Emit identifiers, never addresses</div><p class="card__desc mt-1" style="flex:none">Keeps the platform inside the licensing line permanently.</p></div>
+</div></div>
+<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">02</div>
+<div><div class="feat__t">Publish a confidence score on every match</div><p class="card__desc mt-1" style="flex:none">Nothing merges silently. Low-confidence links go to a human queue.</p></div>
+</div></div>
+<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">03</div>
+<div><div class="feat__t">Ship every statistic with its coverage</div><p class="card__desc mt-1" style="flex:none">&ldquo;73.7% unknown&rdquo; is a finding, not something to hide.</p></div>
+</div></div>
+<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">04</div>
+<div><div class="feat__t">Record every source&rsquo;s access status</div><p class="card__desc mt-1" style="flex:none">A source that starts failing must show as failing, not quietly produce a smaller number.</p></div>
+</div></div>
+<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">05</div>
+<div><div class="feat__t">Stay reproducible</div><p class="card__desc mt-1" style="flex:none">Same inputs, same commit, same outputs &mdash; because a government buyer will eventually be challenged on a number by a named company.</p></div>
+</div></div>
+</div>
+</section>
+
+<hr class="hr">
+
+<section>
+<div class="eyebrow">Go deeper</div>
+<h2 class="mt-2">The full write-up and the raw evidence</h2>
+<div class="grid grid--2 mt-4">
+<a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/RESEARCH.md">
+<div class="card__b"><div class="feat__t">Full research document</div>
+<p class="card__desc mt-1" style="flex:none">Every system: sources, logic, data in and out, architecture, automation, security.</p></div></a>
+<a class="card" href="app/index.html">
+<div class="card__b"><div class="feat__t">Working prototype</div>
+<p class="card__desc mt-1" style="flex:none">Public, admin and mobile interfaces, running on the real figures above.</p></div></a>
+<a class="card" href="https://github.com/mosesdex/uk-open-data-systems/tree/main/research">
+<div class="card__b"><div class="feat__t">Raw probe results</div>
+<p class="card__desc mt-1" style="flex:none">The status every endpoint returned, and the script that regenerates it.</p></div></a>
+</div>
+</section>
+
+</div>
+<footer class="foot"><div class="wrap">
+<div class="foot__grid">
+<div>
+<h4>Groundtruth systems</h4>
+<a href="systems/catchment.html">07 &middot; Catchment</a>
+<a href="systems/sentinel.html">01 &middot; Sentinel</a>
+<a href="systems/highwater.html">06 &middot; Highwater</a>
+<a href="systems/plumbline.html">05 &middot; Plumbline</a>
+<a href="systems/junction.html">10 &middot; Junction</a>
+<a href="systems/ledger.html">11 &middot; Ledger</a>
+<a href="systems/bellwether.html">12 &middot; Bellwether</a>
+</div>
+<div>
+<h4>&nbsp;</h4>
+<a href="systems/sightline.html">13 &middot; Sightline</a>
+<a href="systems/lastmile.html">14 &middot; Lastmile</a>
+<a href="systems/bulwark.html">16 &middot; Bulwark</a>
+<a href="systems/watchman.html">17 &middot; Watchman</a>
+<a href="systems/compass.html">03 &middot; Compass</a>
+<a href="systems/baseline.html">18 &middot; Baseline</a>
+</div>
+<div>
+<h4>Sections</h4>
+<a href="index.html#chains">How they help each other</a>
+<a href="index.html#sequence">Build order</a>
+<a href="index.html#delivery">Delivery and procurement</a>
+<a href="index.html#rejected">Out of scope</a>
+</div>
+<div>
+<h4>About</h4>
+<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+</div>
+</div>
+<div class="foot__bottom">
+<span>&copy; <span data-year>2026</span> Dexter DCL Limited. Research compiled August 2026.</span>
+<span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
+</div>
+</div></footer>
+<script src="assets/app.js"></script>
+</body></html>

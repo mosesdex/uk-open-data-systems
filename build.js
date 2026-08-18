@@ -6,6 +6,7 @@ import C from './data/systems-c.js';
 import P from './data/platform.js';
 import CHAINS from './data/chains.js';
 import EX from './data/examples.js';
+import RS from './data/research.js';
 
 // The thirteen Groundtruth systems: every source fetchable anonymously, no account, no key, no application.
 const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass', 'baseline'];
@@ -47,6 +48,7 @@ const nav = (depth = 0) => {
 <a class="hide-sm" href="${p}index.html#thesis">The problem</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
 <a class="hide-sm" href="${p}index.html#chains">How they help each other</a>
+<a class="hide-sm" href="${p}research.html">Research</a>
 <a href="${p}examples.html">Problems &amp; solutions</a>
 <a href="${p}app/index.html">Prototype</a>
 <a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
@@ -626,9 +628,129 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 </div>
 ${foot()}`;
 
+const research = `${head('Research findings — what is actually open in UK government data',
+  'An access audit of 101 UK government endpoints. 69 returned data to an anonymous request. What that makes possible, and what it rules out.')}
+${nav()}
+
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<div class="eyebrow">Research findings &middot; ${RS.date}</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">What is actually open</h1>
+${RS.intro.map(p => `<p class="lede" style="margin-top:.9rem;font-size:1.1rem">${p}</p>`).join('\n')}
+</div></header>
+
+<div class="wrap section">
+
+<div class="impact">
+${RS.headline.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">${n}</div><div class="impact__l">${l}</div></div>`).join('')}
+</div>
+
+<hr class="hr">
+
+<div class="eyebrow">The findings</div>
+<h2 class="mt-2">Four things testing found that reading would not</h2>
+
+${RS.findings.map(f => `
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING ${f.n}</div>
+<h3 class="mt-2" style="font-size:1.35rem">${esc(f.title)}</h3>
+<p class="lede mt-2" style="font-size:1.02rem">${f.lede}</p>
+<div class="prose mt-3">${f.body.map(b => `<p>${b}</p>`).join('\n')}</div>
+${f.note ? `<div class="note mt-3">${f.note}</div>` : ''}
+${f.table ? `<div class="tablewrap mt-4">
+<table><thead><tr>${f.table.head.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+<tbody>${f.table.rows.map(r => `<tr>${r.map((c, i) => `<td${i === 1 || i === 2 ? ' class="small"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : ''}
+</div></div>
+</section>`).join('\n')}
+
+<hr class="hr">
+
+<section id="baseline">
+<div class="eyebrow">Measured baseline</div>
+<h2 class="mt-2">${RS.baseline.heading}</h2>
+<p class="lede mt-2" style="font-size:1.02rem">${RS.baseline.lede}</p>
+<div class="tablewrap mt-4">
+<table><thead><tr><th>Measure</th><th>Value</th><th>Meaning</th></tr></thead>
+<tbody>${RS.baseline.rows.map(([m, v, n, k]) => `<tr>
+<td>${m}</td>
+<td class="small"${k === 'ok' ? ' style="color:var(--cool);font-weight:600"' : k === 'warn' ? ' style="color:var(--hot);font-weight:600"' : ''}>${v}</td>
+<td>${n}</td></tr>`).join('')}</tbody></table></div>
+<div class="note mt-4">${RS.baseline.close}</div>
+</section>
+
+<hr class="hr">
+
+<section id="mismatch">
+<div class="eyebrow">Geography</div>
+<h2 class="mt-2">${RS.mismatch.heading}</h2>
+<div class="prose mt-3">${RS.mismatch.body.map(b => `<p>${b}</p>`).join('\n')}</div>
+</section>
+
+<hr class="hr">
+
+<section id="blocked">
+<div class="eyebrow">Honest limits</div>
+<h2 class="mt-2">${RS.blocked.heading}</h2>
+<p class="lede mt-2" style="font-size:1.02rem">${RS.blocked.lede}</p>
+<div class="tablewrap mt-4">
+<table><thead><tr><th>Source</th><th>Response</th><th>Position</th></tr></thead>
+<tbody>${RS.blocked.rows.map(([n, c, w]) => `<tr><td>${n}</td>
+<td class="small" style="color:var(--hot)">${c}</td><td>${w}</td></tr>`).join('')}</tbody></table></div>
+</section>
+
+<hr class="hr">
+
+<section id="cannot">
+<div class="eyebrow">Ceiling</div>
+<h2 class="mt-2">${RS.cannot.heading}</h2>
+<div class="grid grid--2 mt-4">
+${RS.cannot.items.map(([t, d]) => `<div class="card"><div class="card__b">
+<div class="feat__t" style="color:var(--hot)">${t}</div>
+<p class="card__desc mt-1" style="flex:none">${d}</p></div></div>`).join('\n')}
+</div>
+<div class="note mt-4">${RS.cannot.close}</div>
+</section>
+
+<hr class="hr">
+
+<section id="rules">
+<div class="eyebrow">Consequences</div>
+<h2 class="mt-2">${RS.rules.heading}</h2>
+<div class="mt-4">
+${RS.rules.items.map(([t, d], i) => `<div class="card mt-2"><div class="card__b" style="display:flex;gap:1rem;align-items:flex-start">
+<div class="card__num" style="flex:none;padding-top:.15rem">${String(i + 1).padStart(2, '0')}</div>
+<div><div class="feat__t">${t}</div><p class="card__desc mt-1" style="flex:none">${d}</p></div>
+</div></div>`).join('\n')}
+</div>
+</section>
+
+<hr class="hr">
+
+<section>
+<div class="eyebrow">Go deeper</div>
+<h2 class="mt-2">The full write-up and the raw evidence</h2>
+<div class="grid grid--2 mt-4">
+<a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/RESEARCH.md">
+<div class="card__b"><div class="feat__t">Full research document</div>
+<p class="card__desc mt-1" style="flex:none">Every system: sources, logic, data in and out, architecture, automation, security.</p></div></a>
+<a class="card" href="app/index.html">
+<div class="card__b"><div class="feat__t">Working prototype</div>
+<p class="card__desc mt-1" style="flex:none">Public, admin and mobile interfaces, running on the real figures above.</p></div></a>
+<a class="card" href="https://github.com/mosesdex/uk-open-data-systems/tree/main/research">
+<div class="card__b"><div class="feat__t">Raw probe results</div>
+<p class="card__desc mt-1" style="flex:none">The status every endpoint returned, and the script that regenerates it.</p></div></a>
+</div>
+</section>
+
+</div>
+${foot()}`;
+
 writeFileSync('index.html', index);
 writeFileSync('platform.html', platform);
 writeFileSync('examples.html', examples);
+writeFileSync('research.html', research);
 SYSTEMS.forEach((s, i) => writeFileSync(`systems/${s.id}.html`, detailPage(s, i)));
 console.log(`Built index.html + ${SYSTEMS.length} system pages:`);
 SYSTEMS.forEach(s => console.log(`  systems/${s.id}.html  ${s.num} ${s.name}`));
