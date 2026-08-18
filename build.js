@@ -645,6 +645,17 @@ ${RS.intro.map(p => `<p class="lede" style="margin-top:.9rem;font-size:1.1rem">$
 ${RS.headline.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">${n}</div><div class="impact__l">${l}</div></div>`).join('')}
 </div>
 
+<div class="note mt-5">
+<div class="note__title">See it working</div>
+<p>Every figure on this page drives a working prototype &mdash; real boundaries, real school data,
+the verified source catalogue. Three interfaces over the same platform.</p>
+<div class="flexrow mt-3">
+<a class="btn btn--primary" href="app/index.html">Open the prototype &rarr;</a>
+<a class="btn btn--ghost" href="app/admin.html">Admin console</a>
+<a class="btn btn--ghost" href="app/mobile.html">Mobile</a>
+</div>
+</div>
+
 <hr class="hr">
 
 <div class="eyebrow">The findings</div>
