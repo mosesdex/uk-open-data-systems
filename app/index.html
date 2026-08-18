@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth — public interface</title>
+<meta name="description" content="Groundtruth public interface: linkage coverage, thirteen systems and the free UK data behind them.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+</head>
+<body>
+<div class="flagrule"><i></i><i></i><i></i></div>
+<div class="app">
+
+<aside class="side">
+  <div class="side__brand">
+    <div class="mark">G</div>
+    <div><div class="side__name">Groundtruth</div><div class="side__sub">Public</div></div>
+  </div>
+  <div class="side__scroll">
+    <div class="side__group">Overview</div>
+    <a class="navi is-on" href="#top"><i class="navi__dot"></i>National picture</a>
+    <a class="navi" href="#map"><i class="navi__dot"></i>Coverage map</a>
+    <a class="navi" href="#spines"><i class="navi__dot"></i>The two links</a>
+    <div class="side__group">Systems</div>
+    <div id="navSystems"></div>
+    <div class="side__group">Evidence</div>
+    <a class="navi" href="#feeds"><i class="navi__dot"></i>Data sources</a>
+    <a class="navi" href="#honesty"><i class="navi__dot"></i>What we cannot do</a>
+  </div>
+</aside>
+
+<div class="main">
+<header class="top"><div class="top__in">
+  <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
+  <div><div class="top__crumb">Groundtruth · Public interface</div><div class="top__title">National picture</div></div>
+  <div class="spacer"></div>
+  <span class="live"><i></i>13 SYSTEMS LIVE</span>
+  <nav class="switch">
+    <a class="is-on" href="index.html">Public</a><a href="admin.html">Admin</a><a href="mobile.html">Mobile</a>
+  </nav>
+  <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
+</div></header>
+
+<div class="pad" id="top">
+
+  <div class="grid g4">
+    <div class="kpi rise" style="--accent:var(--uk-blue)">
+      <div class="kpi__l">Systems running</div>
+      <div class="kpi__v" data-count="13">0</div>
+      <div class="kpi__m">All on free public data</div>
+      <div class="kpi__spark" id="sp1"></div></div>
+    <div class="kpi rise" style="--accent:var(--green-600)">
+      <div class="kpi__l">Sources verified open</div>
+      <div class="kpi__v" data-count="69">0</div>
+      <div class="kpi__m">No key, no account, no fee</div>
+      <div class="kpi__spark" id="sp2"></div></div>
+    <div class="kpi rise" style="--accent:var(--uk-red)">
+      <div class="kpi__l">Schools resolved to a place</div>
+      <div class="kpi__v" data-count="96.5" data-dec="1" data-suf="%">0</div>
+      <div class="kpi__m">27,167 open schools carry a property reference</div>
+      <div class="kpi__spark" id="sp3"></div></div>
+    <div class="kpi rise" style="--accent:var(--amber-600)">
+      <div class="kpi__l">Resolved to an organisation</div>
+      <div class="kpi__v" data-count="45.4" data-dec="1" data-suf="%">0</div>
+      <div class="kpi__m">The gap Groundtruth closes</div>
+      <div class="kpi__spark" id="sp4"></div></div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-top:1rem">
+    <section class="card rise" id="map">
+      <div class="card__hd">
+        <div><div class="card__t">Linkage coverage by local authority</div>
+        <div class="card__s">Share of open schools carrying a property reference. Real ONS boundaries, real DfE data.</div></div>
+        <div class="spacer"></div>
+        <div class="legend">low <span class="legend__bar"></span> high</div>
+      </div>
+      <div class="card__b">
+        <div class="mapwrap" id="mapA" data-geo="data/lad.geojson" style="min-height:320px"></div>
+        <div class="row" style="margin-top:.7rem;justify-content:space-between">
+          <span class="card__s" id="mapNote">Hover a district. Click to pin it.</span>
+          <span class="tag">318 authorities · ONS May 2024</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="card rise">
+        <div class="card__hd"><div class="card__t">Selected authority</div></div>
+        <div class="card__b" id="pick">
+          <p class="card__s">Click a district on the map to see its published figures.</p>
+        </div>
+      </section>
+      <section class="card rise">
+        <div class="card__hd"><div class="card__t">Largest school groups</div>
+        <div class="card__s">One organisation, many sites</div></div>
+        <div class="card__b"><div class="bars" id="trustBars"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card rise" id="spines" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">The two missing links</div>
+      <div class="card__s">Every system below depends on one or both</div></div></div>
+    <div class="card__b">
+      <div class="spine">
+        <div class="spine__c">
+          <div class="tag">LINK ONE · WHERE</div>
+          <h3 style="font-size:15px;margin-top:.5rem">A messy reference becomes a point on a map</h3>
+          <p class="card__s" style="margin-top:.35rem">“East Devon 21/0751/FUL” → property reference → coordinate.
+          Seven of the thirteen systems cannot start without this.</p>
+          <div class="meter" style="margin-top:.7rem"><i data-w="96.5" class="ok"></i></div>
+          <div class="card__s mono" style="margin-top:.3rem;font-size:11px">96.5% on school records today</div>
+        </div>
+        <div class="spine__k">JOIN</div>
+        <div class="spine__c">
+          <div class="tag">LINK TWO · WHO</div>
+          <h3 style="font-size:15px;margin-top:.5rem">A name becomes one identified organisation</h3>
+          <p class="card__s" style="margin-top:.35rem">“SOFTCAT LTD”, “Softcat plc”, “SOFTCAT PLC - FCA” → one company number.
+          Six systems depend on it.</p>
+          <div class="meter" style="margin-top:.7rem"><i data-w="45.4" class="warn"></i></div>
+          <div class="card__s mono" style="margin-top:.3rem;font-size:11px">45.4% on school records today</div>
+        </div>
+      </div>
+      <div class="pipe" style="margin-top:1.1rem">
+        <div class="pipe__s"><div class="pipe__n">01 COLLECT</div><div class="pipe__t">Fetch</div><div class="pipe__v">39 open feeds</div></div>
+        <div class="pipe__s"><div class="pipe__n">02 RESOLVE</div><div class="pipe__t">Place link</div><div class="pipe__v">UPRN · USRN · TOID</div></div>
+        <div class="pipe__s"><div class="pipe__n">03 RESOLVE</div><div class="pipe__t">Entity link</div><div class="pipe__v">Company no. · PPON</div></div>
+        <div class="pipe__s"><div class="pipe__n">04 SCORE</div><div class="pipe__t">Confidence</div><div class="pipe__v">Published per link</div></div>
+        <div class="pipe__s"><div class="pipe__n">05 SERVE</div><div class="pipe__t">Systems</div><div class="pipe__v">13 consumers</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card rise" id="systems" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">The thirteen systems</div>
+      <div class="card__s">Each answers a question nobody can currently answer</div></div>
+      <div class="spacer"></div>
+      <div class="row" id="filters"></div></div>
+    <div class="card__b"><div class="grid g3" id="sysGrid"></div></div>
+  </section>
+
+  <div class="grid g-1-2" style="margin-top:1rem">
+    <section class="card rise">
+      <div class="card__hd"><div class="card__t">Where the systems draw from</div></div>
+      <div class="card__b">
+        <div class="row" style="justify-content:center"><div id="donut1"></div></div>
+        <div id="donutKey" style="margin-top:.9rem"></div>
+      </div>
+    </section>
+    <section class="card rise" id="feeds">
+      <div class="card__hd"><div><div class="card__t">Open data sources</div>
+        <div class="card__s">Every row returned HTTP 200 to an unauthenticated request on 17 August 2026</div></div>
+        <div class="spacer"></div>
+        <div class="srch"><span class="card__s">⌕</span><input id="feedSearch" placeholder="Filter sources…" aria-label="Filter sources"></div></div>
+      <div class="card__b card__b--flush" style="max-height:420px;overflow:auto">
+        <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Format</th></tr></thead>
+        <tbody id="feedRows"></tbody></table>
+      </div>
+    </section>
+  </div>
+
+  <section class="card rise" id="honesty" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">What this cannot do</div>
+      <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
+    <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
+  </section>
+
+  <p class="card__s" style="margin-top:1.6rem;max-width:70ch">
+    Prototype for demonstration. Figures shown are computed from published DfE, ONS and Ordnance Survey
+    data retrieved on 17 August 2026. Where a figure is illustrative rather than measured it is labelled as such.
+  </p>
+</div>
+</div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(async function(){
+  document.getElementById('navSystems').innerHTML = SYSTEMS.map(s =>
+    `<a class="navi" href="#sys-${s.id}"><i class="navi__dot"></i>${s.n}</a>`).join('');
+
+  ['sp1','sp2','sp3','sp4'].forEach((id,i)=>{
+    const seeds=[[3,5,7,9,11,13],[22,31,40,52,61,69],[88,90,92,94,95.5,96.5],[30,34,38,41,43,45.4]];
+    document.getElementById(id).innerHTML = GT.spark(seeds[i],{fill:true,
+      c:['var(--uk-blue)','var(--green-600)','var(--uk-red)','var(--amber-600)'][i]});
+  });
+
+  const sc = await fetch('data/schools.json').then(r=>r.json());
+  const vals = {}; Object.entries(sc.byLad).forEach(([k,v])=>vals[k]=v.uprnPct);
+  const mapEl = document.getElementById('mapA');
+  await GT.choropleth(mapEl,{values:vals,label:'{}% of schools carry a property reference'});
+  document.getElementById('mapNote').textContent =
+    `${Object.keys(sc.byLad).length} of 318 districts carry a published figure. The rest are two-tier counties whose schools span several districts — the mismatch Catchment exists to fix.`;
+
+  mapEl.addEventListener('pick', e => {
+    const d = sc.byLad[e.detail.code];
+    const box = document.getElementById('pick');
+    if(!d){ box.innerHTML = `<h3 style="font-size:15px">${e.detail.name}</h3>
+      <p class="card__s" style="margin-top:.4rem">No authority-level figure published at this geography.
+      Its schools are planned by a county council covering several districts.</p>
+      <span class="tag tag--warn" style="margin-top:.6rem">GEOGRAPHY MISMATCH</span>`; return; }
+    box.innerHTML = `<h3 style="font-size:16px">${d.name}</h3>
+      <div class="row" style="margin-top:.5rem"><span class="tag">${GT.fmt(d.schools)} schools</span>
+      <span class="tag">${GT.fmt(d.pupils)} pupils</span></div>
+      <div style="margin-top:.85rem"><div class="card__s">Capacity used</div>
+        <div class="meter" style="margin-top:.3rem"><i class="${d.util>95?'bad':d.util>88?'warn':'ok'}" style="width:${Math.min(d.util,100)}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.util}% of ${GT.fmt(d.capacity)} places</div></div>
+      <div style="margin-top:.75rem"><div class="card__s">Resolved to a place</div>
+        <div class="meter" style="margin-top:.3rem"><i class="ok" style="width:${d.uprnPct}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.uprnPct}%</div></div>
+      <div style="margin-top:.75rem"><div class="card__s">Resolved to an organisation</div>
+        <div class="meter" style="margin-top:.3rem"><i class="${d.trustPct<50?'warn':'ok'}" style="width:${d.trustPct}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.trustPct}%</div></div>`;
+  });
+
+  const tr = await fetch('data/trusts.json').then(r=>r.json());
+  GT.bars(document.getElementById('trustBars'),
+    tr.slice(0,7).map(t=>({n:t.name.replace(/ (TRUST|ACADEMY TRUST|FEDERATION)$/i,''), v:t.schools})),
+    {fmt:v=>v+' schools'});
+
+  const badge = st => st==='live' ? '<span class="tag tag--ok">LIVE</span>' : '<span class="tag tag--warn">BETA</span>';
+  const spineTag = sp => sp==='both' ? '<span class="tag">WHERE + WHO</span>'
+    : sp==='place' ? '<span class="tag">WHERE</span>' : '<span class="tag">WHO</span>';
+  const drawSystems = (f='all') => {
+    document.getElementById('sysGrid').innerHTML = SYSTEMS
+      .filter(s => f==='all' || s.spine===f || (f==='both'&&s.spine==='both'))
+      .map(s=>`<a class="card card--hov" id="sys-${s.id}" href="../systems/${s.id}.html" style="display:block">
+      <div class="card__b">
+        <div class="row" style="justify-content:space-between">${badge(s.st)}<span class="card__s mono" style="font-size:10px">${s.dom.toUpperCase()}</span></div>
+        <h3 style="font-size:15px;margin-top:.6rem">${s.n}</h3>
+        <p class="card__s" style="margin-top:.3rem">${s.s}</p>
+        <div style="margin-top:.7rem">${spineTag(s.spine)}</div>
+      </div></a>`).join('');
+    GT.reveal();
+  };
+  document.getElementById('filters').innerHTML =
+    [['all','All 13'],['place','Where'],['entity','Who'],['both','Both']]
+    .map(([k,l],i)=>`<button class="btn ${i?'btn--ghost':''}" data-f="${k}">${l}</button>`).join('');
+  document.querySelectorAll('#filters [data-f]').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#filters [data-f]').forEach(o=>o.classList.add('btn--ghost'));
+    b.classList.remove('btn--ghost'); drawSystems(b.dataset.f);
+  }));
+  drawSystems();
+
+  const byKind = {};
+  FEEDS.forEach(f => byKind[f.kind] = (byKind[f.kind]||0)+1);
+  const cols = ['var(--uk-blue)','var(--blue-500)','var(--uk-red)','var(--amber-600)','var(--green-600)','var(--blue-300)','#6B4FA8','#0E7C7B'];
+  const segs = Object.entries(byKind).sort((a,b)=>b[1]-a[1])
+    .map(([k,v],i)=>({n:k,v,c:cols[i%cols.length]}));
+  GT.donut(document.getElementById('donut1'), segs, {center:String(FEEDS.length)});
+  document.getElementById('donutKey').innerHTML = segs.map(s=>
+    `<div class="row" style="justify-content:space-between;padding:.18rem 0">
+      <span class="row" style="gap:.45rem"><i style="width:9px;height:9px;border-radius:3px;background:${s.c};display:inline-block"></i>
+      <span style="font-size:12.5px">${s.n}</span></span>
+      <span class="mono card__s" style="font-size:11.5px">${s.v}</span></div>`).join('');
+
+  const rowsHtml = list => list.map(f=>`<tr><td>${f.n}</td><td>${f.org}</td>
+    <td><span class="tag">${f.kind}</span></td><td class="mono" style="font-size:11.5px">${f.freq}</td>
+    <td class="mono" style="font-size:11.5px">${f.fmt}</td></tr>`).join('');
+  document.getElementById('feedRows').innerHTML = rowsHtml(FEEDS);
+  document.getElementById('feedSearch').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.getElementById('feedRows').innerHTML = rowsHtml(
+      FEEDS.filter(f => (f.n+f.org+f.kind).toLowerCase().includes(q)));
+  });
+
+  document.getElementById('blockedFeed').innerHTML = BLOCKED.map(b=>`<div class="fitem">
+    <div class="fitem__i" style="background:var(--red-050);color:var(--uk-red)">${b.code}</div>
+    <div><div class="fitem__t">${b.n}</div><div class="fitem__d">${b.why}</div>
+    <div class="fitem__m"><span>${b.org}</span><span>HTTP ${b.code}</span></div></div></div>`).join('');
+
+  GT.reveal(); GT.countAll(); GT.meters();
+})();
+</script>
+</body>
+</html>

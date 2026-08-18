@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groundtruth — admin console</title>
+<meta name="description" content="Groundtruth admin console: feed health, resolver queues, match review, alerts and access control.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+</head>
+<body>
+<div class="flagrule"><i></i><i></i><i></i></div>
+<div class="app">
+
+<aside class="side">
+  <div class="side__brand"><div class="mark">G</div>
+    <div><div class="side__name">Groundtruth</div><div class="side__sub">Admin</div></div></div>
+  <div class="side__scroll">
+    <div class="side__group">Operations</div>
+    <a class="navi is-on" href="#ops"><i class="navi__dot"></i>Control room</a>
+    <a class="navi" href="#feeds"><i class="navi__dot"></i>Data sources<span class="navi__badge">8</span></a>
+    <a class="navi" href="#pipeline"><i class="navi__dot"></i>Ingest pipeline</a>
+    <a class="navi" href="#queue"><i class="navi__dot"></i>Match review<span class="navi__badge">6</span></a>
+    <div class="side__group">Platform</div>
+    <a class="navi" href="#systems"><i class="navi__dot"></i>Systems</a>
+    <a class="navi" href="#alerts"><i class="navi__dot"></i>Alert rules</a>
+    <a class="navi" href="#users"><i class="navi__dot"></i>Users &amp; access</a>
+    <a class="navi" href="#audit"><i class="navi__dot"></i>Audit log</a>
+  </div>
+</aside>
+
+<div class="main">
+<header class="top"><div class="top__in">
+  <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
+  <div><div class="top__crumb">Groundtruth · Admin console</div><div class="top__title">Control room</div></div>
+  <div class="spacer"></div>
+  <span class="live"><i></i>ALL PIPELINES HEALTHY</span>
+  <nav class="switch"><a href="index.html">Public</a><a class="is-on" href="admin.html">Admin</a><a href="mobile.html">Mobile</a></nav>
+  <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
+</div></header>
+
+<div class="pad" id="ops">
+
+  <div class="grid g4">
+    <div class="kpi rise" style="--accent:var(--green-600)"><div class="kpi__l">Feeds connected</div>
+      <div class="kpi__v" data-count="39">0</div><div class="kpi__m">of 47 evaluated</div></div>
+    <div class="kpi rise" style="--accent:var(--uk-blue)"><div class="kpi__l">Records resolved today</div>
+      <div class="kpi__v" data-count="1284119">0</div><div class="kpi__m">Illustrative throughput</div></div>
+    <div class="kpi rise" style="--accent:var(--amber-600)"><div class="kpi__l">Awaiting human review</div>
+      <div class="kpi__v" data-count="6">0</div><div class="kpi__m">Below confidence threshold</div></div>
+    <div class="kpi rise" style="--accent:var(--uk-red)"><div class="kpi__l">Sources failing</div>
+      <div class="kpi__v" data-count="8">0</div><div class="kpi__m">Blocked or needing an account</div></div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-top:1rem">
+    <section class="card rise">
+      <div class="card__hd"><div><div class="card__t">Resolution rate, last 12 runs</div>
+        <div class="card__s">Share of incoming records resolved to a place and to an organisation. Illustrative.</div></div>
+        <div class="spacer"></div>
+        <div class="row"><span class="tag" style="border-color:var(--blue-500);color:var(--blue-600)">● place</span>
+        <span class="tag" style="border-color:var(--red-300);color:var(--uk-red)">● entity</span></div></div>
+      <div class="card__b"><div id="lineA"></div></div>
+    </section>
+    <section class="card rise">
+      <div class="card__hd"><div class="card__t">Pipeline stages</div></div>
+      <div class="card__b"><div class="stack" id="stages"></div></div>
+    </section>
+  </div>
+
+  <section class="card rise" id="pipeline" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">Ingest pipeline</div>
+      <div class="card__s">Every stage runs on a schedule; nothing here requires an account with a publisher</div></div>
+      <div class="spacer"></div><button class="btn btn--ghost" id="runBtn">▶ Run now</button></div>
+    <div class="card__b"><div class="pipe" id="pipeStages"></div>
+      <div class="row" style="margin-top:.9rem;justify-content:space-between">
+        <span class="card__s" id="runNote">Last completed run 04:12 · 39 sources · 0 failures</span>
+        <span class="tag tag--ok">SCHEDULED 04:00 DAILY</span></div></div>
+  </section>
+
+  <section class="card rise" id="feeds" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">Data sources</div>
+      <div class="card__s">Connection status from an unauthenticated probe on 17 August 2026</div></div>
+      <div class="spacer"></div>
+      <div class="srch"><span class="card__s">⌕</span><input id="q" placeholder="Filter…" aria-label="Filter sources"></div>
+      <button class="btn" id="addBtn">+ Add source</button></div>
+    <div class="card__b card__b--flush" style="max-height:460px;overflow:auto">
+      <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Status</th><th>Enabled</th></tr></thead>
+      <tbody id="rows"></tbody></table></div>
+  </section>
+
+  <div class="grid g2" style="margin-top:1rem">
+    <section class="card rise" id="queue">
+      <div class="card__hd"><div><div class="card__t">Match review queue</div>
+        <div class="card__s">Links below the auto-accept threshold. Nothing merges silently.</div></div></div>
+      <div class="card__b card__b--flush"><div class="feed" id="queueFeed"></div></div>
+    </section>
+    <section class="card rise" id="alerts">
+      <div class="card__hd"><div><div class="card__t">Alert rules</div>
+        <div class="card__s">Fire when a watched condition appears in a feed</div></div>
+        <div class="spacer"></div><button class="btn btn--ghost">+ New rule</button></div>
+      <div class="card__b card__b--flush"><div class="feed" id="ruleFeed"></div></div>
+    </section>
+  </div>
+
+  <section class="card rise" id="systems" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">System operations</div>
+      <div class="card__s">Per-system freshness, coverage and dependency</div></div></div>
+    <div class="card__b card__b--flush" style="overflow:auto">
+      <table class="tbl"><thead><tr><th>System</th><th>Domain</th><th>Needs</th><th>Coverage</th><th>Last build</th><th>State</th></tr></thead>
+      <tbody id="sysRows"></tbody></table></div>
+  </section>
+
+  <div class="grid g-1-2" style="margin-top:1rem">
+    <section class="card rise" id="users">
+      <div class="card__hd"><div class="card__t">Users &amp; access</div></div>
+      <div class="card__b card__b--flush"><div class="feed" id="userFeed"></div></div>
+    </section>
+    <section class="card rise" id="audit">
+      <div class="card__hd"><div><div class="card__t">Audit log</div>
+        <div class="card__s">Every change to a source, rule or threshold is recorded</div></div></div>
+      <div class="card__b card__b--flush" style="max-height:300px;overflow:auto">
+        <table class="tbl"><thead><tr><th>When</th><th>Actor</th><th>Action</th></tr></thead>
+        <tbody id="auditRows"></tbody></table></div>
+    </section>
+  </div>
+
+  <p class="card__s" style="margin-top:1.6rem;max-width:70ch">
+    Prototype. Source status and system inventory are real; throughput, queue contents, users and audit
+    entries are illustrative sample data for demonstration.
+  </p>
+</div>
+</div>
+</div>
+
+<script src="assets/shared.js"></script>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  GT.line(document.getElementById('lineA'), [
+    {c:'var(--blue-500)', v:[91.2,92.0,92.4,93.1,93.0,94.2,94.8,95.1,95.4,96.0,96.2,96.5]},
+    {c:'var(--uk-red)',   v:[38.1,39.0,39.8,40.2,41.0,41.6,42.4,43.1,43.6,44.2,44.9,45.4]}
+  ], {labels:['','','','','','','','','','','','now']});
+
+  const stages = [['Fetch','39 sources','ok',100],['Validate','schema + licence','ok',100],
+    ['Place link','UPRN / USRN / TOID','ok',96.5],['Entity link','company number','warn',45.4],
+    ['Confidence','scored per link','ok',100],['Publish','13 systems','ok',100]];
+  document.getElementById('stages').innerHTML = stages.map(([n,d,s,v])=>`
+    <div><div class="row" style="justify-content:space-between">
+      <span style="font-size:12.5px;font-weight:550">${n}</span>
+      <span class="mono card__s" style="font-size:11px">${v}%</span></div>
+    <div class="meter" style="margin-top:.28rem"><i class="${s==='warn'?'warn':'ok'}" data-w="${v}"></i></div>
+    <div class="card__s" style="font-size:11px;margin-top:.2rem">${d}</div></div>`).join('');
+
+  const pstages=[['01','Fetch','39 open feeds'],['02','Validate','licence + schema'],['03','Place link','96.5% resolved'],
+    ['04','Entity link','45.4% resolved'],['05','Confidence','scored per link'],['06','Publish','13 systems']];
+  document.getElementById('pipeStages').innerHTML = pstages.map(([n,t,v])=>
+    `<div class="pipe__s"><div class="pipe__n">${n}</div><div class="pipe__t">${t}</div><div class="pipe__v">${v}</div></div>`).join('');
+
+  document.getElementById('runBtn').addEventListener('click', function(){
+    const b=this, note=document.getElementById('runNote'), cells=[...document.querySelectorAll('.pipe__s')];
+    b.disabled=true; b.textContent='Running…'; cells.forEach(c=>c.style.background='');
+    cells.forEach((c,i)=>setTimeout(()=>{
+      c.style.background='var(--blue-050)'; c.style.borderColor='var(--blue-300)';
+      note.textContent='Running stage '+(i+1)+' of '+cells.length+'…';
+      if(i===cells.length-1) setTimeout(()=>{
+        cells.forEach(x=>{x.style.background='';x.style.borderColor='';});
+        note.textContent='Run complete · 39 sources · 0 failures · '+new Date().toLocaleTimeString('en-GB');
+        b.disabled=false; b.textContent='▶ Run now';
+      },600);
+    }, i*430));
+  });
+
+  const st = f => f.code===200 ? '<span class="tag tag--ok">200 OK</span>'
+    : f.code===401 ? '<span class="tag tag--bad">401 KEY</span>'
+    : f.code===403 ? '<span class="tag tag--bad">403 BLOCKED</span>' : '<span class="tag tag--warn">'+f.code+'</span>';
+  const all = FEEDS.map(f=>({...f,on:true})).concat(BLOCKED.map(b=>({n:b.n,org:b.org,kind:'Blocked',freq:'—',code:b.code,on:false})));
+  const draw = list => document.getElementById('rows').innerHTML = list.map((f,i)=>`<tr>
+    <td>${f.n}</td><td>${f.org}</td><td><span class="tag">${f.kind}</span></td>
+    <td class="mono" style="font-size:11.5px">${f.freq}</td><td>${st(f)}</td>
+    <td><span class="toggle ${f.on?'on':''}" data-i="${i}" role="switch" tabindex="0"></span></td></tr>`).join('');
+  draw(all);
+  document.getElementById('rows').addEventListener('click', e=>{
+    const t=e.target.closest('.toggle'); if(t) t.classList.toggle('on');
+  });
+  document.getElementById('q').addEventListener('input', e=>{
+    const v=e.target.value.toLowerCase();
+    draw(all.filter(f=>(f.n+f.org+f.kind).toLowerCase().includes(v)));
+  });
+  document.getElementById('addBtn').addEventListener('click',()=>
+    alert('Prototype: adding a source opens a form for the endpoint, licence and refresh schedule.\n\nA source is only accepted if it returns data to an unauthenticated request.'));
+
+  const queue=[
+    ['SOFTCAT PLC - FCA','Softcat plc','0.82','Suffix on the buyer record; company number absent','entity'],
+    ['NORTHERN CARE GROUP LTD','Northern Care Group Limited','0.91','Legal-form variant only','entity'],
+    ['21/0751/FUL, East Devon','UPRN 10023456789','0.74','Two candidate properties on the same parcel','place'],
+    ['United Learning Trust','UNITED LEARNING','0.88','Trading name against registered name','entity'],
+    ['Land r/o 14 Mill Lane','UPRN 100062114539','0.68','Descriptive address, no postcode','place'],
+    ['SW-STW-0421 (pre-2024)','SW-STW-8891 (2024)','0.79','Regulator reissued the reference','entity']];
+  document.getElementById('queueFeed').innerHTML = queue.map(([a,b,c,d,k])=>`<div class="fitem">
+    <div class="fitem__i" style="background:${k==='place'?'var(--blue-050);color:var(--blue-600)':'var(--red-050);color:var(--uk-red)'}">${(+c).toFixed(2)}</div>
+    <div style="min-width:0"><div class="fitem__t">${a}</div>
+    <div class="fitem__d">→ ${b}</div><div class="fitem__m"><span>${d}</span></div>
+    <div class="row" style="margin-top:.45rem"><button class="btn" style="padding:.22rem .55rem;font-size:11.5px">Accept</button>
+    <button class="btn btn--ghost" style="padding:.22rem .55rem;font-size:11.5px">Reject</button>
+    <button class="btn btn--ghost" style="padding:.22rem .55rem;font-size:11.5px">Defer</button></div></div></div>`).join('');
+  document.getElementById('queueFeed').addEventListener('click', e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    const item=b.closest('.fitem'); item.style.transition='opacity .3s,transform .3s';
+    item.style.opacity='0'; item.style.transform='translateX(14px)';
+    setTimeout(()=>item.remove(),300);
+  });
+
+  const rules=[['Insolvency notice names a public supplier','Watchman','Gazette JSON, every 15 min','on'],
+    ['Care provider passes 30% of a council’s beds','Bellwether','CQC location file, weekly','on'],
+    ['Two bidders share a director','Sentinel','Companies House PSC, daily','on'],
+    ['Spill count rises with no matching rainfall','Baseline','EA rainfall + EDM, daily','on'],
+    ['Flood defence inspection date passes','Bulwark','EA asset API, weekly','off']];
+  document.getElementById('ruleFeed').innerHTML = rules.map(([n,s,src,on])=>`<div class="fitem">
+    <div class="fitem__i" style="background:var(--blue-050);color:var(--blue-600)">${s[0]}</div>
+    <div style="flex:1;min-width:0"><div class="fitem__t">${n}</div>
+    <div class="fitem__m"><span>${s}</span><span>${src}</span></div></div>
+    <span class="toggle ${on==='on'?'on':''}" role="switch" tabindex="0"></span></div>`).join('');
+  document.getElementById('ruleFeed').addEventListener('click',e=>{
+    const t=e.target.closest('.toggle'); if(t) t.classList.toggle('on');
+  });
+
+  const cov={catchment:96.5,sentinel:71.4,highwater:68.2,plumbline:88.1,junction:54.0,ledger:0.0,
+    bellwether:93.9,sightline:70.0,lastmile:82.3,bulwark:26.3,watchman:100,compass:96.5,baseline:91.2};
+  document.getElementById('sysRows').innerHTML = SYSTEMS.map(s=>{
+    const c=cov[s.id], cls=c>=85?'ok':c>=50?'warn':'bad';
+    return `<tr><td>${s.n}</td><td>${s.dom}</td>
+      <td><span class="tag">${s.spine==='both'?'WHERE + WHO':s.spine==='place'?'WHERE':'WHO'}</span></td>
+      <td style="min-width:150px"><div class="row" style="gap:.5rem"><div class="meter" style="flex:1"><i class="${cls}" data-w="${c}"></i></div>
+      <span class="mono" style="font-size:11px">${c.toFixed(1)}%</span></div></td>
+      <td class="mono" style="font-size:11.5px">04:12</td>
+      <td>${s.st==='live'?'<span class="tag tag--ok">LIVE</span>':'<span class="tag tag--warn">BETA</span>'}</td></tr>`;
+  }).join('');
+
+  const users=[['Analyst, MHCLG','Read · Housing systems','A'],['Statistician, DfE','Read · Education systems','S'],
+    ['Counter-fraud, Cabinet Office','Read + alerts · Sentinel, Watchman','C'],
+    ['Platform operator','Admin · all systems','P'],['Public','Read · published outputs only','G']];
+  document.getElementById('userFeed').innerHTML = users.map(([n,r,i])=>`<div class="fitem">
+    <div class="fitem__i" style="background:var(--uk-blue);color:#fff">${i}</div>
+    <div><div class="fitem__t">${n}</div><div class="fitem__d">${r}</div></div></div>`).join('');
+
+  const audit=[['09:41','platform.operator','Enabled source “EA asset management”'],
+    ['08:12','system','Scheduled run completed — 39 sources, 0 failures'],
+    ['Yesterday 17:03','platform.operator','Raised entity auto-accept threshold to 0.95'],
+    ['Yesterday 16:20','analyst.mhclg','Exported Ledger contributions for Cornwall'],
+    ['Yesterday 11:58','system','Source “EPC register” marked failing — anonymous request returned a sign-in page'],
+    ['2 days ago','platform.operator','Created alert rule “Insolvency notice names a public supplier”']];
+  document.getElementById('auditRows').innerHTML = audit.map(([w,a,x])=>
+    `<tr><td class="mono" style="font-size:11.5px">${w}</td><td>${a}</td><td>${x}</td></tr>`).join('');
+
+  GT.reveal(); GT.countAll(); GT.meters();
+})();
+</script>
+</body>
+</html>

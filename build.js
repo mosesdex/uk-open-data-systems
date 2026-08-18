@@ -48,6 +48,7 @@ const nav = (depth = 0) => {
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
 <a class="hide-sm" href="${p}index.html#chains">How they help each other</a>
 <a href="${p}examples.html">Problems &amp; solutions</a>
+<a href="${p}app/index.html">Prototype</a>
 <a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
 <a href="${p}platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>

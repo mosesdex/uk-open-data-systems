@@ -1,0 +1,51 @@
+bduk-omr	200	100020	text/html	<!DOCTYPE html><html class="govuk-template" lang="en">  <hea
+bods-timetables	401	58	application/json	{"detail":"Authentication credentials were not provided."}
+charity-api	401	152	application/json	{ "statusCode": 401, "message": "Access denied due to missin
+charity-register	404	66215	text/html	<!DOCTYPE html>
+companies-house-bulk	200	7442	text/html	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//E
+companies-house-psc	200	11335	text/html	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//E
+contracts-finder-ocds	200	27392	application/json	{    "uri": "https://www.contractsfinder.service.gov.uk/Publ
+cqc-locations	404	63010	text/html	<!DOCTYPE html><html lang="en" dir="ltr">  <head>    <meta c
+cqc-syndication	401	152	application/json	{ "statusCode": 401, "message": "Access denied due to missin
+data-gov-uk-ckan	200	26423	application/json	{"help": "https://ckan.publishing.service.gov.uk/api/3/actio
+defra-data-services	200	45480	text/html	<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" d
+defra-edm	404	25962	text/html	<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" d
+dfe-ees-api	000	0	inode/x-empty	
+ea-asset-mgmt	400	59068	text/html	            <!DOCTYPE html><html lang="en">    <head>       
+ea-catchment-data	404	330	text/html	<!DOCTYPE html><html lang="en" class="error-page">  <head>  
+ea-ecology	200	93887	application/json	[{"long":-1.580003598,"local_id":"1","northing":434109,"type
+ea-flood-monitoring	200	5065	application/json	{   "@context" : "http://environment.data.gov.uk/flood-monit
+ea-hydrology	200	13602	application/json	{"meta":{"@id":"http://environment.data.gov.uk/hydrology/id/
+ea-rainfall	200	5198	application/json	{   "@context" : "http://environment.data.gov.uk/flood-monit
+ea-water-quality	404	143871	text/html	<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/>
+epc-domestic	200	17463	text/html	<!DOCTYPE html><html lang="en" class="govuk-template"><head>
+find-a-tender-ocds	200	39259	application/json	{    "uri": "https://www.find-tender.service.gov.uk/api/1.0/
+fsa-api	404	37	text/plain	"The API 'Authorities' doesn't exist"
+gazette-all	200	11135	application/json	{"id":"https://www.thegazette.co.uk/all-notices/notice/data.
+gazette-insolvency	200	21226	application/json	{"id":"https://www.thegazette.co.uk/insolvency/notice/data.f
+gias-search	403	1484	text/html	<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//E
+hmlr-ocod	302	0	inode/x-empty	
+hmlr-ppd-sparql	400	36	text/plain	SPARQL Query: No 'query=' parameter
+hmlr-price-paid	200	5436396	text/csv	"{559C5AD4-BCEF-AFE3-E063-4804A8C004A4}","350000","2021-04-2
+insolvency-service	200	101053	text/html	<!DOCTYPE html><html class="govuk-template" lang="en">  <hea
+legislation-api	200	1956111	text/plain	<Legislation xmlns="http://www.legislation.gov.uk/namespaces
+naptan	200	9386500	text/csv	ATCOCode,NaptanCode,PlateCode,CleardownCode,CommonName,Commo
+neso-ckan	200	4944	application/json	{"help": "https://api.neso.energy/api/3/action/help_show?nam
+neso-tec	200	7155	application/json	{"help": "https://api.neso.energy/api/3/action/help_show?nam
+nhs-england-stats	200	74502	text/html	<!DOCTYPE HTML><!--[if lt IE 7]><html class="no-js lt-ie9 lt
+nhs-ods-api	200	1349	application/json	{"Organisations":[{"Name":"CLWYD","OrgId":"001","Status":"In
+nomis-api	200	1967672	text/plain	{"structure" :{"header" :{"id" :"none","prepared" :"2026-08-
+ofcom-connected-nations	403	5812	text/html	<!DOCTYPE html><html lang="en-US"><head><title>Just a moment
+ons-api-beta	200	4107	application/json	{"items":[{"contacts":[{"email":"qualityoflife@ons.gov.uk","
+ons-geo-portal	200	808665	application/json	{"currentVersion":12,"services":[{"name":"250606_Westminster
+os-downloads-list	200	13987	application/json	[{"id":"250kScaleColourRaster","name":"1:250 000 Scale Colou
+os-open-uprn	200	964	application/json	{"id":"OpenUPRN","name":"OS Open UPRN","description":["An op
+osm-nominatim	404	26	application/json	{"title": "404 Not Found"}
+parliament-members	200	3596	application/json	{"items":[{"value":{"id":172,"nameListAs":"Abbott, Ms Diane"
+planning-data-api	200	2447	application/json	{"entities":[{"entry-date":"2020-08-15","start-date":"2019-0
+planning-data-datasets	200	346938	application/json	{"datasets":[{"entry-date":"","start-date":"","end-date":"",
+planning-data-title	200	2455	application/json	{"entities":[{"entry-date":"2026-08-13","start-date":"2009-0
+police-api	200	2258	application/json	[{"id":"avon-and-somerset","name":"Avon and Somerset Constab
+police-street	200	20887	application/json	[{"date":"2026-06","stop-and-search":["avon-and-somerset","b
+uk-air-defra	200	71606	text/html	<!DOCTYPE html><html lang="en"><head>            <meta http-
+ukhsa-dashboard	200	401	application/json	[{"name":"climate_and_environment","link":"https://api.ukhsa

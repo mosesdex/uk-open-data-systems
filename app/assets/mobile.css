@@ -1,0 +1,55 @@
+/* Mobile-first shell. Presented inside a device frame on desktop so the
+   prototype can be shown on a laptop, but the layout itself is genuinely mobile. */
+.phone-stage{min-height:100vh;display:grid;place-items:center;padding:2rem 1rem;
+  background:radial-gradient(1100px 620px at 50% -10%,var(--blue-100),var(--bg) 62%)}
+.phone{width:392px;max-width:100%;height:812px;max-height:calc(100vh - 4rem);background:var(--surface);
+  border-radius:38px;box-shadow:var(--shadow-3),0 0 0 10px var(--blue-900),0 0 0 11px rgba(255,255,255,.14);
+  overflow:hidden;display:flex;flex-direction:column;position:relative}
+.phone__notch{position:absolute;top:0;left:50%;translate:-50% 0;width:132px;height:24px;
+  background:var(--blue-900);border-radius:0 0 15px 15px;z-index:30}
+.m-head{padding:1.5rem 1.1rem .75rem;background:linear-gradient(160deg,var(--uk-blue),var(--blue-700));color:#fff;flex:none}
+.m-head__r{display:flex;align-items:center;gap:.6rem}
+.m-head h1{font-size:19px;margin-top:.9rem}
+.m-head p{font-size:12.5px;color:#B9C7EA;margin-top:.2rem}
+.m-body{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  background:var(--bg);padding:.85rem .8rem 1.4rem}
+.m-body::-webkit-scrollbar{width:0}
+.m-tabs{display:flex;background:var(--surface);border-top:1px solid var(--line);flex:none;
+  padding:.4rem .3rem calc(.4rem + env(safe-area-inset-bottom))}
+.m-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:.18rem;padding:.42rem 0;
+  border-radius:11px;color:var(--ink-3);font-size:10px;transition:color .2s var(--ease),background .2s var(--ease)}
+.m-tab.on{color:var(--uk-blue);background:var(--blue-050);font-weight:600}
+.m-tab span:first-child{font-size:16px;line-height:1}
+.m-card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:.85rem .9rem;
+  box-shadow:var(--shadow-1);margin-bottom:.7rem}
+.m-kpi{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.7rem}
+.m-kpi .kpi{padding:.75rem .8rem;border-radius:13px}
+.m-kpi .kpi__v{font-size:22px}
+.m-kpi .kpi__l{font-size:9px}
+.m-kpi .kpi__m{font-size:10px}
+.m-sec{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);margin:.9rem .2rem .45rem}
+.m-pane{display:none;animation:mfade .32s var(--ease-out)}
+.m-pane.on{display:block}
+@keyframes mfade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.m-row{display:flex;align-items:center;gap:.65rem;padding:.62rem 0;border-bottom:1px solid var(--line)}
+.m-row:last-child{border-bottom:0}
+.m-row__i{width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:600}
+.m-row__t{font-size:13px;font-weight:600}
+.m-row__d{font-size:11.5px;color:var(--ink-3);margin-top:.08rem}
+.m-search{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.16);
+  border-radius:10px;padding:.45rem .65rem;margin-top:.85rem}
+.m-search input{border:0;background:none;outline:0;color:#fff;font-size:13px;width:100%}
+.m-search input::placeholder{color:#A9BAE4}
+.m-chip{display:inline-flex;align-items:center;gap:.25rem;font-family:var(--mono);font-size:9.5px;
+  padding:.16rem .42rem;border-radius:5px;background:var(--blue-050);color:var(--blue-700);
+  border:1px solid var(--blue-100);white-space:nowrap}
+.m-scroll-x{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.3rem;margin:0 -.2rem;scrollbar-width:none}
+.m-scroll-x::-webkit-scrollbar{display:none}
+.m-scroll-x>*{flex:none}
+@media (max-width:460px){
+  .phone-stage{padding:0}
+  .phone{width:100%;height:100vh;max-height:100vh;border-radius:0;box-shadow:none}
+  .phone__notch{display:none}
+}

@@ -2,3 +2,7 @@
 node_modules/
 *.log
 .vscode/
+
+# Large re-downloadable research intermediates
+research/gias.csv
+research/lad-raw.geojson
