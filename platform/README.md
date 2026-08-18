@@ -82,7 +82,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M3 entity spine | **done** — identifier-first, ambiguity reported not guessed |
 | M4 Catchment end to end | **done** — 26,605 schools resolved, masking exposed |
 | M5 Watchman | **done** — cumulative supplier register, exposure checking |
-| M6–M9 remaining systems | next |
+| M6 Bellwether | **done** — care concentration at entity and group level |
+| M7–M9 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -254,3 +255,51 @@ requirement before the system produces signal.
 - Contracts Finder pages by **date cursor** (`publishedTo`), not page number. A
   `&page=` parameter is silently ignored and returns the same 100 releases: an
   early collection produced 1,500 rows containing 93 distinct notices.
+
+## M6 — Bellwether
+
+```bash
+./.venv/bin/python -m groundtruth.cli fetch cqc_hsca_locations
+./.venv/bin/python -m groundtruth.cli bellwether
+```
+
+### The blocked source was the wrong source
+
+The CQC syndication API returns 401 and was recorded as blocked in M1. The
+regulator also publishes a fuller extract as a plain file, reachable with no
+key at all — 57,867 locations, 122 columns, carrying **bed counts, a brand
+field, and a provider Companies House number on 92.4% of care-home beds**.
+That is more than the API would have given. Worth remembering: a blocked
+endpoint is not the same as a blocked dataset.
+
+### Concentration is reported at two levels
+
+Neither alone is honest.
+
+**Legal entity** is exact but understates a group trading through several
+companies. Care UK runs Islington homes through two numbered entities — each
+looks like 26.8% of the borough; the group is 53.6%.
+
+**Group** catches that, using the regulator's brand field, but the field is
+imperfect and the imperfections are published alongside it:
+
+- **49% of care-home beds are unbranded.** The group view cannot see them, and
+  the figure travels with every group statistic.
+- **The field mixes operator with owner.** "Care UK Community Partnerships Ltd"
+  is branded *Welltower* — the investment trust that owns the property, not the
+  company running the home. Islington therefore shows Care UK and Welltower each
+  at 26.8%, which is two true statements about the same 203 beds.
+
+Unbranded providers are treated as their own group, never pooled: the
+placeholder means "no group", not "the same group".
+
+### What it finds
+
+| Group | Authorities | Companies | Locations | Beds |
+|---|---|---|---|---|
+| Welltower | **124** | 72 | 562 | 37,404 |
+| Care UK | 80 | 1 | 241 | 16,368 |
+| Barchester Healthcare | 81 | 1 | 237 | 14,944 |
+
+One owner group across 124 authorities is exactly the exposure no single council
+can see from its own contracts — and it is computable today from a free file.

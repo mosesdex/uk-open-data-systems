@@ -222,6 +222,36 @@ def cmd_watchman(args) -> int:
     return 0
 
 
+def cmd_bellwether(args) -> int:
+    from .systems import bellwether as BW
+    con = store.connect(DB)
+    ods = BRONZE / "cqc_hsca_locations.ods"
+    if not ods.exists():
+        print(f"{RED}no CQC extract{OFF} -- run: gt fetch cqc_hsca_locations")
+        con.close(); return 1
+    if args.reload or not con.execute(
+            "SELECT count(*) FROM information_schema.tables "
+            "WHERE table_schema='silver' AND table_name='care_location'").fetchone()[0]:
+        cov = BW.load_care(con, ods)
+        print(f"  loaded {cov.rows:,} locations, {cov.identified_pct:.1f}% with a company number")
+    BW.build(con); BW.build_groups(con)
+
+    unbranded = BW.unbranded_share(con)
+    print(f"{BOLD}Bellwether{OFF}  {DIM}care sector{OFF}")
+    print(f"  {DIM}group view cannot see {unbranded}% of beds -- those providers are unbranded{OFF}")
+    print(f"\n{BOLD}systemically important groups{OFF}")
+    print(f"  {'group':<30}{'LAs':>5}{'cos':>6}{'sites':>7}{'beds':>9}")
+    for br, la, co, loc, bd in BW.systemic(con, args.limit):
+        print(f"  {br.replace('BRAND ',''):<30}{la:>5}{co:>6}{loc:>7}{bd:>9,}")
+    print(f"\n{BOLD}highest single-group share of an authority{OFF}  {DIM}(300+ beds){OFF}")
+    for la, gn, br, loc, bd, lab, sh in con.execute("""
+            SELECT * FROM gold.bellwether_group WHERE la_beds >= 300
+            ORDER BY share_pct DESC LIMIT ?""", [args.limit]).fetchall():
+        print(f"  {la[:24]:<26}{sh:>6.1f}%  {bd:>6,} of {lab:>7,}  {gn.replace('BRAND ','')[:30]}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -273,6 +303,11 @@ def main(argv=None) -> int:
     pw = sub.add_parser("watchman", help="build the supplier register and check exposure")
     pw.add_argument("--limit", type=int, default=10)
     pw.set_defaults(fn=cmd_watchman)
+
+    pb = sub.add_parser("bellwether", help="provider concentration in care")
+    pb.add_argument("--limit", type=int, default=8)
+    pb.add_argument("--reload", action="store_true")
+    pb.set_defaults(fn=cmd_bellwether)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

@@ -261,6 +261,25 @@ REGISTRY: tuple[Source, ...] = (
             "identifier; 44 of 80 suppliers (55%) also carry a Companies House number."
         ),
     ),
+    Source(
+        id="cqc_hsca_locations",
+        name="CQC active locations under the Health and Social Care Act",
+        publisher="Care Quality Commission",
+        url="https://www.cqc.org.uk/system/files/2026-08/04_August_2026_HSCA_Active_Locations.ods",
+        fmt="zip-csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="monthly",
+        expect_content=("application/vnd.oasis.opendocument.spreadsheet",
+                        "application/zip", "application/octet-stream"),
+        systems=("bellwether", "watchman"),
+        notes=(
+            "57,867 locations, 122 columns. Carries a provider Companies House "
+            "number on 71.5% of locations and 92.4% of care-home beds, plus bed "
+            "counts and a brand field. The syndication API needs a key; this "
+            "published file does not. Filename is dated, so it changes monthly."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",
@@ -287,7 +306,11 @@ REGISTRY: tuple[Source, ...] = (
         licence="OGL v3",
         cadence="daily",
         expect_content=("application/json",),
-        blocked="HTTP 401 -- requires a subscription key. The published location file is still free.",
+        blocked=(
+            "HTTP 401 -- requires a subscription key. Superseded for Groundtruth's "
+            "purposes by cqc_hsca_locations, which is published openly and carries "
+            "more: company numbers, bed counts and brand."
+        ),
     ),
 )
 
