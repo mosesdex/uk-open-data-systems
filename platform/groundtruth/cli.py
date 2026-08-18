@@ -156,6 +156,36 @@ def cmd_coverage(args) -> int:
     return 0
 
 
+def cmd_catchment(args) -> int:
+    from .systems import catchment as C
+    con = store.connect(DB)
+    gias = BRONZE / "gias_establishments.csv"
+    if not gias.exists():
+        print(f"{RED}no school register{OFF} -- run: gt fetch gias_establishments")
+        con.close(); return 1
+    cov = C.build(con, gias)
+    print(f"{BOLD}Catchment{OFF}")
+    print(f"  open schools          {cov.total:>9,}")
+    print(f"  resolved to a place   {cov.resolved:>9,}  ({cov.resolved_pct:.1f}%)")
+    print(f"  published a capacity  {cov.with_capacity:>9,}  ({cov.capacity_pct:.1f}%)")
+
+    m = con.execute("""SELECT count(*), sum(pupils), sum(capacity),
+        round(100.0*sum(pupils)/sum(capacity),1) FROM gold.catchment_district""").fetchone()
+    sp = con.execute("""SELECT count(*), sum(pupils), sum(capacity),
+        round(100.0*sum(pupils)/sum(capacity),1), sum(over_capacity)
+        FROM gold.catchment_specialist""").fetchone()
+    print()
+    print(f"  {BOLD}mainstream{OFF}  {m[0]} districts  {m[1]:,} pupils / {m[2]:,} places  {m[3]}%")
+    print(f"  {BOLD}specialist{OFF}  {sp[0]} districts  {sp[1]:,} pupils / {sp[2]:,} places  {sp[3]}%"
+          f"  {RED}{sp[4]} settings over capacity{OFF}")
+
+    print(f"\n{BOLD}where a district average hides both a full and an empty school{OFF}")
+    for nm, avg, lo, hi, spread, n in C.masking(con, args.limit):
+        print(f"  {nm[:26]:<28} average {avg:>5.1f}%   {DIM}range {lo:.1f}% to {hi:.1f}% over {n} schools{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -199,6 +229,10 @@ def main(argv=None) -> int:
     pc.add_argument("--validate", action="store_true",
                     help="measure accuracy against GIAS published coordinates")
     pc.set_defaults(fn=cmd_coverage)
+
+    pcat = sub.add_parser("catchment", help="build and report the Catchment system")
+    pcat.add_argument("--limit", type=int, default=8)
+    pcat.set_defaults(fn=cmd_catchment)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

@@ -80,7 +80,9 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M1 ingest framework | **done** — 12 admissible sources, 2 blocked and visible |
 | M2 place spine | **done** — 1,749,109 postcodes, validated at 64 m median |
 | M3 entity spine | **done** — identifier-first, ambiguity reported not guessed |
-| M4 Catchment end to end | next |
+| M4 Catchment end to end | **done** — 26,605 schools resolved, masking exposed |
+| M5–M9 remaining systems | next |
+| M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
 
@@ -170,3 +172,39 @@ An early version stripped "group", "holdings" and "UK" as noise. It is not
 noise: "Northern Care Group Ltd" and "Northern Care Holdings Ltd" are routinely
 separate companies with separate numbers, and collapsing them is a false merge.
 Only unambiguous legal forms are stripped now.
+
+## M4 — Catchment, end to end
+
+```bash
+./.venv/bin/python -m groundtruth.cli catchment
+```
+
+The first system on the spines. 27,167 open schools, 26,605 resolved to a
+district (97.9%), 317 mainstream district pictures built.
+
+### What it exposes
+
+| | Districts | Pupils | Places | Utilisation |
+|---|---|---|---|---|
+| Mainstream | 317 | 8,543,252 | 9,539,518 | 89.6% |
+| Specialist | 271 | 203,373 | 216,062 | **94.1%** |
+
+629 specialist settings hold more pupils than places.
+
+The masking table is the point of the system. Waverley averages 91.1% — a
+district that looks comfortable — while containing a school at 48% and another
+at 228%. Aggregation cancels the surplus against the shortage and neither
+appears in published figures.
+
+### A correction the data forced
+
+The first build blended specialist provision into the district average and
+produced schools at 330% of capacity. That is not a data error: 12.5% of pupil
+referral units and 5.1% of special academies hold more pupils than places,
+against 0.1–0.4% of mainstream schools. "Capacity" simply means something
+different for alternative provision.
+
+Blending the two produces a utilisation figure that means nothing, so mainstream
+and specialist are now counted separately everywhere, and the split is covered
+by tests. The specialist figure is worth having in its own right — it is the
+SEND pressure in the research, measured.
