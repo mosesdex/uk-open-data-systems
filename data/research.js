@@ -57,6 +57,17 @@ export default {
     },
     {
       n: '04',
+      title: 'Insolvency notices carry a company number 70% of the time, not always',
+      lede: 'Measured while building the entity spine, and it corrects an earlier claim.',
+      body: [
+        'The premise was that a Gazette notice always carries a structured company number, so exposure questions never need name matching. Parsing the live feed shows that is true of <strong>70%</strong> of notices, not all of them.',
+        'It splits cleanly by notice type. Every <em>appointment of liquidators</em> carries the number, as does every <em>meeting of creditors</em>. But <em>notices to creditors</em> carry it in none of the cases sampled, and <em>notices of intended dividends</em> in almost none. The notice types that mark an actual insolvency event are the reliable ones, which is why the system still works &mdash; but the blanket claim was wrong.',
+        'The notices missing a number still print a registered address. Feeding that postcode to the place spine lifts coverage from 70% to <strong>93%</strong>. The two spines cover each other&rsquo;s gaps, which is an argument for one platform rather than thirteen.'
+      ],
+      note: 'This is what building rather than reading finds. The corrected figures are what the platform reports; the site has been updated to match.'
+    },
+    {
+      n: '05',
       title: 'Some sources described as open are not',
       lede: 'The trap case, and the reason the audit was worth running.',
       body: [

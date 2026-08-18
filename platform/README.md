@@ -79,8 +79,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 |---|---|
 | M1 ingest framework | **done** — 12 admissible sources, 2 blocked and visible |
 | M2 place spine | **done** — 1,749,109 postcodes, validated at 64 m median |
-| M3 entity spine | next |
-| M4 Catchment end to end | |
+| M3 entity spine | **done** — identifier-first, ambiguity reported not guessed |
+| M4 Catchment end to end | next |
 
 ## M2 — place spine
 
@@ -126,3 +126,47 @@ That is the number to quote when someone asks how good "resolved" really is.
   Helmert transform puts a point roughly 100 m out, enough to place a property
   on the wrong side of a street. `geo.py` is verified against the Ordnance
   Survey worked example to seven decimal places.
+
+## M3 — entity spine
+
+The harder join. Place has a free national identifier; entity does not, so most
+records carry a *name*, written differently every time.
+
+Three rules, each enforced by a test:
+
+1. **An identifier beats a name.** A record carrying a company number resolves
+   at confidence 1.0 with no matching at all.
+2. **A name match is scored, never silent.** Nothing reaches the auto-accept
+   threshold on a name alone; below it, the match goes to a review queue.
+3. **Ambiguity is an answer.** Two companies matching equally well is reported
+   as ambiguous, not resolved to whichever sorted first.
+
+### Measured on live insolvency notices
+
+The claim being tested was that a Gazette notice always carries a structured
+company number. It does not — it carries one **70%** of the time:
+
+| Notice type | Carries a number |
+|---|---|
+| Appointment of liquidators | 38/38 |
+| Meetings of creditors | 5/5 |
+| Resolutions for winding up | 17/30 |
+| Notices to creditors | 0/6 |
+| Notices of intended dividends | 1/7 |
+
+The notice types that mark an actual insolvency event are the reliable ones, so
+Watchman still works — but the blanket claim was wrong, and the site has been
+corrected.
+
+### The spines cover each other
+
+Notices without a number still print a registered address. Feeding that postcode
+to the place spine lifts coverage from 70% to **93%**. That is the compounding
+argument made concrete: the second spine rescues what the first cannot identify.
+
+### One correctness fix worth noting
+
+An early version stripped "group", "holdings" and "UK" as noise. It is not
+noise: "Northern Care Group Ltd" and "Northern Care Holdings Ltd" are routinely
+separate companies with separate numbers, and collapsing them is a false merge.
+Only unambiguous legal forms are stripped now.

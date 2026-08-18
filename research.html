@@ -102,6 +102,20 @@ the verified source catalogue. Three interfaces over the same platform.</p>
 <div class="card" style="border-left:3px solid var(--cool)">
 <div class="card__b" style="padding:1.4rem 1.5rem">
 <div class="card__num">FINDING 04</div>
+<h3 class="mt-2" style="font-size:1.35rem">Insolvency notices carry a company number 70% of the time, not always</h3>
+<p class="lede mt-2" style="font-size:1.02rem">Measured while building the entity spine, and it corrects an earlier claim.</p>
+<div class="prose mt-3"><p>The premise was that a Gazette notice always carries a structured company number, so exposure questions never need name matching. Parsing the live feed shows that is true of <strong>70%</strong> of notices, not all of them.</p>
+<p>It splits cleanly by notice type. Every <em>appointment of liquidators</em> carries the number, as does every <em>meeting of creditors</em>. But <em>notices to creditors</em> carry it in none of the cases sampled, and <em>notices of intended dividends</em> in almost none. The notice types that mark an actual insolvency event are the reliable ones, which is why the system still works &mdash; but the blanket claim was wrong.</p>
+<p>The notices missing a number still print a registered address. Feeding that postcode to the place spine lifts coverage from 70% to <strong>93%</strong>. The two spines cover each other&rsquo;s gaps, which is an argument for one platform rather than thirteen.</p></div>
+<div class="note mt-3">This is what building rather than reading finds. The corrected figures are what the platform reports; the site has been updated to match.</div>
+
+</div></div>
+</section>
+
+<section class="mt-5">
+<div class="card" style="border-left:3px solid var(--cool)">
+<div class="card__b" style="padding:1.4rem 1.5rem">
+<div class="card__num">FINDING 05</div>
 <h3 class="mt-2" style="font-size:1.35rem">Some sources described as open are not</h3>
 <p class="lede mt-2" style="font-size:1.02rem">The trap case, and the reason the audit was worth running.</p>
 <div class="prose mt-3"><p>The energy performance register returns <span class="mono">HTTP 200</span> to an anonymous client &mdash; and serves a sign-in page. A system built on documentation alone would have shipped with a dependency that silently returns nothing.</p>

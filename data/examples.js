@@ -93,7 +93,7 @@ export default {
 
     watchman: [
       { problem: 'A supplier enters administration on a Friday afternoon. Which departments, councils and services depend on it? Nobody can say before Monday, and possibly not for weeks.',
-        solution: 'Watchman reads the notice, which includes the company number, and immediately lists everything the public sector relies on that company for. No guesswork about which company it is.' },
+        solution: 'Watchman reads the notice. Where it carries a company number — every liquidator appointment does — the public bodies relying on that company are listed immediately, with no guessing about which company it is. Where the number is missing, the registered address in the notice still places it.' },
       { problem: 'A small supplier files accounts late two years running and takes on new charges over its assets. Both are published signals of difficulty. Nobody is watching, because the standard financial models need profit data small companies never file.',
         solution: 'Watchman treats those as facts that have happened rather than a prediction, and warns the buyers who depend on that supplier.' }
     ],
