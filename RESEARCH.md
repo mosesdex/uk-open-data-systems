@@ -236,13 +236,18 @@ and how it connects to the rest.
 - **Change from earlier design**: EPC replaced by Price Paid Data after EPC failed the access test
 
 ### 4.10 Bulwark — who owns flood defences
-- **In**: **EA asset management API (200)** — carries `actualCondition`, `lastInspectionDate`,
-  `assetType`, `primaryPurpose`, `protectionType`; title boundaries; Companies House
+- **In**: **AIMS spatial flood defences via WFS (200)** — 141,468 assets with owner,
+  operator, maintainer, condition, inspection dates and geometry. *Correction: the
+  asset-management API registered earlier carries condition but **no owner and no
+  geometry**, so it cannot answer this system's question. Same publisher, different endpoint.*
 - **Logic**: resolve each asset to the land parcel beneath it, the parcel to a registered owner;
   separate genuinely unowned from merely unrecorded; flag overdue inspections
 - **Out**: ownership attribution, inspection-overdue list, coverage-qualified condition statistics
-- **Problem**: owner is "Unknown" on 73.7% of 141,629 assets; the headline condition figure is
-  computed on the quarter of assets that have a condition grade at all
+- **Problem**: owner is "Unknown" on **73.7%** of 141,468 assets (measured, matching the
+  published figure), and only **24.9%** carry a condition grade at all
+- **Measured correction**: the *maintainer* is known for **90.9%**. The operational question
+  is largely answered; it is legal ownership that is missing. **7,233 inspections are overdue**
+  against the assets' own scheduled dates
 - **Research upgrade**: the asset API was newly confirmed accessible — this system is stronger
   than previously assessed
 

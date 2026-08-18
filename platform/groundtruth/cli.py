@@ -252,6 +252,40 @@ def cmd_bellwether(args) -> int:
     return 0
 
 
+def cmd_bulwark(args) -> int:
+    from .systems import bulwark as BK
+    con = store.connect(DB)
+    src = BRONZE / "ea_aims_defences.json"
+    if not src.exists():
+        print(f"{RED}no AIMS extract{OFF} -- run: gt fetch ea_aims_defences")
+        con.close(); return 1
+    if args.reload or not con.execute(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema='silver'"
+            " AND table_name='flood_defence'").fetchone()[0]:
+        print(f"  loaded {BK.load(con, src):,} assets")
+    BK.build(con)
+    c = BK.coverage(con)
+    print(f"{BOLD}Bulwark{OFF}  {DIM}{c.total:,} flood defences in England{OFF}\n")
+    print(f"  maintainer known   {c.maintainer_known:>8,}  {GREEN}{c.pct(c.maintainer_known):5.1f}%{OFF}"
+          f"  {DIM}the operational question{OFF}")
+    print(f"  owner known        {c.owner_known:>8,}  {RED}{c.pct(c.owner_known):5.1f}%{OFF}"
+          f"  {DIM}the headline gap{OFF}")
+    print(f"  condition graded   {c.graded:>8,}  {RED}{c.pct(c.graded):5.1f}%{OFF}"
+          f"  {DIM}coverage of any condition statistic{OFF}")
+    od = con.execute("""SELECT count(*) FROM silver.flood_defence
+        WHERE next_inspection IS NOT NULL AND next_inspection < CURRENT_DATE""").fetchone()[0]
+    print(f"\n  {BOLD}inspections overdue{OFF} {od:>7,} of {c.with_next_inspection:,} scheduled")
+    print(f"\n{BOLD}by responsible maintainer{OFF}")
+    for m, a, km, o in con.execute(
+            "SELECT * FROM gold.bulwark_responsibility LIMIT ?", [args.limit]).fetchall():
+        print(f"  {m[:40]:<42}{a:>7,} assets  {o:>6,} overdue ({100*o/a:4.1f}%)")
+    print(f"\n{BOLD}authorities with most overdue{OFF}")
+    for la, n, oldest, unm in BK.overdue(con, args.limit):
+        print(f"  {la[:26]:<28}{n:>6,}  {DIM}oldest {oldest}{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -308,6 +342,11 @@ def main(argv=None) -> int:
     pb.add_argument("--limit", type=int, default=8)
     pb.add_argument("--reload", action="store_true")
     pb.set_defaults(fn=cmd_bellwether)
+
+    pbk = sub.add_parser("bulwark", help="flood defence responsibility and inspections")
+    pbk.add_argument("--limit", type=int, default=6)
+    pbk.add_argument("--reload", action="store_true")
+    pbk.set_defaults(fn=cmd_bulwark)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

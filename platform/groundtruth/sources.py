@@ -280,6 +280,32 @@ REGISTRY: tuple[Source, ...] = (
             "published file does not. Filename is dated, so it changes monthly."
         ),
     ),
+    Source(
+        id="ea_aims_defences",
+        name="AIMS spatial flood defences (standardised attributes)",
+        publisher="Environment Agency",
+        url=(
+            "https://environment.data.gov.uk/spatialdata/"
+            "spatial-flood-defences-including-standardised-attributes/wfs"
+            "?service=WFS&version=2.0.0&request=GetFeature"
+            "&typeNames=dataset-8e5be50f-d465-11e4-ba9a-f0def148f590:"
+            "Spatial_Flood_Defences_Including_Standardised_Attributes"
+            "&outputFormat=application/json&count=5000"
+        ),
+        fmt="json",
+        role="domain",
+        licence="OGL v3",
+        cadence="quarterly",
+        expect_content=("application/json",),
+        systems=("bulwark",),
+        notes=(
+            "141,468 assets with owner, operator, maintainer, condition, inspection "
+            "dates and geometry. This is the dataset Bulwark needs; the "
+            "asset-management API carries condition but no owner and no geometry. "
+            "Dates are DD/MM/YYYY. Supports resultType=hits for exact counts "
+            "without transferring data."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",

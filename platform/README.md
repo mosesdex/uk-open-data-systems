@@ -83,7 +83,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M4 Catchment end to end | **done** — 26,605 schools resolved, masking exposed |
 | M5 Watchman | **done** — cumulative supplier register, exposure checking |
 | M6 Bellwether | **done** — care concentration at entity and group level |
-| M7–M9 remaining systems | next |
+| M7 Bulwark | **done** — 141,468 defences, 7,233 inspections overdue |
+| M8–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -303,3 +304,54 @@ placeholder means "no group", not "the same group".
 
 One owner group across 124 authorities is exactly the exposure no single council
 can see from its own contracts — and it is computable today from a free file.
+
+## M7 — Bulwark
+
+```bash
+./.venv/bin/python -m groundtruth.cli bulwark
+```
+
+### The registered source was the wrong endpoint
+
+M1 registered the Environment Agency asset-management API for this system. It
+carries condition and inspection dates but **no owner field and no geometry**,
+so it cannot answer "who owns this defence" at all. The spatial dataset
+published through the WFS service carries owner, operator, maintainer, condition
+and geometry for all 141,468 assets. Same publisher, different endpoint,
+entirely different capability. `RESEARCH.md` has been corrected.
+
+The WFS also supports `resultType=hits`, so exact national counts can be taken
+without transferring the data — the coverage figures below cost a few kilobytes.
+
+### The headline number is not the useful number
+
+| | | |
+|---|---|---|
+| Maintainer known | 128,573 | **90.9%** |
+| Owner known | 37,225 | 26.3% |
+| Condition graded | 35,191 | 24.9% |
+
+"73.7% of flood defences have no known owner" is true and confirms the research
+figure exactly. But when a defence fails, the operational question is who
+maintains it — and that is answered for **nine assets in ten**. Bulwark reports
+both and does not let the more alarming number stand in for the more useful one.
+
+Condition coverage of 24.9% also confirms the research: any national condition
+statistic describes a quarter of the estate, so that denominator travels with
+every figure the system publishes.
+
+### 7,233 inspections are overdue
+
+Against the assets' own scheduled next-inspection dates, oldest from 2024.
+The Environment Agency's own assets have the highest overdue rate of any named
+maintainer — 8.5%, against 4.0% for private owners.
+
+### A silent failure worth recording
+
+The first build reported **zero** overdue inspections. Not a data finding: AIMS
+publishes `DD/MM/YYYY` and `date.fromisoformat` returned `None` for all 103,667
+values, so "none are overdue" was computed over nothing. The parser now handles
+the real format, was checked empirically rather than assumed — across all values
+the first component reaches 31 and the second never exceeds 12 — and **raises**
+if more than 2% of dates fail, rather than quietly reporting a statistic over
+the rows that happened to work.
