@@ -23,6 +23,8 @@ from pathlib import Path
 
 import duckdb
 
+from ..store import insert_many
+
 from .. import place
 
 OPEN = "Open"
@@ -103,7 +105,7 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
           trust_code VARCHAR, trust_name VARCHAR,
           mainstream BOOLEAN
         )""")
-    con.executemany(
+    insert_many(con, 
         "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
 
     # District picture. Utilisation is computed only over schools that published

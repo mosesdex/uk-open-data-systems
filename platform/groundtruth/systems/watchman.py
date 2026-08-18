@@ -36,6 +36,8 @@ from pathlib import Path
 
 import duckdb
 
+from ..store import insert_many
+
 from .. import entity
 from ..gazette import Notice, parse as parse_notices
 
@@ -195,7 +197,7 @@ def register_suppliers(con: duckdb.DuckDBPyConnection, suppliers: list[Supplier]
         rows.append((key, s.company_number, s.name, s.buyer, s.value,
                      s.award_date, s.source))
     if rows:
-        con.executemany(
+        insert_many(con, 
             "INSERT OR IGNORE INTO silver.supplier_register VALUES (?,?,?,?,?,?,?)", rows)
     after = con.execute("SELECT count(*) FROM silver.supplier_register").fetchone()[0]
     distinct = con.execute(
@@ -244,5 +246,5 @@ def write(con: duckdb.DuckDBPyConnection, report: Report) -> None:
              e.supplier.value, e.supplier.award_date, e.method, e.confidence, e.note)
             for e in report.exposures + report.review]
     if rows:
-        con.executemany(
+        insert_many(con, 
             "INSERT INTO gold.watchman_exposure VALUES (?,?,?,?,?,?,?,?,?,?)", rows)

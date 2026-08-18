@@ -286,6 +286,34 @@ def cmd_bulwark(args) -> int:
     return 0
 
 
+def cmd_ledger(args) -> int:
+    from .systems import ledger as L
+    con = store.connect(DB)
+    f = [BRONZE / n for n in ("planning_developer_agreement_contribution.json",
+                              "planning_developer_agreement_transaction.json",
+                              "planning_local_authority.json")]
+    if not all(p.exists() for p in f):
+        print(f"{RED}missing planning extracts{OFF}"); con.close(); return 1
+    cov = L.load(con, *f); L.build(con)
+    total, with_amount, rows = L.national_total(con)
+    print(f"{BOLD}Ledger{OFF}  {DIM}developer contributions{OFF}\n")
+    print(f"  contributions        {cov.contributions:>8,}")
+    print(f"  stating an amount    {cov.with_amount:>8,}  {cov.pct(cov.with_amount):5.1f}%")
+    print(f"  carrying a location  {cov.with_geometry:>8,}  {RED}{cov.pct(cov.with_geometry):5.1f}%{OFF}"
+          f"  {DIM}the gap: none of it can be mapped{OFF}")
+    print(f"\n  {BOLD}£{total:,.0f}{OFF} recorded, over {with_amount:,} of {rows:,} contributions")
+    print(f"\n{BOLD}promised against delivered{OFF}")
+    for st, n, wa, amt in con.execute(
+            "SELECT * FROM gold.ledger_funding_status LIMIT ?", [args.limit]).fetchall():
+        print(f"  {st[:26]:<28}{n:>7,} txns   £{(amt or 0):>15,.0f}")
+    print(f"\n{BOLD}by purpose{OFF}")
+    for p_, n, wa, amt in con.execute(
+            "SELECT * FROM gold.ledger_purpose LIMIT ?", [args.limit]).fetchall():
+        print(f"  {p_[:26]:<28}{n:>7,}       £{(amt or 0):>15,.0f}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -347,6 +375,10 @@ def main(argv=None) -> int:
     pbk.add_argument("--limit", type=int, default=6)
     pbk.add_argument("--reload", action="store_true")
     pbk.set_defaults(fn=cmd_bulwark)
+
+    pl2 = sub.add_parser("ledger", help="developer contributions promised and delivered")
+    pl2.add_argument("--limit", type=int, default=6)
+    pl2.set_defaults(fn=cmd_ledger)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

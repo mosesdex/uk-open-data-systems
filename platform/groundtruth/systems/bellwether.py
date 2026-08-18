@@ -36,6 +36,8 @@ from pathlib import Path
 
 import duckdb
 
+from ..store import insert_many
+
 from .. import entity
 from ..ods import table
 
@@ -105,7 +107,7 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
           beds INTEGER, company_number VARCHAR, provider VARCHAR,
           provider_key VARCHAR, brand VARCHAR
         )""")
-    con.executemany(
+    insert_many(con, 
         "INSERT INTO silver.care_location VALUES (?,?,?,?,?,?,?,?)", records)
     return SectorCoverage(len(records), identified, "care")
 

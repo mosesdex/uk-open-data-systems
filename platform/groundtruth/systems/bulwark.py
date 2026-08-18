@@ -29,6 +29,8 @@ from pathlib import Path
 
 import duckdb
 
+from ..store import insert_many
+
 UNKNOWN = "Unknown"
 GRADES = ("1", "2", "3", "4", "5")
 
@@ -90,7 +92,7 @@ def load(con: duckdb.DuckDBPyConnection, path: Path) -> int:
         failed += 1
         return None
 
-    con.executemany(
+    insert_many(con, 
         "INSERT INTO silver.flood_defence VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [(clean(r.get("asset_id")), clean(r.get("asset_sub_type")),
           clean(r.get("primary_purpose")), clean(r.get("protection_type")),

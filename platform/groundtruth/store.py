@@ -104,6 +104,19 @@ def sync_registry(con: duckdb.DuckDBPyConnection) -> int:
     return len(REGISTRY)
 
 
+def insert_many(con: duckdb.DuckDBPyConnection, sql: str, rows) -> int:
+    """executemany that tolerates an empty result set.
+
+    DuckDB raises on an empty parameter list. A publisher legitimately returning
+    zero rows for one dataset must not crash the loader -- it is a fact to
+    record, not an error.
+    """
+    rows = list(rows)
+    if rows:
+        con.executemany(sql, rows)
+    return len(rows)
+
+
 def record_fetch(con: duckdb.DuckDBPyConnection, run_id: str, result) -> None:
     con.execute(
         """INSERT INTO bronze.fetch_log

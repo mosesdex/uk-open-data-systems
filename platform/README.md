@@ -84,7 +84,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M5 Watchman | **done** — cumulative supplier register, exposure checking |
 | M6 Bellwether | **done** — care concentration at entity and group level |
 | M7 Bulwark | **done** — 141,468 defences, 7,233 inspections overdue |
-| M8–M16 remaining systems | next |
+| M8 Ledger | **done** — £1.49bn traced, 0% of it mappable |
+| M9–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -355,3 +356,41 @@ the real format, was checked empirically rather than assumed — across all valu
 the first component reaches 31 and the second never exceeds 12 — and **raises**
 if more than 2% of dates fail, rather than quietly reporting a statistic over
 the rows that happened to work.
+
+## M8 — Ledger
+
+```bash
+./.venv/bin/python -m groundtruth.cli ledger
+```
+
+Confirms the research exactly: **39,325 contributions, £1,491,818,575**, and
+**not one record carries a location**. Both `geometry` and `point` are present
+on every record and empty on every record, so £1.49bn of obligations cannot be
+put on a map.
+
+### The total covers 70.4% of records
+
+Only 27,699 of 39,325 contributions state an amount. The headline is published
+with that denominator attached, because a figure that implies the other 29.6%
+are worth nothing is wrong.
+
+### Promised is not delivered
+
+The transaction table carries a funding status on 99.2% of 49,891 records, which
+separates what was agreed from what actually moved:
+
+| Status | Transactions | Amount |
+|---|---|---|
+| received | 13,017 | £517,329,167 |
+| secured | 19,526 | £387,104,279 |
+| allocated | 8,203 | £257,460,646 |
+| **spent** | 7,379 | **£154,801,702** |
+
+That last row is the system's reason for existing.
+
+### A robustness bug the tests caught
+
+DuckDB's `executemany` raises on an empty list, so a publisher legitimately
+returning zero rows for one dataset would have crashed the loader mid-run. Every
+loader now goes through `store.insert_many`, which treats an empty result as a
+fact to record rather than an error.

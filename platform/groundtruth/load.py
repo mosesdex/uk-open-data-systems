@@ -14,6 +14,8 @@ from pathlib import Path
 
 import duckdb
 
+from .store import insert_many
+
 # Code-Point Open ships headerless CSVs plus a separate header file.
 CODEPOINT_COLUMNS = [
     "postcode", "positional_quality", "easting", "northing", "country_code",
@@ -144,5 +146,5 @@ def load_lad_boundaries(con: duckdb.DuckDBPyConnection, geojson_path: Path) -> i
             for f in gj["features"]]
     con.execute("DROP TABLE IF EXISTS silver.lad")
     con.execute("CREATE TABLE silver.lad (lad_code VARCHAR PRIMARY KEY, lad_name VARCHAR)")
-    con.executemany("INSERT OR IGNORE INTO silver.lad VALUES (?, ?)", rows)
+    insert_many(con, "INSERT OR IGNORE INTO silver.lad VALUES (?, ?)", rows)
     return con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
