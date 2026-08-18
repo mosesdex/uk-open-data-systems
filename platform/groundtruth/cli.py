@@ -17,6 +17,8 @@ from . import sources as S
 from . import store
 from .fetch import fetch
 from .resolve import resolve, ResolutionError
+from . import place as place_mod
+from . import load as load_mod
 import requests
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -89,6 +91,71 @@ def cmd_fetch(args) -> int:
     return 1 if failures and args.strict else 0
 
 
+def cmd_load(args) -> int:
+    """Expand bronze downloads into silver tables."""
+    con = store.connect(DB)
+    steps = [
+        ("postcodes",  lambda: load_mod.load_codepoint(con, BRONZE / "os_code_point_open.zip")),
+        ("boundaries", lambda: load_mod.load_lad_boundaries(con, BRONZE / "ons_lad_boundaries.geojson")),
+        ("properties", lambda: load_mod.load_uprn(con, BRONZE / "os_open_uprn.zip")),
+    ]
+    for name, fn in steps:
+        print(f"  {name:<12}", end="", flush=True)
+        try:
+            print(f"{GREEN}{fn():>12,}{OFF} rows")
+        except load_mod.LoadError as exc:
+            print(f"{RED}skipped{OFF}  {DIM}{exc}{OFF}"[:150])
+    con.close()
+    return 0
+
+
+def cmd_place(args) -> int:
+    con = store.connect(DB)
+    for raw in args.postcodes:
+        ref = place_mod.resolve_postcode(con, raw)
+        if ref.resolved:
+            print(f"  {raw:<10} {GREEN}{ref.tier}{OFF}  conf {ref.confidence:.2f}  "
+                  f"{ref.latitude:.5f}, {ref.longitude:.5f}  lad={ref.lad_code}  {DIM}{ref.note}{OFF}")
+        else:
+            print(f"  {raw:<10} {RED}unresolved{OFF}  {DIM}{ref.note}{OFF}")
+    con.close()
+    return 0
+
+
+def cmd_coverage(args) -> int:
+    con = store.connect(DB)
+    cov = place_mod.coverage(con)
+    print(f"{BOLD}place spine{OFF}")
+    if not cov["tiers"]:
+        print("  nothing loaded yet -- run: gt load")
+    for tier, info in cov["tiers"].items():
+        bits = "  ".join(f"{k}={v:,}" if isinstance(v, int) else f"{k}={v}"
+                         for k, v in info.items())
+        print(f"  {tier:<10} {bits}")
+    print()
+    print(f"  {DIM}Code-Point Open covers Great Britain, not the UK: "
+          f"Northern Ireland postcodes do not resolve.{OFF}")
+    if args.validate:
+        from .validate import validate_against_gias
+        gias = BRONZE / "gias_establishments.csv"
+        if not gias.exists():
+            print()
+            print(f"  {RED}no GIAS extract to validate against{OFF}"
+                  f" -- run: gt fetch gias_establishments")
+            con.close(); return 1
+        print()
+        print(f"{BOLD}validation against the publisher's own coordinates{OFF}")
+        v = validate_against_gias(con, gias)
+        print(f"  establishments        {v.total:>10,}")
+        print(f"  resolved by postcode  {v.resolved:>10,}  ({v.resolve_rate:.1f}%)")
+        print(f"  median error          {v.median_m:>10.0f} m")
+        print(f"  90th percentile       {v.p90_m:>10.0f} m")
+        print(f"  within 100 m          {v.within_100m:>10.1f}%")
+        print(f"  within 500 m          {v.within_500m:>10.1f}%")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -120,6 +187,18 @@ def main(argv=None) -> int:
     pf.add_argument("--timeout", type=int, default=120)
     pf.add_argument("--strict", action="store_true", help="exit non-zero if any source fails")
     pf.set_defaults(fn=cmd_fetch)
+
+    pl = sub.add_parser("load", help="expand bronze downloads into silver tables")
+    pl.set_defaults(fn=cmd_load)
+
+    pp = sub.add_parser("place", help="resolve postcodes through the place spine")
+    pp.add_argument("postcodes", nargs="+")
+    pp.set_defaults(fn=cmd_place)
+
+    pc = sub.add_parser("coverage", help="what the place spine can resolve")
+    pc.add_argument("--validate", action="store_true",
+                    help="measure accuracy against GIAS published coordinates")
+    pc.set_defaults(fn=cmd_coverage)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

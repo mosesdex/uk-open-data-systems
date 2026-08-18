@@ -77,7 +77,52 @@ tests/         24 offline tests, 2 network tests (-m network)
 
 | Milestone | State |
 |---|---|
-| M1 ingest framework | **done** — 11 admissible sources, 2 blocked and visible |
-| M2 place spine | next |
-| M3 entity spine | |
+| M1 ingest framework | **done** — 12 admissible sources, 2 blocked and visible |
+| M2 place spine | **done** — 1,749,109 postcodes, validated at 64 m median |
+| M3 entity spine | next |
 | M4 Catchment end to end | |
+
+## M2 — place spine
+
+```bash
+./.venv/bin/python -m groundtruth.cli load
+./.venv/bin/python -m groundtruth.cli place "SW1A 1AA"
+./.venv/bin/python -m groundtruth.cli coverage --validate
+```
+
+**Resolution is tiered, and the tier is always reported.** A postcode centroid
+is a useful answer but it is not an exact property, and returning both as "a
+location" would be lying by omission. Confidence comes from Ordnance Survey's
+own positional quality flag, never from an invented number — and only an exact
+property reference is allowed to score 1.0.
+
+| Tier | Source | State |
+|---|---|---|
+| `uprn` | OS Open UPRN | loads when the product is fetched |
+| `postcode` | Code-Point Open | **1,749,109 rows, loaded** |
+| `lad` | ONS boundaries | 318 districts |
+
+### Measured, not asserted
+
+GIAS publishes a postcode *and* a coordinate for every school, so the spine can
+be checked against the publisher's own answer:
+
+| | |
+|---|---|
+| Establishments | 27,167 |
+| Resolved from postcode alone | 26,605 — **97.9%** |
+| Median error | **64 m** |
+| 90th percentile | 183 m |
+| Within 500 m | 98.5% |
+
+That is the number to quote when someone asks how good "resolved" really is.
+
+### Two limits worth stating
+
+- **Code-Point Open is Great Britain, not the UK.** There are zero Northern
+  Ireland postcodes in it — confirmed, and covered by a test. Any coverage
+  figure must say GB.
+- **Coordinate conversion is a datum shift, not a reprojection.** Skipping the
+  Helmert transform puts a point roughly 100 m out, enough to place a property
+  on the wrong side of a street. `geo.py` is verified against the Ordnance
+  Survey worked example to seven decimal places.
