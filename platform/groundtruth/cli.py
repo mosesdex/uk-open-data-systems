@@ -487,6 +487,42 @@ def cmd_lastmile(args) -> int:
     return 0
 
 
+def cmd_junction(args) -> int:
+    import requests as _rq, time as _t
+    from .systems import junction as J
+    con = store.connect(DB)
+    sess = _rq.Session(); sess.trust_env = False
+    sess.headers.update({"User-Agent": "groundtruth/0.1"})
+    states = []
+    for op, base, ds in J.REGISTERS:
+        exp = sess.get(J.EXPORT.format(base=base, ds=ds), timeout=240)
+        fields, rows = (J.parse_export(exp.content.decode("utf-8-sig", errors="replace"))
+                        if exp.status_code == 200 else ([], []))
+        meta = sess.get(f"{base}/api/explore/v2.1/catalog/datasets/{ds}", timeout=120)
+        rc = (meta.json().get("metas", {}).get("default", {}).get("records_count")
+              if meta.status_code == 200 else None)
+        states.append(J.RegisterState(op, ds, exp.status_code, tuple(fields), len(rows), rc))
+        _t.sleep(1)
+    J.load(con, states)
+    gap = J.catalogue_gap(states); cmp_ = J.compare(states)
+    print(f"{BOLD}Junction{OFF}  {DIM}embedded capacity registers{OFF}\n")
+    print(f"  {'operator':<24}{'catalogue':>11}{'open export':>13}{'fields':>8}")
+    for st in states:
+        mark = GREEN if st.publishes_data else RED
+        print(f"  {st.operator:<24}{st.catalogue_records or 0:>11,}"
+              f"{mark}{st.rows:>13,}{OFF}{len(st.fields):>8}")
+    print(f"\n  advertised {gap['advertised']:,} records; the open route returns "
+          f"{gap['returned']:,}")
+    print(f"  {RED}{gap['withheld']:,} records never reach it{OFF}  "
+          f"{DIM}({gap['operators_serving_data']} of {gap['operators']} operators serve data){OFF}")
+    print(f"\n  {BOLD}the schemas are not the problem{OFF}: {cmp_['shared_fields']} of "
+          f"{cmp_['distinct_fields']} fields shared by all ({cmp_['shared_pct']}%)")
+    print(f"  {DIM}Ofgem mandated a common format and the operators followed it."
+          f"\n  Availability through the open route is the gap, not comparability.{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -579,6 +615,9 @@ def main(argv=None) -> int:
     plm.add_argument("--limit", type=int, default=8)
     plm.add_argument("--reload", action="store_true")
     plm.set_defaults(fn=cmd_lastmile)
+
+    pjn = sub.add_parser("junction", help="grid capacity registers and what they serve")
+    pjn.set_defaults(fn=cmd_junction)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

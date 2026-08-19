@@ -91,7 +91,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M12 Plumbline | **done** — 82.8% headline against 15.9% statutory |
 | M13 Sightline | **done** — one advice stream has no outcome field at all |
 | M14 Lastmile | **done** — new-build postcodes 21 points worse connected |
-| M15–M16 remaining systems | next |
+| M15 Junction | **done** — schemas standardised, 5,833 records withheld |
+| M16 Compass | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -617,3 +618,43 @@ completely wrong answer. A test now pins the distinction.
 **Wrong loader.** Inserting 1.4m premises row by row from Python took minutes and
 timed out. Handing the CSVs to DuckDB's own reader does it in **0.8 seconds**.
 Both loaders now read natively.
+
+## M15 — Junction
+
+```bash
+./.venv/bin/python -m groundtruth.cli junction
+```
+
+This milestone reversed its own premise, which is the reason it was worth doing.
+
+### The schemas are not the problem
+
+The four embedded capacity registers share **51 of 77 field names (66.2%)** and
+run to 58–63 columns each. Ofgem mandated a common format and the operators
+followed it.
+
+An earlier version of this analysis reported **1.3%** commonality. That was
+wrong: it had compared three genuine registers against an LTDS appendix table,
+a different regulatory return entirely. Catching that mattered — the wrong number
+supported exactly the story the research expected to find.
+
+### Availability is the problem
+
+| Operator | Catalogue says | Open export returns |
+|---|---|---|
+| UK Power Networks | 4,496 | **0** |
+| Northern Powergrid | 937 | 937 |
+| Electricity North West | 567 | **0** |
+| SP Energy Networks | 770 | **0** |
+
+**6,770 records advertised, 937 returned, 5,833 that never reach the open
+route.** The datasets are listed, dated and sized in each portal's own
+catalogue. Only one operator in four actually serves the data anonymously.
+
+### An access quirk worth knowing
+
+On these portals `/records` returns **HTTP 403** to an anonymous client while
+`/exports/csv` returns **200** for the same dataset. Anyone testing the obvious
+endpoint concludes the data is closed. It is not — and the earlier research note
+claiming "full Opendatasoft APIs anonymously" was based on the catalogue
+endpoint, so it is now stated precisely.

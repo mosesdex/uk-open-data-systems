@@ -24,9 +24,11 @@ Three things this method caught that documentation review would not have:
    Documentation steers you to the OS Data Hub, which wants an account. The `api.os.uk/downloads/v1`
    path does not. A range request returned `HTTP 206` and real ZIP bytes. This is the single most
    important finding in the whole study — see §2.1.
-2. **Four of the six DNO open-data portals expose a full Opendatasoft API anonymously**, with
-   filtering, aggregation and geospatial querying. The industry position is that grid connection
-   data is hard to obtain; for four networks it is a query string.
+2. **Four of the six DNO open-data portals expose an Opendatasoft catalogue anonymously.**
+   *Corrected while building M15:* the catalogue and `/exports/csv` answer without credentials,
+   but `/records` returns HTTP 403, and three of the four capacity registers return a column
+   header with **zero rows** despite their catalogues advertising thousands. 6,770 records
+   advertised, 937 actually served.
 3. **Several "open" sources are not.** The EPC register serves a sign-in page to an anonymous
    client despite being described as open. Two DfT services return 401. These were removed from
    the platform rather than assumed to work.
