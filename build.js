@@ -50,7 +50,6 @@ const nav = (depth = 0) => {
 <a class="hide-sm" href="${p}index.html#chains">How they help each other</a>
 <a class="hide-sm" href="${p}research.html">Research</a>
 <a href="${p}examples.html">Problems &amp; solutions</a>
-<a href="${p}app/index.html">Prototype</a>
 <a class="hide-sm" href="${p}index.html#overall">Why one platform</a>
 <a href="${p}platform.html">Architecture</a>
 <button class="themetoggle" aria-label="Toggle theme"></button>
@@ -646,14 +645,18 @@ ${RS.headline.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">
 </div>
 
 <div class="note mt-5">
-<div class="note__title">See it working</div>
-<p>Every figure on this page drives a working prototype &mdash; real boundaries, real school data,
-the verified source catalogue. Three interfaces over the same platform.</p>
-<div class="flexrow mt-3">
-<a class="btn btn--primary" href="app/index.html">Open the prototype &rarr;</a>
-<a class="btn btn--ghost" href="app/admin.html">Admin console</a>
-<a class="btn btn--ghost" href="app/mobile.html">Mobile</a>
-</div>
+<div class="note__title">The system runs on your own machine</div>
+<p>This site explains Groundtruth. It does not run it. The working system &mdash; the public,
+admin and mobile interfaces, reading figures computed from the live sources &mdash; is
+deliberately not published: it is built and served locally, so the operator holds the data
+and can reproduce every number without depending on anyone else hosting it.</p>
+<pre class="mono" style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:1rem;overflow-x:auto;margin-top:1rem;font-size:.85rem">git clone https://github.com/mosesdex/uk-open-data-systems
+cd uk-open-data-systems/platform
+python3 -m venv .venv &amp;&amp; ./.venv/bin/pip install -r requirements.txt
+./.venv/bin/python -m groundtruth.cli run --fetch
+./.venv/bin/python -m groundtruth.cli serve</pre>
+<p class="mt-3">The server binds to <span class="mono">127.0.0.1</span> only and is not reachable
+from the network.</p>
 </div>
 
 <hr class="hr">
@@ -746,9 +749,9 @@ ${RS.rules.items.map(([t, d], i) => `<div class="card mt-2"><div class="card__b"
 <a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/RESEARCH.md">
 <div class="card__b"><div class="feat__t">Full research document</div>
 <p class="card__desc mt-1" style="flex:none">Every system: sources, logic, data in and out, architecture, automation, security.</p></div></a>
-<a class="card" href="app/index.html">
-<div class="card__b"><div class="feat__t">Working prototype</div>
-<p class="card__desc mt-1" style="flex:none">Public, admin and mobile interfaces, running on the real figures above.</p></div></a>
+<a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/platform/HANDOVER.md">
+<div class="card__b"><div class="feat__t">Run the system yourself</div>
+<p class="card__desc mt-1" style="flex:none">What a full run produces, the rules the code enforces, and the traps worth knowing.</p></div></a>
 <a class="card" href="https://github.com/mosesdex/uk-open-data-systems/tree/main/research">
 <div class="card__b"><div class="feat__t">Raw probe results</div>
 <p class="card__desc mt-1" style="flex:none">The status every endpoint returned, and the script that regenerates it.</p></div></a>

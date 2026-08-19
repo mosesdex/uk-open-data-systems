@@ -1,0 +1,66 @@
+# Publishes the informational website only.
+#
+# The operational system -- the dashboards that read real platform output -- is
+# deliberately not published. It runs on localhost, against a database built on
+# the operator's own machine. See platform/HANDOVER.md.
+#
+# Published:   index.html, platform.html, research.html, examples.html,
+#              systems/, assets/
+# Not published: app/ (the system), platform/ (the engine), data/, research/
+name: Publish website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the website
+        run: |
+          mkdir -p _site
+          cp index.html platform.html research.html examples.html _site/
+          cp -r systems assets _site/
+          cp .nojekyll LICENSE _site/ 2>/dev/null || true
+
+      - name: Refuse to publish the system
+        run: |
+          # The operational interfaces must never reach the public site.
+          for forbidden in app platform data research; do
+            if [ -e "_site/$forbidden" ]; then
+              echo "::error::_site contains $forbidden — the system must stay local"
+              exit 1
+            fi
+          done
+          if grep -rl 'app/index\.html\|app/admin\.html\|app/mobile\.html' _site/ ; then
+            echo "::error::published pages link to the local-only system"
+            exit 1
+          fi
+          echo "checked: website only, no system, no engine"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

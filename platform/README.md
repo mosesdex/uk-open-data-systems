@@ -13,6 +13,7 @@ python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 ## Use
 
 ```bash
+./.venv/bin/python -m groundtruth.cli serve              # the system, localhost only
 ./.venv/bin/python -m groundtruth.cli sources            # the registry
 ./.venv/bin/python -m groundtruth.cli fetch --role place_spine
 ./.venv/bin/python -m groundtruth.cli fetch --all --max-bytes 20000000

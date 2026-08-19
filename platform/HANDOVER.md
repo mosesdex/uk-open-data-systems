@@ -7,6 +7,20 @@ A working platform that resolves two missing joins in UK government data —
 them. Everything runs on data an anonymous client can retrieve: no account, no
 API key, no subscription, anywhere.
 
+## Where each part lives
+
+| Part | Where |
+|---|---|
+| **The website** — what Groundtruth is, the thirteen systems, the research | published at <https://mosesdex.github.io/uk-open-data-systems/> |
+| **The system** — public, admin and mobile interfaces reading real output | **localhost only** |
+| **The engine** — fetchers, spines, systems, database | this directory, on your machine |
+
+The operational interfaces are deliberately not published. The site explains the
+platform; it does not run it. Running it locally means the operator holds the
+data and can reproduce every number without depending on anyone else hosting it.
+A CI check fails the website build if a system file or a link to one ever
+reaches the published output.
+
 ## Running it
 
 ```bash
@@ -15,7 +29,13 @@ python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 
 ./.venv/bin/python -m groundtruth.cli run --fetch    # everything, ~15 min
 ./.venv/bin/python -m groundtruth.cli run            # rebuild from what is cached
+./.venv/bin/python -m groundtruth.cli serve          # the system, on localhost
 ```
+
+`serve` binds to `127.0.0.1` and nothing else, so an operator running this on a
+laptop on a shared network does not expose a dashboard to it. That is asserted
+by a test, and verified in practice: the loopback address answers, the machine's
+LAN address refuses the connection.
 
 A stage that fails is recorded and the run continues. A platform that stops at
 the first unreachable publisher is useless for a corpus this size, and a test

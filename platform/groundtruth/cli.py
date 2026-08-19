@@ -615,6 +615,18 @@ def cmd_run(args) -> int:
     return 1 if (report.failed and args.strict) else 0
 
 
+def cmd_serve(args) -> int:
+    from . import serve as S
+    app = ROOT.parent / "app"
+    print(f"{BOLD}Groundtruth{OFF}  {DIM}operational system, local only{OFF}")
+    try:
+        S.serve(app, port=args.port, open_browser=not args.no_open)
+    except (FileNotFoundError, OSError) as exc:
+        print(f"{RED}{exc}{OFF}")
+        return 1
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -727,6 +739,11 @@ def main(argv=None) -> int:
     prun.add_argument("--fetch", action="store_true", help="fetch sources first")
     prun.add_argument("--strict", action="store_true", help="exit non-zero if a stage fails")
     prun.set_defaults(fn=cmd_run)
+
+    psv = sub.add_parser("serve", help="run the system on localhost")
+    psv.add_argument("--port", type=int, default=8787)
+    psv.add_argument("--no-open", action="store_true", help="do not open a browser")
+    psv.set_defaults(fn=cmd_serve)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

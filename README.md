@@ -1,5 +1,11 @@
 # Groundtruth
 
+| | |
+|---|---|
+| **Website** (explanation, systems, research) | <https://mosesdex.github.io/uk-open-data-systems/> |
+| **System** (working interfaces on real data) | localhost — `platform/` then `gt serve` |
+
+
 **One platform. Thirteen public data systems. No registration anywhere.**
 
 British government publishes records that say *what* happened but not, in any form a

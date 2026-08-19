@@ -1,4 +1,19 @@
-# Groundtruth prototype
+# Groundtruth — the system
+
+**This runs on localhost. It is not published.**
+
+```bash
+cd ../platform
+./.venv/bin/python -m groundtruth.cli run     # compute
+./.venv/bin/python -m groundtruth.cli serve   # serve on 127.0.0.1:8787
+```
+
+The public website at <https://mosesdex.github.io/uk-open-data-systems/> explains
+Groundtruth and carries the research. It does not run the system, and a CI check
+fails the site build if any of these files, or a link to them, reaches it.
+
+The server binds to the loopback address only — the LAN address refuses the
+connection.
 
 Three interfaces over the platform:
 
