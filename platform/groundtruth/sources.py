@@ -403,6 +403,26 @@ REGISTRY: tuple[Source, ...] = (
             "reference, so joins to premises data are postcode level."
         ),
     ),
+    Source(
+        id="dfe_sen_provision",
+        name="Pupils by type of SEN provision, 2015/16 to 2025/26",
+        publisher="Department for Education",
+        url=("https://api.education.gov.uk/statistics/v1/data-sets/"
+             "019df85e-ab00-7458-a4ff-b381997776cb/csv"),
+        fmt="csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="annual",
+        expect_content=("text/csv",),
+        systems=("compass",),
+        notes=(
+            "591,117 rows, 130 MB, local authority level with ONS codes. Aggregate "
+            "counts only. The file is a cube carrying its own subtotals across phase, "
+            "establishment type and hospital-school flag, so only the fully-totalled "
+            "cell may be summed. The JSON query endpoint rejects the documented "
+            "filter syntax; the CSV endpoint is reliable."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",

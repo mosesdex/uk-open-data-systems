@@ -92,7 +92,9 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M13 Sightline | **done** — one advice stream has no outcome field at all |
 | M14 Lastmile | **done** — new-build postcodes 21 points worse connected |
 | M15 Junction | **done** — schemas standardised, 5,833 records withheld |
-| M16 Compass | next |
+| M16 Compass | **done** — EHC plans up 127.4% against 4.2% pupil growth |
+| **All thirteen systems built** | |
+| M17 wire the prototype to real outputs | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -658,3 +660,37 @@ On these portals `/records` returns **HTTP 403** to an anonymous client while
 endpoint concludes the data is closed. It is not — and the earlier research note
 claiming "full Opendatasoft APIs anonymously" was based on the catalogue
 endpoint, so it is now stated precisely.
+
+## M16 — Compass
+
+```bash
+./.venv/bin/python -m groundtruth.cli compass
+```
+
+The last of the thirteen systems, and the one with the sharpest number in it.
+
+| England, 2015/16 → 2025/26 | | |
+|---|---|---|
+| All pupils | 8,559,540 → 8,920,227 | +4.2% |
+| SEN support | 991,981 → 1,319,780 | +33.0% |
+| **EHC plans** | 236,806 → **538,547** | **+127.4%** |
+
+Statutory plans have more than doubled while the pupil population grew 4.2%.
+
+Compass forecasts at **local authority** level, which is where places are
+commissioned, and flags where an authority moves against its region — Newham is
+projected up 58.1% against a London average of 21.6%. National and regional
+projections cannot show that.
+
+**Aggregates only.** No record about any individual child is read, held or
+needed, and a test asserts that only aggregate columns are retained. That is
+what makes the system deliverable without a data sharing agreement.
+
+### A four-fold error, caught before it went anywhere
+
+The first build reported **2,154,188 EHC plans** against a real England figure
+near 576,000. The file is a cube: every combination of phase, establishment type
+and hospital-school flag appears, each with its own `Total` row. Summing across
+them counts the same children several times over. Only the fully-totalled cell
+is taken now, a test asserts one row per authority, year and provision, and the
+corrected figure lands where the published statistic does.

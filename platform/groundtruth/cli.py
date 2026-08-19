@@ -523,6 +523,39 @@ def cmd_junction(args) -> int:
     return 0
 
 
+def cmd_compass(args) -> int:
+    from .systems import compass as C
+    con = store.connect(DB)
+    src = BRONZE / "dfe_sen_provision.csv"
+    if not src.exists():
+        print(f"{RED}no SEN extract{OFF}"); con.close(); return 1
+    if args.reload or not con.execute(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema='silver'"
+            " AND table_name='sen_provision'").fetchone()[0]:
+        cov = C.load(con, src)
+        print(f"  loaded {cov.rows:,} rows, {cov.authorities} authorities, {cov.years} years")
+    C.build(con)
+    print(f"{BOLD}Compass{OFF}  {DIM}special educational needs demand{OFF}\n")
+    for prov, y0, y1, latest, earliest in C.national(con):
+        if latest and earliest:
+            pct = 100 * (latest - earliest) / earliest
+            mark = RED if pct > 50 else DIM
+            print(f"  {prov[:42]:<44}{earliest:>10,} -> {latest:>10,}   {mark}{pct:+6.1f}%{OFF}")
+    print(f"\n{DIM}  Aggregate counts only. No record about any individual child is read"
+          f"\n  or needed, which is what makes this deliverable without an agreement.{OFF}")
+    print(f"\n{BOLD}fastest-rising EHC plan demand{OFF}  {DIM}3-year projection on an 11-year trend{OFF}")
+    for la, name, prov, yrs, f_, l_, mean, slope, ch3, pct in con.execute(
+            "SELECT * FROM gold.compass_trend WHERE provision = ? "
+            "ORDER BY projected_change_pct DESC LIMIT ?", [C.EHC_PLAN, args.limit]).fetchall():
+        print(f"  {name[:26]:<28}{slope:>7.1f}/yr   +{ch3:>6,.0f} over 3 years   {pct:>6.1f}%")
+    print(f"\n{BOLD}diverging most from their region{OFF}  {DIM}the mismatch the system exists for{OFF}")
+    for name, region, lapct, regpct, div in con.execute(
+            "SELECT * FROM gold.compass_divergence LIMIT ?", [args.limit]).fetchall():
+        print(f"  {name[:24]:<26}{lapct:>7.1f}%  {DIM}region {regpct:>6.1f}%{OFF}   {div:>+6.1f}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -618,6 +651,11 @@ def main(argv=None) -> int:
 
     pjn = sub.add_parser("junction", help="grid capacity registers and what they serve")
     pjn.set_defaults(fn=cmd_junction)
+
+    pcm = sub.add_parser("compass", help="SEND demand forecast by authority")
+    pcm.add_argument("--limit", type=int, default=6)
+    pcm.add_argument("--reload", action="store_true")
+    pcm.set_defaults(fn=cmd_compass)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)
