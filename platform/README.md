@@ -88,7 +88,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M9 Baseline | **done** — spills adjusted for monitor availability |
 | M10 Sentinel | **done** — concentration, within what the data supports |
 | M11 Highwater | **done** — override rate flat for nine years |
-| M12–M16 remaining systems | next |
+| M12 Plumbline | **done** — 82.8% headline against 15.9% statutory |
+| M13–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -496,3 +497,49 @@ prevents.
 The publisher switches from `2020-21` to `2021/22` partway through the series.
 Left alone the same financial year becomes two values and the time series splits
 in half. `normalise_year` converges them, with tests for both forms.
+
+## M12 — Plumbline
+
+```bash
+./.venv/bin/python -m groundtruth.cli plumbline
+```
+
+The published performance figure counts an application as decided on time if it
+met an **agreed extension**, not the deadline in law. Both numbers are true;
+only one is the one people think they are reading.
+
+| Since 2023 | |
+|---|---|
+| Published headline "in time" | **82.8%** (7,894 major decisions) |
+| Major dwellings within 13 weeks | **15.9%** (14,844 decisions) |
+| Gap | **66.9 points** |
+
+Individual authorities: Wokingham and Lambeth both report **100%** on the
+published measure against roughly **17%** within the statutory period.
+
+The two rates cover slightly different populations — all majors against major
+dwellings — and both denominators are printed alongside them so neither is read
+as the other. The gap is far too large to be explained by scope.
+
+### The column that showed this directly was discontinued
+
+The source used to publish "decided within maximum time", which is where agreed
+extensions land. Comparing it with the 13-week columns gave extension reliance
+outright. It was populated on **100% of rows in 2019** and **0% since 2024**:
+
+| Year | Populated |
+|---|---|
+| 2018–19 | 100% |
+| 2020 | 75.1% |
+| 2021–23 | under 0.4% |
+| 2024 onward | 0% |
+
+The field that made the distinction visible is no longer published. Noticing
+that quietly happening is the kind of thing this platform exists to do.
+
+### Finding the data at all
+
+The quarterly statistics release carries only a PDF factsheet. The actual tables
+live in a separate live-tables collection whose attachments are reachable through
+the gov.uk content API. The loader also fails loudly if a named column is
+missing, rather than computing against whatever sits at that position.

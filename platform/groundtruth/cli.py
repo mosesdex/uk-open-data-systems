@@ -395,6 +395,39 @@ def cmd_highwater(args) -> int:
     return 0
 
 
+def cmd_plumbline(args) -> int:
+    from .systems import plumbline as P
+    con = store.connect(DB)
+    src = BRONZE / "planning_ps2.csv"
+    if not src.exists():
+        print(f"{RED}no PS2 extract{OFF}"); con.close(); return 1
+    if args.reload or not con.execute(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema='silver'"
+            " AND table_name='planning_performance'").fetchone()[0]:
+        cov = P.load(con, src)
+        print(f"  loaded {cov.rows:,} rows, {cov.authorities} authorities")
+    P.build(con)
+    h, st, md, dd = P.national_gap(con, since=args.since)
+    print(f"{BOLD}Plumbline{OFF}  {DIM}major applications since {args.since}{OFF}\n")
+    print(f"  published headline 'in time'   {GREEN}{h:>6.1f}%{OFF}  {DIM}counts agreed extensions"
+          f" · {md:,.0f} decisions{OFF}")
+    print(f"  within the statutory deadline  {RED}{st:>6.1f}%{OFF}  {DIM}major dwellings within"
+          f" 13 weeks · {dd:,.0f} decisions{OFF}")
+    print(f"  {BOLD}gap {h-st:.1f} points{OFF}")
+    print(f"\n{DIM}  The two rates cover slightly different populations -- all majors against"
+          f"\n  major dwellings -- and both counts are shown so neither is read as the other.{OFF}")
+    print(f"\n{BOLD}the column that used to show this directly{OFF}")
+    for y, rows_, pop, pct in P.transparency_column_status(con):
+        mark = GREEN if pct > 50 else RED
+        print(f"  {y}  'within maximum time' populated on {mark}{pct:>5.1f}%{OFF} of rows")
+    print(f"\n{BOLD}widest gap by authority{OFF}")
+    for lpa, md_, hp, dd_, sp in con.execute(
+            "SELECT * FROM gold.plumbline_authority LIMIT ?", [args.limit]).fetchall():
+        print(f"  {lpa[:26]:<28} headline {hp:>5.1f}%   statutory {sp:>5.1f}%   gap {hp-sp:>5.1f}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -472,6 +505,12 @@ def main(argv=None) -> int:
 
     phw = sub.add_parser("highwater", help="flood objections and outcomes")
     phw.set_defaults(fn=cmd_highwater)
+
+    ppl = sub.add_parser("plumbline", help="planning performance, headline against statutory")
+    ppl.add_argument("--since", default="2023")
+    ppl.add_argument("--limit", type=int, default=6)
+    ppl.add_argument("--reload", action="store_true")
+    ppl.set_defaults(fn=cmd_plumbline)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

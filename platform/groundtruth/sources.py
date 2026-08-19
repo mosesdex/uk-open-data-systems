@@ -346,6 +346,25 @@ REGISTRY: tuple[Source, ...] = (
             "Financial years switch from 2020-21 to 2021/22 partway through."
         ),
     ),
+    Source(
+        id="planning_ps2",
+        name="District planning application statistics (PS2), full dataset",
+        publisher="MHCLG",
+        url=("https://www.gov.uk/api/content/government/statistical-data-sets/"
+             "live-tables-on-planning-application-statistics"),
+        fmt="csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="quarterly",
+        expect_content=("application/json",),
+        systems=("plumbline",),
+        notes=(
+            "68,273 rows, 334 columns, 1996 to date. The statistics release itself "
+            "carries only a PDF; the data lives in the live-tables collection, whose "
+            "attachment list is reachable through the gov.uk content API. Note that "
+            "'decided within maximum time' was discontinued after 2020."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",
