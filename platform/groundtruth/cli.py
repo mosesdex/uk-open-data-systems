@@ -456,6 +456,37 @@ def cmd_sightline(args) -> int:
     return 0
 
 
+def cmd_lastmile(args) -> int:
+    from .systems import lastmile as LM
+    con = store.connect(DB)
+    bduk = sorted(BRONZE.glob("bduk_*.zip"))
+    ppd = BRONZE / "ppd_monthly.csv"
+    if not bduk or not ppd.exists():
+        print(f"{RED}missing premises or price paid data{OFF}"); con.close(); return 1
+    if args.reload or not con.execute(
+            "SELECT count(*) FROM information_schema.tables WHERE table_schema='silver'"
+            " AND table_name='premises_connectivity'").fetchone()[0]:
+        print(f"  premises {LM.load_premises(con, *bduk):,}   new-build sales "
+              f"{LM.load_new_builds(con, ppd):,}")
+    LM.build(con)
+    nb_p, nb_g, nb_pct, ot_p, ot_pct = LM.comparison(con)
+    print(f"{BOLD}Lastmile{OFF}  {DIM}gigabit where new homes are being built{OFF}\n")
+    print(f"  new-build postcodes    {RED}{nb_pct:>6.1f}%{OFF} gigabit   {DIM}{nb_p:,} premises{OFF}")
+    print(f"  everywhere else        {GREEN}{ot_pct:>6.1f}%{OFF} gigabit   {DIM}{ot_p:,} premises{OFF}")
+    print(f"  {BOLD}difference {nb_pct-ot_pct:+.1f} points{OFF}")
+    print(f"\n{DIM}  Joined on postcode, not property: Price Paid carries no property"
+          f"\n  reference. This measures the postcodes new homes sell in, which is a"
+          f"\n  proxy for the homes themselves.{OFF}")
+    print(f"\n{BOLD}by authority{OFF}")
+    for la, p_, g, gp, nb, nbp in con.execute(
+            "SELECT * FROM gold.lastmile_authority ORDER BY premises DESC LIMIT ?",
+            [args.limit]).fetchall():
+        d = f"{nbp:>6.1f}%" if nbp is not None else "     -"
+        print(f"  {la[:22]:<24}{gp:>6.1f}% overall  {d} new-build  {DIM}{int(nb or 0)} sales{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -543,6 +574,11 @@ def main(argv=None) -> int:
     psl = sub.add_parser("sightline", help="consultee advice and whether it is tracked")
     psl.add_argument("--limit", type=int, default=8)
     psl.set_defaults(fn=cmd_sightline)
+
+    plm = sub.add_parser("lastmile", help="gigabit coverage where new homes are built")
+    plm.add_argument("--limit", type=int, default=8)
+    plm.add_argument("--reload", action="store_true")
+    plm.set_defaults(fn=cmd_lastmile)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

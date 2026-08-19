@@ -90,7 +90,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M11 Highwater | **done** — override rate flat for nine years |
 | M12 Plumbline | **done** — 82.8% headline against 15.9% statutory |
 | M13 Sightline | **done** — one advice stream has no outcome field at all |
-| M14–M16 remaining systems | next |
+| M14 Lastmile | **done** — new-build postcodes 21 points worse connected |
+| M15–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -578,3 +579,41 @@ the total is 23,336 — matching the published figure. The outcome counts were
 never affected, since the appended rows carried no outcome value, so M11's
 substantive findings stand; only the total was inflated. A test asserts the
 flood sheet holds exactly 23,336 rows and that unfiltered reading picks up more.
+
+## M14 — Lastmile
+
+```bash
+./.venv/bin/python -m groundtruth.cli lastmile
+```
+
+New homes have been legally required to be gigabit connectable since 2022, and
+nobody checks nationally because the two halves live with different bodies:
+Price Paid flags new builds at address level, BDUK publishes gigabit status per
+premises. Both free, both unregistered. Ofcom's Connected Nations — the obvious
+third source — returns 403 even from a browser user agent, so it is excluded.
+
+### New-build postcodes are worse connected, not better
+
+| North East, 1,423,443 premises | Gigabit |
+|---|---|
+| Postcodes with a recent new-build sale | **66.7%** |
+| Everywhere else | **87.8%** |
+| Difference | **−21.1 points** |
+
+Sunderland is 91.2% overall and **28.5%** in its new-build postcodes.
+
+The join is on **postcode, not property** — Price Paid carries no property
+reference — so this measures the postcodes new homes sell in rather than the
+homes themselves. That caveat is printed with the figures. Closing it properly
+is exactly the address-to-property matching the place spine exists to do.
+
+### Two mistakes worth recording
+
+**Wrong column.** `current_gigabit` is a boolean; `Gigabit Grey/Black` is a
+*subsidy status* meaning the market is already served. Reading the second as if
+it were the first reported **0% coverage everywhere** — a confident, uniform,
+completely wrong answer. A test now pins the distinction.
+
+**Wrong loader.** Inserting 1.4m premises row by row from Python took minutes and
+timed out. Handing the CSVs to DuckDB's own reader does it in **0.8 seconds**.
+Both loaders now read natively.

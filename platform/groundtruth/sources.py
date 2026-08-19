@@ -365,6 +365,44 @@ REGISTRY: tuple[Source, ...] = (
             "'decided within maximum time' was discontinued after 2020."
         ),
     ),
+    Source(
+        id="bduk_premises",
+        name="BDUK open market review, premises level",
+        publisher="Building Digital UK",
+        url=("https://assets.publishing.service.gov.uk/media/6a203ec2178cd408c8f80cfd/"
+             "202601_north_east.zip"),
+        fmt="zip-csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="quarterly",
+        expect_content=("application/zip", "application/octet-stream"),
+        systems=("lastmile",),
+        notes=(
+            "Premises-level gigabit status keyed on the property reference. "
+            "1,423,443 premises in the North East release alone. Published as one "
+            "archive per region; attachment URLs come from the gov.uk content API. "
+            "current_gigabit is a boolean; Gigabit Grey/Black is a subsidy status."
+        ),
+    ),
+    Source(
+        id="hmlr_price_paid_monthly",
+        name="HM Land Registry Price Paid, monthly update",
+        publisher="HM Land Registry",
+        url=("http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1"
+             ".amazonaws.com/pp-monthly-update-new-version.csv"),
+        fmt="csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="monthly",
+        expect_content=("text/csv",),
+        systems=("lastmile",),
+        notes=(
+            "Headerless CSV. Column 5 is the old/new flag, which identifies new "
+            "builds at address level -- the replacement for the EPC register, which "
+            "is not anonymously reachable. Carries a postcode but no property "
+            "reference, so joins to premises data are postcode level."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",
