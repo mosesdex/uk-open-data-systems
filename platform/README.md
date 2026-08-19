@@ -94,7 +94,9 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M15 Junction | **done** — schemas standardised, 5,833 records withheld |
 | M16 Compass | **done** — EHC plans up 127.4% against 4.2% pupil growth |
 | **All thirteen systems built** | |
-| M17 wire the prototype to real outputs | next |
+| M17 wire the prototype to real outputs | **done** |
+| M18 cross-system chains | **done** — executed, not illustrated |
+| M19 UI and system visibility | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -694,3 +696,36 @@ and hospital-school flag appears, each with its own `Total` row. Summing across
 them counts the same children several times over. Only the fully-totalled cell
 is taken now, a test asserts one row per authority, year and provision, and the
 corrected figure lands where the published statistic does.
+
+## M18 — cross-system chains
+
+```bash
+./.venv/bin/python -m groundtruth.cli chains
+```
+
+The argument for one platform rather than thirteen procurements is that one fact
+sets off several systems at once. That is easy to assert, so the chains are
+**executed against the gold tables** and report what each step actually returns.
+A system with nothing to say is left out rather than narrated — asserted by a
+test that runs the chains against an empty database and requires zero steps.
+
+**A council approves housing** — one decision, six real answers:
+
+| System | Answer |
+|---|---|
+| Plumbline | 15.9% decided within the legal deadline, against an 82.8% headline |
+| Ledger | £1,491,818,575 recorded, **0 of it mappable** |
+| Highwater | 635 of 23,336 objections overridden |
+| Sightline | 180 water quality objections, **none with a recorded outcome** |
+| Catchment | 89.6% of places already used across 317 districts |
+| Lastmile | 66.7% gigabit in new-build postcodes against 87.8% elsewhere |
+
+**A company goes bust** reaches Watchman, Bellwether and Sentinel; **a regulator
+reissues its reference numbers** reaches Baseline, Junction and Bellwether — the
+same repair in three industries.
+
+### The compounding, counted
+
+Two resolvers carry thirteen systems: **7** depend on the place spine, **3** on
+the entity spine, **3** on both. Each spine was built once. A test asserts every
+system is assigned to a spine, so none can quietly belong to neither.

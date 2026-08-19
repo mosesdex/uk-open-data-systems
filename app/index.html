@@ -24,6 +24,7 @@
     <a class="navi is-on" href="#top"><i class="navi__dot"></i>National picture</a>
     <a class="navi" href="#map"><i class="navi__dot"></i>Coverage map</a>
     <a class="navi" href="#spines"><i class="navi__dot"></i>The two links</a>
+    <a class="navi" href="#chains"><i class="navi__dot"></i>One fact, many systems</a>
     <div class="side__group">Systems</div>
     <div id="navSystems"></div>
     <div class="side__group">Evidence</div>
@@ -115,6 +116,12 @@
         <div class="pipe__s"><div class="pipe__n">05 SERVE</div><div class="pipe__t">Systems</div><div class="pipe__v">13 consumers</div></div>
       </div>
     </div>
+  </section>
+
+  <section class="card rise" id="chains" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">One fact, several systems</div>
+      <div class="card__s">Run against the platform's own output. A system with nothing to say is left out.</div></div></div>
+    <div class="card__b"><div class="stack" id="chainList"></div></div>
   </section>
 
   <section class="card rise" id="systems" style="margin-top:1rem">
@@ -284,6 +291,40 @@
     <div class="fitem__i" style="background:var(--red-050);color:var(--uk-red)">${b.code}</div>
     <div><div class="fitem__t">${b.n}</div><div class="fitem__d">${b.why}</div>
     <div class="fitem__m"><span>${b.org}</span><span>HTTP ${b.code}</span></div></div></div>`).join('');
+
+  const chainEl = document.getElementById('chainList');
+  const chains = Platform.chains();
+  chainEl.innerHTML = chains.length ? chains.map(c=>`
+    <div class="card" style="box-shadow:none;border-color:var(--line)">
+      <div class="card__b">
+        <div class="row" style="justify-content:space-between">
+          <div><div class="feat__t">${c.name}</div>
+          <div class="card__s" style="font-size:11.5px">${c.trigger}</div></div>
+          <span class="tag">${c.systems_touched} SYSTEMS ANSWER</span>
+        </div>
+        <div class="stack" style="gap:.45rem;margin-top:.8rem">
+          ${c.steps.map(s=>`<div class="row" style="align-items:flex-start;gap:.6rem">
+            <span class="tag" style="min-width:82px;justify-content:center">${s.system}</span>
+            <div style="min-width:0">
+              <div class="card__s" style="font-size:11.5px">${s.question}</div>
+              <div style="font-size:12.5px;font-weight:550">${s.answer}</div>
+            </div></div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('') : '<p class="card__s">No chain output. Run <span class="mono">gt publish</span>.</p>';
+
+  const ru = Platform.reuse();
+  if (ru) {
+    chainEl.insertAdjacentHTML('beforeend', `
+      <div class="card" style="box-shadow:none;border-color:var(--blue-300);background:var(--blue-050)">
+        <div class="card__b">
+          <div class="feat__t">Why the next system is cheaper</div>
+          <p class="card__desc mt-1" style="flex:none">Two resolvers carry ${ru.systems_built} systems.
+          ${ru.place_spine_users.length} depend on the place spine, ${ru.entity_spine_users.length} on the entity spine,
+          and ${ru.both_spines.length} on both. Each was built once.</p>
+        </div>
+      </div>`);
+  }
 
   const sp = Platform.spineSummary();
   const pl = document.getElementById('spinePlace');

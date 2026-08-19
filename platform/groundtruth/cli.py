@@ -569,6 +569,29 @@ def cmd_publish(args) -> int:
     return 0
 
 
+def cmd_chains(args) -> int:
+    from . import chains as CH
+    con = store.connect(DB)
+    for ch in CH.run_all(con):
+        print(f"\n{BOLD}{ch.name}{OFF}  {DIM}{ch.trigger} · {ch.spine} spine{OFF}")
+        if not ch.steps:
+            print(f"  {DIM}no system has produced output for this chain yet{OFF}")
+            continue
+        for st in ch.steps:
+            mark = f"{GREEN}*{OFF}" if st.found else f"{DIM}-{OFF}"
+            print(f"  {mark} {BOLD}{st.system:<12}{OFF}{DIM}{st.question}{OFF}")
+            print(f"    {st.answer}")
+        print(f"  {DIM}{ch.systems_touched} systems answered from one fact{OFF}")
+    r = CH.reuse_summary(con)
+    print(f"\n{BOLD}where the compounding comes from{OFF}")
+    print(f"  place spine   {len(r['place_spine_users']):>2} systems  {DIM}{', '.join(r['place_spine_users'])}{OFF}")
+    print(f"  entity spine  {len(r['entity_spine_users']):>2} systems  {DIM}{', '.join(r['entity_spine_users'])}{OFF}")
+    print(f"  both          {len(r['both_spines']):>2} systems  {DIM}{', '.join(r['both_spines'])}{OFF}")
+    print(f"  {DIM}Two resolvers, {r['systems_built']} systems. The nth costs less than the first.{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -673,6 +696,9 @@ def main(argv=None) -> int:
     ppb = sub.add_parser("publish", help="write gold tables as JSON for the prototype")
     ppb.add_argument("--out", default=None)
     ppb.set_defaults(fn=cmd_publish)
+
+    pch = sub.add_parser("chains", help="run the cross-system chains against real output")
+    pch.set_defaults(fn=cmd_chains)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

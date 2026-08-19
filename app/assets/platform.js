@@ -111,10 +111,13 @@ const Platform = (() => {
     return out;
   }
 
+  const chains = () => (data && data.chains) || [];
+  const reuse = () => (data && data.reuse) || null;
   const generated = () => (data && data.generated) || null;
   const builtSystems = () => (data && data.built_systems) || [];
   const error = () => (data && data.error) || null;
 
   return {load, sys, has, headlines, sourceSummary, spineSummary,
-          districtValues, districtLookup, generated, builtSystems, error};
+          districtValues, districtLookup, chains, reuse, generated,
+          builtSystems, error};
 })();

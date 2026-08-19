@@ -170,6 +170,17 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
     if _exists(con, "gold", "watchman_exposure"):
         S["watchman"] = {"exposures": _rows(con, "SELECT * FROM gold.watchman_exposure LIMIT 20")}
 
+    # Cross-system chains, executed rather than illustrated.
+    from . import chains as CH
+    out["chains"] = [
+        {"name": c.name, "trigger": c.trigger, "spine": c.spine,
+         "systems_touched": c.systems_touched,
+         "steps": [{"system": s.system, "question": s.question,
+                    "answer": s.answer, "found": s.found} for s in c.steps]}
+        for c in CH.run_all(con)
+    ]
+    out["reuse"] = CH.reuse_summary(con)
+
     out["built_systems"] = sorted(S)
     return out
 
