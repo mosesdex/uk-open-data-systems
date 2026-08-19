@@ -87,7 +87,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M8 Ledger | **done** — £1.49bn traced, 0% of it mappable |
 | M9 Baseline | **done** — spills adjusted for monitor availability |
 | M10 Sentinel | **done** — concentration, within what the data supports |
-| M11–M16 remaining systems | next |
+| M11 Highwater | **done** — override rate flat for nine years |
+| M12–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -455,3 +456,43 @@ like one regulator placing 69.6% of 23 awards with a single supplier.
 None of this is an accusation. Concentration has innocent explanations —
 specialist markets, small local supplier bases, genuine incumbency. Sentinel
 surfaces the pattern for a buyer to investigate; it does not score anyone.
+
+## M11 — Highwater
+
+```bash
+./.venv/bin/python -m groundtruth.cli highwater
+```
+
+23,519 objections across 429 authorities. Confirms the research exactly:
+**7,011 outcomes unknown**, and **not one row carries an address, postcode or
+coordinate**. The authority's own planning reference is present on 23,457 rows —
+that reference is the key to the site, but the location lives in the authority's
+register, not in this file.
+
+| Outcome | Objections | Homes |
+|---|---|---|
+| EA advice followed | 15,690 | 344,518 |
+| Outcome unknown | 7,011 | — |
+| **Granted against EA advice** | **635** | **2,949** |
+
+### The override rate has been flat for nine years
+
+| Year | Against advice | Rate |
+|---|---|---|
+| 2016-17 | 84 | 4.2% |
+| 2018-19 | 105 | 4.8% |
+| 2020-21 | 56 | 3.0% |
+| 2022-23 | 60 | 3.4% |
+| 2024-25 | 5 | 3.8% |
+
+Independently reproduces the finding the research recorded for Sightline: the
+rate is stable, even where raw counts move. Rates are computed over **decided
+cases only** — including unknowns in the denominator would make the override
+rate improve every time the Agency fails to learn an outcome, which a test now
+prevents.
+
+### A quiet trap in the year column
+
+The publisher switches from `2020-21` to `2021/22` partway through the series.
+Left alone the same financial year becomes two values and the time series splits
+in half. `normalise_year` converges them, with tests for both forms.

@@ -368,6 +368,33 @@ def cmd_sentinel(args) -> int:
     return 0
 
 
+def cmd_highwater(args) -> int:
+    from .systems import highwater as H
+    con = store.connect(DB)
+    src = BRONZE / "ea_objections.ods"
+    if not src.exists():
+        print(f"{RED}no objections file{OFF}"); con.close(); return 1
+    cov = H.load(con, src); H.build(con)
+    loc = H.locatability(con)
+    print(f"{BOLD}Highwater{OFF}  {DIM}flood risk objections{OFF}\n")
+    print(f"  objections             {cov.rows:>8,}")
+    print(f"  with a known outcome   {cov.with_outcome:>8,}  {cov.pct(cov.with_outcome):5.1f}%")
+    print(f"  carrying a location    {0:>8,}  {RED}  0.0%{OFF}"
+          f"  {DIM}no address, postcode or coordinate on any row{OFF}")
+    print(f"  planning references    {loc['with_reference']:>8,}  {DIM}the key to the site,"
+          f" across {loc['authorities']} authorities{OFF}")
+    print(f"\n{BOLD}outcomes{OFF}")
+    for o, n, u in con.execute("SELECT * FROM gold.highwater_outcome").fetchall():
+        print(f"  {o[:50]:<52}{n:>7,}  {int(u or 0):>8,} homes")
+    print(f"\n{BOLD}override rate, decided cases only{OFF}")
+    for y, ob, f_, a, u, orate, upct in con.execute(
+            "SELECT * FROM gold.highwater_trend ORDER BY year").fetchall():
+        bar = "#" * int((orate or 0) * 3)
+        print(f"  {y}  {a:>4} of {ob:>5,}   {(orate or 0):>5.1f}%  {DIM}{bar}{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -442,6 +469,9 @@ def main(argv=None) -> int:
     psn = sub.add_parser("sentinel", help="procurement concentration signals")
     psn.add_argument("--limit", type=int, default=6)
     psn.set_defaults(fn=cmd_sentinel)
+
+    phw = sub.add_parser("highwater", help="flood objections and outcomes")
+    phw.set_defaults(fn=cmd_highwater)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

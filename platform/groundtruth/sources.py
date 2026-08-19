@@ -326,6 +326,26 @@ REGISTRY: tuple[Source, ...] = (
             "comparable. Filename carries the year."
         ),
     ),
+    Source(
+        id="ea_flood_objections",
+        name="EA objections to planning on flood risk grounds",
+        publisher="Environment Agency",
+        url=("https://assets.publishing.service.gov.uk/media/6894798a9c63e0ee87656962/"
+             "EA_flood_risk_water_quality_objections_list_2016-17_to_2024-25.ods"),
+        fmt="zip-csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="annual",
+        expect_content=("application/vnd.oasis.opendocument.spreadsheet",
+                        "application/zip", "application/octet-stream"),
+        systems=("highwater", "sightline"),
+        notes=(
+            "23,519 objections across 429 authorities. Carries the authority's own "
+            "planning reference but no address, postcode or coordinate, so nothing "
+            "can be mapped from this file alone. Outcome is unknown on 7,011 rows. "
+            "Financial years switch from 2020-21 to 2021/22 partway through."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",
