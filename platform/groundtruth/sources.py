@@ -306,6 +306,26 @@ REGISTRY: tuple[Source, ...] = (
             "without transferring data."
         ),
     ),
+    Source(
+        id="edm_annual_return",
+        name="EDM storm overflow annual return",
+        publisher="Environment Agency",
+        url=("https://environment.data.gov.uk/api/file/download"
+             "?fileDataSetId=c55e170e-3c75-49a5-8026-a961ff94c8e0"
+             "&fileName=EDM_2025_Storm_Overflow_Annual_Return.zip"),
+        fmt="zip-csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="annual",
+        expect_content=("application/zip", "application/octet-stream"),
+        systems=("baseline",),
+        notes=(
+            "14,302 storm overflows. Carries spill counts, a National Grid "
+            "Reference per outlet, and the percentage of the reporting period "
+            "the monitor was operational -- which is what makes counts "
+            "comparable. Filename carries the year."
+        ),
+    ),
     # ---------------- known-blocked, kept visible ----------------
     Source(
         id="epc_domestic",

@@ -85,7 +85,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M6 Bellwether | **done** — care concentration at entity and group level |
 | M7 Bulwark | **done** — 141,468 defences, 7,233 inspections overdue |
 | M8 Ledger | **done** — £1.49bn traced, 0% of it mappable |
-| M9–M16 remaining systems | next |
+| M9 Baseline | **done** — spills adjusted for monitor availability |
+| M10–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -394,3 +395,31 @@ DuckDB's `executemany` raises on an empty list, so a publisher legitimately
 returning zero rows for one dataset would have crashed the loader mid-run. Every
 loader now goes through `store.insert_many`, which treats an empty result as a
 fact to record rather than an error.
+
+## M9 — Baseline
+
+```bash
+./.venv/bin/python -m groundtruth.cli baseline
+```
+
+14,302 storm overflows. Every spill count is published with the share of the
+year its monitor was actually recording, and a full-year-equivalent alongside
+the raw number.
+
+| | |
+|---|---|
+| Reported spills | 291,412 |
+| Availability-adjusted | **300,326** (+3.1%) |
+| Mean monitor uptime | 97.3% |
+| Watched 90%+ of the year | 13,228 of 14,302 (92.5%) |
+| Located from grid reference | 14,245 (99.6%) |
+
+The adjustment is smaller than the concern implies — uptime in 2025 is genuinely
+high — and saying so is the point. The number matters where it is small: **72
+outlets were watched for under half the year**, and their counts cannot be
+compared with anything until adjusted.
+
+Outlet locations are published as National Grid References, not coordinates, so
+`geo.ngr_to_bng` converts them. A malformed reference returns `None` rather than
+a guess: an outlet placed in the wrong 100 km square is worse than an outlet
+with no location at all.

@@ -314,6 +314,30 @@ def cmd_ledger(args) -> int:
     return 0
 
 
+def cmd_baseline(args) -> int:
+    from .systems import baseline as BL
+    con = store.connect(DB)
+    src = BRONZE / "edm_annual.zip"
+    if not src.exists():
+        print(f"{RED}no EDM return{OFF}"); con.close(); return 1
+    cov = BL.load(con, src, args.year); BL.build(con)
+    print(f"{BOLD}Baseline{OFF}  {DIM}storm overflows, {args.year}{OFF}\n")
+    print(f"  outlets                {cov.outlets:>8,}")
+    print(f"  monitor availability   {cov.with_availability:>8,}  {cov.pct(cov.with_availability):5.1f}%")
+    print(f"  located from grid ref  {cov.located:>8,}  {cov.pct(cov.located):5.1f}%")
+    print(f"  watched 90%+ of year   {cov.fully_watched:>8,}  {cov.pct(cov.fully_watched):5.1f}%")
+    t = con.execute("""SELECT round(sum(spills)), round(sum(spills_full_year_equivalent)),
+        round(avg(operational_pct),1) FROM gold.baseline_outlet""").fetchone()
+    print(f"\n  reported spills        {t[0]:>8,.0f}")
+    print(f"  availability-adjusted  {t[1]:>8,.0f}   {GREEN}{100*(t[1]-t[0])/t[0]:+.1f}%{OFF}")
+    print(f"\n{BOLD}by company{OFF}")
+    for y, comp, o, rs, adj, av, uw, bw in con.execute(
+            "SELECT * FROM gold.baseline_company LIMIT ?", [args.limit]).fetchall():
+        print(f"  {comp[:24]:<26}{rs:>8,.0f} -> {adj:>8,.0f}   uptime {av:>5.1f}%   {bw:>3} barely watched")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -379,6 +403,11 @@ def main(argv=None) -> int:
     pl2 = sub.add_parser("ledger", help="developer contributions promised and delivered")
     pl2.add_argument("--limit", type=int, default=6)
     pl2.set_defaults(fn=cmd_ledger)
+
+    pbl = sub.add_parser("baseline", help="storm overflow spills, availability adjusted")
+    pbl.add_argument("--year", type=int, default=2025)
+    pbl.add_argument("--limit", type=int, default=6)
+    pbl.set_defaults(fn=cmd_baseline)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

@@ -117,3 +117,52 @@ def bng_to_wgs84(easting: float, northing: float) -> tuple[float, float]:
     lat, lon = grid_to_airy(easting, northing)
     lat, lon = airy_to_wgs84(lat, lon)
     return math.degrees(lat), math.degrees(lon)
+
+
+# ---------------------------------------------------------------------------
+# National Grid References
+# ---------------------------------------------------------------------------
+# EDM publishes outlet locations as an alphanumeric grid reference such as
+# "SU 12345 67890" rather than as coordinates. The two prefix letters select a
+# 500 km square then a 100 km square; the digits are easting and northing
+# within it, split in half and zero-padded to metres.
+
+_GRID_500 = {"S": (0, 0), "T": (500_000, 0), "N": (0, 500_000),
+             "O": (500_000, 500_000), "H": (0, 1_000_000), "J": (500_000, 1_000_000)}
+# Letter block, omitting I, laid out west-to-east then north-to-south.
+_LETTERS = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
+
+
+def ngr_to_bng(ref: str) -> tuple[int, int] | None:
+    """Convert a National Grid Reference to easting and northing in metres.
+
+    Returns None rather than guessing when the reference is malformed: an
+    outlet placed in the wrong 100 km square is worse than an outlet with no
+    location at all.
+    """
+    if not ref:
+        return None
+    s = "".join(str(ref).split()).upper()
+    if len(s) < 3 or s[0] not in _GRID_500 or s[1] not in _LETTERS:
+        return None
+    digits = s[2:]
+    if not digits.isdigit() or len(digits) % 2 or len(digits) > 10:
+        return None
+
+    e500, n500 = _GRID_500[s[0]]
+    idx = _LETTERS.index(s[1])
+    e100 = (idx % 5) * 100_000
+    n100 = (4 - idx // 5) * 100_000
+
+    half = len(digits) // 2
+    if half == 0:
+        return None
+    scale = 10 ** (5 - half)
+    easting = e500 + e100 + int(digits[:half]) * scale
+    northing = n500 + n100 + int(digits[half:]) * scale
+    return easting, northing
+
+
+def ngr_to_wgs84(ref: str) -> tuple[float, float] | None:
+    bng = ngr_to_bng(ref)
+    return bng_to_wgs84(*bng) if bng else None
