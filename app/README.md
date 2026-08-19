@@ -42,6 +42,38 @@ recorded HTTP status, not a claim about what should work.
 The overdue-inspection count moves between runs because it is computed against
 the current date. That is the system working, not drift.
 
+## All thirteen systems are visible, with results
+
+Every system card on the public and mobile interfaces carries the measured
+headline that system produced — not a description of what it would do:
+
+| System | What it found |
+|---|---|
+| Catchment | 89.6% of mainstream school places in use |
+| Sentinel | 6.6% of awards skipped open competition |
+| Highwater | 635 permissions granted against flood advice |
+| Plumbline | 15.9% decided within the legal deadline |
+| Junction | 937 of 6,770 capacity records actually served |
+| Ledger | £1.49bn recorded, 0 of it mappable |
+| Bellwether | 124 authorities depend on one care group |
+| Sightline | 180 water quality objections, no outcome field |
+| Lastmile | 66.7% gigabit in new-build postcodes |
+| Bulwark | 7,300 inspections overdue |
+| Watchman | register must accumulate before it produces signal |
+| Compass | +127.4% growth in statutory EHC plans |
+| Baseline | 300,326 spills after adjusting for uptime |
+
+A system with no output says so rather than showing a description in place of a
+result.
+
+## A bug worth recording
+
+Reveal-on-scroll never fired for content reached by a deep link. Landing on
+`#systems` jumped the page past the observer, so the section stayed **invisible
+permanently** — the whole point of the page, blank. Elements already on screen
+are now revealed immediately, `hashchange` re-runs the check, and a timeout
+guarantees nothing stays hidden because an observer misfired.
+
 ## Still illustrative
 
 Admin throughput, the match-review queue, users and the audit log remain sample

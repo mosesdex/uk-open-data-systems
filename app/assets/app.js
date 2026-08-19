@@ -12,11 +12,30 @@ const GT = (() => {
     const io = new IntersectionObserver(es => es.forEach(e => {
       if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
     }), {threshold:.08, rootMargin:'0px 0px -40px'});
-    document.querySelectorAll('.rise').forEach((el,i) => {
+    document.querySelectorAll('.rise:not(.in)').forEach((el,i) => {
+      const box = el.getBoundingClientRect();
+      // Anything already on screen, or scrolled past, is shown at once. A deep
+      // link such as #systems jumps the page before the observer ever fires, and
+      // without this the target section stays invisible for good.
+      if (box.top < innerHeight && box.bottom > -innerHeight) {
+        el.classList.add('in');
+        return;
+      }
       el.style.transitionDelay = Math.min(i*38, 320) + 'ms';
       io.observe(el);
     });
+    // Last resort: never leave content hidden because an observer misfired.
+    clearTimeout(reveal._t);
+    reveal._t = setTimeout(() => {
+      document.querySelectorAll('.rise:not(.in)').forEach(el => {
+        const box = el.getBoundingClientRect();
+        if (box.top < innerHeight * 1.5) el.classList.add('in');
+      });
+    }, 1200);
   }
+
+  // A hash change moves the viewport without scrolling, so re-run the check.
+  addEventListener('hashchange', () => reveal());
 
   /* ---- animated counters ---- */
   function count(el, to, opts={}){

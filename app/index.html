@@ -125,8 +125,8 @@
   </section>
 
   <section class="card rise" id="systems" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">The thirteen systems</div>
-      <div class="card__s">Each answers a question nobody can currently answer</div></div>
+    <div class="card__hd"><div><div class="card__t">All thirteen systems, with what each one found</div>
+      <div class="card__s" id="sysCount">&nbsp;</div></div>
       <div class="spacer"></div>
       <div class="row" id="filters"></div></div>
     <div class="card__b"><div class="grid g3" id="sysGrid"></div></div>
@@ -234,15 +234,27 @@
   const spineTag = sp => sp==='both' ? '<span class="tag">WHERE + WHO</span>'
     : sp==='place' ? '<span class="tag">WHERE</span>' : '<span class="tag">WHO</span>';
   const drawSystems = (f='all') => {
-    document.getElementById('sysGrid').innerHTML = SYSTEMS
-      .filter(s => f==='all' || s.spine===f || (f==='both'&&s.spine==='both'))
-      .map(s=>`<a class="card card--hov" id="sys-${s.id}" href="../systems/${s.id}.html" style="display:block">
+    const list = SYSTEMS.filter(s => f==='all' || s.spine===f);
+    document.getElementById('sysGrid').innerHTML = list.map(s=>{
+      const r = Platform.systemResult(s.id);
+      const result = r
+        ? `<div style="margin-top:.75rem;padding-top:.7rem;border-top:1px solid var(--line)">
+             <div style="font-size:22px;font-weight:680;letter-spacing:-.02em;color:var(--uk-blue)">${r.headline}</div>
+             <div class="card__s" style="font-size:11.5px;margin-top:.1rem">${r.label}</div>
+             <div class="card__s" style="font-size:10.5px;margin-top:.25rem;color:var(--ink-3)">${r.sub}</div>
+           </div>`
+        : `<div style="margin-top:.75rem;padding-top:.7rem;border-top:1px solid var(--line)">
+             <div class="card__s" style="font-size:11.5px">no output yet — run this system</div></div>`;
+      return `<a class="card card--hov" id="sys-${s.id}" href="../systems/${s.id}.html" style="display:block">
       <div class="card__b">
         <div class="row" style="justify-content:space-between">${badge(s.st)}<span class="card__s mono" style="font-size:10px">${s.dom.toUpperCase()}</span></div>
         <h3 style="font-size:15px;margin-top:.6rem">${s.n}</h3>
         <p class="card__s" style="margin-top:.3rem">${s.s}</p>
-        <div style="margin-top:.7rem">${spineTag(s.spine)}</div>
-      </div></a>`).join('');
+        <div style="margin-top:.6rem">${spineTag(s.spine)}</div>
+        ${result}
+      </div></a>`;}).join('');
+    document.getElementById('sysCount').textContent =
+      `${list.length} shown · ${list.filter(s=>Platform.systemResult(s.id)).length} with measured output`;
     GT.reveal();
   };
   document.getElementById('filters').innerHTML =
