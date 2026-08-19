@@ -556,6 +556,19 @@ def cmd_compass(args) -> int:
     return 0
 
 
+def cmd_publish(args) -> int:
+    from . import publish
+    con = store.connect(DB)
+    dest = Path(args.out) if args.out else ROOT.parent / "app" / "data" / "platform.json"
+    payload = publish.write(con, dest)
+    size = dest.stat().st_size
+    print(f"{BOLD}published{OFF} {dest}")
+    print(f"  {size/1024:.0f} KB   {len(payload['built_systems'])} systems with real output")
+    print(f"  {DIM}{', '.join(payload['built_systems'])}{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -656,6 +669,10 @@ def main(argv=None) -> int:
     pcm.add_argument("--limit", type=int, default=6)
     pcm.add_argument("--reload", action="store_true")
     pcm.set_defaults(fn=cmd_compass)
+
+    ppb = sub.add_parser("publish", help="write gold tables as JSON for the prototype")
+    ppb.add_argument("--out", default=None)
+    ppb.set_defaults(fn=cmd_publish)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

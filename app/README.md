@@ -1,29 +1,48 @@
 # Groundtruth prototype
 
-Three interfaces over the same platform:
+Three interfaces over the platform:
 
-| File | Interface | For |
+| File | Interface |
+|---|---|
+| `index.html` | Public — reads real platform output |
+| `admin.html` | Admin — feed health, pipeline, review queue |
+| `mobile.html` | Mobile — device frame, tabbed |
+
+## It reads what the platform computed
+
+`data/platform.json` is written by the platform, not by hand:
+
+```bash
+cd ../platform
+./.venv/bin/python -m groundtruth.cli publish
+```
+
+That writes every gold table the platform has produced, stamped with the run
+time. The public interface renders from it through `assets/platform.js`. If the
+file is missing the page says so rather than falling back to figures typed in
+earlier — a missing panel is honest, a stale one is not.
+
+Currently live from real output:
+
+| Figure | Value | System |
 |---|---|---|
-| `index.html` | Public | Coverage map, the two links, thirteen systems, source catalogue |
-| `admin.html` | Admin | Feed health, ingest pipeline, match review queue, alert rules, audit log |
-| `mobile.html` | Mobile | Alerts, local picture, systems and search, in a device frame |
+| Mainstream school places in use | 89.6% | Catchment |
+| Specialist settings over capacity | 629 | Catchment |
+| Developer contributions recorded | £1.49bn | Ledger |
+| Flood defence inspections overdue | 7,300 | Bulwark |
+| Decided within the statutory deadline | 15.9% | Plumbline |
+| Growth in statutory EHC plans | 127.4% | Compass |
+| Spills adjusted for monitor uptime | 300,326 | Baseline |
 
-No build step and no dependencies — open any file directly, or serve the folder.
+The choropleth is Catchment's per-district output over real ONS boundaries, and
+clicking a district shows its utilisation, the **coverage that figure rests on**,
+and its organisation-resolution rate. The source table is the fetcher's own
+recorded HTTP status, not a claim about what should work.
 
-## What is real
+The overdue-inspection count moves between runs because it is computed against
+the current date. That is the system working, not drift.
 
-- Boundaries: ONS Local Authority Districts, May 2024, ultra-generalised (318 features)
-- School figures: DfE GIAS full extract, 17 August 2026 (52,486 establishments, 27,167 open)
-- Linkage coverage: computed, not estimated — 96.5% carry a property reference, 45.4% a trust identifier
-- Source catalogue: every row returned HTTP 200 to an unauthenticated request on 17 August 2026
+## Still illustrative
 
-## What is illustrative
-
-Admin throughput figures, the match review queue, users and the audit log are sample data for
-demonstration. They are labelled as such in the interface.
-
-## Design
-
-Union Flag palette — Pantone 280 blue, Pantone 186 red, white — used structurally for navigation,
-emphasis and alerting rather than decoratively. Charts, maps and counters are drawn as SVG at
-runtime with no charting library.
+Admin throughput, the match-review queue, users and the audit log remain sample
+data, labelled as such in the interface.

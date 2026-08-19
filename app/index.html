@@ -46,34 +46,17 @@
 
 <div class="pad" id="top">
 
-  <div class="grid g4">
-    <div class="kpi rise" style="--accent:var(--uk-blue)">
-      <div class="kpi__l">Systems running</div>
-      <div class="kpi__v" data-count="13">0</div>
-      <div class="kpi__m">All on free public data</div>
-      <div class="kpi__spark" id="sp1"></div></div>
-    <div class="kpi rise" style="--accent:var(--green-600)">
-      <div class="kpi__l">Sources verified open</div>
-      <div class="kpi__v" data-count="69">0</div>
-      <div class="kpi__m">No key, no account, no fee</div>
-      <div class="kpi__spark" id="sp2"></div></div>
-    <div class="kpi rise" style="--accent:var(--uk-red)">
-      <div class="kpi__l">Schools resolved to a place</div>
-      <div class="kpi__v" data-count="96.5" data-dec="1" data-suf="%">0</div>
-      <div class="kpi__m">27,167 open schools carry a property reference</div>
-      <div class="kpi__spark" id="sp3"></div></div>
-    <div class="kpi rise" style="--accent:var(--amber-600)">
-      <div class="kpi__l">Resolved to an organisation</div>
-      <div class="kpi__v" data-count="45.4" data-dec="1" data-suf="%">0</div>
-      <div class="kpi__m">The gap Groundtruth closes</div>
-      <div class="kpi__spark" id="sp4"></div></div>
+  <div class="row" style="justify-content:space-between;margin-bottom:.8rem">
+    <span class="tag" id="liveTag">READING PLATFORM OUTPUT…</span>
+    <span class="card__s mono" id="builtTag" style="font-size:11px"></span>
   </div>
+  <div class="grid g4" id="kpis"></div>
 
   <div class="grid g-2-1" style="margin-top:1rem">
     <section class="card rise" id="map">
       <div class="card__hd">
-        <div><div class="card__t">Linkage coverage by local authority</div>
-        <div class="card__s">Share of open schools carrying a property reference. Real ONS boundaries, real DfE data.</div></div>
+        <div><div class="card__t">School places in use, by local authority</div>
+        <div class="card__s">Share of mainstream school places in use, computed by Catchment. Real ONS boundaries, real DfE figures.</div></div>
         <div class="spacer"></div>
         <div class="legend">low <span class="legend__bar"></span> high</div>
       </div>
@@ -111,8 +94,8 @@
           <h3 style="font-size:15px;margin-top:.5rem">A messy reference becomes a point on a map</h3>
           <p class="card__s" style="margin-top:.35rem">“East Devon 21/0751/FUL” → property reference → coordinate.
           Seven of the thirteen systems cannot start without this.</p>
-          <div class="meter" style="margin-top:.7rem"><i data-w="96.5" class="ok"></i></div>
-          <div class="card__s mono" style="margin-top:.3rem;font-size:11px">96.5% on school records today</div>
+          <div class="meter" style="margin-top:.7rem"><i data-w="100" class="ok"></i></div>
+          <div class="card__s mono" style="margin-top:.3rem;font-size:11px" id="spinePlace">&nbsp;</div>
         </div>
         <div class="spine__k">JOIN</div>
         <div class="spine__c">
@@ -120,8 +103,8 @@
           <h3 style="font-size:15px;margin-top:.5rem">A name becomes one identified organisation</h3>
           <p class="card__s" style="margin-top:.35rem">“SOFTCAT LTD”, “Softcat plc”, “SOFTCAT PLC - FCA” → one company number.
           Six systems depend on it.</p>
-          <div class="meter" style="margin-top:.7rem"><i data-w="45.4" class="warn"></i></div>
-          <div class="card__s mono" style="margin-top:.3rem;font-size:11px">45.4% on school records today</div>
+          <div class="meter" style="margin-top:.7rem"><i data-w="60" class="warn"></i></div>
+          <div class="card__s mono" style="margin-top:.3rem;font-size:11px" id="spineEntity">&nbsp;</div>
         </div>
       </div>
       <div class="pipe" style="margin-top:1.1rem">
@@ -177,44 +160,62 @@
 </div>
 
 <script src="assets/shared.js"></script>
+<script src="assets/platform.js"></script>
 <script src="assets/app.js"></script>
 <script>
 (async function(){
   document.getElementById('navSystems').innerHTML = SYSTEMS.map(s =>
     `<a class="navi" href="#sys-${s.id}"><i class="navi__dot"></i>${s.n}</a>`).join('');
 
-  ['sp1','sp2','sp3','sp4'].forEach((id,i)=>{
-    const seeds=[[3,5,7,9,11,13],[22,31,40,52,61,69],[88,90,92,94,95.5,96.5],[30,34,38,41,43,45.4]];
-    document.getElementById(id).innerHTML = GT.spark(seeds[i],{fill:true,
-      c:['var(--uk-blue)','var(--green-600)','var(--uk-red)','var(--amber-600)'][i]});
-  });
+  await Platform.load();
+  const built = Platform.builtSystems();
+  const gen = Platform.generated();
+  document.getElementById('liveTag').outerHTML = Platform.error()
+    ? '<span class="tag tag--bad">PLATFORM OUTPUT UNAVAILABLE — SHOWING NOTHING RATHER THAN STALE FIGURES</span>'
+    : `<span class="tag tag--ok">LIVE FROM THE PLATFORM · ${built.length} SYSTEMS</span>`;
+  document.getElementById('builtTag').textContent = gen ? 'computed ' + gen.replace('T',' ').replace('+00:00',' UTC') : '';
 
-  const sc = await fetch('data/schools.json').then(r=>r.json());
-  const vals = {}; Object.entries(sc.byLad).forEach(([k,v])=>vals[k]=v.uprnPct);
+  const accents=['var(--uk-blue)','var(--green-600)','var(--uk-red)','var(--amber-600)','var(--blue-500)','#6B4FA8','#0E7C7B'];
+  document.getElementById('kpis').innerHTML = Platform.headlines().map((h,i)=>{
+    const v = h.money ? (h.value/1e9).toFixed(2) : h.value;
+    const pre = h.money ? '£' : (h.prefix||'');
+    const suf = h.money ? 'bn' : (h.suffix||'');
+    return `<div class="kpi rise" style="--accent:${accents[i%accents.length]}">
+      <div class="kpi__l">${h.label}</div>
+      <div class="kpi__v" data-count="${v}" data-dec="${String(v).includes('.')?(h.money?2:1):0}" data-pre="${pre}" data-suf="${suf}">0</div>
+      <div class="kpi__m">${h.note}</div>
+      <div class="card__s mono" style="font-size:9.5px;letter-spacing:.08em;margin-top:.35rem;color:var(--ink-3)">${h.system.toUpperCase()}</div>
+    </div>`;
+  }).join('') || '<div class="card"><div class="card__b"><p class="card__s">No platform output found. Run <span class="mono">gt publish</span>.</p></div></div>';
+
+  const vals = Platform.districtValues('utilisation_pct');
+  const lookup = Platform.districtLookup();
   const mapEl = document.getElementById('mapA');
-  await GT.choropleth(mapEl,{values:vals,label:'{}% of schools carry a property reference'});
+  await GT.choropleth(mapEl,{values:vals,label:'{}% of mainstream school places used'});
+  const n = Object.keys(vals).length;
   document.getElementById('mapNote').textContent =
-    `${Object.keys(sc.byLad).length} of 318 districts carry a published figure. The rest are two-tier counties whose schools span several districts — the mismatch Catchment exists to fix.`;
+    `${n} districts computed by Catchment from the school register. Districts without a figure are two-tier counties whose schools are planned across several districts — the mismatch Catchment exists to fix.`;
 
   mapEl.addEventListener('pick', e => {
-    const d = sc.byLad[e.detail.code];
+    const d = lookup[e.detail.code];
     const box = document.getElementById('pick');
     if(!d){ box.innerHTML = `<h3 style="font-size:15px">${e.detail.name}</h3>
       <p class="card__s" style="margin-top:.4rem">No authority-level figure published at this geography.
       Its schools are planned by a county council covering several districts.</p>
       <span class="tag tag--warn" style="margin-top:.6rem">GEOGRAPHY MISMATCH</span>`; return; }
-    box.innerHTML = `<h3 style="font-size:16px">${d.name}</h3>
+    const util = d.utilisation_pct;
+    box.innerHTML = `<h3 style="font-size:16px">${d.lad_name}</h3>
       <div class="row" style="margin-top:.5rem"><span class="tag">${GT.fmt(d.schools)} schools</span>
       <span class="tag">${GT.fmt(d.pupils)} pupils</span></div>
-      <div style="margin-top:.85rem"><div class="card__s">Capacity used</div>
-        <div class="meter" style="margin-top:.3rem"><i class="${d.util>95?'bad':d.util>88?'warn':'ok'}" style="width:${Math.min(d.util,100)}%"></i></div>
-        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.util}% of ${GT.fmt(d.capacity)} places</div></div>
-      <div style="margin-top:.75rem"><div class="card__s">Resolved to a place</div>
-        <div class="meter" style="margin-top:.3rem"><i class="ok" style="width:${d.uprnPct}%"></i></div>
-        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.uprnPct}%</div></div>
+      <div style="margin-top:.85rem"><div class="card__s">Mainstream places used</div>
+        <div class="meter" style="margin-top:.3rem"><i class="${util>95?'bad':util>88?'warn':'ok'}" style="width:${Math.min(util,100)}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${util}% of ${GT.fmt(d.capacity)} places</div></div>
+      <div style="margin-top:.75rem"><div class="card__s">Schools with both figures published</div>
+        <div class="meter" style="margin-top:.3rem"><i class="${d.measured_pct<80?'warn':'ok'}" style="width:${d.measured_pct}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.measured_pct}% — the coverage this figure rests on</div></div>
       <div style="margin-top:.75rem"><div class="card__s">Resolved to an organisation</div>
-        <div class="meter" style="margin-top:.3rem"><i class="${d.trustPct<50?'warn':'ok'}" style="width:${d.trustPct}%"></i></div>
-        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.trustPct}%</div></div>`;
+        <div class="meter" style="margin-top:.3rem"><i class="${d.entity_resolved_pct<50?'warn':'ok'}" style="width:${d.entity_resolved_pct}%"></i></div>
+        <div class="mono card__s" style="font-size:11px;margin-top:.25rem">${d.entity_resolved_pct}%</div></div>`;
   });
 
   const tr = await fetch('data/trusts.json').then(r=>r.json());
@@ -258,20 +259,41 @@
       <span style="font-size:12.5px">${s.n}</span></span>
       <span class="mono card__s" style="font-size:11.5px">${s.v}</span></div>`).join('');
 
-  const rowsHtml = list => list.map(f=>`<tr><td>${f.n}</td><td>${f.org}</td>
+  const live = Platform.sourceSummary();
+  const useLive = live.rows.length > 0;
+  const list0 = useLive
+    ? live.rows.map(r => ({n:r.name, org:r.publisher, kind:r.role.replace('_',' '),
+        freq:r.cadence, fmt:r.ok ? 'HTTP 200' : (r.blocked ? 'blocked' : 'HTTP ' + r.http_status),
+        ok:r.ok}))
+    : FEEDS.map(f => ({...f, ok:true}));
+  const rowsHtml = l => l.map(f=>`<tr><td>${f.n}</td><td>${f.org}</td>
     <td><span class="tag">${f.kind}</span></td><td class="mono" style="font-size:11.5px">${f.freq}</td>
-    <td class="mono" style="font-size:11.5px">${f.fmt}</td></tr>`).join('');
-  document.getElementById('feedRows').innerHTML = rowsHtml(FEEDS);
+    <td><span class="tag ${f.ok?'tag--ok':'tag--bad'}">${f.fmt}</span></td></tr>`).join('');
+  document.getElementById('feedRows').innerHTML = rowsHtml(list0);
+  if (useLive) {
+    const hd = document.querySelector('#feeds .card__s');
+    if (hd) hd.textContent = `${live.ok} of ${live.total} sources answered on the last run. Status is what the fetcher recorded, not a claim.`;
+  }
   document.getElementById('feedSearch').addEventListener('input', e => {
     const q = e.target.value.toLowerCase();
     document.getElementById('feedRows').innerHTML = rowsHtml(
-      FEEDS.filter(f => (f.n+f.org+f.kind).toLowerCase().includes(q)));
+      list0.filter(f => (f.n+f.org+f.kind).toLowerCase().includes(q)));
   });
 
   document.getElementById('blockedFeed').innerHTML = BLOCKED.map(b=>`<div class="fitem">
     <div class="fitem__i" style="background:var(--red-050);color:var(--uk-red)">${b.code}</div>
     <div><div class="fitem__t">${b.n}</div><div class="fitem__d">${b.why}</div>
     <div class="fitem__m"><span>${b.org}</span><span>HTTP ${b.code}</span></div></div></div>`).join('');
+
+  const sp = Platform.spineSummary();
+  const pl = document.getElementById('spinePlace');
+  if (pl) pl.textContent = sp.postcodes
+    ? `${GT.fmt(sp.postcodes)} postcodes loaded, ${sp.districts} districts`
+    : 'place spine not yet loaded';
+  const en = document.getElementById('spineEntity');
+  if (en) en.textContent = sp.register
+    ? `${GT.fmt(sp.register)} awards registered, ${GT.fmt(sp.registerNumbers)} company numbers`
+    : 'entity spine not yet loaded';
 
   GT.reveal(); GT.countAll(); GT.meters();
 })();
