@@ -89,7 +89,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M10 Sentinel | **done** — concentration, within what the data supports |
 | M11 Highwater | **done** — override rate flat for nine years |
 | M12 Plumbline | **done** — 82.8% headline against 15.9% statutory |
-| M13–M16 remaining systems | next |
+| M13 Sightline | **done** — one advice stream has no outcome field at all |
+| M14–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -543,3 +544,37 @@ The quarterly statistics release carries only a PDF factsheet. The actual tables
 live in a separate live-tables collection whose attachments are reachable through
 the gov.uk content API. The loader also fails loudly if a named column is
 missing, rather than computing against whatever sits at that position.
+
+## M13 — Sightline
+
+```bash
+./.venv/bin/python -m groundtruth.cli sightline
+```
+
+The Environment Agency publishes two objection streams in one workbook, and the
+contrast between them is the finding:
+
+| Stream | Objections | Outcome |
+|---|---|---|
+| Flood risk | 23,336 | tracked on 70.0% |
+| Water quality | 180 | **no outcome field at all** |
+
+"Unknown for some" and "no field at all" are different conditions. A consultee
+regime being cut back on the grounds that it adds delay has, for one of its two
+published objection streams, **no evidence base whatsoever** about whether the
+advice was taken. The water quality sheet records why the Agency objected —
+insufficient information (58), non-mains drainage in a sewered area (45) — and
+nothing about what the authority then did.
+
+### A bug in M11 that this milestone caught
+
+The objections workbook holds two sheets. The ODS reader iterated every row in
+the file regardless of sheet, so Highwater silently loaded **23,519** rows: the
+23,336 flood risk objections plus 183 water quality rows appended underneath.
+Those 183 were exactly the "(blank)" outcome category in the M11 output.
+
+The reader now supports sheet selection, Highwater reads `Flood_Risk` only, and
+the total is 23,336 — matching the published figure. The outcome counts were
+never affected, since the appended rows carried no outcome value, so M11's
+substantive findings stand; only the total was inflated. A test asserts the
+flood sheet holds exactly 23,336 rows and that unfiltered reading picks up more.

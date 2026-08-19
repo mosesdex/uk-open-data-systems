@@ -16,6 +16,8 @@ NS = {
     "table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
     "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
 }
+_TABLE = "{%s}table" % NS["table"]
+_NAME = "{%s}name" % NS["table"]
 _REPEAT = "{%s}number-columns-repeated" % NS["table"]
 _P = "{%s}p" % NS["text"]
 
@@ -24,12 +26,41 @@ _P = "{%s}p" % NS["text"]
 MAX_REPEAT = 200
 
 
-def rows(path: Path | str, *, max_rows: int | None = None) -> Iterator[list[str]]:
+def sheets(path: Path | str) -> list[str]:
+    """Names of the sheets in the workbook, in order."""
+    out: list[str] = []
+    with zipfile.ZipFile(path) as z:
+        with z.open("content.xml") as fh:
+            for _event, el in ET.iterparse(fh, events=("start",)):
+                if el.tag == _TABLE:
+                    name = el.get(_NAME)
+                    if name:
+                        out.append(name)
+    return out
+
+
+def rows(path: Path | str, *, max_rows: int | None = None,
+         sheet: str | None = None) -> Iterator[list[str]]:
+    """Yield rows, optionally from one named sheet.
+
+    Sheet selection matters: a workbook can hold two datasets with similar
+    shapes, and reading every row in the file silently concatenates them.
+    """
     with zipfile.ZipFile(path) as z:
         with z.open("content.xml") as fh:
             n = 0
-            for _event, el in ET.iterparse(fh, events=("end",)):
+            current: str | None = None
+            for _event, el in ET.iterparse(fh, events=("start", "end")):
+                if el.tag == _TABLE:
+                    if _event == "start":
+                        current = el.get(_NAME)
+                    continue
+                if _event != "end":
+                    continue
                 if not el.tag.endswith("}table-row"):
+                    continue
+                if sheet is not None and current != sheet:
+                    el.clear()
                     continue
                 cells: list[str] = []
                 for c in el.findall("table:table-cell", NS):
@@ -43,10 +74,10 @@ def rows(path: Path | str, *, max_rows: int | None = None) -> Iterator[list[str]
                     return
 
 
-def table(path: Path | str, *, min_header_cells: int = 20):
+def table(path: Path | str, *, min_header_cells: int = 20, sheet: str | None = None):
     """Yield (header, row) pairs, skipping the preamble rows publishers add."""
     header: list[str] | None = None
-    for cells in rows(path):
+    for cells in rows(path, sheet=sheet):
         populated = sum(1 for c in cells if c.strip())
         if header is None:
             if populated >= min_header_cells:

@@ -428,6 +428,34 @@ def cmd_plumbline(args) -> int:
     return 0
 
 
+def cmd_sightline(args) -> int:
+    from .systems import sightline as SL
+    from .systems import highwater as H
+    con = store.connect(DB)
+    src = BRONZE / "ea_objections.ods"
+    if not src.exists():
+        print(f"{RED}no objections workbook{OFF}"); con.close(); return 1
+    if not con.execute("SELECT count(*) FROM information_schema.tables WHERE"
+                       " table_schema='silver' AND table_name='flood_objection'").fetchone()[0]:
+        H.load(con, src)
+    SL.load_water_quality(con, src); SL.build(con)
+    print(f"{BOLD}Sightline{OFF}  {DIM}is expert planning advice followed?{OFF}\n")
+    for s in SL.streams(con, src):
+        if s.has_outcome_field:
+            print(f"  {s.name:<16}{s.objections:>7,} objections   outcome tracked on "
+                  f"{GREEN}{s.tracked_pct:5.1f}%{OFF}")
+        else:
+            print(f"  {s.name:<16}{s.objections:>7,} objections   {RED}no outcome field at all{OFF}")
+    print(f"\n{DIM}  'Unknown for some' and 'no field at all' are different conditions."
+          f"\n  One of the two published advice streams has no evidence base whatsoever.{OFF}")
+    print(f"\n{BOLD}why the Agency objected on water quality{OFF}")
+    for r, n, a in con.execute(
+            "SELECT * FROM gold.sightline_reason LIMIT ?", [args.limit]).fetchall():
+        print(f"  {r[:50]:<52}{n:>5}  {DIM}{a} authorities{OFF}")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -511,6 +539,10 @@ def main(argv=None) -> int:
     ppl.add_argument("--limit", type=int, default=6)
     ppl.add_argument("--reload", action="store_true")
     ppl.set_defaults(fn=cmd_plumbline)
+
+    psl = sub.add_parser("sightline", help="consultee advice and whether it is tracked")
+    psl.add_argument("--limit", type=int, default=8)
+    psl.set_defaults(fn=cmd_sightline)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

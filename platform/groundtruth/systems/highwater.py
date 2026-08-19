@@ -27,6 +27,7 @@ import duckdb
 from ..ods import table
 from ..store import insert_many
 
+SHEET = "Flood_Risk"
 COL = {"lpa": 0, "website": 1, "reference": 2, "description": 3,
        "units": 4, "year_objection": 5, "year_decision": 6, "outcome": 7}
 
@@ -77,7 +78,10 @@ def _text(v):
 
 def load(con: duckdb.DuckDBPyConnection, ods_path: Path) -> Coverage:
     rows = []
-    for _h, r in table(ods_path, min_header_cells=6):
+    # Read the flood risk sheet only. The workbook also holds a water quality
+    # sheet with a similar shape; without this filter its rows append to the
+    # flood risk data and inflate every total.
+    for _h, r in table(ods_path, min_header_cells=6, sheet=SHEET):
         def g(k):
             i = COL[k]
             return r[i] if i < len(r) else None
