@@ -96,7 +96,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | **All thirteen systems built** | |
 | M17 wire the prototype to real outputs | **done** |
 | M18 cross-system chains | **done** — executed, not illustrated |
-| M19 UI and system visibility | next |
+| M19 UI and system visibility | **done** |
+| M20 packaging and handover | **done** — one command runs everything |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -729,3 +730,25 @@ same repair in three industries.
 Two resolvers carry thirteen systems: **7** depend on the place spine, **3** on
 the entity spine, **3** on both. Each spine was built once. A test asserts every
 system is assigned to a spine, so none can quietly belong to neither.
+
+## M20 — one command
+
+```bash
+./.venv/bin/python -m groundtruth.cli run --fetch
+```
+
+Fifteen stages: place spine, twelve systems, junction, chains, publish. A full
+rebuild from cached sources takes about four minutes.
+
+**A failing stage is recorded and the run continues.** A platform that stops at
+the first unreachable publisher is useless for a corpus this size, and a test
+asserts it by running every stage against an empty directory and requiring the
+run to complete with failures marked.
+
+That test found a real bug: the chains guarded on whether a table *existed* but
+not on whether it had rows, so `sum()` over an empty table returned `NULL` and
+the step died formatting it. Aggregates are now coalesced and steps with no data
+are omitted.
+
+See [HANDOVER.md](HANDOVER.md) for what a full run produces, the rules the code
+enforces, and the traps worth knowing before extending it.

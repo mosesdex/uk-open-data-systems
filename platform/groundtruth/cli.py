@@ -592,6 +592,29 @@ def cmd_chains(args) -> int:
     return 0
 
 
+def cmd_run(args) -> int:
+    """Fetch (optionally), build every system, publish."""
+    from . import run as R, publish
+    con = store.connect(DB)
+    if args.fetch:
+        print(f"{BOLD}fetching{OFF}")
+        cmd_fetch(argparse.Namespace(ids=[], role=None, all=True, max_bytes=None,
+                                     timeout=600, strict=False))
+    print(f"\n{BOLD}building{OFF}")
+    report = R.build_everything(con, BRONZE)
+    for st in report.stages:
+        mark = f"{GREEN}ok  {OFF}" if st.ok else f"{RED}fail{OFF}"
+        print(f"  {mark} {st.name:<14}{st.seconds:>6.1f}s  {DIM}{st.detail[:70]}{OFF}")
+    dest = ROOT.parent / "app" / "data" / "platform.json"
+    payload = publish.write(con, dest)
+    print(f"\n{BOLD}published{OFF} {len(payload['built_systems'])} systems to {dest.name}")
+    if report.failed:
+        print(f"{RED}{len(report.failed)} stage(s) failed{OFF} "
+              f"{DIM}-- recorded, not hidden; the run continued{OFF}")
+    con.close()
+    return 1 if (report.failed and args.strict) else 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -699,6 +722,11 @@ def main(argv=None) -> int:
 
     pch = sub.add_parser("chains", help="run the cross-system chains against real output")
     pch.set_defaults(fn=cmd_chains)
+
+    prun = sub.add_parser("run", help="build every system and publish")
+    prun.add_argument("--fetch", action="store_true", help="fetch sources first")
+    prun.add_argument("--strict", action="store_true", help="exit non-zero if a stage fails")
+    prun.set_defaults(fn=cmd_run)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

@@ -43,6 +43,12 @@ def _has(con, schema, table) -> bool:
         "WHERE table_schema=? AND table_name=?", [schema, table]).fetchone()[0] > 0
 
 
+def _num(v, default=0):
+    """Aggregates over an empty table return NULL. A chain step must report
+    zero, not fail formatting a None."""
+    return default if v is None else v
+
+
 def _rows(con, sql, params=None):
     cur = con.execute(sql, params or [])
     cols = [d[0] for d in cur.description]
@@ -54,8 +60,8 @@ def chain_company_fails(con: duckdb.DuckDBPyConnection, company_number: str | No
     c = Chain("A company goes bust", "an insolvency notice is published", "entity")
 
     if _has(con, "silver", "supplier_register"):
-        n = con.execute("SELECT count(DISTINCT company_number) FROM silver.supplier_register "
-                        "WHERE company_number IS NOT NULL").fetchone()[0]
+        n = _num(con.execute("SELECT count(DISTINCT company_number) FROM silver.supplier_register "
+                             "WHERE company_number IS NOT NULL").fetchone()[0])
         c.steps.append(Step("Watchman", "which public suppliers are on the register?",
                             f"{n:,} companies with a company number", n))
 
@@ -88,39 +94,45 @@ def chain_development_approved(con: duckdb.DuckDBPyConnection) -> Chain:
     if _has(con, "gold", "plumbline_quarter"):
         from .systems import plumbline as P
         h, st, md, dd = P.national_gap(con, since="2023")
-        c.steps.append(Step("Plumbline", "was it decided within the legal deadline?",
-                            f"{st}% were, against a published headline of {h}%", 1))
+        if h is not None and st is not None:
+            c.steps.append(Step("Plumbline", "was it decided within the legal deadline?",
+                                f"{st}% were, against a published headline of {h}%", 1))
 
     if _has(con, "silver", "contribution"):
         total, located = con.execute(
             "SELECT round(sum(amount)), count(*) FILTER (WHERE has_geometry) "
             "FROM silver.contribution").fetchone()
+        total, located = _num(total), _num(located)
         c.steps.append(Step("Ledger", "what did the developer agree to pay, and where?",
-                            f"£{total:,.0f} recorded, {located} of it mappable", 1))
+                            f"£{total:,.0f} recorded, {located} of it mappable",
+                            1 if total else 0))
 
     if _has(con, "silver", "flood_objection"):
         n, against = con.execute("""SELECT count(*), count(*) FILTER (
             WHERE outcome = 'Permission granted against Environment Agency advice')
             FROM silver.flood_objection""").fetchone()
+        n, against = _num(n), _num(against)
         c.steps.append(Step("Highwater", "did a flood objection stand against it?",
                             f"{against} of {n:,} objections were overridden", against))
 
     if _has(con, "silver", "water_quality_objection"):
-        n = con.execute("SELECT count(*) FROM silver.water_quality_objection").fetchone()[0]
+        n = _num(con.execute("SELECT count(*) FROM silver.water_quality_objection").fetchone()[0])
         c.steps.append(Step("Sightline", "was other expert advice followed?",
                             f"{n} water quality objections, none with a recorded outcome", n))
 
     if _has(con, "gold", "catchment_district"):
         d, u = con.execute("""SELECT count(*), round(100.0*sum(pupils)/nullif(sum(capacity),0),1)
             FROM gold.catchment_district""").fetchone()
+        d, u = _num(d), _num(u)
         c.steps.append(Step("Catchment", "are there school places for the children?",
                             f"{u}% of places already used across {d} districts", d))
 
     if _has(con, "gold", "lastmile_authority"):
         from .systems import lastmile as LM
         nb_p, nb_g, nb_pct, ot_p, ot_pct = LM.comparison(con)
-        c.steps.append(Step("Lastmile", "will the homes have decent broadband?",
-                            f"{nb_pct}% in new-build postcodes against {ot_pct}% elsewhere", 1))
+        if nb_pct is not None and ot_pct is not None:
+            c.steps.append(Step("Lastmile", "will the homes have decent broadband?",
+                                f"{nb_pct}% in new-build postcodes against {ot_pct}% elsewhere", 1))
     return c
 
 
@@ -129,19 +141,20 @@ def chain_reference_reissued(con: duckdb.DuckDBPyConnection) -> Chain:
     c = Chain("A regulator reissues its reference numbers",
               "identifiers change and series break", "entity")
     if _has(con, "silver", "storm_overflow"):
-        n = con.execute("SELECT count(*) FROM silver.storm_overflow").fetchone()[0]
+        n = _num(con.execute("SELECT count(*) FROM silver.storm_overflow").fetchone()[0])
         c.steps.append(Step("Baseline", "sewage: can an overflow be tracked across 2024?",
                             f"{n:,} outlets, bridged on the pre-2024 identifier", n))
     if _has(con, "gold", "junction_register"):
         adv, ret = con.execute("""SELECT sum(catalogue_records), sum(rows)
             FROM gold.junction_register""").fetchone()
+        adv, ret = _num(adv), _num(ret)
         c.steps.append(Step("Junction", "electricity: are the registers comparable?",
                             f"{adv:,} advertised, {ret:,} served through the open route", ret))
     if _has(con, "silver", "care_location"):
-        multi = con.execute("""SELECT count(*) FROM (
+        multi = _num(con.execute("""SELECT count(*) FROM (
             SELECT company_number FROM silver.care_location
             WHERE company_number IS NOT NULL GROUP BY company_number
-            HAVING count(DISTINCT provider) > 1)""").fetchone()[0]
+            HAVING count(DISTINCT provider) > 1)""").fetchone()[0])
         c.steps.append(Step("Bellwether", "care: does one company trade as several?",
                             f"{multi} company numbers appear under more than one name", multi))
     return c
