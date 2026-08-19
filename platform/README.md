@@ -86,7 +86,8 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M7 Bulwark | **done** — 141,468 defences, 7,233 inspections overdue |
 | M8 Ledger | **done** — £1.49bn traced, 0% of it mappable |
 | M9 Baseline | **done** — spills adjusted for monitor availability |
-| M10–M16 remaining systems | next |
+| M10 Sentinel | **done** — concentration, within what the data supports |
+| M11–M16 remaining systems | next |
 | M10 wire the prototype to real outputs | |
 
 ## M2 — place spine
@@ -423,3 +424,34 @@ Outlet locations are published as National Grid References, not coordinates, so
 `geo.ngr_to_bng` converts them. A malformed reference returns `None` rather than
 a guess: an outlet placed in the wrong 100 km square is worse than an outlet
 with no location at all.
+
+## M10 — Sentinel
+
+```bash
+./.venv/bin/python -m groundtruth.cli sentinel
+```
+
+### Two standard screens are impossible, and the system says so
+
+- **Price screens.** Bid prices are not published in UK procurement data, so the
+  statistical price-pattern family cannot be run. Known from the research.
+- **Single-bidder rates.** `numberOfTenderers` is present on **zero** of 1,802
+  notices sampled. "How many suppliers competed" cannot be answered from the
+  feed at all. Found by building.
+
+What remains is concentration, which the research identified as the most
+tractable available signal:
+
+| Method | Awards | Share | Value |
+|---|---|---|---|
+| selective | 986 | 53.3% | £3.16bn |
+| open | 292 | 15.8% | £7.32bn |
+| direct | 86 | 4.6% | £60.3m |
+| limited | 37 | 2.0% | £291m |
+
+**6.6% of awards skipped open competition.** Buyer concentration surfaces cases
+like one regulator placing 69.6% of 23 awards with a single supplier.
+
+None of this is an accusation. Concentration has innocent explanations —
+specialist markets, small local supplier bases, genuine incumbency. Sentinel
+surfaces the pattern for a buyer to investigate; it does not score anyone.

@@ -338,6 +338,36 @@ def cmd_baseline(args) -> int:
     return 0
 
 
+def cmd_sentinel(args) -> int:
+    from .systems import sentinel as S
+    con = store.connect(DB)
+    paths = [p for p in (BRONZE / "contracts_finder_bulk.json",
+                         BRONZE / "contracts_finder.json",
+                         BRONZE / "find_a_tender.json") if p.exists()]
+    if not paths:
+        print(f"{RED}no procurement feeds{OFF}"); con.close(); return 1
+    cov = S.load(con, *paths); S.build(con)
+    n, total, pct = S.uncompeted_share(con)
+    print(f"{BOLD}Sentinel{OFF}  {DIM}procurement concentration{OFF}\n")
+    print(f"  award records          {cov.awards:>8,}")
+    print(f"  supplier identified    {cov.suppliers_identified:>8,}  "
+          f"{cov.pct(cov.suppliers_identified, cov.awards):5.1f}%")
+    print(f"  bidder counts present  {cov.with_tenderer_count:>8,}  "
+          f"{RED}single-bidder screens impossible in UK data{OFF}")
+    print(f"  awards without open competition  {n:,} of {total:,} ({pct}%)")
+    print(f"\n{BOLD}by procurement method{OFF}")
+    for m, a, v, sh in con.execute(
+            "SELECT * FROM gold.sentinel_method LIMIT ?", [args.limit]).fetchall():
+        print(f"  {m:<16}{a:>6,}  {sh:>5.1f}%   £{(v or 0):>14,.0f}")
+    print(f"\n{BOLD}buyers concentrating on one supplier{OFF}  {DIM}(a signal, not a verdict){OFF}")
+    for b, s_, a, v, sh, vs in con.execute("""
+            SELECT * FROM gold.sentinel_buyer WHERE awards >= 5
+            ORDER BY top_supplier_award_share DESC LIMIT ?""", [args.limit]).fetchall():
+        print(f"  {b[:36]:<38}{sh:>5.1f}% of {a:>3} awards")
+    con.close()
+    return 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -408,6 +438,10 @@ def main(argv=None) -> int:
     pbl.add_argument("--year", type=int, default=2025)
     pbl.add_argument("--limit", type=int, default=6)
     pbl.set_defaults(fn=cmd_baseline)
+
+    psn = sub.add_parser("sentinel", help="procurement concentration signals")
+    psn.add_argument("--limit", type=int, default=6)
+    psn.set_defaults(fn=cmd_sentinel)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)
