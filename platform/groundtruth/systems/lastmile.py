@@ -102,7 +102,7 @@ def load_premises(con: duckdb.DuckDBPyConnection, *zips: Path) -> int:
 
 
 def load_new_builds(con: duckdb.DuckDBPyConnection, ppd_csv: Path,
-                    limit: int | None = None) -> int:
+                    limit: int | None = None, since: str | None = None) -> int:
     """Price Paid transactions flagged as new build.
 
     The file has no header row; column order is fixed by the publisher.
@@ -122,6 +122,11 @@ def load_new_builds(con: duckdb.DuckDBPyConnection, ppd_csv: Path,
         WHERE column05 = 'Y'          -- the publisher's old/new flag
           AND trim(column03) <> ''
     """)
+    # The connectivity duty is about homes built recently. A 1998 new-build is
+    # not what the 2022 rule covers, so when the full history is loaded the
+    # comparison is restricted to recent sales; the raw table keeps everything.
+    if since:
+        con.execute(f"DELETE FROM silver.new_build_sale WHERE sale_date < '{since}'")
     return con.execute("SELECT count(*) FROM silver.new_build_sale").fetchone()[0]
 
 

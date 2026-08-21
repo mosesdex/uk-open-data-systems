@@ -15,7 +15,7 @@
   --shadow-1:0 1px 2px rgba(1,20,63,.06),0 1px 3px rgba(1,20,63,.05);
   --shadow-2:0 4px 12px rgba(1,20,63,.08),0 2px 4px rgba(1,20,63,.04);
   --shadow-3:0 18px 40px rgba(1,20,63,.14),0 4px 12px rgba(1,20,63,.07);
-  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
   --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.16,1,.3,1);
 }
@@ -31,8 +31,13 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
   font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  /* Every number here is a measurement, so figures must align in columns.
+     cv05/cv11 give Inter a single-storey l and a straight-tailed a, which
+     separates 1/l/I at the small sizes the tables use. */
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1,'cv05' 1,'cv11' 1;
   transition:background .3s var(--ease),color .3s var(--ease)}
-h1,h2,h3,h4{margin:0;line-height:1.2;letter-spacing:-.02em;font-weight:650}
+h1,h2,h3,h4{margin:0;line-height:1.2;letter-spacing:-.021em;font-weight:650}
 p{margin:0}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
@@ -125,7 +130,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-2)}
 .kpi::after{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent,var(--uk-blue))}
 .kpi__l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
-.kpi__v{font-size:29px;font-weight:680;letter-spacing:-.035em;margin-top:.35rem;font-variant-numeric:tabular-nums}
+.kpi__v{font-size:29px;font-weight:680;letter-spacing:-.032em;margin-top:.35rem;font-variant-numeric:tabular-nums}
 .kpi__m{font-size:11.5px;color:var(--ink-3);margin-top:.15rem}
 .kpi__spark{position:absolute;right:.8rem;bottom:.8rem;opacity:.5}
 
@@ -252,3 +257,31 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   .g3{grid-template-columns:1fr}
 }
 @media (max-width:700px){ .g2,.g4{grid-template-columns:1fr} .pad{padding:1rem .9rem 3rem} }
+
+/* ---------- system detail drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(1,20,63,.42);backdrop-filter:blur(2px);
+  opacity:0;pointer-events:none;z-index:90;transition:opacity .28s var(--ease)}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(920px,94vw);background:var(--bg);
+  z-index:100;box-shadow:var(--shadow-3);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .34s var(--ease-out)}
+.drawer.on{transform:none}
+.drawer__hd{flex:none;padding:1.15rem 1.4rem;border-bottom:1px solid var(--line);
+  background:var(--surface);position:sticky;top:0;z-index:2}
+.drawer__body{overflow-y:auto;padding:1.3rem 1.4rem 3rem;flex:1}
+.drawer__close{position:absolute;top:1.1rem;right:1.2rem;width:32px;height:32px;border-radius:9px;
+  border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;
+  font-size:16px;line-height:1;transition:all .18s var(--ease)}
+.drawer__close:hover{background:var(--red-050);border-color:var(--red-300);color:var(--uk-red)}
+.step{display:flex;gap:.85rem;align-items:flex-start}
+.step__n{width:24px;height:24px;border-radius:7px;flex:none;display:grid;place-items:center;
+  background:var(--uk-blue);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600}
+.step__l{width:1px;flex:none;background:var(--line);margin:.3rem 0 0 11.5px}
+.flowbar{display:flex;align-items:stretch;gap:0;overflow-x:auto;border:1px solid var(--line);
+  border-radius:11px;background:var(--surface)}
+.flowbar__s{flex:1;min-width:120px;padding:.7rem .8rem;border-right:1px solid var(--line)}
+.flowbar__s:last-child{border-right:0}
+.flowbar__k{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--ink-3)}
+.flowbar__v{font-size:12.5px;font-weight:600;margin-top:.2rem}
+.flowbar__d{font-size:11px;color:var(--ink-3);margin-top:.15rem}
+@media (max-width:700px){ .drawer{width:100vw} }

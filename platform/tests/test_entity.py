@@ -96,3 +96,96 @@ class TestGazette:
         # entity spine cannot identify.
         assert not notices[1].identified
         assert notices[1].locatable and notices[1].postcode == "S75 3LS"
+
+
+class TestRegisterResolution:
+    """Resolving against the loaded Companies House register. The rules do not
+    relax just because there are 5.7 million rows to match against."""
+
+    def _register(self, tmp_path, rows):
+        from groundtruth import store
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.company_key (
+            company_number VARCHAR, name VARCHAR, status VARCHAR, name_key VARCHAR)""")
+        con.executemany("INSERT INTO silver.company_key VALUES (?,?,?,?)",
+                        [(n, nm, st, E.normalise_name(nm)) for n, nm, st in rows])
+        return con
+
+    def test_identifier_beats_the_register(self, tmp_path):
+        con = self._register(tmp_path, [("02174990", "SOFTCAT PLC", "Active")])
+        ref = E.resolve_in_register(con, company_number="02174990")
+        assert ref.method == "identifier" and ref.confidence == 1.0
+        assert ref.name == "SOFTCAT PLC"
+        con.close()
+
+    def test_a_number_absent_from_the_register_is_still_returned(self, tmp_path):
+        """The number is what the publisher asserted. Not finding it in the
+        register is worth saying, but not grounds for discarding it."""
+        con = self._register(tmp_path, [("02174990", "SOFTCAT PLC", "Active")])
+        ref = E.resolve_in_register(con, company_number="99999999")
+        assert ref.resolved and ref.company_number == "99999999"
+        assert "not present in the register" in ref.note
+        con.close()
+
+    def test_unique_name_resolves_but_never_scores_one(self, tmp_path):
+        con = self._register(tmp_path, [("02174990", "SOFTCAT PLC", "Active")])
+        for variant in ("Softcat public limited company", "SOFTCAT PLC - FCA", "softcat"):
+            ref = E.resolve_in_register(con, name=variant)
+            assert ref.resolved and ref.company_number == "02174990"
+            assert ref.confidence < 1.0, "only an identifier may score 1.0"
+        con.close()
+
+    def test_shared_name_is_ambiguous_not_guessed(self, tmp_path):
+        con = self._register(tmp_path, [
+            ("11111111", "ACME LTD", "Active"),
+            ("22222222", "Acme Limited", "Active"),
+        ])
+        ref = E.resolve_in_register(con, name="ACME")
+        assert not ref.resolved and len(ref.candidates) == 2
+        assert "ambiguous" in ref.note
+        con.close()
+
+    def test_absent_name_resolves_to_nothing(self, tmp_path):
+        con = self._register(tmp_path, [("11111111", "ACME LTD", "Active")])
+        assert not E.resolve_in_register(con, name="Nonexistent Trading Co").resolved
+        con.close()
+
+    def test_missing_register_says_so_rather_than_failing(self, tmp_path):
+        from groundtruth import store
+        con = store.connect(tmp_path / "empty")
+        ref = E.resolve_in_register(con, name="ACME LTD")
+        assert not ref.resolved and "gt load --full" in ref.note
+        con.close()
+
+
+class TestCharityResolution:
+    """A third identifier authority for providers that are charities, not
+    companies. Helps less than the company register -- most unidentified care
+    providers are councils and NHS bodies, which are neither."""
+
+    def _charities(self, tmp_path, rows):
+        from groundtruth import store
+        con = store.connect(tmp_path / "db")
+        con.execute("CREATE TABLE silver.charity_key (charity_number VARCHAR, name VARCHAR, name_key VARCHAR)")
+        con.executemany("INSERT INTO silver.charity_key VALUES (?,?,?)",
+                        [(n, nm, E.normalise_name(nm)) for n, nm in rows])
+        return con
+
+    def test_unique_charity_resolves_with_a_chc_number(self, tmp_path):
+        con = self._charities(tmp_path, [("219279", "The Royal British Legion")])
+        ref = E.resolve_charity(con, name="Royal British Legion")
+        assert ref.resolved and ref.company_number == "GB-CHC-219279"
+        assert ref.confidence < 1.0
+        con.close()
+
+    def test_shared_charity_name_is_ambiguous(self, tmp_path):
+        con = self._charities(tmp_path, [("1", "Age Concern"), ("2", "Age Concern")])
+        ref = E.resolve_charity(con, name="Age Concern")
+        assert not ref.resolved and len(ref.candidates) == 2
+        con.close()
+
+    def test_no_charity_index_says_so(self, tmp_path):
+        from groundtruth import store
+        con = store.connect(tmp_path / "empty")
+        assert not E.resolve_charity(con, name="Anything").resolved
+        con.close()

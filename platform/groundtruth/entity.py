@@ -172,6 +172,107 @@ def resolve(
                      note=f"closest name match, score {top[0]:.2f}")
 
 
+# ---------------------------------------------------------------------------
+# Resolving against the Companies House register
+# ---------------------------------------------------------------------------
+# Until now the entity spine could only recognise a company if some other
+# publisher had already written its number down. With the register loaded it can
+# resolve a name directly -- against 5.7 million companies, of which only 0.37%
+# share a normalised name with another.
+
+
+def _register_ready(con) -> bool:
+    return con.execute(
+        "SELECT count(*) FROM information_schema.tables "
+        "WHERE table_schema='silver' AND table_name='company_key'").fetchone()[0] > 0
+
+
+def resolve_in_register(con, *, company_number=None, name=None,
+                        active_only: bool = False) -> EntityRef:
+    """Resolve against the loaded register.
+
+    Same rules as everywhere else: an identifier wins outright, an unambiguous
+    name match scores high but never 1.0, and a name shared by several companies
+    is reported as ambiguous rather than resolved to whichever sorted first.
+    """
+    if not _register_ready(con):
+        return EntityRef("none", 0.0, None, name,
+                         note="company register not loaded -- run: gt load --full")
+
+    num = normalise_company_number(company_number)
+    if num:
+        row = con.execute(
+            "SELECT company_number, name, status FROM silver.company_key "
+            "WHERE company_number = ?", [num]).fetchone()
+        if row:
+            return EntityRef("identifier", 1.0, row[0], row[1],
+                             note=f"matched the register directly ({row[2]})")
+        return EntityRef("identifier", 1.0, num, name,
+                         note="carried a company number not present in the register")
+
+    key = normalise_name(name)
+    if not key:
+        return UNRESOLVED
+
+    sql = ("SELECT company_number, name, status FROM silver.company_key "
+           "WHERE name_key = ?")
+    params = [key]
+    if active_only:
+        sql += " AND status = 'Active'"
+    hits = con.execute(sql + " LIMIT 6", params).fetchall()
+
+    if not hits:
+        return EntityRef("none", 0.0, None, name,
+                         note=f"no company in the register normalises to {key!r}")
+    if len(hits) == 1:
+        return EntityRef("name", 0.97, hits[0][0], hits[0][1],
+                         note=f"unique in the register on {key!r} ({hits[0][2]})")
+    return EntityRef("name", 0.0, None, name,
+                     candidates=tuple(h[0] for h in hits),
+                     note=f"{len(hits)} companies share {key!r} -- ambiguous, not guessed")
+
+
+def resolve_charity(con, name=None) -> EntityRef:
+    """Resolve a name against the registered-charity list.
+
+    A third identifier authority, for providers that are charities rather than
+    companies. It helps less than the company register: most unidentified care
+    providers are councils and NHS bodies, which are neither. Same rules apply --
+    unique match scores high but not 1.0, a shared name is ambiguous.
+    """
+    ready = con.execute("SELECT count(*) FROM information_schema.tables "
+                        "WHERE table_schema='silver' AND table_name='charity_key'").fetchone()[0]
+    if not ready:
+        return EntityRef("none", 0.0, None, name, note="charity index not built")
+    key = normalise_name(name)
+    if not key:
+        return UNRESOLVED
+    hits = con.execute(
+        "SELECT charity_number, name FROM silver.charity_key WHERE name_key = ? LIMIT 6",
+        [key]).fetchall()
+    if not hits:
+        return EntityRef("none", 0.0, None, name, note=f"no registered charity for {key!r}")
+    if len(hits) == 1:
+        return EntityRef("name", 0.95, "GB-CHC-" + str(hits[0][0]), hits[0][1],
+                         note=f"unique registered charity on {key!r}")
+    return EntityRef("name", 0.0, None, name, candidates=tuple("GB-CHC-"+str(h[0]) for h in hits),
+                     note=f"{len(hits)} charities share {key!r} -- ambiguous")
+
+
+def register_stats(con) -> dict:
+    if not _register_ready(con):
+        return {"loaded": False}
+    total, active, keys = con.execute(
+        "SELECT count(*), count(*) FILTER (WHERE status='Active'), "
+        "count(DISTINCT name_key) FROM silver.company_key").fetchone()
+    ambiguous = con.execute(
+        "SELECT count(*) FROM (SELECT name_key FROM silver.company_key "
+        "GROUP BY 1 HAVING count(*) > 1)").fetchone()[0]
+    return {"loaded": True, "companies": total, "active": active,
+            "distinct_names": keys, "ambiguous_names": ambiguous,
+            "ambiguous_pct": round(100 * ambiguous / keys, 2) if keys else 0.0}
+
+
 def build_index(rows) -> dict[str, list[tuple[str, str]]]:
     """Index (company_number, name) pairs by normalised name."""
     index: dict[str, list[tuple[str, str]]] = {}

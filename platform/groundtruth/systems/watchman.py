@@ -171,6 +171,28 @@ def build(con: duckdb.DuckDBPyConnection, gazette_path: Path,
     return report
 
 
+def enrich_from_register(con: duckdb.DuckDBPyConnection,
+                         suppliers: list[Supplier]) -> tuple[list[Supplier], int]:
+    """Give a company number to suppliers that were published without one.
+
+    Exposure only works if the supplier can be named. Before the register was
+    loaded this depended entirely on whether the buyer had written the number
+    down, which they do about a third of the time.
+    """
+    out, gained = [], 0
+    for s in suppliers:
+        if s.company_number or not s.name:
+            out.append(s); continue
+        ref = entity.resolve_in_register(con, name=s.name)
+        if ref.resolved:
+            gained += 1
+            out.append(Supplier(s.name, ref.company_number, s.buyer, s.buyer_id,
+                                s.value, s.award_date, s.source))
+        else:
+            out.append(s)
+    return out, gained
+
+
 def register_suppliers(con: duckdb.DuckDBPyConnection, suppliers: list[Supplier]) -> dict:
     """Accumulate suppliers into a persistent register.
 

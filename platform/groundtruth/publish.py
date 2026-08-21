@@ -50,16 +50,12 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
                                   "distinct_numbers": nums or 0}
 
     # ---- sources ----
+    # One source of truth for source state, so the public list and the operator
+    # console can never disagree about whether a feed is supplying data.
     if _exists(con, "bronze", "fetch_log"):
-        out["sources"]["status"] = _rows(con, """
-            WITH last AS (SELECT *, row_number() OVER (PARTITION BY source_id
-                          ORDER BY fetched_at DESC) rn FROM bronze.fetch_log)
-            SELECT r.id, r.name, r.publisher, r.role, r.cadence,
-                   COALESCE(l.http_status, 0) AS http_status,
-                   COALESCE(l.ok, FALSE) AS ok, l.bytes_len, r.blocked
-            FROM bronze.source_registry r
-            LEFT JOIN last l ON l.source_id = r.id AND l.rn = 1
-            ORDER BY r.role, r.id""")
+        from . import admin as _admin
+        bronze_dir = Path(__file__).resolve().parent.parent / "data" / "bronze"
+        out["sources"]["status"] = _admin.source_health(con, bronze_dir)
 
     # ---- systems ----
     S = out["systems"]
@@ -118,6 +114,10 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
                 round(avg(operational_pct),1) AS mean_uptime,
                 count(*) AS outlets FROM gold.baseline_outlet""")[0],
             "by_company": _rows(con, "SELECT * FROM gold.baseline_company LIMIT 12"),
+            "weather": _rows(con, """SELECT company, spills, mean_local_rain_mm,
+                spills_per_100mm_rain FROM gold.baseline_rainfall
+                ORDER BY spills_per_100mm_rain DESC LIMIT 12""")
+                if _exists(con, "gold", "baseline_rainfall") else [],
         }
 
     if _exists(con, "gold", "highwater_trend"):
@@ -140,6 +140,11 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
             "method": _rows(con, "SELECT * FROM gold.sentinel_method"),
             "concentrated": _rows(con, """SELECT * FROM gold.sentinel_buyer
                 WHERE awards >= 5 ORDER BY top_supplier_award_share DESC LIMIT 10"""),
+            "shared_control": _rows(con, "SELECT * FROM gold.sentinel_shared_control LIMIT 20")
+                if _exists(con, "gold", "sentinel_shared_control") else [],
+            "control_footprint": _rows(con,
+                "SELECT * FROM gold.sentinel_control_footprint LIMIT 15")
+                if _exists(con, "gold", "sentinel_control_footprint") else [],
         }
 
     if _exists(con, "gold", "junction_register"):
@@ -155,6 +160,10 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
                 WHERE provision = 'Education, health and care plan'
                 ORDER BY projected_change_pct DESC LIMIT 10"""),
             "divergence": _rows(con, "SELECT * FROM gold.compass_divergence LIMIT 10"),
+            "cohort": _rows(con, """SELECT la_name, ehc_mean, annual_births,
+                ehc_per_1000_births FROM gold.compass_cohort
+                WHERE annual_births >= 500 ORDER BY ehc_per_1000_births DESC LIMIT 10""")
+                if _exists(con, "gold", "compass_cohort") else [],
         }
 
     if _exists(con, "gold", "lastmile_authority"):
@@ -162,7 +171,13 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         nb_p, nb_g, nb_pct, ot_p, ot_pct = LM.comparison(con)
         S["lastmile"] = {"new_build_pct": nb_pct, "other_pct": ot_pct,
                          "new_build_premises": nb_p, "other_premises": ot_p,
-                         "by_authority": _rows(con, "SELECT * FROM gold.lastmile_authority LIMIT 12")}
+                         "by_authority": _rows(con, "SELECT * FROM gold.lastmile_authority LIMIT 12"),
+                         "worst_gap": _rows(con, """SELECT lad_name, gigabit_pct,
+                             gigabit_pct_new_build, new_build_sales,
+                             round(gigabit_pct - gigabit_pct_new_build, 1) AS gap
+                             FROM gold.lastmile_authority
+                             WHERE gigabit_pct_new_build IS NOT NULL AND new_build_sales >= 500
+                             ORDER BY gap DESC LIMIT 10""")}
 
     if _exists(con, "gold", "sightline_reason"):
         S["sightline"] = {"reasons": _rows(con, "SELECT * FROM gold.sightline_reason LIMIT 10")}
@@ -180,6 +195,22 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         for c in CH.run_all(con)
     ]
     out["reuse"] = CH.reuse_summary(con)
+
+    # One place, every system -- the platform's proposition made answerable.
+    from . import places as PL
+    pv = PL.place_view(con)
+    lad_names = dict(con.execute("SELECT lad_code, lad_name FROM silver.lad").fetchall()) \
+        if _exists(con, "silver", "lad") else {}
+    out["places"] = {
+        "districts": pv["districts"],
+        "resolution": pv["resolution"],
+        "names": lad_names,
+        "byLad": pv["places"],
+    }
+
+    # Operator view: everything traceable to a row, nothing invented.
+    from . import admin as A
+    out["admin"] = A.build(con, Path(__file__).resolve().parent.parent / "data" / "bronze")
 
     out["built_systems"] = sorted(S)
     return out

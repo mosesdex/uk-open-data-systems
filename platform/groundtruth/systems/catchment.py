@@ -48,6 +48,7 @@ class Coverage:
     total: int
     resolved: int
     with_capacity: int
+    conflicts: int = 0
 
     @property
     def resolved_pct(self) -> float:
@@ -72,10 +73,16 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
     live = [r for r in rows if r.get("EstablishmentStatus (name)") == OPEN]
 
     records = []
-    resolved = with_capacity = 0
+    resolved = with_capacity = conflicts = 0
     for r in live:
         ref = place.resolve(con, uprn=r.get("UPRN") or None,
                             postcode=r.get("Postcode") or None)
+        # A published property reference that disagrees with its own postcode by
+        # kilometres is not describing the same place. Record the disagreement
+        # rather than trusting whichever tier answered first.
+        check = place.cross_check(con, r.get("UPRN") or None, r.get("Postcode") or None)
+        if check["conflict"]:
+            conflicts += 1
         cap, pup = _int(r.get("SchoolCapacity")), _int(r.get("NumberOfPupils"))
         if ref.resolved:
             resolved += 1
@@ -92,6 +99,7 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
             (r.get("Trusts (code)") or "").strip() or None,
             (r.get("Trusts (name)") or "").strip() or None,
             is_mainstream(r.get("TypeOfEstablishment (name)", "")),
+            check["conflict"], check["metres"],
         ))
 
     con.execute("DROP TABLE IF EXISTS gold.catchment_school")
@@ -103,10 +111,13 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
           latitude DOUBLE, longitude DOUBLE,
           capacity INTEGER, pupils INTEGER,
           trust_code VARCHAR, trust_name VARCHAR,
-          mainstream BOOLEAN
+          mainstream BOOLEAN,
+          -- A published property reference that disagrees with its own
+          -- postcode by kilometres is recorded, not trusted.
+          identifier_conflict BOOLEAN, tier_distance_m INTEGER
         )""")
     insert_many(con, 
-        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
+        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
 
     # District picture. Utilisation is computed only over schools that published
     # both numbers, and the share doing so travels with the figure.
@@ -158,7 +169,7 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
         HAVING count(*) >= 3
         ORDER BY utilisation_pct DESC NULLS LAST
     """)
-    return Coverage(len(live), resolved, with_capacity)
+    return Coverage(len(live), resolved, with_capacity, conflicts)
 
 
 def pressure(con: duckdb.DuckDBPyConnection, limit: int = 10):

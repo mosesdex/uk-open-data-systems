@@ -24,6 +24,15 @@ LOOPBACK = "127.0.0.1"
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     """Serves the app directory, logging one line per request."""
 
+    def send_header(self, keyword, value):
+        # Suppress validators for the payload so a conditional request cannot
+        # produce a 304 and leave the browser showing figures from an earlier
+        # build. Static assets keep theirs.
+        if (keyword.lower() in ("last-modified", "etag")
+                and self.path.split("?")[0].endswith("platform.json")):
+            return
+        super().send_header(keyword, value)
+
     def log_message(self, fmt, *args):  # noqa: A003 - stdlib signature
         code = args[1] if len(args) > 1 else "?"
         path = args[0].split(" ")[1] if args else "?"

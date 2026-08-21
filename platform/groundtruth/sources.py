@@ -32,6 +32,12 @@ class Source:
     member_glob: str | None = None
     systems: tuple[str, ...] = ()
     notes: str = ""
+    # True when the url above is a discovery endpoint -- an index, a catalogue
+    # or a first page -- rather than the data itself. Fetching such a source
+    # directly stores the pointer and silently replaces good data with it, which
+    # is exactly what happened to the flood defence and planning tables once.
+    # These must go through `gt backfill`, which pages or resolves properly.
+    needs_backfill: str | None = None
     # For Ordnance Survey products whose filenames are versioned per release,
     # the concrete file is resolved at fetch time. See resolve.py.
     os_product: str | None = None
@@ -305,6 +311,7 @@ REGISTRY: tuple[Source, ...] = (
             "Dates are DD/MM/YYYY. Supports resultType=hits for exact counts "
             "without transferring data."
         ),
+        needs_backfill="aims",
     ),
     Source(
         id="edm_annual_return",
@@ -364,6 +371,7 @@ REGISTRY: tuple[Source, ...] = (
             "attachment list is reachable through the gov.uk content API. Note that "
             "'decided within maximum time' was discontinued after 2020."
         ),
+        needs_backfill="ps2",
     ),
     Source(
         id="bduk_premises",
@@ -422,6 +430,115 @@ REGISTRY: tuple[Source, ...] = (
             "cell may be summed. The JSON query endpoint rejects the documented "
             "filter syntax; the CSV endpoint is reliable."
         ),
+    ),
+    # The four embedded capacity registers Junction reads. Fetched live at
+    # runtime rather than cached, but registered so their provenance is visible
+    # like any other source.
+    Source(
+        id="dno_ecr_ukpn",
+        name="Embedded capacity register — UK Power Networks",
+        publisher="UK Power Networks",
+        url=("https://ukpowernetworks.opendatasoft.com/api/explore/v2.1/catalog/"
+             "datasets/ukpn-embedded-capacity-register-1-under-1mw/exports/csv"),
+        fmt="csv", role="domain", licence="OGL v3", cadence="varies",
+        expect_content=("text/csv",), systems=("junction",),
+        notes="Catalogue advertises 4,496 records; the open export returns a header only.",
+    ),
+    Source(
+        id="dno_ecr_npg",
+        name="Embedded capacity register — Northern Powergrid",
+        publisher="Northern Powergrid",
+        url=("https://northernpowergrid.opendatasoft.com/api/explore/v2.1/catalog/"
+             "datasets/embedded-capacity-register/exports/csv"),
+        fmt="csv", role="domain", licence="OGL v3", cadence="varies",
+        expect_content=("text/csv",), systems=("junction",),
+        notes="The only one of the four that serves its full 937 records openly.",
+    ),
+    Source(
+        id="dno_ecr_enwl",
+        name="Embedded capacity register — Electricity North West",
+        publisher="Electricity North West",
+        url=("https://electricitynorthwest.opendatasoft.com/api/explore/v2.1/catalog/"
+             "datasets/enwl-embedded-capacity-register-2-1mw-and-above/exports/csv"),
+        fmt="csv", role="domain", licence="OGL v3", cadence="varies",
+        expect_content=("text/csv",), systems=("junction",),
+        notes="Catalogue advertises 567 records; the open export returns a header only.",
+    ),
+    Source(
+        id="dno_ecr_spen",
+        name="Embedded capacity register — SP Energy Networks",
+        publisher="SP Energy Networks",
+        url=("https://spenergynetworks.opendatasoft.com/api/explore/v2.1/catalog/"
+             "datasets/embedded-capacity-register/exports/csv"),
+        fmt="csv", role="domain", licence="OGL v3", cadence="varies",
+        expect_content=("text/csv",), systems=("junction",),
+        notes="Catalogue advertises 770 records; the open export returns a header only.",
+    ),
+    Source(
+        id="ch_psc",
+        name="Companies House persons of significant control",
+        publisher="Companies House",
+        url="http://download.companieshouse.gov.uk/en_pscdata.html",
+        fmt="json", role="entity_spine", licence="OGL v3", cadence="daily",
+        expect_content=("text/html",), systems=("sentinel", "watchman", "bellwether"),
+        notes=("Beneficial owners: who ultimately controls each company. 32 snapshot "
+               "parts, ~2.3 GB. This is how two bidders sharing an owner become "
+               "visible. URL is the index; use gt backfill --only psc."),
+        needs_backfill="psc",
+    ),
+    Source(
+        id="hmlr_price_paid_full",
+        name="HM Land Registry Price Paid, complete history",
+        publisher="HM Land Registry",
+        url=("http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1"
+             ".amazonaws.com/pp-complete.csv"),
+        fmt="csv", role="domain", licence="OGL v3", cadence="monthly",
+        expect_content=("text/csv",), systems=("lastmile",),
+        notes=("~5.5 GB, 31.4M transactions since 1995, new-build flagged. Lastmile "
+               "restricts to sales in the last five years -- the homes the "
+               "connectivity duty covers -- to avoid treating a 1998 new-build as new."),
+    ),
+    Source(
+        id="ea_rainfall_readings",
+        name="Environment Agency rainfall readings",
+        publisher="Environment Agency",
+        url=("https://environment.data.gov.uk/flood-monitoring/data/readings"
+             "?parameter=rainfall&_limit=10000"),
+        fmt="json", role="domain", licence="OGL v3", cadence="15 minutes",
+        expect_content=("application/json",), systems=("baseline",),
+        notes="Actual rainfall values per station -- the weather side of the spill normalisation.",
+    ),
+    Source(
+        id="charity_register",
+        name="Charity Commission register extract",
+        publisher="Charity Commission",
+        url=("https://ccewuksprdoneregsadata1.blob.core.windows.net/data/json/"
+             "publicextract.charity.zip"),
+        fmt="zip-csv", role="entity_spine", licence="OGL v3", cadence="monthly",
+        expect_content=("application/zip", "application/octet-stream"),
+        systems=("bellwether", "sentinel"),
+        notes="Registered charities: the providers a company register cannot identify.",
+    ),
+    Source(
+        id="ons_births_area",
+        name="ONS births by local authority",
+        publisher="Office for National Statistics",
+        url="https://www.nomisweb.co.uk/api/v01/dataset/NM_205_1.data.csv?geography=TYPE432&date=latest&age_of_mother=0&measures=20100&select=geography_code,geography_name,obs_value",
+        fmt="csv", role="domain", licence="OGL v3", cadence="annual",
+        expect_content=("text/csv", "application/octet-stream"),
+        systems=("catchment", "compass"),
+        notes="Birth counts per authority -- the cohort input for pupil and SEND forecasting.",
+    ),
+    Source(
+        id="ea_rainfall_annual",
+        name="Environment Agency annual rainfall totals per station",
+        publisher="Environment Agency",
+        url="https://environment.data.gov.uk/hydrology/id/stations?observedProperty=rainfall",
+        fmt="json", role="domain", licence="OGL v3", cadence="annual",
+        expect_content=("application/json",), systems=("baseline",),
+        notes=("Daily rainfall summed to an annual total per station, with coords. "
+               "The weather side of the spill normalisation. Paged; use gt backfill --only rainfall."),
+        needs_backfill="rainfall",
     ),
     # ---------------- known-blocked, kept visible ----------------
     Source(

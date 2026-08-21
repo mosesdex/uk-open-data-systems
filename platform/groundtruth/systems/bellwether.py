@@ -57,6 +57,8 @@ class SectorCoverage:
     rows: int
     with_identifier: int
     label: str
+    via_register: int = 0
+    via_charity: int = 0
 
     @property
     def identified_pct(self) -> float:
@@ -83,12 +85,32 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
     """Load CQC locations, resolving each provider to a company number."""
     records, idx = [], None
     identified = 0
+    via_register = 0
+    via_charity = 0
     for header, row in table(ods_path):
         if idx is None:
             idx = _index(header)
         num = entity.normalise_company_number(_get(row, idx, COL_COMPANY))
         if num:
             identified += 1
+        else:
+            # The regulator did not record a number. Ask the register by name.
+            # This helps less here than in procurement: most unmatched providers
+            # are councils, NHS trusts, charities or sole traders, which are not
+            # companies and never will be in it.
+            ref = entity.resolve_in_register(con, name=_get(row, idx, COL_PROVIDER))
+            if ref.resolved:
+                num = ref.company_number
+                identified += 1
+                via_register += 1
+            else:
+                # Third authority: the charity register. Most misses here are
+                # councils and NHS bodies, which are neither company nor charity.
+                cref = entity.resolve_charity(con, name=_get(row, idx, COL_PROVIDER))
+                if cref.resolved:
+                    num = cref.company_number   # a GB-CHC- charity number
+                    identified += 1
+                    via_charity += 1
         records.append((
             _get(row, idx, COL_LOCATION),
             _get(row, idx, COL_LA),
@@ -109,7 +131,7 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
         )""")
     insert_many(con, 
         "INSERT INTO silver.care_location VALUES (?,?,?,?,?,?,?,?)", records)
-    return SectorCoverage(len(records), identified, "care")
+    return SectorCoverage(len(records), identified, "care", via_register, via_charity)
 
 
 def build(con: duckdb.DuckDBPyConnection) -> None:

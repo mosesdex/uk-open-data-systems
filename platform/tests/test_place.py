@@ -42,3 +42,35 @@ class TestCoverageLimits:
         # postcode is well-formed and will normalise, but will not resolve --
         # so any coverage figure must be stated as GB, never UK.
         assert place.normalise_postcode(postcode) is not None
+
+
+class TestCrossCheck:
+    """A published property reference can be wrong. Some in the school register
+    point to the opposite end of the country, and a resolver that returns a
+    coordinate for one of those has not verified anything."""
+
+    def test_agreement_is_not_a_conflict(self, tmp_path, monkeypatch):
+        from groundtruth import place as P
+        monkeypatch.setattr(P, "resolve_uprn", lambda c, u:
+            P.PlaceRef("uprn", 1.0, None, None, 51.5010, -0.1416, None))
+        monkeypatch.setattr(P, "resolve_postcode", lambda c, p:
+            P.PlaceRef("postcode", .95, None, None, 51.5012, -0.1418, "E09000033"))
+        r = P.cross_check(None, 1, "SW1A 1AA")
+        assert r["comparable"] and not r["conflict"] and r["metres"] < 100
+
+    def test_cross_country_disagreement_is_flagged(self, tmp_path, monkeypatch):
+        from groundtruth import place as P
+        monkeypatch.setattr(P, "resolve_uprn", lambda c, u:
+            P.PlaceRef("uprn", 1.0, None, None, 55.9503, -3.1930, None))   # Edinburgh
+        monkeypatch.setattr(P, "resolve_postcode", lambda c, p:
+            P.PlaceRef("postcode", .95, None, None, 51.5010, -0.1416, "E09000033"))  # London
+        r = P.cross_check(None, 1, "SW1A 1AA")
+        assert r["conflict"] and r["metres"] > 500_000
+
+    def test_one_tier_alone_is_not_comparable(self, tmp_path, monkeypatch):
+        from groundtruth import place as P
+        monkeypatch.setattr(P, "resolve_uprn", lambda c, u: P.UNRESOLVED)
+        monkeypatch.setattr(P, "resolve_postcode", lambda c, p:
+            P.PlaceRef("postcode", .95, None, None, 51.5, -0.14, "E09000033"))
+        r = P.cross_check(None, 1, "SW1A 1AA")
+        assert r["comparable"] is False and r["conflict"] is False

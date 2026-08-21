@@ -47,6 +47,11 @@ def _stage(report: RunReport, name: str, fn):
     return report.stages[-1]
 
 
+def _has(con, schema, table) -> bool:
+    return con.execute("SELECT count(*) FROM information_schema.tables "
+                       "WHERE table_schema=? AND table_name=?", [schema, table]).fetchone()[0] > 0
+
+
 def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     """Load and build every system whose inputs are present."""
     from .systems import (catchment, watchman, bellwether, bulwark, ledger,
@@ -69,7 +74,8 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     def _bellwether():
         c = bellwether.load_care(con, B / "cqc_hsca_locations.ods")
         bellwether.build(con); bellwether.build_groups(con)
-        return f"{c.rows:,} care locations, {c.identified_pct:.1f}% identified"
+        return (f"{c.rows:,} care locations, {c.identified_pct:.1f}% identified "
+                f"(+{c.via_register:,} company, +{c.via_charity:,} charity)")
     _stage(r, "bellwether", _bellwether)
 
     def _bulwark():
@@ -86,27 +92,37 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     _stage(r, "ledger", _ledger)
 
     def _baseline():
-        c = baseline.load(con, B / "edm_annual.zip", 2025); baseline.build(con)
-        return f"{c.outlets:,} storm overflows"
+        c = baseline.load(con, B / "edm_annual.zip", 2025)
+        rain = B / "rainfall_annual_2025.json"
+        if rain.exists():
+            baseline.load_rainfall(con, rain)
+        baseline.build(con)
+        wn = con.execute("SELECT count(*) FROM gold.baseline_rainfall").fetchone()[0] \
+            if _has(con, "gold", "baseline_rainfall") else 0
+        return f"{c.outlets:,} storm overflows, {wn} companies weather-normalised"
     _stage(r, "baseline", _baseline)
 
     def _sentinel():
         paths = [p for p in (B / "contracts_finder_bulk.json", B / "find_a_tender.json")
                  if p.exists()]
         c = sentinel.load(con, *paths); sentinel.build(con)
-        return f"{c.awards:,} awards, {c.pct(c.suppliers_identified, c.awards):.1f}% identified"
+        return (f"{c.awards:,} awards, {c.pct(c.suppliers_identified, c.awards):.1f}% "
+                f"identified (+{c.identified_via_register:,} via the register)")
     _stage(r, "sentinel", _sentinel)
 
     def _watchman():
         paths = [p for p in (B / "contracts_finder_bulk.json", B / "find_a_tender.json")
                  if p.exists()]
-        st = watchman.register_suppliers(con, watchman.load_suppliers(*paths))
+        sups, gained = watchman.enrich_from_register(con, watchman.load_suppliers(*paths))
+        st = watchman.register_suppliers(con, sups)
+        st["from_register"] = gained
         gaz = B / "gazette_insolvency_bulk.json"
         gaz = gaz if gaz.exists() else B / "gazette_insolvency.json"
         exposures = watchman.check_against_register(con, gaz)
         rep = watchman.Report(0, 0, st["rows"], st["distinct_numbers"], exposures, [])
         watchman.write(con, rep)
-        return f"register {st['rows']:,} awards, {len(exposures)} exposures"
+        return (f"register {st['rows']:,} awards, +{st.get('from_register', 0):,} named "
+                f"via the register, {len(exposures)} exposures")
     _stage(r, "watchman", _watchman)
 
     def _highwater():
@@ -127,14 +143,26 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     def _lastmile():
         zips = sorted(B.glob("bduk_*.zip"))
         n = lastmile.load_premises(con, *zips)
-        m = lastmile.load_new_builds(con, B / "ppd_monthly.csv")
+        # Full price-paid history when available, restricted to homes sold new in
+        # the last five years -- the population the connectivity duty covers.
+        full = B / "hmlr_price_paid_full.csv"
+        if full.exists():
+            m = lastmile.load_new_builds(con, full, since="2021-01-01")
+        else:
+            m = lastmile.load_new_builds(con, B / "ppd_monthly.csv")
         lastmile.build(con)
-        return f"{n:,} premises, {m:,} new-build sales"
+        return f"{n:,} premises, {m:,} recent new-build sales"
     _stage(r, "lastmile", _lastmile)
 
     def _compass():
+        # Births feed the cohort join; load them first if present.
+        births = B / "ons_births_area.csv"
+        if births.exists():
+            loader.load_births(con, births)
         c = compass.load(con, B / "dfe_sen_provision.csv"); compass.build(con)
-        return f"{c.authorities} authorities over {c.years} years"
+        cohort = con.execute("SELECT count(*) FROM gold.compass_cohort").fetchone()[0] \
+            if _has(con, "gold", "compass_cohort") else 0
+        return f"{c.authorities} authorities over {c.years} years, {cohort} with a birth cohort"
     _stage(r, "compass", _compass)
 
     def _junction():

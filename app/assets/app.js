@@ -63,13 +63,23 @@ const GT = (() => {
   }
 
   /* ---- choropleth from real ONS boundaries ---- */
-  function ramp(t){ // blue-100 -> uk-blue
-    const a=[221,229,247], b=[53,99,201], c=[1,20,63];
+  /* Two ramps. Blue means "more of a neutral or good thing"; red means "more of
+     a problem". Shading overdue inspections on the same scale as gigabit
+     coverage would imply that more overdue inspections is an achievement. */
+  const RAMPS = {
+    blue: [[221,229,247],[53,99,201],[1,20,63]],
+    red:  [[253,238,241],[224,110,130],[142,10,32]],
+  };
+  function ramp(t, key='blue'){
+    const [a,b,c] = RAMPS[key] || RAMPS.blue;
+    t = Math.max(0, Math.min(1, t));
     const m = t<.5 ? a.map((v,i)=>v+(b[i]-v)*(t/.5)) : b.map((v,i)=>v+(c[i]-v)*((t-.5)/.5));
     return `rgb(${m.map(Math.round).join(',')})`;
   }
+  const NO_DATA = 'var(--line)';
 
-  async function choropleth(el, {values={}, label='', fallbackSpread=true}={}){
+  async function choropleth(el, {values={}, label='', fallbackSpread=false,
+                                 ramp:rampKey='blue'}={}){
     const gj = await fetch(el.dataset.geo || 'data/lad.geojson').then(r=>r.json());
     // project lon/lat -> screen, equirectangular scaled for UK latitudes
     let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
@@ -83,31 +93,95 @@ const GT = (() => {
     const ox = (W-(maxX-minX)*s)/2, oy = (H-(maxY-minY)*s)/2;
     const P = (x,y) => [((x*K-minX)*s+ox).toFixed(1), (H-((y-minY)*s+oy)).toFixed(1)];
 
-    // deterministic pseudo-value when a code has no real metric, so the map still reads
-    const hash = c => { let h=0; for(const ch of c) h=(h*31+ch.charCodeAt(0))>>>0; return h; };
-    const vals = gj.features.map(f => values[f.properties.c]);
-    const real = vals.filter(v => v != null);
-    const lo = real.length ? Math.min(...real) : 0, hi = real.length ? Math.max(...real) : 1;
-
-    const svg = ['<svg class="mapsvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Map of local authorities">'];
+    const svg = ['<svg class="mapsvg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet"'
+      + ' role="img" aria-label="Map of local authorities">'];
+    const boxes = {};
     gj.features.forEach(f => {
-      const d = pts(f).map(poly => 'M' + poly[0].map(([x,y])=>P(x,y).join(',')).join('L') + 'Z').join('');
-      const v = values[f.properties.c];
-      let t;
-      if (v != null) t = hi>lo ? (v-lo)/(hi-lo) : .5;
-      else t = fallbackSpread ? (hash(f.properties.c)%1000)/1000*.55 + .05 : 0;
-      svg.push(`<path d="${d}" fill="${ramp(t)}" data-c="${f.properties.c}" data-n="${f.properties.n}"`
-        + ` data-v="${v==null?'':v}" tabindex="-1"><title>${f.properties.n}</title></path>`);
+      let bx0=1e9, by0=1e9, bx1=-1e9, by1=-1e9;
+      const d = pts(f).map(poly => 'M' + poly[0].map(([x,y])=>{
+        const [px,py] = P(x,y);
+        const nx=+px, ny=+py;
+        if(nx<bx0)bx0=nx; if(nx>bx1)bx1=nx; if(ny<by0)by0=ny; if(ny>by1)by1=ny;
+        return px+','+py;
+      }).join('L') + 'Z').join('');
+      boxes[f.properties.c] = [bx0,by0,bx1,by1];
+      svg.push(`<path d="${d}" fill="${NO_DATA}" data-c="${f.properties.c}"`
+        + ` data-n="${f.properties.n}" tabindex="-1"><title>${f.properties.n}</title></path>`);
     });
     svg.push('</svg>');
     el.innerHTML = svg.join('') + '<div class="maptip" id="'+ (el.id||'m') +'-tip"></div>';
 
+    const svgEl = el.querySelector('svg');
     const tip = el.querySelector('.maptip');
-    el.querySelectorAll('path').forEach(p => {
+    const paths = [...el.querySelectorAll('path')];
+    const home = [0,0,W,H];
+    let current = {values:{}, label:'', rampKey};
+
+    /* Recolour every district for a new metric.
+       anime.js interpolates the fills and staggers them from the middle of the
+       country outwards, so the map visibly re-shades instead of snapping. */
+    function setMetric({values:vals={}, label:lbl='', ramp:rk='blue', animate=true}={}){
+      current = {values:vals, label:lbl, rampKey:rk};
+      const real = Object.values(vals).filter(v=>v!=null && !Number.isNaN(v));
+      const lo = real.length ? Math.min(...real) : 0;
+      const hi = real.length ? Math.max(...real) : 1;
+      const targets = paths.map(p => {
+        const v = vals[p.dataset.c];
+        p.dataset.v = (v==null ? '' : v);
+        if (v == null) return NO_DATA;
+        const t = hi>lo ? (v-lo)/(hi-lo) : .5;
+        return ramp(t, rk);
+      });
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!animate || reduced || typeof anime === 'undefined') {
+        paths.forEach((p,i) => { p.style.fill = targets[i]; });
+        return;
+      }
+      paths.forEach((p,i) => { p.__target = targets[i]; });
+      anime.animate(paths, {
+        fill: (p) => p.__target,
+        duration: 520,
+        ease: 'outQuad',
+        delay: anime.stagger(2.2, {from: 'center'}),
+      });
+    }
+
+    /* Frame one district. Animating the viewBox keeps every path in place and
+       simply moves the camera, which is cheaper and steadier than transforming
+       316 elements. */
+    function zoomTo(code, {padding=46, duration=620}={}){
+      const b = boxes[code];
+      const to = b
+        ? (() => {
+            const w = Math.max(b[2]-b[0], 40) + padding*2;
+            const h = Math.max(b[3]-b[1], 40) + padding*2;
+            const side = Math.max(w, h * (W/H));
+            const cx = (b[0]+b[2])/2, cy = (b[1]+b[3])/2;
+            return [cx - side/2, cy - (side*(H/W))/2, side, side*(H/W)];
+          })()
+        : home;
+      const from = svgEl.getAttribute('viewBox').split(/\s+/).map(Number);
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || typeof anime === 'undefined') {
+        svgEl.setAttribute('viewBox', to.join(' ')); return;
+      }
+      const state = {a:from[0], b:from[1], c:from[2], d:from[3]};
+      anime.animate(state, {
+        a: to[0], b: to[1], c: to[2], d: to[3],
+        duration, ease: 'inOutQuad',
+        onUpdate: () => svgEl.setAttribute('viewBox',
+          `${state.a.toFixed(1)} ${state.b.toFixed(1)} ${state.c.toFixed(1)} ${state.d.toFixed(1)}`),
+      });
+    }
+    const resetZoom = () => zoomTo(null);
+
+    paths.forEach(p => {
       p.addEventListener('mousemove', ev => {
         const r = el.getBoundingClientRect();
         const v = p.dataset.v;
-        tip.innerHTML = `<b>${p.dataset.n}</b><span>${v ? label.replace('{}', (+v).toLocaleString('en-GB')) : 'no published value'}</span>`;
+        tip.innerHTML = `<b>${p.dataset.n}</b><span>${v !== '' && v != null
+          ? current.label.replace('{}', (+v).toLocaleString('en-GB'))
+          : 'no value published here'}</span>`;
         tip.classList.add('on');
         let x = ev.clientX-r.left+12, y = ev.clientY-r.top+12;
         if (x > r.width-190) x -= 200;
@@ -117,10 +191,15 @@ const GT = (() => {
       p.addEventListener('click', () => {
         el.querySelectorAll('path.is-sel').forEach(o=>o.classList.remove('is-sel'));
         p.classList.add('is-sel');
-        el.dispatchEvent(new CustomEvent('pick',{detail:{code:p.dataset.c,name:p.dataset.n,value:p.dataset.v}}));
+        zoomTo(p.dataset.c);
+        el.dispatchEvent(new CustomEvent('pick',
+          {detail:{code:p.dataset.c, name:p.dataset.n, value:p.dataset.v}}));
       });
     });
-    return gj;
+
+    setMetric({values, label, ramp:rampKey, animate:false});
+    el.__map = {setMetric, zoomTo, resetZoom, paths, boxes, home};
+    return el.__map;
   }
 
   /* ---- bar list ---- */

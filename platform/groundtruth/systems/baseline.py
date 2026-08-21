@@ -125,6 +125,26 @@ def _has(con, table: str) -> bool:
         "WHERE table_schema='silver' AND table_name=?", [table]).fetchone()[0] > 0
 
 
+def load_rainfall(con: duckdb.DuckDBPyConnection, path: Path) -> int:
+    """Annual rainfall total per station, with its coordinates."""
+    import json as _json
+    rows = _json.loads(Path(path).read_text())
+    con.execute("DROP TABLE IF EXISTS silver.rainfall_station")
+    con.execute("""CREATE TABLE silver.rainfall_station (
+        station VARCHAR, label VARCHAR, lat DOUBLE, long DOUBLE,
+        annual_mm DOUBLE, days INTEGER)""")
+    insert_many(con, "INSERT INTO silver.rainfall_station VALUES (?,?,?,?,?,?)",
+                [(r.get("station"), r.get("label"),
+                  r.get("lat"), r.get("long"),
+                  r.get("annual_mm"), r.get("days")) for r in rows])
+    return len(rows)
+
+
+def _has(con, table):
+    return con.execute("SELECT count(*) FROM information_schema.tables "
+                       "WHERE table_schema='silver' AND table_name=?", [table]).fetchone()[0] > 0
+
+
 def build(con: duckdb.DuckDBPyConnection) -> None:
     """Raw and availability-adjusted spill measures, side by side."""
     con.execute("DROP TABLE IF EXISTS gold.baseline_outlet")
@@ -145,6 +165,40 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
         FROM silver.storm_overflow
         WHERE spills IS NOT NULL
     """)
+
+    # Weather normalisation: assign each outlet the rainfall of its nearest
+    # station, then compare spills against rainfall. A fall in spills in a year
+    # that was also drier tells you less than a fall in a wet year. This closes
+    # the second half of the system -- the availability adjustment was the first.
+    con.execute("DROP TABLE IF EXISTS gold.baseline_rainfall")
+    if _has(con, "rainfall_station"):
+        con.execute("""
+            CREATE TABLE gold.baseline_rainfall AS
+            WITH nearest AS (
+              SELECT o.unique_id, o.company, o.spills, o.operational_pct,
+                     (SELECT r.annual_mm FROM silver.rainfall_station r
+                      WHERE r.lat IS NOT NULL
+                      ORDER BY (r.lat-o.latitude)*(r.lat-o.latitude)
+                             + (r.long-o.longitude)*(r.long-o.longitude)
+                      LIMIT 1) AS local_rain_mm
+              FROM gold.baseline_outlet o
+              WHERE o.latitude IS NOT NULL AND o.spills IS NOT NULL
+            )
+            SELECT company,
+                   count(*)                              AS outlets,
+                   round(sum(spills))                    AS spills,
+                   round(avg(local_rain_mm), 0)          AS mean_local_rain_mm,
+                   -- spills per 100mm of rainfall: the weather-adjusted rate.
+                   -- separates what the network did from what the sky did.
+                   round(sum(spills) / nullif(avg(local_rain_mm), 0) * 100, 1)
+                                                         AS spills_per_100mm_rain
+            FROM nearest WHERE local_rain_mm IS NOT NULL
+            GROUP BY company ORDER BY spills DESC
+        """)
+    else:
+        con.execute("""CREATE TABLE gold.baseline_rainfall (
+            company VARCHAR, outlets INTEGER, spills DOUBLE,
+            mean_local_rain_mm DOUBLE, spills_per_100mm_rain DOUBLE)""")
 
     con.execute("DROP TABLE IF EXISTS gold.baseline_company")
     con.execute("""

@@ -64,3 +64,35 @@ class TestNewBuildComparison:
         row = con.execute("""SELECT new_build_sales FROM gold.lastmile_postcode""").fetchone()
         assert row[0] == 0
         con.close()
+
+
+class TestRecencyFilter:
+    """The connectivity duty covers homes built recently. Loading 31 years of
+    price-paid data and treating a 1998 new-build as a new home would answer the
+    wrong question."""
+
+    def test_since_drops_older_sales(self, tmp_path):
+        import csv
+        rows = [
+            "{a},250000,1998-05-01 00:00,AA1 1AA,D,Y,F,1,,Old Rd,,,,,",
+            "{b},300000,2023-05-01 00:00,BB2 2BB,D,Y,F,2,,New Rd,,,,,",
+        ]
+        p = tmp_path / "pp.csv"
+        p.write_text("\n".join(r.format(a="{x1}", b="{x2}") for r in rows) + "\n")
+        from groundtruth import store
+        con = store.connect(tmp_path / "db")
+        n = LM.load_new_builds(con, p, since="2021-01-01")
+        assert n == 1, "only the 2023 sale should survive the recency filter"
+        d = con.execute("SELECT sale_date FROM silver.new_build_sale").fetchone()[0]
+        assert d.startswith("2023")
+        con.close()
+
+    def test_no_since_keeps_everything(self, tmp_path):
+        p = tmp_path / "pp.csv"
+        p.write_text(
+            "{x1},250000,1998-05-01 00:00,AA1 1AA,D,Y,F,1,,Old Rd,,,,,\n"
+            "{x2},300000,2023-05-01 00:00,BB2 2BB,D,Y,F,2,,New Rd,,,,,\n")
+        from groundtruth import store
+        con = store.connect(tmp_path / "db")
+        assert LM.load_new_builds(con, p) == 2
+        con.close()

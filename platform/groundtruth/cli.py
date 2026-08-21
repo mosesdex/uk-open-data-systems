@@ -51,6 +51,22 @@ def cmd_sources(args) -> int:
     return 0
 
 
+def _existing_file(src):
+    """The file this source already has, if it looks usable."""
+    from . import admin as _admin
+    name = _admin._on_disk(BRONZE, src.id)
+    if not name:
+        return None
+    p = BRONZE / name
+    if p.stat().st_size < 1024:
+        return None
+    if p.suffix == ".zip":
+        import zipfile
+        if not zipfile.is_zipfile(p):
+            return None                      # truncated: fetch it again
+    return p
+
+
 def cmd_fetch(args) -> int:
     if args.role:
         targets = [s for s in S.by_role(args.role) if s.admissible]
@@ -62,12 +78,49 @@ def cmd_fetch(args) -> int:
         print("nothing to fetch", file=sys.stderr)
         return 2
 
-    con = store.connect(DB)
+    # Re-downloading a complete 900 MB archive to discover it has not changed is
+    # not a health check, it is an hour. --if-missing skips sources whose file is
+    # already on disk and readable.
+    if args.if_missing:
+        kept = []
+        for src in targets:
+            existing = _existing_file(src)
+            if existing:
+                print(f"  {src.id:<32}{DIM}already on disk, {existing.stat().st_size/1e6:.1f} MB{OFF}")
+            else:
+                kept.append(src)
+        targets = kept
+        if not targets:
+            print("\nnothing missing")
+            return 0
+
     run_id = uuid.uuid4().hex[:12]
     print(f"{DIM}run {run_id} -- {len(targets)} source(s), anonymous{OFF}\n")
     failures = 0
+    skipped = 0
+
+    def _record(result):
+        # Hold the database only for the instant it takes to log one fetch, so a
+        # multi-gigabyte download never locks another fetch out of the DB.
+        for attempt in range(30):
+            try:
+                con = store.connect(DB)
+                store.record_fetch(con, run_id, result)
+                fresh = (store.changed_since_last(con, result.source_id, result.sha256)
+                         if result.ok and result.sha256 else result.ok)
+                con.close()
+                return fresh
+            except Exception:
+                import time as _t; _t.sleep(2)
+        return result.ok
 
     for src in targets:
+        # Refuse to overwrite real data with a discovery endpoint's response.
+        if getattr(src, "needs_backfill", None):
+            print(f"  {src.id:<32}{DIM}skipped -- its URL is an index, not the data. "
+                  f"Use: gt backfill --only {src.needs_backfill}{OFF}")
+            skipped += 1
+            continue
         print(f"  {src.id:<32}", end="", flush=True)
         url = _resolve_url(src)
         if url is None:
@@ -75,10 +128,9 @@ def cmd_fetch(args) -> int:
             continue
         res = fetch(src, BRONZE, max_bytes=args.max_bytes,
                     url_override=url, timeout=args.timeout)
-        store.record_fetch(con, run_id, res)
+        fresh = _record(res)
         if res.ok:
             mb = res.bytes_len / 1e6
-            fresh = store.changed_since_last(con, src.id, res.sha256)
             tag = "new content" if fresh else "unchanged"
             print(f"{GREEN}HTTP 200{OFF}  {mb:>8.1f} MB  {res.elapsed_ms:>6} ms  {DIM}{tag}{OFF}")
         else:
@@ -86,8 +138,9 @@ def cmd_fetch(args) -> int:
             label = f"HTTP {res.http_status}" if res.http_status else "no response"
             print(f"{RED}{label:<8}{OFF}  {DIM}{res.note[:66]}{OFF}")
 
-    con.close()
-    print(f"\n{len(targets)-failures} ok, {failures} failed")
+    fetched = len(targets) - failures - skipped
+    tail = f", {skipped} skipped" if skipped else ""
+    print(f"\n{fetched} ok, {failures} failed{tail}")
     return 1 if failures and args.strict else 0
 
 
@@ -99,6 +152,20 @@ def cmd_load(args) -> int:
         ("boundaries", lambda: load_mod.load_lad_boundaries(con, BRONZE / "ons_lad_boundaries.geojson")),
         ("properties", lambda: load_mod.load_uprn(con, BRONZE / "os_open_uprn.zip")),
     ]
+    if args.full:
+        steps += [
+            ("uprn->street",   lambda: load_mod.load_crosswalk(
+                con, BRONZE / "os_lids_uprn_usrn.zip", "lids_uprn_usrn")),
+            ("uprn->building", lambda: load_mod.load_crosswalk(
+                con, BRONZE / "os_lids_uprn_toid.zip", "lids_uprn_toid")),
+            ("companies",      lambda: load_mod.load_companies(
+                con, BRONZE / "companies_house_bulk.zip")),
+            ("psc",            lambda: load_mod.load_psc(con, BRONZE)),
+            ("charities",      lambda: load_mod.load_charities(
+                con, BRONZE / "charity_register.zip")),
+            ("births",         lambda: load_mod.load_births(
+                con, BRONZE / "ons_births_area.csv")),
+        ]
     for name, fn in steps:
         print(f"  {name:<12}", end="", flush=True)
         try:
@@ -627,6 +694,50 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def cmd_backfill(args) -> int:
+    """Complete the sources that were originally taken in part."""
+    from . import backfill as B
+    sess = B._session()
+    parts = args.only or ["bduk", "edm", "companies", "aims", "ps2", "psc", "contracts", "gazette"]
+    results = []
+    if "bduk" in parts:
+        print(f"{BOLD}BDUK premises, all regions{OFF}")
+        results += B.fetch_bduk(BRONZE, sess)
+    if "edm" in parts:
+        print(f"{BOLD}EDM storm overflow, all years{OFF}")
+        results += B.fetch_edm(BRONZE, sess)
+    if "companies" in parts:
+        print(f"{BOLD}Companies House basic company data{OFF}")
+        results.append(B.fetch_companies_house(BRONZE, sess))
+    if "contracts" in parts:
+        print(f"{BOLD}Contracts Finder backfill{OFF}")
+        results.append(B.fetch_contracts(BRONZE, pages=args.pages, s=sess))
+    if "aims" in parts:
+        print(f"{BOLD}Environment Agency flood defences, all pages{OFF}")
+        results.append(B.fetch_aims(BRONZE, sess))
+    if "ps2" in parts:
+        print(f"{BOLD}Planning statistics PS2 table{OFF}")
+        results.append(B.fetch_ps2(BRONZE, sess))
+    if "rainfall" in parts:
+        print(f"{BOLD}Annual rainfall totals per station{OFF}")
+        results.append(B.fetch_rainfall(BRONZE, s=sess))
+    if "psc" in parts:
+        print(f"{BOLD}Companies House PSC, all snapshot parts{OFF}")
+        results.append(B.fetch_psc(BRONZE, sess))
+    if "gazette" in parts:
+        print(f"{BOLD}Gazette insolvency backfill{OFF}")
+        results.append(B.fetch_gazette(BRONZE, pages=args.pages, s=sess))
+
+    print()
+    for r in results:
+        mark = f"{GREEN}ok  {OFF}" if r.ok else f"{RED}fail{OFF}"
+        size = f"{r.bytes/1e6:>8.1f} MB" if r.bytes else " " * 11
+        print(f"  {mark} {r.name:<34}{size}  {DIM}{r.detail[:52]}{OFF}")
+    failed = [r for r in results if not r.ok]
+    print(f"\n{len(results)-len(failed)} complete, {len(failed)} failed")
+    return 1 if failed and args.strict else 0
+
+
 def cmd_status(args) -> int:
     con = store.connect(DB)
     rows = store.latest_status(con)
@@ -657,9 +768,13 @@ def main(argv=None) -> int:
                     help="stop after N bytes -- useful for smoke tests on large products")
     pf.add_argument("--timeout", type=int, default=120)
     pf.add_argument("--strict", action="store_true", help="exit non-zero if any source fails")
+    pf.add_argument("--if-missing", action="store_true",
+                    help="skip sources whose file is already on disk and readable")
     pf.set_defaults(fn=cmd_fetch)
 
     pl = sub.add_parser("load", help="expand bronze downloads into silver tables")
+    pl.add_argument("--full", action="store_true",
+                    help="also load the identifier crosswalks and company register (~16 GB of CSV)")
     pl.set_defaults(fn=cmd_load)
 
     pp = sub.add_parser("place", help="resolve postcodes through the place spine")
@@ -744,6 +859,13 @@ def main(argv=None) -> int:
     psv.add_argument("--port", type=int, default=8787)
     psv.add_argument("--no-open", action="store_true", help="do not open a browser")
     psv.set_defaults(fn=cmd_serve)
+
+    pbf = sub.add_parser("backfill", help="complete sources taken only in part")
+    pbf.add_argument("--only", nargs="*",
+                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette"])
+    pbf.add_argument("--pages", type=int, default=200)
+    pbf.add_argument("--strict", action="store_true")
+    pbf.set_defaults(fn=cmd_backfill)
 
     pst = sub.add_parser("status", help="last outcome per source")
     pst.set_defaults(fn=cmd_status)

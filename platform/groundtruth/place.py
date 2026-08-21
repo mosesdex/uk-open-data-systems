@@ -124,6 +124,35 @@ def _has(con: duckdb.DuckDBPyConnection, table: str) -> bool:
         WHERE table_schema='silver' AND table_name=?""", [table]).fetchone()[0] > 0
 
 
+# A property reference and a postcode that disagree by more than this are not
+# describing the same place. Measured on the school register: genuine estates
+# spread a few hundred metres, while broken identifiers land hundreds of
+# kilometres away.
+CONFLICT_METRES = 2_000
+
+
+def cross_check(con: duckdb.DuckDBPyConnection, uprn, postcode) -> dict:
+    """Resolve a record both ways and report whether the two agree.
+
+    A published property reference can be wrong. In the school register, some
+    point to the opposite end of the country. Nothing downstream should treat
+    such a reference as authoritative simply because it resolved, so the two
+    tiers are compared and the disagreement is reported rather than hidden.
+    """
+    import math
+    p = resolve_uprn(con, uprn) if uprn is not None else UNRESOLVED
+    q = resolve_postcode(con, postcode) if postcode else UNRESOLVED
+    if not (p.resolved and q.resolved):
+        return {"comparable": False, "metres": None, "conflict": False,
+                "tier": p.tier if p.resolved else q.tier}
+    dlat = (p.latitude - q.latitude) * 111_320
+    dlon = ((p.longitude - q.longitude) * 111_320
+            * math.cos(math.radians(q.latitude)))
+    d = math.hypot(dlat, dlon)
+    return {"comparable": True, "metres": round(d), "conflict": d > CONFLICT_METRES,
+            "tier": "uprn"}
+
+
 def coverage(con: duckdb.DuckDBPyConnection) -> dict:
     """What the spine can currently resolve, and at which tier."""
     out: dict = {"tiers": {}}
@@ -144,4 +173,9 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
         out["tiers"]["lad"] = {
             "rows": con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
         }
+    for name, table in (("uprn_to_street", "lids_uprn_usrn"),
+                        ("uprn_to_building", "lids_uprn_toid")):
+        if _has(con, table):
+            out.setdefault("crosswalks", {})[name] = con.execute(
+                f"SELECT count(*) FROM silver.{table}").fetchone()[0]
     return out

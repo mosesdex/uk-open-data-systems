@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Groundtruth — admin console</title>
-<meta name="description" content="Groundtruth admin console: feed health, resolver queues, match review, alerts and access control.">
+<meta name="description" content="Groundtruth operator console: source health, ingest runs, system state, match review.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,450;14..32,500;14..32,600;14..32,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
 </head>
@@ -16,243 +16,249 @@
 
 <aside class="side">
   <div class="side__brand"><div class="mark">G</div>
-    <div><div class="side__name">Groundtruth</div><div class="side__sub">Admin</div></div></div>
+    <div><div class="side__name">Groundtruth</div><div class="side__sub">Admin · local</div></div></div>
   <div class="side__scroll">
     <div class="side__group">Operations</div>
     <a class="navi is-on" href="#ops"><i class="navi__dot"></i>Control room</a>
-    <a class="navi" href="#feeds"><i class="navi__dot"></i>Data sources<span class="navi__badge">8</span></a>
-    <a class="navi" href="#pipeline"><i class="navi__dot"></i>Ingest pipeline</a>
-    <a class="navi" href="#queue"><i class="navi__dot"></i>Match review<span class="navi__badge">6</span></a>
+    <a class="navi" href="#runs"><i class="navi__dot"></i>Ingest runs</a>
+    <a class="navi" href="#sources"><i class="navi__dot"></i>Data sources<span class="navi__badge" id="badgeSrc"></span></a>
     <div class="side__group">Platform</div>
     <a class="navi" href="#systems"><i class="navi__dot"></i>Systems</a>
-    <a class="navi" href="#alerts"><i class="navi__dot"></i>Alert rules</a>
-    <a class="navi" href="#users"><i class="navi__dot"></i>Users &amp; access</a>
-    <a class="navi" href="#audit"><i class="navi__dot"></i>Audit log</a>
+    <a class="navi" href="#review"><i class="navi__dot"></i>Match review<span class="navi__badge" id="badgeRev"></span></a>
+    <a class="navi" href="#storage"><i class="navi__dot"></i>Storage</a>
+    <a class="navi" href="#integrity"><i class="navi__dot"></i>Reproducibility<span class="navi__badge" id="badgeGap"></span></a>
   </div>
 </aside>
 
 <div class="main">
 <header class="top"><div class="top__in">
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
-  <div><div class="top__crumb">Groundtruth · Admin console</div><div class="top__title">Control room</div></div>
+  <div><div class="top__crumb">Groundtruth · Admin console · 127.0.0.1</div>
+       <div class="top__title">Control room</div></div>
   <div class="spacer"></div>
-  <span class="live"><i></i>ALL PIPELINES HEALTHY</span>
+  <span class="live" id="stateTag"><i></i>READING DATABASE…</span>
   <nav class="switch"><a href="index.html">Public</a><a class="is-on" href="admin.html">Admin</a><a href="mobile.html">Mobile</a></nav>
   <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
 </div></header>
 
 <div class="pad" id="ops">
+  <div class="grid g4" id="kpis"></div>
 
-  <div class="grid g4">
-    <div class="kpi rise" style="--accent:var(--green-600)"><div class="kpi__l">Feeds connected</div>
-      <div class="kpi__v" data-count="39">0</div><div class="kpi__m">of 47 evaluated</div></div>
-    <div class="kpi rise" style="--accent:var(--uk-blue)"><div class="kpi__l">Records resolved today</div>
-      <div class="kpi__v" data-count="1284119">0</div><div class="kpi__m">Illustrative throughput</div></div>
-    <div class="kpi rise" style="--accent:var(--amber-600)"><div class="kpi__l">Awaiting human review</div>
-      <div class="kpi__v" data-count="6">0</div><div class="kpi__m">Below confidence threshold</div></div>
-    <div class="kpi rise" style="--accent:var(--uk-red)"><div class="kpi__l">Sources failing</div>
-      <div class="kpi__v" data-count="8">0</div><div class="kpi__m">Blocked or needing an account</div></div>
-  </div>
-
-  <div class="grid g-2-1" style="margin-top:1rem">
-    <section class="card rise">
-      <div class="card__hd"><div><div class="card__t">Resolution rate, last 12 runs</div>
-        <div class="card__s">Share of incoming records resolved to a place and to an organisation. Illustrative.</div></div>
-        <div class="spacer"></div>
-        <div class="row"><span class="tag" style="border-color:var(--blue-500);color:var(--blue-600)">● place</span>
-        <span class="tag" style="border-color:var(--red-300);color:var(--uk-red)">● entity</span></div></div>
-      <div class="card__b"><div id="lineA"></div></div>
-    </section>
-    <section class="card rise">
-      <div class="card__hd"><div class="card__t">Pipeline stages</div></div>
-      <div class="card__b"><div class="stack" id="stages"></div></div>
-    </section>
-  </div>
-
-  <section class="card rise" id="pipeline" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">Ingest pipeline</div>
-      <div class="card__s">Every stage runs on a schedule; nothing here requires an account with a publisher</div></div>
-      <div class="spacer"></div><button class="btn btn--ghost" id="runBtn">▶ Run now</button></div>
-    <div class="card__b"><div class="pipe" id="pipeStages"></div>
-      <div class="row" style="margin-top:.9rem;justify-content:space-between">
-        <span class="card__s" id="runNote">Last completed run 04:12 · 39 sources · 0 failures</span>
-        <span class="tag tag--ok">SCHEDULED 04:00 DAILY</span></div></div>
+  <section class="card rise" id="runs" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">Ingest runs</div>
+      <div class="card__s">Every fetch this database has recorded. Append-only.</div></div>
+      <div class="spacer"></div><span class="card__s mono" id="runMeta"></span></div>
+    <div class="card__b card__b--flush" style="overflow:auto">
+      <table class="tbl"><thead><tr><th>Run</th><th>Started</th><th>Sources</th>
+        <th>Succeeded</th><th>Failed</th><th>Downloaded</th><th>Elapsed</th></tr></thead>
+      <tbody id="runRows"></tbody></table></div>
   </section>
 
-  <section class="card rise" id="feeds" style="margin-top:1rem">
+  <section class="card rise" id="sources" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">Data sources</div>
-      <div class="card__s">Connection status from an unauthenticated probe on 17 August 2026</div></div>
+      <div class="card__s" id="srcNote">&nbsp;</div></div>
       <div class="spacer"></div>
-      <div class="srch"><span class="card__s">⌕</span><input id="q" placeholder="Filter…" aria-label="Filter sources"></div>
-      <button class="btn" id="addBtn">+ Add source</button></div>
-    <div class="card__b card__b--flush" style="max-height:460px;overflow:auto">
-      <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Status</th><th>Enabled</th></tr></thead>
-      <tbody id="rows"></tbody></table></div>
+      <div class="srch"><span class="card__s">⌕</span><input id="q" placeholder="Filter…" aria-label="Filter sources"></div></div>
+    <div class="card__b card__b--flush" style="max-height:520px;overflow:auto">
+      <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th>
+        <th>Refresh</th><th>Last fetch</th><th>Size</th><th>Status</th></tr></thead>
+      <tbody id="srcRows"></tbody></table></div>
   </section>
-
-  <div class="grid g2" style="margin-top:1rem">
-    <section class="card rise" id="queue">
-      <div class="card__hd"><div><div class="card__t">Match review queue</div>
-        <div class="card__s">Links below the auto-accept threshold. Nothing merges silently.</div></div></div>
-      <div class="card__b card__b--flush"><div class="feed" id="queueFeed"></div></div>
-    </section>
-    <section class="card rise" id="alerts">
-      <div class="card__hd"><div><div class="card__t">Alert rules</div>
-        <div class="card__s">Fire when a watched condition appears in a feed</div></div>
-        <div class="spacer"></div><button class="btn btn--ghost">+ New rule</button></div>
-      <div class="card__b card__b--flush"><div class="feed" id="ruleFeed"></div></div>
-    </section>
-  </div>
 
   <section class="card rise" id="systems" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">System operations</div>
-      <div class="card__s">Per-system freshness, coverage and dependency</div></div></div>
+    <div class="card__hd"><div><div class="card__t">System state</div>
+      <div class="card__s">Rows each system has written, and whether its inputs are on disk</div></div></div>
     <div class="card__b card__b--flush" style="overflow:auto">
-      <table class="tbl"><thead><tr><th>System</th><th>Domain</th><th>Needs</th><th>Coverage</th><th>Last build</th><th>State</th></tr></thead>
+      <table class="tbl"><thead><tr><th>System</th><th>State</th><th>Rows written</th>
+        <th>Tables</th><th>Inputs</th></tr></thead>
       <tbody id="sysRows"></tbody></table></div>
   </section>
 
-  <div class="grid g-1-2" style="margin-top:1rem">
-    <section class="card rise" id="users">
-      <div class="card__hd"><div class="card__t">Users &amp; access</div></div>
-      <div class="card__b card__b--flush"><div class="feed" id="userFeed"></div></div>
+  <section class="card rise" id="review" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">Match review</div>
+      <div class="card__s" id="revNote">Ambiguity found in the data. Nothing here has been merged.</div></div></div>
+    <div class="card__b card__b--flush"><div class="feed" id="revFeed"></div></div>
+  </section>
+
+  <div class="grid g-2-1" style="margin-top:1rem">
+    <section class="card rise" id="storage">
+      <div class="card__hd"><div><div class="card__t">Storage</div>
+        <div class="card__s">Rows held, by layer</div></div>
+        <div class="spacer"></div><span class="card__s mono" id="storeMeta"></span></div>
+      <div class="card__b card__b--flush" style="max-height:360px;overflow:auto">
+        <table class="tbl"><thead><tr><th>Layer</th><th>Table</th><th>Rows</th></tr></thead>
+        <tbody id="tblRows"></tbody></table></div>
     </section>
-    <section class="card rise" id="audit">
-      <div class="card__hd"><div><div class="card__t">Audit log</div>
-        <div class="card__s">Every change to a source, rule or threshold is recorded</div></div></div>
-      <div class="card__b card__b--flush" style="max-height:300px;overflow:auto">
-        <table class="tbl"><thead><tr><th>When</th><th>Actor</th><th>Action</th></tr></thead>
-        <tbody id="auditRows"></tbody></table></div>
+    <section class="card rise" id="integrity">
+      <div class="card__hd"><div><div class="card__t">Reproducibility</div>
+        <div class="card__s">Could another machine rebuild this?</div></div></div>
+      <div class="card__b" id="gapBody"></div>
     </section>
   </div>
 
-  <p class="card__s" style="margin-top:1.6rem;max-width:70ch">
-    Prototype. Source status and system inventory are real; throughput, queue contents, users and audit
-    entries are illustrative sample data for demonstration.
+  <p class="card__s" style="margin-top:1.6rem;max-width:74ch">
+    Every figure on this page is read from the database or the filesystem on this machine.
+    Where there is nothing to show, the panel says so rather than showing a placeholder.
   </p>
 </div>
 </div>
 </div>
 
 <script src="assets/shared.js"></script>
+<script src="assets/platform.js"></script>
 <script src="assets/app.js"></script>
 <script>
-(function(){
-  GT.line(document.getElementById('lineA'), [
-    {c:'var(--blue-500)', v:[91.2,92.0,92.4,93.1,93.0,94.2,94.8,95.1,95.4,96.0,96.2,96.5]},
-    {c:'var(--uk-red)',   v:[38.1,39.0,39.8,40.2,41.0,41.6,42.4,43.1,43.6,44.2,44.9,45.4]}
-  ], {labels:['','','','','','','','','','','','now']});
+(async function(){
+  await Platform.load();
+  const a = Platform.admin();
+  const s = Platform.adminSummary();
+  const tag = document.getElementById('stateTag');
 
-  const stages = [['Fetch','39 sources','ok',100],['Validate','schema + licence','ok',100],
-    ['Place link','UPRN / USRN / TOID','ok',96.5],['Entity link','company number','warn',45.4],
-    ['Confidence','scored per link','ok',100],['Publish','13 systems','ok',100]];
-  document.getElementById('stages').innerHTML = stages.map(([n,d,s,v])=>`
-    <div><div class="row" style="justify-content:space-between">
-      <span style="font-size:12.5px;font-weight:550">${n}</span>
-      <span class="mono card__s" style="font-size:11px">${v}%</span></div>
-    <div class="meter" style="margin-top:.28rem"><i class="${s==='warn'?'warn':'ok'}" data-w="${v}"></i></div>
-    <div class="card__s" style="font-size:11px;margin-top:.2rem">${d}</div></div>`).join('');
+  if (!a || !s) {
+    tag.outerHTML = '<span class="tag tag--bad">NO DATABASE OUTPUT — RUN: gt run</span>';
+    document.getElementById('kpis').innerHTML =
+      '<div class="card"><div class="card__b"><p class="card__s">Nothing to administer yet. '
+      + 'Run <span class="mono">gt run</span> then reload.</p></div></div>';
+    return;
+  }
+  tag.outerHTML = `<span class="live"><i></i>${s.systemsBuilt}/${s.systemsTotal} SYSTEMS BUILT</span>`;
 
-  const pstages=[['01','Fetch','39 open feeds'],['02','Validate','licence + schema'],['03','Place link','96.5% resolved'],
-    ['04','Entity link','45.4% resolved'],['05','Confidence','scored per link'],['06','Publish','13 systems']];
-  document.getElementById('pipeStages').innerHTML = pstages.map(([n,t,v])=>
-    `<div class="pipe__s"><div class="pipe__n">${n}</div><div class="pipe__t">${t}</div><div class="pipe__v">${v}</div></div>`).join('');
+  const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-GB');
+  const mb = n => n == null ? '—' : (n >= 1e6 ? (n/1e6).toFixed(1)+' MB' : Math.round(n/1e3)+' KB');
+  const ago = ts => {
+    if (!ts) return 'never';
+    const d = new Date(ts.replace(' ','T'));
+    const h = (Date.now() - d.getTime()) / 36e5;
+    return h < 1 ? Math.round(h*60)+'m ago' : h < 48 ? Math.round(h)+'h ago' : Math.round(h/24)+'d ago';
+  };
 
-  document.getElementById('runBtn').addEventListener('click', function(){
-    const b=this, note=document.getElementById('runNote'), cells=[...document.querySelectorAll('.pipe__s')];
-    b.disabled=true; b.textContent='Running…'; cells.forEach(c=>c.style.background='');
-    cells.forEach((c,i)=>setTimeout(()=>{
-      c.style.background='var(--blue-050)'; c.style.borderColor='var(--blue-300)';
-      note.textContent='Running stage '+(i+1)+' of '+cells.length+'…';
-      if(i===cells.length-1) setTimeout(()=>{
-        cells.forEach(x=>{x.style.background='';x.style.borderColor='';});
-        note.textContent='Run complete · 39 sources · 0 failures · '+new Date().toLocaleTimeString('en-GB');
-        b.disabled=false; b.textContent='▶ Run now';
-      },600);
-    }, i*430));
-  });
+  /* KPIs — each is a count of something real */
+  const kpis = [
+    {l:'Sources holding data', v:s.sourcesWithData, m:`of ${s.sourcesTotal} registered · ${s.sourcesAbsent} absent, both deliberately blocked`, a:'var(--green-600)'},
+    {l:'Systems built', v:s.systemsBuilt, m:`of ${s.systemsTotal} · ${s.systemsMissingInputs} missing an input`, a:'var(--uk-blue)'},
+    {l:'Rows held', v:s.rowsHeld, m:`across ${s.tableCount} tables`, a:'var(--blue-500)'},
+    {l:'Awaiting review', v:s.reviewCount, m:'real ambiguity, nothing merged', a: s.reviewCount ? 'var(--amber-600)' : 'var(--green-600)'},
+  ];
+  const provNote = [
+    s.sourcesLogged + ' fetched through the registry',
+    s.sourcesUnlogged + ' holding data with no fetch record',
+    s.sourcesAbsent + ' absent',
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k=>`
+    <div class="kpi rise" style="--accent:${k.a}">
+      <div class="kpi__l">${k.l}</div>
+      <div class="kpi__v" data-count="${k.v}">0</div>
+      <div class="kpi__m">${k.m}</div></div>`).join('');
 
-  const st = f => f.code===200 ? '<span class="tag tag--ok">200 OK</span>'
-    : f.code===401 ? '<span class="tag tag--bad">401 KEY</span>'
-    : f.code===403 ? '<span class="tag tag--bad">403 BLOCKED</span>' : '<span class="tag tag--warn">'+f.code+'</span>';
-  const all = FEEDS.map(f=>({...f,on:true})).concat(BLOCKED.map(b=>({n:b.n,org:b.org,kind:'Blocked',freq:'—',code:b.code,on:false})));
-  const draw = list => document.getElementById('rows').innerHTML = list.map((f,i)=>`<tr>
-    <td>${f.n}</td><td>${f.org}</td><td><span class="tag">${f.kind}</span></td>
-    <td class="mono" style="font-size:11.5px">${f.freq}</td><td>${st(f)}</td>
-    <td><span class="toggle ${f.on?'on':''}" data-i="${i}" role="switch" tabindex="0"></span></td></tr>`).join('');
-  draw(all);
-  document.getElementById('rows').addEventListener('click', e=>{
-    const t=e.target.closest('.toggle'); if(t) t.classList.toggle('on');
-  });
+  /* Runs */
+  document.getElementById('runRows').innerHTML = s.runs.length ? s.runs.map(r=>`<tr>
+    <td class="mono" style="font-size:11.5px">${r.run_id}</td>
+    <td class="mono" style="font-size:11.5px">${String(r.started).slice(0,16).replace('T',' ')}</td>
+    <td>${r.sources}</td>
+    <td><span class="tag tag--ok">${r.succeeded}</span></td>
+    <td>${r.failed ? `<span class="tag tag--bad">${r.failed}</span>` : '<span class="card__s">0</span>'}</td>
+    <td class="mono" style="font-size:11.5px">${mb(r.bytes)}</td>
+    <td class="mono" style="font-size:11.5px">${(r.elapsed_ms/1000).toFixed(1)}s</td></tr>`).join('')
+    : '<tr><td colspan="7" class="card__s">No runs recorded.</td></tr>';
+  document.getElementById('runMeta').textContent =
+    s.lastRun ? `last run ${ago(s.lastRun.started)}` : '';
+
+  /* Sources */
+  const statusCell = r => {
+    if (r.blocked) return `<span class="tag tag--bad">BLOCKED</span>`;
+    if (r.provenance === 'unlogged')
+      // The data is here; the provenance is not. A different, sharper problem
+      // from having no data at all.
+      return `<span class="tag tag--warn" title="on disk, but not fetched through the registry">NO PROVENANCE</span>`;
+    if (!r.fetched_at) return `<span class="tag tag--warn">NEVER FETCHED</span>`;
+    return r.ok ? `<span class="tag tag--ok">${r.http_status}</span>`
+                : `<span class="tag tag--bad">${r.http_status || 'ERR'}</span>`;
+  };
+  const srcHtml = list => list.map(r=>`<tr title="${(r.note||r.blocked||'').replace(/"/g,'')}">
+    <td>${r.name}</td><td>${r.publisher}</td>
+    <td><span class="tag">${String(r.role).replace('_',' ')}</span></td>
+    <td class="mono" style="font-size:11.5px">${r.cadence}</td>
+    <td class="mono" style="font-size:11.5px">${r.fetched_at ? ago(r.fetched_at) : (r.disk_file ? 'unlogged' : 'never')}</td>
+    <td class="mono" style="font-size:11.5px">${mb(r.bytes_len != null ? r.bytes_len : r.disk_bytes)}</td>
+    <td>${statusCell(r)}</td></tr>`).join('');
+  document.getElementById('srcRows').innerHTML = srcHtml(a.sources);
+  document.getElementById('srcNote').textContent = provNote.join(' · ');
+  document.getElementById('badgeSrc').textContent = s.sourcesUnlogged + s.sourcesAbsent || '';
   document.getElementById('q').addEventListener('input', e=>{
-    const v=e.target.value.toLowerCase();
-    draw(all.filter(f=>(f.n+f.org+f.kind).toLowerCase().includes(v)));
+    const v = e.target.value.toLowerCase();
+    document.getElementById('srcRows').innerHTML = srcHtml(
+      a.sources.filter(r => (r.name+r.publisher+r.role+r.id).toLowerCase().includes(v)));
   });
-  document.getElementById('addBtn').addEventListener('click',()=>
-    alert('Prototype: adding a source opens a form for the endpoint, licence and refresh schedule.\n\nA source is only accepted if it returns data to an unauthenticated request.'));
 
-  const queue=[
-    ['SOFTCAT PLC - FCA','Softcat plc','0.82','Suffix on the buyer record; company number absent','entity'],
-    ['NORTHERN CARE GROUP LTD','Northern Care Group Limited','0.91','Legal-form variant only','entity'],
-    ['21/0751/FUL, East Devon','UPRN 10023456789','0.74','Two candidate properties on the same parcel','place'],
-    ['United Learning Trust','UNITED LEARNING','0.88','Trading name against registered name','entity'],
-    ['Land r/o 14 Mill Lane','UPRN 100062114539','0.68','Descriptive address, no postcode','place'],
-    ['SW-STW-0421 (pre-2024)','SW-STW-8891 (2024)','0.79','Regulator reissued the reference','entity']];
-  document.getElementById('queueFeed').innerHTML = queue.map(([a,b,c,d,k])=>`<div class="fitem">
-    <div class="fitem__i" style="background:${k==='place'?'var(--blue-050);color:var(--blue-600)':'var(--red-050);color:var(--uk-red)'}">${(+c).toFixed(2)}</div>
-    <div style="min-width:0"><div class="fitem__t">${a}</div>
-    <div class="fitem__d">→ ${b}</div><div class="fitem__m"><span>${d}</span></div>
-    <div class="row" style="margin-top:.45rem"><button class="btn" style="padding:.22rem .55rem;font-size:11.5px">Accept</button>
-    <button class="btn btn--ghost" style="padding:.22rem .55rem;font-size:11.5px">Reject</button>
-    <button class="btn btn--ghost" style="padding:.22rem .55rem;font-size:11.5px">Defer</button></div></div></div>`).join('');
-  document.getElementById('queueFeed').addEventListener('click', e=>{
-    const b=e.target.closest('button'); if(!b) return;
-    const item=b.closest('.fitem'); item.style.transition='opacity .3s,transform .3s';
+  /* Systems */
+  document.getElementById('sysRows').innerHTML = a.systems.map(r=>{
+    const miss = (r.missing_inputs||[]).length;
+    return `<tr>
+      <td>${r.system}</td>
+      <td>${r.built ? '<span class="tag tag--ok">BUILT</span>' : '<span class="tag tag--warn">NOT BUILT</span>'}</td>
+      <td class="mono">${fmt(r.rows)}</td>
+      <td class="card__s" style="font-size:11.5px">${(r.tables||[]).map(t=>t.table.split('.')[1]).join(', ')}</td>
+      <td>${miss ? `<span class="tag tag--bad">${miss} of ${(r.inputs||[]).length} MISSING</span>`
+                 : `<span class="card__s" style="font-size:11.5px">${(r.inputs||[]).length} of ${(r.inputs||[]).length} present</span>`}</td>
+    </tr>`;}).join('');
+
+  /* Review queue — real ambiguity */
+  const rev = a.review || [];
+  document.getElementById('badgeRev').textContent = rev.length || '';
+  document.getElementById('revFeed').innerHTML = rev.length ? rev.map((r,i)=>`
+    <div class="fitem" data-i="${i}">
+      <div class="fitem__i" style="background:${r.action==='keep separate'?'var(--red-050);color:var(--uk-red)':'var(--blue-050);color:var(--blue-600)'}">${r.variants}</div>
+      <div style="min-width:0;flex:1">
+        <div class="fitem__t">${r.left} <span class="card__s">vs</span> ${r.right}</div>
+        <div class="fitem__d">${r.note}</div>
+        <div class="fitem__m"><span>${r.source}</span><span>${r.kind}</span><span class="mono">${r.key}</span></div>
+        <div class="row" style="margin-top:.45rem">
+          <button class="btn" style="padding:.22rem .55rem;font-size:11.5px">${r.action}</button>
+          <button class="btn btn--ghost" style="padding:.22rem .55rem;font-size:11.5px">Defer</button>
+        </div>
+      </div></div>`).join('')
+    : '<div class="fitem"><div><div class="fitem__t">Nothing ambiguous</div>'
+      + '<div class="fitem__d">Every match the resolvers made was unambiguous.</div></div></div>';
+  document.getElementById('revFeed').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const item = b.closest('.fitem');
+    item.style.transition='opacity .3s,transform .3s';
     item.style.opacity='0'; item.style.transform='translateX(14px)';
-    setTimeout(()=>item.remove(),300);
+    setTimeout(()=>{
+      item.remove();
+      const left = document.querySelectorAll('#revFeed .fitem').length;
+      document.getElementById('badgeRev').textContent = left || '';
+      document.getElementById('revNote').textContent =
+        'Decisions are held in this browser only — the resolver is not yet writing them back.';
+    },300);
   });
 
-  const rules=[['Insolvency notice names a public supplier','Watchman','Gazette JSON, every 15 min','on'],
-    ['Care provider passes 30% of a council’s beds','Bellwether','CQC location file, weekly','on'],
-    ['Two bidders share a director','Sentinel','Companies House PSC, daily','on'],
-    ['Spill count rises with no matching rainfall','Baseline','EA rainfall + EDM, daily','on'],
-    ['Flood defence inspection date passes','Bulwark','EA asset API, weekly','off']];
-  document.getElementById('ruleFeed').innerHTML = rules.map(([n,s,src,on])=>`<div class="fitem">
-    <div class="fitem__i" style="background:var(--blue-050);color:var(--blue-600)">${s[0]}</div>
-    <div style="flex:1;min-width:0"><div class="fitem__t">${n}</div>
-    <div class="fitem__m"><span>${s}</span><span>${src}</span></div></div>
-    <span class="toggle ${on==='on'?'on':''}" role="switch" tabindex="0"></span></div>`).join('');
-  document.getElementById('ruleFeed').addEventListener('click',e=>{
-    const t=e.target.closest('.toggle'); if(t) t.classList.toggle('on');
-  });
+  /* Storage */
+  const tbls = (a.tables||[]).filter(t=>t.rows).sort((x,y)=>y.rows-x.rows);
+  document.getElementById('tblRows').innerHTML = tbls.map(t=>`<tr>
+    <td><span class="tag">${t.schema}</span></td><td>${t.table}</td>
+    <td class="mono">${fmt(t.rows)}</td></tr>`).join('');
+  document.getElementById('storeMeta').textContent = `${fmt(s.rowsHeld)} rows`;
 
-  const cov={catchment:96.5,sentinel:71.4,highwater:68.2,plumbline:88.1,junction:54.0,ledger:0.0,
-    bellwether:93.9,sightline:70.0,lastmile:82.3,bulwark:26.3,watchman:100,compass:96.5,baseline:91.2};
-  document.getElementById('sysRows').innerHTML = SYSTEMS.map(s=>{
-    const c=cov[s.id], cls=c>=85?'ok':c>=50?'warn':'bad';
-    return `<tr><td>${s.n}</td><td>${s.dom}</td>
-      <td><span class="tag">${s.spine==='both'?'WHERE + WHO':s.spine==='place'?'WHERE':'WHO'}</span></td>
-      <td style="min-width:150px"><div class="row" style="gap:.5rem"><div class="meter" style="flex:1"><i class="${cls}" data-w="${c}"></i></div>
-      <span class="mono" style="font-size:11px">${c.toFixed(1)}%</span></div></td>
-      <td class="mono" style="font-size:11.5px">04:12</td>
-      <td>${s.st==='live'?'<span class="tag tag--ok">LIVE</span>':'<span class="tag tag--warn">BETA</span>'}</td></tr>`;
-  }).join('');
-
-  const users=[['Analyst, MHCLG','Read · Housing systems','A'],['Statistician, DfE','Read · Education systems','S'],
-    ['Counter-fraud, Cabinet Office','Read + alerts · Sentinel, Watchman','C'],
-    ['Platform operator','Admin · all systems','P'],['Public','Read · published outputs only','G']];
-  document.getElementById('userFeed').innerHTML = users.map(([n,r,i])=>`<div class="fitem">
-    <div class="fitem__i" style="background:var(--uk-blue);color:#fff">${i}</div>
-    <div><div class="fitem__t">${n}</div><div class="fitem__d">${r}</div></div></div>`).join('');
-
-  const audit=[['09:41','platform.operator','Enabled source “EA asset management”'],
-    ['08:12','system','Scheduled run completed — 39 sources, 0 failures'],
-    ['Yesterday 17:03','platform.operator','Raised entity auto-accept threshold to 0.95'],
-    ['Yesterday 16:20','analyst.mhclg','Exported Ledger contributions for Cornwall'],
-    ['Yesterday 11:58','system','Source “EPC register” marked failing — anonymous request returned a sign-in page'],
-    ['2 days ago','platform.operator','Created alert rule “Insolvency notice names a public supplier”']];
-  document.getElementById('auditRows').innerHTML = audit.map(([w,a,x])=>
-    `<tr><td class="mono" style="font-size:11.5px">${w}</td><td>${a}</td><td>${x}</td></tr>`).join('');
+  /* Reproducibility */
+  const gapEl = document.getElementById('gapBody');
+  const un = s.unregistered, tr = s.truncated;
+  document.getElementById('badgeGap').textContent = (un.length + tr.length) || '';
+  gapEl.innerHTML = `
+    ${s.sourcesUnlogged ? `<div class="feat__t" style="color:var(--hot)">${s.sourcesUnlogged} sources hold data with no fetch record</div>
+      <p class="card__desc mt-1" style="flex:none">The data is present and the systems use it, but it did not arrive
+      through <span class="mono">gt fetch</span>, so there is no recorded status, hash or timestamp behind it.
+      Re-fetching through the registry would close this.</p>` : ''}
+    ${un.length ? `<div class="feat__t mt-4" style="color:var(--hot)">${un.length} files no registered source produces</div>
+      <p class="card__desc mt-1" style="flex:none">Fetched by hand during development. They work here, but
+      <span class="mono">gt fetch</span> would not reproduce them on another machine.</p>
+      <div class="flexrow mt-2">${un.slice(0,8).map(f=>`<span class="tag tag--warn">${f}</span>`).join('')}
+      ${un.length>8?`<span class="card__s">+${un.length-8} more</span>`:''}</div>` : ''}
+    ${tr.length ? `<div class="feat__t mt-4" style="color:var(--hot)">${tr.length} downloads are truncated</div>
+      <p class="card__desc mt-1" style="flex:none">Capped at 21 MB while disk was tight. The place spine runs on
+      Code-Point Open instead; the property tier needs these re-fetched in full.</p>
+      <div class="flexrow mt-2">${tr.map(f=>`<span class="tag tag--bad">${f}</span>`).join('')}</div>` : ''}
+    ${!un.length && !tr.length ? '<p class="card__s">Every file on disk maps to a registered source. A clean machine could rebuild this.</p>' : ''}`;
 
   GT.reveal(); GT.countAll(); GT.meters();
 })();
