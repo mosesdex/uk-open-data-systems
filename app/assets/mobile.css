@@ -40,7 +40,11 @@
 .m-row__d{font-size:11.5px;color:var(--ink-3);margin-top:.08rem}
 .m-search{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.16);
   border-radius:10px;padding:.45rem .65rem;margin-top:.85rem}
-.m-search input{border:0;background:none;outline:0;color:#fff;font-size:13px;width:100%}
+/* 16px is not a style choice: Safari on iOS zooms the whole page when a field
+   under 16px takes focus, and the layout never recovers cleanly. */
+.m-search input{border:0;background:none;outline:0;color:#fff;font-size:16px;width:100%;
+  min-width:0;-webkit-appearance:none;appearance:none}
+.m-search input::-webkit-search-cancel-button{display:none}
 .m-search input::placeholder{color:#A9BAE4}
 .m-chip{display:inline-flex;align-items:center;gap:.25rem;font-family:var(--mono);font-size:9.5px;
   padding:.16rem .42rem;border-radius:5px;background:var(--blue-050);color:var(--blue-700);
@@ -50,6 +54,26 @@
 .m-scroll-x>*{flex:none}
 @media (max-width:460px){
   .phone-stage{padding:0}
-  .phone{width:100%;height:100vh;max-height:100vh;border-radius:0;box-shadow:none}
+    /* 100vh on a phone measures the viewport with the URL bar collapsed, so the
+     tab bar sits below the fold until the user scrolls. dvh tracks the real
+     visible height; vh stays as the fallback for older engines. */
+  .phone{width:100%;height:100vh;height:100dvh;max-height:100dvh;border-radius:0;box-shadow:none}
   .phone__notch{display:none}
 }
+
+/* Available to assistive technology, absent from the design. */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* Section labels are headings now, so keep their box identical to the divs they
+   replaced -- the heading rules would otherwise add their own line-height. */
+h2.m-sec,h2.card__t{line-height:inherit;text-wrap:initial}
+h2.card__t{font-size:inherit;font-weight:inherit;letter-spacing:inherit}
+
+/* The theme toggle used to be fixed to the viewport, which is right inside the
+   desktop device frame and wrong once the app fills the screen -- there it
+   landed on top of the LIVE badge. It now lives in the header row at every
+   size: one control, no overlap, and it travels with the app rather than the
+   page behind it. */
+.m-head__r .iconbtn{color:#fff;background:rgba(255,255,255,.16);border-color:transparent}
+.m-head__r .iconbtn:hover{background:rgba(255,255,255,.26)}

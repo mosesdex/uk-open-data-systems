@@ -91,8 +91,18 @@ def load_premises(con: duckdb.DuckDBPyConnection, *zips: Path) -> int:
                        nullif(trim(subsidy_control_status), '')     AS subsidy_status,
                        nullif(trim(local_authority_district_ons_code), '') AS lad_code,
                        nullif(trim(local_authority_district_ons), '')      AS lad_name
+                -- The dialect is pinned rather than sniffed. DuckDB samples
+                -- the first file of the glob and applies what it finds to
+                -- every other member of the archive; where that file happens
+                -- to contain no quoted field, it settles on "no quote
+                -- character" and the rest of the region loses quoting. Two
+                -- things then load wrong and load silently: the publisher's
+                -- blank district code, written "", survives as two literal
+                -- quote characters, and the two district names that contain a
+                -- comma -- Kingston upon Hull, City of and Herefordshire,
+                -- County of -- are truncated at it.
                 FROM read_csv('{tmp}/*.csv', header=true, all_varchar=true,
-                              ignore_errors=true)
+                              ignore_errors=true, quote='"', escape='"')
             """)
             total = con.execute(
                 "SELECT count(*) FROM silver.premises_connectivity").fetchone()[0]
@@ -135,8 +145,25 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
     con.execute("DROP TABLE IF EXISTS gold.lastmile_postcode")
     con.execute(f"""
         CREATE TABLE gold.lastmile_postcode AS
+        WITH district AS (
+            -- BDUK gives three premises a district name and no district code.
+            -- The authority table groups by name and so counts them; anything
+            -- keyed on the code cannot reach them, and the platform's own two
+            -- views of one system disagreed by exactly one premise in Merton,
+            -- Lewisham and Tower Hamlets. The district is not unknown -- the
+            -- publisher named it -- so the code is recovered from the name.
+            -- That is only sound because the mapping is one-to-one: every name
+            -- here appears with at most one code, so a name that never carries
+            -- one keeps a null rather than borrowing a neighbour's.
+            SELECT lad_name, any_value(lad_code) AS lad_code
+            FROM silver.premises_connectivity
+            WHERE lad_name IS NOT NULL AND lad_code IS NOT NULL
+            GROUP BY lad_name
+            HAVING count(DISTINCT lad_code) = 1
+        )
         SELECT p.postcode_key,
                any_value(p.lad_name)                                  AS lad_name,
+               any_value(coalesce(p.lad_code, d.lad_code))            AS lad_code,
                count(*)                                               AS premises,
                count(*) FILTER (WHERE lower(p.current_gigabit) = '{GIGABIT_TRUE}')
                                                                       AS gigabit_now,
@@ -144,6 +171,7 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
                      / count(*), 1)                                   AS gigabit_pct,
                count(DISTINCT s.transaction_id)                       AS new_build_sales
         FROM silver.premises_connectivity p
+        LEFT JOIN district d ON d.lad_name = p.lad_name
         LEFT JOIN silver.new_build_sale s USING (postcode_key)
         WHERE p.postcode_key IS NOT NULL
         GROUP BY p.postcode_key
@@ -153,6 +181,7 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
     con.execute("""
         CREATE TABLE gold.lastmile_authority AS
         SELECT lad_name,
+               any_value(lad_code)                                    AS lad_code,
                sum(premises)                                          AS premises,
                sum(gigabit_now)                                       AS gigabit_now,
                round(100.0 * sum(gigabit_now) / nullif(sum(premises), 0), 1)

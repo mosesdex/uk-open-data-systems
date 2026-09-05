@@ -216,6 +216,23 @@ p { text-wrap: pretty; }
   align-items: center;
   gap: .6em;
 }
+/* Section labels on system pages are headings, so the page has a real outline
+   for crawlers and screen readers. The class keeps their appearance; this keeps
+   their box identical to the div they replaced. */
+h2.eyebrow, h3.eyebrow { line-height: inherit; text-wrap: initial; }
+
+/* Footer column headings are h2 so the page outline has no gap. The class
+   restores the smaller size they had as h4. */
+.foot h2 { font-size: 1.0625rem; letter-spacing: -0.005em; font-weight: 660; }
+
+/* Available to assistive technology, absent from the visual design. Used for a
+   heading that labels a column the design shows as a continuation. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
 .eyebrow::before {
   content: "";
   width: 1.6em; height: 1.5px;
@@ -277,6 +294,22 @@ p { text-wrap: pretty; }
 }
 .nav__links a.is-cta:hover { background: var(--accent); color: #fff; }
 @media (max-width: 900px) { .nav__links .hide-sm { display: none; } }
+
+/* On a phone the brand (228px) and the remaining links (305px) did not fit a
+   375px bar, and the whole page scrolled sideways. The links stay in the markup
+   and stay reachable -- they are the site's primary internal links -- so the row
+   scrolls instead of the page, and the brand drops its sub-label. */
+@media (max-width: 560px) {
+  .nav__inner { gap: .75rem; }
+  .brand__sub { display: none; }
+  .nav__links {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav__links::-webkit-scrollbar { display: none; }
+}
 
 .themetoggle {
   width: 34px; height: 34px; flex: none;
@@ -479,6 +512,10 @@ td code, .prose code {
   gap: 3rem;
   align-items: start;
 }
+/* A grid item defaults to min-width:auto, so it refuses to shrink below the
+   min-content width of what it holds. On a phone that pushed the whole column
+   to 562px inside a 375px viewport and scrolled the page sideways. */
+.sysLayout > * { min-width: 0; }
 @media (min-width: 1080px) {
   .sysLayout { grid-template-columns: minmax(0,1fr) 250px; gap: 4rem; }
   .sysLayout__aside { position: sticky; top: 86px; }

@@ -1,4 +1,4 @@
-// Systems 11–17. The Groundtruth extension. Consumed by build.js.
+// Systems 11–17. The UK GroundTruth extension. Consumed by build.js.
 export default [
 
 {

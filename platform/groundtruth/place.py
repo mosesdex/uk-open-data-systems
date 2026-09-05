@@ -106,10 +106,22 @@ def resolve_uprn(con: duckdb.DuckDBPyConnection, uprn: int | str) -> PlaceRef:
 
 
 def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None) -> PlaceRef:
-    """Best available tier for whatever identifiers a record happens to carry."""
+    """Best available tier for whatever identifiers a record happens to carry.
+
+    The property tier gives an exact coordinate but no administrative district --
+    the UPRN file carries no LAD. When a postcode is also present, its district
+    is grafted onto the property result, so a record keeps the precise point and
+    still aggregates by authority. Without this, property-resolved records fall
+    out of every by-district statistic.
+    """
     if uprn is not None:
         ref = resolve_uprn(con, uprn)
         if ref.resolved:
+            if ref.lad_code is None and postcode is not None:
+                pc = resolve_postcode(con, postcode)
+                if pc.resolved and pc.lad_code:
+                    from dataclasses import replace
+                    return replace(ref, lad_code=pc.lad_code, ward_code=pc.ward_code)
             return ref
     if postcode is not None:
         ref = resolve_postcode(con, postcode)

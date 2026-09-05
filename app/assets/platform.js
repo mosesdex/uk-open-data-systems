@@ -24,6 +24,8 @@ const Platform = (() => {
 
   const sys = id => (data && data.systems && data.systems[id]) || null;
   const has = id => !!sys(id);
+  const pipeline = () => (data && data.pipeline) || null;
+  const organisations = () => (data && data.organisations) || [];
 
   /* Headline figures, each traced to the system that produced it. */
   function headlines() {
@@ -437,10 +439,16 @@ const Platform = (() => {
   const builtSystems = () => (data && data.built_systems) || [];
   const error = () => (data && data.error) || null;
 
-  return {load, sys, has, headlines, systemResult, sourceSummary, spineSummary,
+  /* The cross-checks the platform runs against its own output. Surfaced so an
+     interface can show where the platform disagrees with itself rather than
+     leaving a reader to add up two screens. */
+  const contradictions = () => (data && data.contradictions) || null;
+  const corrections = () => (data && data.corrections) || null;
+
+  return {load, sys, has, pipeline, organisations, headlines, systemResult, sourceSummary, spineSummary,
           districtValues, districtLookup, chains, reuse, admin, adminSummary,
           placeCoverage, placeList, placeReport, placeResolution,
           mapMetrics, metricValues, metricSpec, metricProvenance,
           systemProvenance, systemMethod,
-          generated, builtSystems, error};
+          generated, builtSystems, error, contradictions, corrections};
 })();

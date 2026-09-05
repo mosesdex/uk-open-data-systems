@@ -119,3 +119,93 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
         ON f.lpa = w.lpa
         ORDER BY water_objections DESC, flood_objections DESC
     """)
+
+
+# ---------------------------------------------------------------------------
+# National water-quality planning corpus (PlanIt).
+# The EA objection sheet above is a small sample with no outcome and no
+# coordinates. PlanIt adds ~1,400 real applications that actually mention water
+# quality, phosphate or nutrient neutrality -- each with a decision state, dates
+# and coordinates -- so the system can show the national pattern and place it on
+# a map, not just tally a sampled reason column.
+# ---------------------------------------------------------------------------
+def load_planit(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    import json
+    recs = json.loads(json_path.read_text()).get("records", [])
+    rows = []
+    for r in recs:
+        uid = r.get("uid") or r.get("name")
+        if not uid:
+            continue
+        rows.append((
+            uid, r.get("area_name"), r.get("app_type"), r.get("app_size"),
+            r.get("app_state"), str(r.get("start_date") or "") or None,
+            str(r.get("decided_date") or "") or None,
+            r.get("postcode"), r.get("location_x"), r.get("location_y"),
+            r.get("_matched_term"), (r.get("description") or "")[:500],
+        ))
+    con.execute("DROP TABLE IF EXISTS silver.planning_water_quality")
+    con.execute("""
+        CREATE TABLE silver.planning_water_quality (
+          uid VARCHAR, lpa VARCHAR, app_type VARCHAR, app_size VARCHAR,
+          app_state VARCHAR, start_date VARCHAR, decided_date VARCHAR,
+          postcode VARCHAR, lon DOUBLE, lat DOUBLE, term VARCHAR, description VARCHAR)
+    """)
+    insert_many(con, "INSERT INTO silver.planning_water_quality VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    return len(rows)
+
+
+def build_planit(con: duckdb.DuckDBPyConnection) -> None:
+    """Theme, authority and district breakdowns of the water-quality corpus."""
+    con.execute("DROP TABLE IF EXISTS gold.sightline_wq_theme")
+    con.execute("""
+        CREATE TABLE gold.sightline_wq_theme AS
+        SELECT term,
+               count(*)                                              AS applications,
+               count(*) FILTER (WHERE decided_date IS NOT NULL)      AS decided,
+               count(*) FILTER (WHERE lower(app_state) LIKE '%reject%'
+                                   OR lower(app_state) LIKE '%refus%') AS refused,
+               count(DISTINCT lpa)                                   AS authorities
+        FROM silver.planning_water_quality
+        GROUP BY term ORDER BY applications DESC
+    """)
+    con.execute("DROP TABLE IF EXISTS gold.sightline_wq_authority")
+    con.execute("""
+        CREATE TABLE gold.sightline_wq_authority AS
+        SELECT lpa,
+               count(*)                                              AS applications,
+               count(*) FILTER (WHERE decided_date IS NOT NULL)      AS decided,
+               count(*) FILTER (WHERE lower(app_state) LIKE '%reject%'
+                                   OR lower(app_state) LIKE '%refus%') AS refused
+        FROM silver.planning_water_quality
+        WHERE lpa IS NOT NULL
+        GROUP BY lpa ORDER BY applications DESC
+    """)
+    _wq_by_district(con)
+
+
+def _wq_by_district(con: duckdb.DuckDBPyConnection) -> None:
+    """Place each application in a district by its coordinates (point-in-polygon)."""
+    from .. import spatial
+    lads = spatial.load()
+    rows = con.execute("""SELECT lon, lat FROM silver.planning_water_quality
+                          WHERE lon IS NOT NULL AND lat IS NOT NULL""").fetchall()
+    agg = {}
+    for lon, lat in rows:
+        code = lads.point(lon, lat)
+        if code:
+            agg[code] = agg.get(code, 0) + 1
+    con.execute("DROP TABLE IF EXISTS gold.sightline_wq_district")
+    con.execute("CREATE TABLE gold.sightline_wq_district (lad_code VARCHAR, applications INTEGER)")
+    if agg:
+        con.executemany("INSERT INTO gold.sightline_wq_district VALUES (?, ?)",
+                        list(agg.items()))
+
+
+def planit_summary(con: duckdb.DuckDBPyConnection):
+    return con.execute("""
+        SELECT count(*) AS apps, count(DISTINCT lpa) AS authorities,
+               count(*) FILTER (WHERE decided_date IS NOT NULL) AS decided,
+               (SELECT count(*) FROM gold.sightline_wq_district) AS districts
+        FROM silver.planning_water_quality
+    """).fetchone()

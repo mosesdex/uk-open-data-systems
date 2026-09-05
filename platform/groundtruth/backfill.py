@@ -370,3 +370,128 @@ def fetch_gazette(bronze: Path, pages: int = 200,
         time.sleep(0.25)
     dest.write_text(json.dumps({"entry": list(seen.values())}))
     return Result(dest.name, True, f"{len(seen):,} distinct notices", dest.stat().st_size)
+
+
+# ---------------------------------------------------------------- PlanIt (planning)
+# PlanIt aggregates ~20.6M planning applications from ~420 LPAs behind a no-key
+# API that throttles hard on rapid or large requests. So this fetch is
+# deliberately polite: a modest page size, a pause between requests, and
+# exponential backoff when the limiter returns an empty page. It pulls only the
+# on-topic water-quality corpus (a bounded ~1,400 applications), not a bulk
+# scrape -- the API is free and donation-funded, and hammering it would be both
+# rude and self-defeating.
+PLANIT_TERMS = ("water quality", "phosphate", "nutrient neutrality")
+
+
+def fetch_planit_planning(bronze: Path, s: requests.Session | None = None,
+                          terms: tuple[str, ...] = PLANIT_TERMS) -> Result:
+    import urllib.parse
+    s = s or _session()
+    s.headers.update({"User-Agent": "GroundTruth/0.1 (open-data research prototype)"})
+    base = "https://www.planit.org.uk/api/applics/json"
+    PG = 400
+    seen: dict[str, dict] = {}
+    time.sleep(5)                                # settle before the first call
+    for term in terms:
+        page, empty_pages = 1, 0
+        while True:
+            url = (f"{base}?pg_sz={PG}&page={page}"
+                   f"&search={urllib.parse.quote(term)}")
+            recs, total = None, None
+            for attempt in range(7):
+                try:
+                    d = s.get(url, timeout=90).json()
+                    recs = d.get("records", [])
+                    total = d.get("total")
+                    if recs or (total == 0):
+                        break
+                except Exception:
+                    recs = None
+                time.sleep(10 * (attempt + 1))   # back off hard when throttled (10..70s)
+            if not recs:
+                # A throttled page reads as empty; only treat as truly exhausted
+                # after several failed pages in a row, with a long cool-off.
+                empty_pages += 1
+                if empty_pages >= 4:
+                    break
+                time.sleep(30); continue
+            empty_pages = 0
+            for r in recs:
+                uid = r.get("uid") or r.get("name")
+                if not uid:
+                    continue
+                r = dict(r)
+                r.setdefault("_matched_term", term)
+                seen[uid] = r                    # dedup across terms by uid
+            got = len(recs)
+            if total is not None and page * PG >= total:
+                break
+            if got < PG:
+                break
+            page += 1
+            time.sleep(8)                        # be a good neighbour
+        time.sleep(20)                           # cool off between search terms
+    dest = bronze / "planit_planning_wq.json"
+    dest.write_text(json.dumps({"records": list(seen.values())}))
+    return Result(dest.name, len(seen) > 100,
+                  f"{len(seen):,} water-quality planning applications", dest.stat().st_size)
+
+
+# ------------------------------------------------------- planning applications
+# The only published route from a developer agreement to a location. The entity
+# endpoint pages at 500, so the url in the registry is a first page rather than
+# the data -- exactly the discovery-url trap that once replaced good tables with
+# a pointer, hence the backfill step.
+#
+# Worth knowing before extending this: the filter parameter is `organisation_entity`
+# with an underscore. The hyphenated `organisation-entity` that every field in the
+# response body uses is accepted, silently ignored, and returns the whole corpus
+# with a 200. A count taken that way looks like a filtered count and is not.
+def _planning_dataset(bronze: Path, dataset: str, stem: str,
+                      s: requests.Session | None = None,
+                      page_size: int = 500, max_pages: int = 400,
+                      min_rows: int = 1000) -> Result:
+    """Page a planning.data.gov.uk entity endpoint to completion."""
+    s = s or _session()
+    base = ("https://www.planning.data.gov.uk/entity.json"
+            f"?dataset={dataset}&limit={page_size}")
+    seen: dict[str, dict] = {}
+    total = None
+    for page in range(max_pages):
+        url = base + (f"&offset={page * page_size}" if page else "")
+        try:
+            d = s.get(url, timeout=90).json()
+        except Exception as exc:
+            if not seen:
+                return Result(f"{stem}.json", False, f"fetch failed: {exc}", 0)
+            break                              # keep what was retrieved
+        total = d.get("count", total)
+        recs = d.get("entities", [])
+        if not recs:
+            break
+        for r in recs:
+            key = str(r.get("entity") or r.get("reference") or "")
+            if key:
+                seen[key] = r
+        if total is not None and (page + 1) * page_size >= total:
+            break
+        time.sleep(0.5)                        # be a good neighbour
+    dest = bronze / f"{stem}.json"
+    dest.write_text(json.dumps({"entities": list(seen.values())}))
+    with_point = sum(1 for r in seen.values() if (r.get("point") or "").strip())
+    return Result(dest.name, len(seen) > min_rows,
+                  f"{len(seen):,} {dataset} records, {with_point:,} with a point"
+                  + ("" if total is None else f" (publisher reports {total:,})"),
+                  dest.stat().st_size)
+
+
+def fetch_planning_applications(bronze: Path, s: requests.Session | None = None) -> Result:
+    return _planning_dataset(bronze, "planning-application",
+                             "planning_applications", s, min_rows=1000)
+
+
+def fetch_developer_agreements(bronze: Path, s: requests.Session | None = None) -> Result:
+    """The agreements themselves, which carry the planning-application reference
+    that is the only published route from a contribution to a site."""
+    return _planning_dataset(bronze, "developer-agreement",
+                             "developer_agreements", s, min_rows=500)

@@ -68,7 +68,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
 
     def _catchment():
         c = catchment.build(con, B / "gias_establishments.csv")
-        return f"{c.resolved:,} of {c.total:,} schools resolved"
+        cap = B / "dfe_school_capacity.csv"
+        extra = ""
+        if cap.exists():
+            catchment.load_capacity(con, cap); catchment.build_trend(con)
+            yrs = catchment.trend_summary(con)[0]
+            extra = f", {yrs}-year capacity trend"
+        return f"{c.resolved:,} of {c.total:,} schools resolved{extra}"
     _stage(r, "catchment", _catchment)
 
     def _bellwether():
@@ -88,18 +94,48 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
                         B / "planning_developer_agreement_transaction.json",
                         B / "planning_local_authority.json")
         ledger.build(con)
-        return f"{c.contributions:,} contributions, {c.with_geometry} located"
+        # The agreements and applications are what make a location recoverable at
+        # all. Both are optional: a run without them reports the location gap
+        # unchanged rather than failing, which is how every other stage behaves.
+        located = None
+        agreements, applications = (B / "developer_agreements.json",
+                                    B / "planning_applications.json")
+        if agreements.exists() and applications.exists():
+            ledger.load_agreements(con, agreements)
+            ledger.load_applications(con, applications)
+            try:
+                from . import spatial
+                lads = spatial.load()
+            except Exception:
+                lads = None
+            located = ledger.locate(con, lads=lads)
+        tail = ""
+        if located and located.get("available"):
+            tail = (f", {located['located']:,} recovered via agreement "
+                    f"({located['located_pct']}%)")
+        return (f"{c.contributions:,} contributions, "
+                f"{c.with_geometry} carrying a location{tail}")
     _stage(r, "ledger", _ledger)
 
     def _baseline():
-        c = baseline.load(con, B / "edm_annual.zip", 2025)
+        # Load every annual return present (layouts differ by year; the
+        # header-driven loader handles them). 2020's format is incompatible.
+        loaded = []
+        for y in (2021, 2022, 2023, 2024, 2025):
+            zp = B / f"edm_annual_{y}.zip"
+            if zp.exists():
+                baseline.load_multi(con, zp, y); loaded.append(y)
+        if not loaded:
+            baseline.load(con, B / "edm_annual.zip", 2025)
+        c = None
         rain = B / "rainfall_annual_2025.json"
         if rain.exists():
             baseline.load_rainfall(con, rain)
         baseline.build(con)
-        wn = con.execute("SELECT count(*) FROM gold.baseline_rainfall").fetchone()[0] \
-            if _has(con, "gold", "baseline_rainfall") else 0
-        return f"{c.outlets:,} storm overflows, {wn} companies weather-normalised"
+        latest = con.execute("SELECT max(year), count(*) FROM gold.baseline_outlet "
+                             "WHERE year=(SELECT max(year) FROM gold.baseline_outlet)").fetchone()
+        yrs = con.execute("SELECT count(DISTINCT year) FROM gold.baseline_outlet").fetchone()[0]
+        return f"{latest[1]:,} storm overflows ({latest[0]}), {yrs}-year trend"
     _stage(r, "baseline", _baseline)
 
     def _sentinel():
@@ -121,8 +157,9 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
         exposures = watchman.check_against_register(con, gaz)
         rep = watchman.Report(0, 0, st["rows"], st["distinct_numbers"], exposures, [])
         watchman.write(con, rep)
-        return (f"register {st['rows']:,} awards, +{st.get('from_register', 0):,} named "
-                f"via the register, {len(exposures)} exposures")
+        d = watchman.check_distress(con)
+        return (f"register {st['rows']:,} awards, {len(exposures)} notice exposures, "
+                f"{d} status-distress exposures")
     _stage(r, "watchman", _watchman)
 
     def _highwater():
@@ -137,7 +174,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
 
     def _sightline():
         n = sightline.load_water_quality(con, B / "ea_objections.ods"); sightline.build(con)
-        return f"{n} water quality objections"
+        wq = B / "planit_planning_wq.json"
+        extra = ""
+        if wq.exists():
+            sightline.load_planit(con, wq); sightline.build_planit(con)
+            apps = sightline.planit_summary(con)[0]
+            extra = f", {apps:,} PlanIt applications"
+        return f"{n} water quality objections{extra}"
     _stage(r, "sightline", _sightline)
 
     def _lastmile():
@@ -184,6 +227,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
         g = junction.catalogue_gap(states)
         return f"{g['returned']:,} of {g['advertised']:,} records served"
     _stage(r, "junction", _junction)
+
+    def _entity():
+        from .systems import entity
+        entity.build(con)
+        e, ic, ip, cross = entity.summary(con)
+        return f"{e:,} organisations, {cross} cross-system"
+    _stage(r, "entity", _entity)
 
     _stage(r, "chains", lambda: f"{sum(c.systems_touched for c in chains.run_all(con))} system responses")
     return r

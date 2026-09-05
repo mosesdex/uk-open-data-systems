@@ -236,6 +236,15 @@ def cmd_catchment(args) -> int:
     print(f"  resolved to a place   {cov.resolved:>9,}  ({cov.resolved_pct:.1f}%)")
     print(f"  published a capacity  {cov.with_capacity:>9,}  ({cov.capacity_pct:.1f}%)")
 
+    cap = BRONZE / "dfe_school_capacity.csv"
+    if cap.exists():
+        rows = C.load_capacity(con, cap)
+        C.build_trend(con)
+        yrs, first, last, fp, lp = C.trend_summary(con)
+        print(f"  capacity time series  {rows:>9,}  ({yrs} years, {first} to {last}: {fp}% -> {lp}%)")
+    else:
+        print(f"  {DIM}no capacity time series -- run: gt fetch dfe_school_capacity{OFF}")
+
     m = con.execute("""SELECT count(*), sum(pupils), sum(capacity),
         round(100.0*sum(pupils)/sum(capacity),1) FROM gold.catchment_district""").fetchone()
     sp = con.execute("""SELECT count(*), sum(pupils), sum(capacity),
@@ -283,8 +292,28 @@ def cmd_watchman(args) -> int:
         n = stats["distinct_names"] or 1
         need = 875 * n / 5_400_000
         print(f"    {DIM}none -- expected about {need:.1f} per three weeks at this register size.{OFF}")
-        print(f"    {DIM}A register of 100,000 suppliers would surface roughly 16.{OFF}")
-        print(f"    {DIM}Backfilling historic award notices is the operational requirement.{OFF}")
+
+    d = W.check_distress(con)
+    if d:
+        tot, care, contracts, _ = W.distress_summary(con)
+        print(f"\n{BOLD}distress by company status{OFF}  {DIM}(public-role holders in liquidation/administration){OFF}")
+        print(f"  exposures found        {tot:>9,}   {RED}{care} care providers, {contracts} contract suppliers{OFF}")
+        for name, status, role, act in con.execute(
+                """SELECT name, company_status, role, activity FROM gold.watchman_distress
+                   ORDER BY activity DESC LIMIT ?""", [args.limit]).fetchall():
+            print(f"    {name[:34]:<36} {status[:22]:<24} {role[:20]:<22} {act}")
+    con.close()
+    return 0
+
+
+def cmd_entity(args) -> int:
+    from .systems import entity as E
+    con = store.connect(DB)
+    E.build(con)
+    ent, in_care, in_proc, cross = E.summary(con)
+    print(f"{BOLD}Entity graph{OFF}  {DIM}the WHO spine{OFF}")
+    print(f"  {ent:,} organisations  ·  {in_care:,} in care  ·  {in_proc:,} in procurement")
+    print(f"  {BOLD}{cross:,}{OFF} appear in more than one system")
     con.close()
     return 0
 
@@ -367,7 +396,26 @@ def cmd_ledger(args) -> int:
     print(f"  contributions        {cov.contributions:>8,}")
     print(f"  stating an amount    {cov.with_amount:>8,}  {cov.pct(cov.with_amount):5.1f}%")
     print(f"  carrying a location  {cov.with_geometry:>8,}  {RED}{cov.pct(cov.with_geometry):5.1f}%{OFF}"
-          f"  {DIM}the gap: none of it can be mapped{OFF}")
+          f"  {DIM}no contribution record carries a point{OFF}")
+
+    # The location the records lack is recoverable through the agreement's
+    # planning-application reference -- for the few authorities that publish
+    # their applications. Both halves are printed: the join that now works, and
+    # the coverage that stops it mattering.
+    loc = L.locate(con)
+    if not loc["available"]:
+        print(f"  recovered via planning application   {DIM}{loc['reason']}{OFF}")
+    else:
+        print(f"  recovered via agreement {loc['located']:>8,}  "
+              f"{RED if loc['located_pct'] < 5 else ''}{loc['located_pct']:5.2f}%{OFF}"
+              f"  {DIM}£{loc['amount_located']:,.0f} of £{loc['amount_total']:,.0f}{OFF}")
+        gap = L.location_gap(con, limit=args.limit)
+        if gap:
+            print(f"\n{BOLD}unmappable, by authority{OFF}  "
+                  f"{DIM}publishes contributions, not applications{OFF}")
+            for g in gap:
+                print(f"  {g['authority'][:34]:<36}{g['contributions']:>6,} contribs   "
+                      f"£{(g['amount'] or 0):>13,.0f}")
     print(f"\n  {BOLD}£{total:,.0f}{OFF} recorded, over {with_amount:,} of {rows:,} contributions")
     print(f"\n{BOLD}promised against delivered{OFF}")
     for st, n, wa, amt in con.execute(
@@ -384,22 +432,28 @@ def cmd_ledger(args) -> int:
 def cmd_baseline(args) -> int:
     from .systems import baseline as BL
     con = store.connect(DB)
-    src = BRONZE / "edm_annual.zip"
-    if not src.exists():
+    years = [y for y in (2021, 2022, 2023, 2024, 2025)
+             if (BRONZE / f"edm_annual_{y}.zip").exists()]
+    if years:
+        for y in years:
+            BL.load_multi(con, BRONZE / f"edm_annual_{y}.zip", y)
+    elif (BRONZE / "edm_annual.zip").exists():
+        BL.load(con, BRONZE / "edm_annual.zip", args.year); years = [args.year]
+    else:
         print(f"{RED}no EDM return{OFF}"); con.close(); return 1
-    cov = BL.load(con, src, args.year); BL.build(con)
-    print(f"{BOLD}Baseline{OFF}  {DIM}storm overflows, {args.year}{OFF}\n")
-    print(f"  outlets                {cov.outlets:>8,}")
-    print(f"  monitor availability   {cov.with_availability:>8,}  {cov.pct(cov.with_availability):5.1f}%")
-    print(f"  located from grid ref  {cov.located:>8,}  {cov.pct(cov.located):5.1f}%")
-    print(f"  watched 90%+ of year   {cov.fully_watched:>8,}  {cov.pct(cov.fully_watched):5.1f}%")
-    t = con.execute("""SELECT round(sum(spills)), round(sum(spills_full_year_equivalent)),
-        round(avg(operational_pct),1) FROM gold.baseline_outlet""").fetchone()
-    print(f"\n  reported spills        {t[0]:>8,.0f}")
-    print(f"  availability-adjusted  {t[1]:>8,.0f}   {GREEN}{100*(t[1]-t[0])/t[0]:+.1f}%{OFF}")
-    print(f"\n{BOLD}by company{OFF}")
-    for y, comp, o, rs, adj, av, uw, bw in con.execute(
-            "SELECT * FROM gold.baseline_company LIMIT ?", [args.limit]).fetchall():
+    BL.build(con)
+    print(f"{BOLD}Baseline{OFF}  {DIM}storm overflows, {years[0]}-{years[-1]}{OFF}\n")
+    tr = con.execute("SELECT year, outlets, reported_spills, adjusted_spills, mean_uptime "
+                     "FROM gold.baseline_trend ORDER BY year").fetchall()
+    print(f"  {'year':<6}{'outlets':>9}{'reported':>12}{'adjusted':>12}{'uptime':>9}")
+    for y, o, rs, adj, up in tr:
+        print(f"  {y:<6}{o:>9,}{rs:>12,.0f}{adj:>12,.0f}{up:>8.1f}%")
+    print(f"\n{BOLD}by company, latest year{OFF}")
+    for comp, rs, adj, av, bw in con.execute(
+            """SELECT company, reported_spills, availability_adjusted, mean_availability_pct,
+               barely_watched FROM gold.baseline_company
+               WHERE year=(SELECT max(year) FROM gold.baseline_company)
+               ORDER BY reported_spills DESC LIMIT ?""", [args.limit]).fetchall():
         print(f"  {comp[:24]:<26}{rs:>8,.0f} -> {adj:>8,.0f}   uptime {av:>5.1f}%   {bw:>3} barely watched")
     con.close()
     return 0
@@ -506,7 +560,15 @@ def cmd_sightline(args) -> int:
                        " table_schema='silver' AND table_name='flood_objection'").fetchone()[0]:
         H.load(con, src)
     SL.load_water_quality(con, src); SL.build(con)
-    print(f"{BOLD}Sightline{OFF}  {DIM}is expert planning advice followed?{OFF}\n")
+    wq = BRONZE / "planit_planning_wq.json"
+    if wq.exists():
+        n = SL.load_planit(con, wq); SL.build_planit(con)
+        apps, auth, dec, dist = SL.planit_summary(con)
+        print(f"{BOLD}Sightline{OFF}  {DIM}water-quality objections + national planning corpus{OFF}")
+        print(f"  PlanIt corpus  {apps:,} applications · {auth} authorities · {dec} decided · {dist} districts\n")
+    else:
+        print(f"{BOLD}Sightline{OFF}  {DIM}is expert planning advice followed?{OFF}")
+        print(f"  {DIM}no PlanIt corpus -- run: gt backfill --only planit{OFF}\n")
     for s in SL.streams(con, src):
         if s.has_outcome_field:
             print(f"  {s.name:<16}{s.objections:>7,} objections   outcome tracked on "
@@ -727,6 +789,9 @@ def cmd_backfill(args) -> int:
     if "gazette" in parts:
         print(f"{BOLD}Gazette insolvency backfill{OFF}")
         results.append(B.fetch_gazette(BRONZE, pages=args.pages, s=sess))
+    if "planit" in parts:
+        print(f"{BOLD}PlanIt water-quality planning corpus (polite, rate-limited){OFF}")
+        results.append(B.fetch_planit_planning(BRONZE, sess))
 
     print()
     for r in results:
@@ -748,6 +813,428 @@ def cmd_status(args) -> int:
         else:
             st, size = f"{RED}{(str(status) if status > 0 else '-'):<8}{OFF}", " " * 10
         print(f"{sid:<32}{role:<14}{st}{size}  {DIM}{note[:56]}{OFF}")
+    con.close()
+    return 0
+
+
+def cmd_claims(args) -> int:
+    """Corrections the platform has made to its own published claims."""
+    from . import claims as C
+    s = C.summary()
+    print(f"{BOLD}Corrected claims{OFF}  {DIM}what was believed, and what the source says{OFF}\n")
+    print(f"  recorded {s['total']}   guarded by a test {s['guarded']}   "
+          f"{RED if s['unguarded'] else ''}unguarded {s['unguarded']}{OFF}\n")
+    for c in C.ARCHIVE:
+        if args.system and c.system != args.system:
+            continue
+        mark = "" if c.guarded else f"  {RED}no guard{OFF}"
+        print(f"  {BOLD}{c.id}{OFF}  {DIM}{c.system}{OFF}{mark}")
+        print(f"    believed   {c.believed}")
+        print(f"    actually   {c.actually}")
+        print(f"    caught by  {DIM}{c.how_caught}{OFF}\n")
+    return 0
+
+
+def cmd_graph(args) -> int:
+    """The evidence graph: which relationships can currently be walked."""
+    from . import graph as G
+    con = store.connect(DB)
+    if args.node:
+        paths = G.walk(con, args.node, max_depth=args.depth, limit=args.limit)
+        print(f"{BOLD}from{OFF} {args.node}\n")
+        if not paths:
+            print(f"  {DIM}no edges from this node{OFF}")
+        for p_ in paths:
+            print(f"  {p_}   {DIM}confidence {p_.confidence:.3f}{OFF}")
+        con.close()
+        return 0
+    s = G.stats(con)
+    print(f"{BOLD}Evidence graph{OFF}\n")
+    print(f"  declared relationships  {s['declared_edges']:>4}")
+    print(f"  walkable now            {s['available_edges']:>4}")
+    print(f"  total edges             {s['total_relationships']:>12,}\n")
+    for row in G.available(con):
+        state = f"{GREEN}walkable{OFF}" if row["available"] else f"{DIM}unavailable{OFF}"
+        n = f"{row['edges']:,}" if row["edges"] is not None else "--"
+        print(f"  {row['predicate']:<16}{row['from']:<22}-> {row['to']:<20}"
+              f"{n:>12}  {state}")
+        if row["note"]:
+            print(f"    {DIM}{row['note']}{OFF}")
+    con.close()
+    return 0
+
+
+def cmd_why(args) -> int:
+    """Where a number came from."""
+    from . import provenance as P
+    con = store.connect(DB)
+    rows = P.explain(con, args.subject, args.field)
+    if not rows:
+        print(f"{DIM}no observations recorded for {args.subject}{OFF}")
+        print(f"{DIM}the evidence layer fills as systems record through provenance.record(){OFF}")
+        con.close()
+        return 0
+    for r in rows:
+        val = r["value_text"] if r["value_num"] is None else f"{r['value_num']:,}"
+        print(f"{BOLD}{r['field']}{OFF}  {val}   {DIM}{r['derivation']}{OFF}")
+        if r["source_id"]:
+            print(f"  source     {r['publisher']} / {r['dataset']}  {DIM}{r['source_id']}{OFF}")
+        if r["record_ref"]:
+            print(f"  record     {r['record_ref']}")
+        for step in r["transformations"]:
+            print(f"    -> {step}")
+        for j in r["joins"]:
+            print(f"    join on {j.get('on')} to {j.get('to')}")
+        if r.get("coverage_pct") is not None:
+            print(f"  coverage   {r['coverage_pct']}%  "
+                  f"({r['coverage_n']:,} of {r['coverage_of']:,})")
+        if r["confidence"] is not None:
+            print(f"  confidence {r['confidence']:.3f}")
+        print()
+    con.close()
+    return 0
+
+
+def cmd_snapshot(args) -> int:
+    """Record, list or compare the shape of the platform over time."""
+    from . import temporal as T
+    con = store.connect(DB)
+    if args.diff:
+        d = T.diff(con, *args.diff)
+        print(f"{BOLD}{d['before']} -> {d['after']}{OFF}\n")
+        for t_ in d["tables_added"]:
+            print(f"  {GREEN}+{OFF} {t_}")
+        for t_ in d["tables_removed"]:
+            print(f"  {RED}-{OFF} {t_}")
+        for r in d["row_changes"]:
+            sign = "+" if r["delta"] > 0 else ""
+            print(f"  ~ {r['table']:<40}{sign}{r['delta']:,}")
+        for r in d["schema_changes"]:
+            print(f"  {RED}schema{OFF} {r['table']}  added={r['added']} removed={r['removed']}")
+        for t_ in d["rewritten_in_place"]:
+            print(f"  {RED}rewritten in place{OFF} {t_}  "
+                  f"{DIM}same row count, different content{OFF}")
+        con.close()
+        return 0
+    if args.list:
+        for s in T.snapshots(con):
+            print(f"  {s['snapshot_id']}  {s['tables']:>3} tables  "
+                  f"{(s['rows'] or 0):>14,} rows  {DIM}{s['label'] or ''}{OFF}")
+        con.close()
+        return 0
+    out = T.snapshot(con, label=args.label or "")
+    print(f"  snapshot {BOLD}{out['snapshot_id']}{OFF}  "
+          f"{out['tables']} tables, {out['rows']:,} rows")
+    con.close()
+    return 0
+
+
+def cmd_profile(args) -> int:
+    """Everything the platform knows about one place or one organisation."""
+    from . import profiles as PR
+    con = store.connect(DB)
+    ident = args.identifier
+    prof = (PR.organisation_profile(con, ident) if ":entity:" in ident
+            else PR.place_profile(con, ident))
+    if not prof.get("resolved"):
+        print(f"{RED}unresolved{OFF}  {DIM}{prof.get('reason')}{OFF}")
+        con.close(); return 1
+    title = prof.get("name") or prof.get("lad_code")
+    print(f"{BOLD}{title}{OFF}  {DIM}{prof['identifier']}{OFF}")
+    if prof.get("resolved_from"):
+        print(f"  {DIM}resolved from {prof['resolved_from']}{OFF}")
+    if prof.get("company_number"):
+        print(f"  {DIM}{prof.get('status')} - incorporated {prof.get('incorporated')}"
+              f" - {prof.get('post_town')}{OFF}")
+        if prof.get("authorities_operated_in"):
+            a = prof["authorities_operated_in"]
+            print(f"  operates in {len(a)} authorities: "
+                  f"{DIM}{', '.join(a[:6])}{'...' if len(a) > 6 else ''}{OFF}")
+    print(f"  {prof['systems_with_data']} of {prof['systems_checked']} systems hold data")
+    if prof.get("by_name"):
+        print(f"  {DIM}{prof['by_identifier']} matched on an identifier, "
+              f"{prof['by_name']} on a name{OFF}")
+    print()
+    for s in prof["sections"]:
+        if not s["available"]:
+            print(f"  {s['system']:<20}{DIM}unavailable - {s['note']}{OFF}")
+            continue
+        if not s["facts"]:
+            print(f"  {s['system']:<20}{DIM}no rows - {s['note']}{OFF}")
+            continue
+        mark = "" if s["match"] == "identifier" else f"  {DIM}[name match]{OFF}"
+        print(f"  {BOLD}{s['system']}{OFF}{mark}  {DIM}{s['table']}{OFF}")
+        facts = s["facts"]
+        if "rows" in facts:
+            print(f"      {DIM}{facts['count']} rows{OFF}")
+            for r in facts["rows"][:args.limit]:
+                bits = "  ".join(f"{k}={v}" for k, v in list(r.items())[:5])
+                print(f"      {bits}")
+            continue
+        for k, v in list(facts.items())[:12]:
+            if v is None or k in ("lad_code", "lad_name"):
+                continue
+            v = f"{v:,}" if isinstance(v, int) else v
+            print(f"      {k:<26}{v}")
+    con.close()
+    return 0
+
+
+def cmd_ask(args) -> int:
+    """Answer a question, showing the plan before the answer."""
+    from . import search as SE
+    con = store.connect(DB)
+    q = " ".join(args.question)
+    out = SE.answer(con, q, limit=args.limit)
+    p = out["plan"]
+    verdict = {"yes": GREEN, "partial": "", "no": RED}[p["answerable"]]
+    print(f"{BOLD}{q}{OFF}\n")
+    print(f"{BOLD}plan{OFF}")
+    print(f"  answerable        {verdict}{p['answerable']}{OFF}")
+    if p["places"]:
+        print(f"  places            " +
+              ", ".join(f"{h['name']} ({h['lad_code']})" for h in p["places"]))
+    if p["organisations"]:
+        print(f"  organisations     " +
+              ", ".join(f"{h['name']} ({h['company_number']})" for h in p["organisations"]))
+    print(f"  systems           {', '.join(p['systems']) or DIM + 'none matched' + OFF}")
+    for tbl in p["tables"]:
+        print(f"  reads             {DIM}{tbl}{OFF}")
+    for j in p["joins"]:
+        print(f"  joins             {DIM}{j}{OFF}")
+    for b in p["blocked"]:
+        print(f"  {RED}blocked{OFF}           {b}")
+    if p["unresolved"]:
+        print(f"  {DIM}not understood    {', '.join(p['unresolved'])}{OFF}")
+
+    if out["answer"] is None:
+        print(f"\n{RED}Groundtruth cannot answer this.{OFF}")
+        for w in out["why_not"]:
+            print(f"  {w}")
+        con.close(); return 0
+
+    heading = ("what it can show instead" if p["blocked"] else "answer")
+    print(f"\n{BOLD}{heading}{OFF}")
+    if p["blocked"]:
+        print(f"  {DIM}the question as asked cannot be answered; "
+              f"this is the nearest the corpus supports{OFF}")
+    for r in out["results"][:args.limit]:
+        print(f"  {BOLD}{r['subject']}{OFF}")
+        for s in r.get("sections", [])[:8]:
+            if not (s["available"] and s["facts"]):
+                continue
+            facts = s["facts"]
+            if "rows" in facts:
+                print(f"    {BOLD}{s['system']}{OFF}  {DIM}{facts['count']} rows, "
+                      f"{s['table']}{OFF}")
+                for row in facts["rows"][:args.limit]:
+                    bits = "  ".join(f"{v}" for v in list(row.values())[:4]
+                                     if v is not None)
+                    print(f"      {bits}")
+                continue
+            bits = "  ".join(f"{k}={v}" for k, v in list(facts.items())[:4]
+                             if v is not None and k not in ("lad_code", "lad_name"))
+            print(f"    {s['system']:<16}{bits}")
+        for row in r.get("rows", [])[:args.limit]:
+            print("    " + "  ".join(f"{k}={v}" for k, v in list(row.items())[:5]))
+    con.close()
+    return 0
+
+
+def cmd_contradictions(args) -> int:
+    """Where two official records disagree. Neither is chosen."""
+    from . import contradictions as CD
+    con = store.connect(DB)
+    out = CD.run_all(con, limit=args.limit)
+    print(f"{BOLD}Contradictions{OFF}  {DIM}two routes to one quantity{OFF}\n")
+    print(f"  checks {out['checks']}   run {out['run']}   "
+          f"disagreeing {out['with_disagreement']}   "
+          f"rows in disagreement {out['total_disagreements']:,}\n")
+    for r in out["results"]:
+        if not r["run"]:
+            print(f"  {r['check']:<26}{DIM}not run - {r['reason']}{OFF}")
+            continue
+        colour = RED if r["disagreed"] else GREEN
+        print(f"  {BOLD}{r['check']}{OFF}  {DIM}{r['quantity']}{OFF}")
+        print(f"    compared {r['compared']:,}   "
+              f"{colour}disagreed {r['disagreed']:,}{OFF}   "
+              f"agreement {r['agreement_pct']}%")
+        if r["note"]:
+            print(f"    {DIM}{r['note']}{OFF}")
+        for d in r["disagreements"][:args.limit]:
+            print(f"      {str(d['subject'])[:34]:<36}"
+                  f"{d['left_value']:>12,.0f} vs {d['right_value']:>12,.0f}"
+                  f"   {DIM}{d['detail'][:28]}{OFF}")
+        if r["disagreed"]:
+            print(f"    {DIM}left:  {r['disagreements'][0]['left']}{OFF}")
+            print(f"    {DIM}right: {r['disagreements'][0]['right']}{OFF}")
+        print()
+    con.close()
+    return 0
+
+
+def cmd_gaps(args) -> int:
+    """What should be joinable, and is not."""
+    from . import gaps as GP
+    con = store.connect(DB)
+    r = GP.report(con, threshold=args.threshold)
+    print(f"{BOLD}Evidence gaps{OFF}  {DIM}where the trail stops, and why{OFF}\n")
+    print(f"  chains {r['chains']}   complete {r['complete']}   broken {r['broken']}")
+    causes = "   ".join(f"{k} {v}" for k, v in sorted(r["by_cause"].items()))
+    print(f"  {DIM}{causes}{OFF}\n")
+    for c in r["detail"]:
+        mark = f"{GREEN}complete{OFF}" if c["complete"] else f"{RED}breaks at {c['breaks_at']}{OFF}"
+        print(f"  {BOLD}{c['chain']}{OFF}  {mark}")
+        print(f"    {DIM}{c['asks']}{OFF}")
+        for s in c["detail"]:
+            if s["available"]:
+                pct = "" if s["populated_pct"] is None else f"  {s['populated_pct']}% populated"
+                print(f"      {GREEN}ok{OFF}    {s['step']:<26}{DIM}{s['table'] or ''}{pct}{OFF}")
+            else:
+                why = s["absent_because"] or "?"
+                print(f"      {RED}gap{OFF}   {s['step']:<26}{DIM}{why}{OFF}")
+                if s["reason"]:
+                    print(f"            {DIM}{s['reason']}{OFF}")
+        print()
+    if r["not_published_anywhere"]:
+        print(f"{BOLD}not published anywhere in the UK{OFF}  "
+              f"{DIM}no platform can close these{OFF}")
+        for g in r["not_published_anywhere"]:
+            print(f"  {g['chain']}/{g['step']}")
+    if r["fixable_here"]:
+        print(f"\n{BOLD}fixable in this platform{OFF}")
+        for g in r["fixable_here"]:
+            print(f"  {g['chain']}/{g['step']}")
+    con.close()
+    return 0
+
+
+def cmd_explore(args) -> int:
+    """Expand the graph around a node and render it."""
+    from . import relationships as RL
+    con = store.connect(DB)
+    if args.to:
+        paths = RL.between(con, args.node, args.to, max_depth=args.depth)
+        if not paths:
+            print(f"{DIM}no path within {args.depth} hops{OFF}")
+        for p_ in paths[:args.limit]:
+            print(f"  {p_}   {DIM}confidence {p_.confidence:.3f}{OFF}")
+        con.close(); return 0
+    n = RL.neighbourhood(con, args.node, depth=args.depth, max_nodes=args.limit)
+    nodes, edges = n.size
+    print(f"{BOLD}{RL.label(con, args.node)}{OFF}  {DIM}{args.node}{OFF}")
+    print(f"  {nodes} nodes, {edges} edges, depth {args.depth}"
+          + (f"  {RED}truncated{OFF}" if n.truncated else "") + "\n")
+    print(RL.to_mermaid(n) if args.mermaid else RL.to_text(n))
+    con.close()
+    return 0
+
+
+def cmd_audit(args) -> int:
+    """Run the data integrity audit."""
+    from . import audit as AU
+    con = store.connect(DB)
+    a = AU.run(con, network=args.network)
+    s = a.summary()
+    print(f"{BOLD}Data integrity audit{OFF}  "
+          f"{DIM}{'with live publisher checks' if args.network else 'database only'}{OFF}\n")
+    print(f"  checks run {s['checks_run']}   skipped {s['checks_skipped']}   "
+          f"findings {s['findings']}")
+    bits = "   ".join(f"{k} {v}" for k, v in sorted(s["by_severity"].items()))
+    print(f"  {bits}\n")
+    for sk in a.checks_skipped:
+        print(f"  {DIM}skipped {sk['check']}: {sk['reason']}{OFF}")
+    colour = {"critical": RED, "major": RED, "minor": "", "note": DIM}
+    for f in a.sorted():
+        if args.severity and f.severity != args.severity:
+            continue
+        c = colour[f.severity]
+        print(f"  {c}{f.severity.upper():<9}{OFF}{BOLD}{f.subject}{OFF}  {DIM}{f.check}{OFF}")
+        print(f"    {f.summary}")
+        if f.evidence:
+            print(f"    {DIM}{f.evidence}{OFF}")
+        if f.remedy and f.severity in ("critical", "major"):
+            print(f"    {DIM}remedy: {f.remedy}{OFF}")
+    con.close()
+    return 1 if s["critical"] else 0
+
+
+def cmd_investigate(args) -> int:
+    """Create and work an investigation."""
+    from . import investigations as I
+    con = store.connect(DB)
+    try:
+        if args.new:
+            inv = I.create(con, args.new, question=args.question)
+            print(f"  created {BOLD}{inv.id}{OFF}")
+        elif args.add:
+            out = I.add(con, args.name, args.add, why=args.why or "",
+                        found_via="added by hand")
+            print(f"  {'added' if out['added'] else 'already present'}  {args.add}")
+        elif args.rule_out:
+            I.remove(con, args.name, args.rule_out, because=args.why or "")
+            print(f"  ruled out {args.rule_out}")
+        elif args.expand:
+            out = I.expand(con, args.name, args.expand, depth=args.depth)
+            print(f"  added {out['added']} from {out['seed']} "
+                  f"({out['already_present']} already present)")
+        elif args.note:
+            I.note(con, args.name, args.note)
+            print("  noted")
+        elif args.close:
+            I.close(con, args.name, outcome=args.close)
+            print("  closed")
+        elif args.name:
+            inv = I.get(con, args.name)
+            state = f"{DIM}closed{OFF}" if not inv.open else f"{GREEN}open{OFF}"
+            print(f"{BOLD}{inv.name}{OFF}  {DIM}{inv.id}{OFF}  {state}")
+            if inv.question:
+                print(f"  {DIM}{inv.question}{OFF}")
+            if inv.outcome:
+                print(f"  outcome: {inv.outcome}")
+            counts = "  ".join(f"{k} {v}" for k, v in sorted(inv.by_kind().items()))
+            print(f"\n  {len(inv.live_items)} subjects   {counts}")
+            for i in inv.live_items:
+                print(f"    {i['identifier']}")
+                print(f"      {DIM}{i['why']}{OFF}")
+                if i["found_via"]:
+                    print(f"      {DIM}via {i['found_via']}{OFF}")
+            if inv.ruled_out:
+                print(f"\n  {len(inv.ruled_out)} ruled out")
+                for i in inv.ruled_out:
+                    print(f"    {DIM}{i['identifier']} -- {i['removed_because']}{OFF}")
+            for n in inv.notes:
+                print(f"\n  {DIM}{n['noted_at']:%Y-%m-%d %H:%M}{OFF}  {n['text']}")
+        else:
+            rows = I.listing(con)
+            if not rows:
+                print(f"  {DIM}no investigations yet -- gt investigate --new \"name\"{OFF}")
+            for r in rows:
+                state = "closed" if r["closed_at"] else "open"
+                print(f"  {r['id']:<34}{r['items']:>4} subjects  "
+                      f"{r['ruled_out']:>3} ruled out  {DIM}{state}{OFF}")
+    except I.InvestigationError as exc:
+        print(f"{RED}{exc}{OFF}")
+        con.close(); return 1
+    con.close()
+    return 0
+
+
+def cmd_bundle(args) -> int:
+    """Export an investigation as an evidence pack."""
+    from . import bundles as BU
+    con = store.connect(DB)
+    if args.out:
+        out = BU.write(con, args.name, Path(args.out))
+        print(f"  {BOLD}{out['path']}{OFF}")
+        for f in out["files"]:
+            print(f"    {f}")
+        print(f"\n  {out['subjects']} subjects, {out['sources']} sources")
+        if out["sources_without_retrieval_record"]:
+            print(f"  {RED}{out['sources_without_retrieval_record']} sources have no "
+                  f"recorded retrieval{OFF}  {DIM}stated in the pack{OFF}")
+    else:
+        print(BU.to_markdown(BU.build(con, args.name)))
     con.close()
     return 0
 
@@ -793,6 +1280,9 @@ def main(argv=None) -> int:
     pw = sub.add_parser("watchman", help="build the supplier register and check exposure")
     pw.add_argument("--limit", type=int, default=10)
     pw.set_defaults(fn=cmd_watchman)
+
+    pe = sub.add_parser("entity", help="build the organisation knowledge graph")
+    pe.set_defaults(fn=cmd_entity)
 
     pb = sub.add_parser("bellwether", help="provider concentration in care")
     pb.add_argument("--limit", type=int, default=8)
@@ -855,6 +1345,78 @@ def main(argv=None) -> int:
     prun.add_argument("--strict", action="store_true", help="exit non-zero if a stage fails")
     prun.set_defaults(fn=cmd_run)
 
+    pcl = sub.add_parser("claims", help="corrections this platform made to its own claims")
+    pcl.add_argument("--system", default=None)
+    pcl.set_defaults(fn=cmd_claims)
+
+    pgr = sub.add_parser("graph", help="the evidence graph and what can be walked")
+    pgr.add_argument("--node", default=None, help="a gt: identifier to walk from")
+    pgr.add_argument("--depth", type=int, default=4)
+    pgr.add_argument("--limit", type=int, default=25)
+    pgr.set_defaults(fn=cmd_graph)
+
+    pwy = sub.add_parser("why", help="where a number came from")
+    pwy.add_argument("subject", help="a gt: identifier")
+    pwy.add_argument("--field", default=None)
+    pwy.set_defaults(fn=cmd_why)
+
+    psn = sub.add_parser("snapshot", help="record or compare the platform over time")
+    psn.add_argument("--label", default=None)
+    psn.add_argument("--list", action="store_true")
+    psn.add_argument("--diff", nargs=2, metavar=("BEFORE", "AFTER"), default=None)
+    psn.set_defaults(fn=cmd_snapshot)
+
+    ppf = sub.add_parser("profile", help="everything known about one place or organisation")
+    ppf.add_argument("identifier", help="a gt: place or entity identifier")
+    ppf.add_argument("--limit", type=int, default=5)
+    ppf.set_defaults(fn=cmd_profile)
+
+    pask = sub.add_parser("ask", help="answer a question, showing the plan first")
+    pask.add_argument("question", nargs="+")
+    pask.add_argument("--limit", type=int, default=6)
+    pask.set_defaults(fn=cmd_ask)
+
+    pcd = sub.add_parser("contradictions", help="where two official records disagree")
+    pcd.add_argument("--limit", type=int, default=5)
+    pcd.set_defaults(fn=cmd_contradictions)
+
+    pgp = sub.add_parser("gaps", help="what should be joinable, and is not")
+    pgp.add_argument("--threshold", type=float, default=1.0)
+    pgp.set_defaults(fn=cmd_gaps)
+
+    pex = sub.add_parser("explore", help="expand the graph around a node")
+    pex.add_argument("node")
+    pex.add_argument("--to", default=None, help="find paths to another node")
+    pex.add_argument("--depth", type=int, default=2)
+    pex.add_argument("--limit", type=int, default=40)
+    pex.add_argument("--mermaid", action="store_true")
+    pex.set_defaults(fn=cmd_explore)
+
+    pau = sub.add_parser("audit", help="data integrity audit")
+    pau.add_argument("--network", action="store_true",
+                     help="also check every source still serves data anonymously")
+    pau.add_argument("--severity", default=None,
+                     choices=["critical", "major", "minor", "note"])
+    pau.set_defaults(fn=cmd_audit)
+
+    piv = sub.add_parser("investigate", help="create and work an investigation")
+    piv.add_argument("name", nargs="?", default=None)
+    piv.add_argument("--new", default=None, metavar="NAME")
+    piv.add_argument("--question", default=None)
+    piv.add_argument("--add", default=None, metavar="ID")
+    piv.add_argument("--rule-out", dest="rule_out", default=None, metavar="ID")
+    piv.add_argument("--why", default=None, help="required with --add and --rule-out")
+    piv.add_argument("--expand", default=None, metavar="SEED")
+    piv.add_argument("--depth", type=int, default=2)
+    piv.add_argument("--note", default=None)
+    piv.add_argument("--close", default=None, metavar="OUTCOME")
+    piv.set_defaults(fn=cmd_investigate)
+
+    pbu = sub.add_parser("bundle", help="export an investigation as an evidence pack")
+    pbu.add_argument("name")
+    pbu.add_argument("--out", default=None, help="directory to write; omit to print")
+    pbu.set_defaults(fn=cmd_bundle)
+
     psv = sub.add_parser("serve", help="run the system on localhost")
     psv.add_argument("--port", type=int, default=8787)
     psv.add_argument("--no-open", action="store_true", help="do not open a browser")
@@ -862,7 +1424,7 @@ def main(argv=None) -> int:
 
     pbf = sub.add_parser("backfill", help="complete sources taken only in part")
     pbf.add_argument("--only", nargs="*",
-                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette"])
+                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette", "planit"])
     pbf.add_argument("--pages", type=int, default=200)
     pbf.add_argument("--strict", action="store_true")
     pbf.set_defaults(fn=cmd_backfill)

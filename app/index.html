@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Groundtruth — public interface</title>
-<meta name="description" content="Groundtruth public interface: linkage coverage, thirteen systems and the free UK data behind them.">
+<title>UK GroundTruth — public interface</title>
+<meta name="description" content="UK GroundTruth public interface: linkage coverage, thirteen systems and the free UK data behind them.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,450;14..32,500;14..32,600;14..32,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
 </head>
@@ -17,42 +17,63 @@
 <aside class="side">
   <div class="side__brand">
     <div class="mark">G</div>
-    <div><div class="side__name">Groundtruth</div><div class="side__sub">Public</div></div>
+    <div><div class="side__name">UK GroundTruth</div><div class="side__sub">Public</div></div>
   </div>
   <div class="side__scroll">
-    <div class="side__group">Overview</div>
-    <a class="navi is-on" href="#top"><i class="navi__dot"></i>National picture</a>
-    <a class="navi" href="#spines"><i class="navi__dot"></i>The two links</a>
-    <a class="navi" href="#place"><i class="navi__dot"></i>One place, every system</a>
-    <a class="navi" href="#chains"><i class="navi__dot"></i>One fact, many systems</a>
-    <div class="side__group">Systems</div>
+    <div class="side__group">The story</div>
+    <a class="navi is-on" href="#top"><i class="navi__dot"></i>What it is</a>
+    <a class="navi" href="#mark-01"><i class="navi__dot"></i>The evidence</a>
+    <a class="navi" href="#place"><i class="navi__dot"></i>Your area</a>
+    <a class="navi" href="#systems"><i class="navi__dot"></i>The thirteen systems</a>
+    <a class="navi" href="#spines"><i class="navi__dot"></i>How they connect</a>
+    <a class="navi" href="#feeds"><i class="navi__dot"></i>The evidence base</a>
+    <a class="navi" href="#honesty"><i class="navi__dot"></i>What it cannot do</a>
+    <div class="side__group">Jump to a system</div>
     <div id="navSystems"></div>
-    <div class="side__group">Evidence</div>
-    <a class="navi" href="#feeds"><i class="navi__dot"></i>Data sources</a>
-    <a class="navi" href="#honesty"><i class="navi__dot"></i>What we cannot do</a>
   </div>
 </aside>
 
 <div class="main">
 <header class="top"><div class="top__in">
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
-  <div><div class="top__crumb">Groundtruth · Public interface</div><div class="top__title">National picture</div></div>
+  <div><div class="top__crumb">UK GroundTruth · Public interface</div><div class="top__title">National picture</div></div>
   <div class="spacer"></div>
+  <a class="topsearch" href="#search" aria-label="Search across all systems">
+    <span class="topsearch__ico">⌕</span><span class="topsearch__t">Search organisations, places, systems</span>
+    <span class="topsearch__k">/</span></a>
   <span class="live"><i></i>13 SYSTEMS LIVE</span>
-  <nav class="switch">
-    <a class="is-on" href="index.html">Public</a><a href="admin.html">Admin</a><a href="mobile.html">Mobile</a>
-  </nav>
   <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
 </div></header>
 
 <div class="pad" id="top">
 
-  <div class="row" style="justify-content:space-between;margin-bottom:.8rem">
-    <span class="tag" id="liveTag">READING PLATFORM OUTPUT…</span>
-    <span class="card__s mono" id="builtTag" style="font-size:11px"></span>
-  </div>
+  <section class="hero rise" id="hero">
+    <div class="hero__inner">
+      <div class="row" style="gap:.6rem;margin-bottom:1.1rem">
+        <span class="tag" id="liveTag">READING PLATFORM OUTPUT…</span>
+        <span class="card__s mono" id="builtTag" style="font-size:11px"></span>
+      </div>
+      <h1 class="hero__h">UK government records <em>what</em> happened.<br>
+        It rarely records <em>where</em>, or <em>which organisation</em>.</h1>
+      <p class="hero__p">A flood objection with no location. A billion pounds of developer money that
+        can't be put on a map. A care company quietly running a third of a county's beds.
+        The data exists — but two joins are missing, so nobody can use it.</p>
+      <p class="hero__p">UK GroundTruth adds those two joins — <strong>where</strong> and
+        <strong>who</strong> — to data anyone can download, without an account or a fee.
+        That single fix makes <strong>thirteen</strong> things possible that are impossible today.
+        Every figure below is computed from published records on one machine. Nothing is estimated.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#place">See it for your area &rarr;</a>
+        <a class="btn btn--ghost" href="#systems">The thirteen systems</a>
+        <a class="btn btn--ghost" href="#honesty">What it cannot do</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="secmark rise" id="mark-01"><span class="secmark__n">01</span><div><div class="secmark__k">The evidence</div><div class="secmark__t">Thirteen findings, in numbers</div><div class="secmark__s">Each figure is one system's headline. Click any card to see the sources, the method, and what it cannot tell you.</div></div></div>
   <div class="grid g4" id="kpis"></div>
 
+  <div class="secmark rise" id="mark-02"><span class="secmark__n">02</span><div><div class="secmark__k">Your area</div><div class="secmark__t">One place, every system</div><div class="secmark__s">Pick a district. Every system reports what it found there, with the coverage each figure rests on.</div></div></div>
   <section class="card rise" id="place" style="margin-top:1rem">
     <div class="card__hd">
       <div><div class="card__t">One place, every system</div>
@@ -80,6 +101,17 @@
     </div>
   </section>
 
+  <div class="secmark rise" id="mark-03"><span class="secmark__n">03</span><div><div class="secmark__k">The thirteen</div><div class="secmark__t">Every system, and what it found</div><div class="secmark__s">Thirteen questions nobody can currently answer. Each runs only on data anyone can download.</div></div></div>
+  <section class="card rise" id="systems" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">All thirteen systems, with what each one found</div>
+      <div class="card__s" id="sysCount">&nbsp;</div></div>
+      <div class="spacer"></div>
+      <a class="cmpcta" href="#compare">What · Where · Who — compare all 13 →</a>
+      <div class="row" id="filters" style="margin-left:.6rem"></div></div>
+    <div class="card__b"><div class="grid g3" id="sysGrid"></div></div>
+  </section>
+
+  <div class="secmark rise" id="mark-04"><span class="secmark__n">04</span><div><div class="secmark__k">How they connect</div><div class="secmark__t">Two links, shared by everything</div><div class="secmark__s">The same two joins power all thirteen. Fix them once, and one fact sets off several systems at once.</div></div></div>
   <section class="card rise" id="spines" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">The two missing links</div>
       <div class="card__s">Every system below depends on one or both</div></div></div>
@@ -101,15 +133,14 @@
           Six systems depend on it.</p>
           <div class="meter" style="margin-top:.7rem"><i data-w="60" class="warn"></i></div>
           <div class="card__s mono" style="margin-top:.3rem;font-size:11px" id="spineEntity">&nbsp;</div>
+          <a class="cmpcta" href="#org" style="margin-top:.7rem">Explore organisations across systems →</a>
         </div>
       </div>
-      <div class="pipe" style="margin-top:1.1rem">
-        <div class="pipe__s"><div class="pipe__n">01 COLLECT</div><div class="pipe__t">Fetch</div><div class="pipe__v">39 open feeds</div></div>
-        <div class="pipe__s"><div class="pipe__n">02 RESOLVE</div><div class="pipe__t">Place link</div><div class="pipe__v">UPRN · USRN · TOID</div></div>
-        <div class="pipe__s"><div class="pipe__n">03 RESOLVE</div><div class="pipe__t">Entity link</div><div class="pipe__v">Company no. · PPON</div></div>
-        <div class="pipe__s"><div class="pipe__n">04 SCORE</div><div class="pipe__t">Confidence</div><div class="pipe__v">Published per link</div></div>
-        <div class="pipe__s"><div class="pipe__n">05 SERVE</div><div class="pipe__t">Systems</div><div class="pipe__v">13 consumers</div></div>
+      <div class="jrnyhd" style="margin-top:1.3rem">
+        <div class="card__t">The journey of a number</div>
+        <div class="card__s">From a file a department published to the figure on this page. Click any stage to see what happens there — with the platform's own counts.</div>
       </div>
+      <div class="jn" id="jnPlatform"></div>
 
       <hr class="hr" style="margin:1.4rem 0 1.1rem">
 
@@ -128,14 +159,7 @@
     <div class="card__b"><div class="stack" id="chainList"></div></div>
   </section>
 
-  <section class="card rise" id="systems" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">All thirteen systems, with what each one found</div>
-      <div class="card__s" id="sysCount">&nbsp;</div></div>
-      <div class="spacer"></div>
-      <div class="row" id="filters"></div></div>
-    <div class="card__b"><div class="grid g3" id="sysGrid"></div></div>
-  </section>
-
+  <div class="secmark rise" id="mark-05"><span class="secmark__n">05</span><div><div class="secmark__k">The evidence base</div><div class="secmark__t">Where every figure comes from</div><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee — and the ones that failed, kept visible.</div></div></div>
   <div class="grid g-1-2" style="margin-top:1rem">
     <section class="card rise">
       <div class="card__hd"><div class="card__t">Where the systems draw from</div></div>
@@ -156,42 +180,74 @@
     </section>
   </div>
 
+  <div class="secmark rise" id="mark-06"><span class="secmark__n">06</span><div><div class="secmark__k">Honesty</div><div class="secmark__t">What this cannot do</div><div class="secmark__s">The limits are part of the product. A tool a civil servant can defend states plainly what it cannot answer.</div></div></div>
   <section class="card rise" id="honesty" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">What this cannot do</div>
       <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
     <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
   </section>
 
-  <p class="card__s" style="margin-top:1.6rem;max-width:70ch">
-    Prototype for demonstration. Figures shown are computed from published DfE, ONS and Ordnance Survey
-    data retrieved on 17 August 2026. Where a figure is illustrative rather than measured it is labelled as such.
+  <p class="card__s" style="margin-top:1.6rem;max-width:78ch" id="footNote">
+    Prototype. Every figure on this page is computed on this machine from published sources, each
+    retrieved without an account, key or fee. Nothing is modelled, estimated or filled in by hand.
+    Source access was verified anonymously on 17 August 2026.
   </p>
 </div>
 </div>
 </div>
 
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-  <div class="drawer__hd">
-    <button class="drawer__close" id="drawerClose" aria-label="Close">&times;</button>
-    <div class="card__s mono" style="font-size:10px;letter-spacing:.1em" id="drawerKicker">&nbsp;</div>
-    <h2 id="drawerTitle" style="font-size:22px;margin-top:.35rem">&nbsp;</h2>
-    <p class="card__s" id="drawerSub" style="margin-top:.25rem">&nbsp;</p>
-  </div>
-  <div class="drawer__body" id="drawerBody"></div>
-</aside>
+<div id="syshost"><div class="syspage" id="syspage"></div></div>
 
 <script src="assets/shared.js"></script>
 <script src="assets/platform.js"></script>
 <script src="assets/detail.js"></script>
+<script src="assets/cards.js"></script>
+<script src="assets/joins.js"></script>
+<script src="assets/sysview.js"></script>
 <script src="assets/anime.min.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/systempage.js"></script>
 <script>
 (async function(){
-  document.getElementById('navSystems').innerHTML = SYSTEMS.map(s =>
-    `<a class="navi" href="#sys-${s.id}"><i class="navi__dot"></i>${s.n}</a>`).join('');
-
   await Platform.load();
+
+  // The jump list doubles as a scannable index: system icon, domain, and its
+  // live headline figure. Built after load so the figure is the real number.
+  const navFig = id => {
+    try {
+      const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[id];
+      const h = spec && spec.headline && spec.headline(Platform.sys(id));
+      if (!h) return '';
+      if (h.trend != null) return (h.trend > 0 ? '+' : '') + h.trend + '%';
+      return (h.prefix || '') + (h.value != null ? Number(h.value).toLocaleString('en-GB') : '') + (h.unit || '');
+    } catch (e) { return ''; }
+  };
+  document.getElementById('navSystems').innerHTML = SYSTEMS.map(s => {
+    const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[s.id];
+    const ico = (spec && spec.icon) || '•';
+    const dom = (spec && spec.domain) || s.dom || '';
+    const fig = navFig(s.id);
+    return `<a class="navx" href="#sys-${s.id}" data-spy="sys-${s.id}">
+      <span class="navx__ico">${ico}</span>
+      <span class="navx__tx"><span class="navx__nm">${s.n}</span>${dom ? `<span class="navx__dm">${dom}</span>` : ''}</span>
+      ${fig ? `<span class="navx__fig">${fig}</span>` : ''}
+    </a>`;
+  }).join('');
+
+  // Scroll-spy: highlight the system whose card is nearest the top of the view.
+  const spyLinks = [...document.querySelectorAll('#navSystems .navx')];
+  const spyTargets = spyLinks.map(a => document.getElementById(a.dataset.spy)).filter(Boolean);
+  if (spyTargets.length) {
+    const spy = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (!e.isIntersecting) return;
+        const id = e.target.id;
+        spyLinks.forEach(a => a.classList.toggle('is-on', a.dataset.spy === id));
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    spyTargets.forEach(t => spy.observe(t));
+  }
+
   const built = Platform.builtSystems();
   const gen = Platform.generated();
   document.getElementById('liveTag').outerHTML = Platform.error()
@@ -349,6 +405,14 @@
         or it is planned at a different geography.</p>` : ''}`;
   }
 
+  // Let cross-system search drive the location layer.
+  window.__gtShowPlace = code => {
+    showPlace(code);
+    const path = mapEl.querySelector(`path[data-c="${code}"]`);
+    if (path) { mapEl.querySelectorAll('path.is-sel').forEach(o => o.classList.remove('is-sel')); path.classList.add('is-sel'); }
+    try { map.zoomTo(code); } catch (e) {}
+    document.getElementById('place').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   mapEl.addEventListener('pick', e => showPlace(e.detail.code));
   document.getElementById('placeSearch').addEventListener('change', e => {
     const hit = list.find(p => p.name.toLowerCase() === e.target.value.toLowerCase());
@@ -370,29 +434,65 @@
   const badge = st => st==='live' ? '<span class="tag tag--ok">LIVE</span>' : '<span class="tag tag--warn">BETA</span>';
   const spineTag = sp => sp==='both' ? '<span class="tag">WHERE + WHO</span>'
     : sp==='place' ? '<span class="tag">WHERE</span>' : '<span class="tag">WHO</span>';
+  const srcFor = id => (Platform.sourceSummary().rows || [])
+    .filter(r => (r.systems||'').split(',').map(x=>x.trim()).includes(id));
+  const freshFor = id => {
+    const fed = srcFor(id).filter(r => r.fetched_at || r.provenance==='unlogged');
+    if (!fed.length) return GT.freshness(null, null);
+    const latest = fed.map(r=>r.fetched_at).filter(Boolean).sort().slice(-1)[0];
+    const cad = (fed[0]||{}).cadence;
+    return GT.freshness(cad, latest || Date.now());
+  };
   const drawSystems = (f='all') => {
     const list = SYSTEMS.filter(s => f==='all' || s.spine===f);
     document.getElementById('sysGrid').innerHTML = list.map(s=>{
-      const r = Platform.systemResult(s.id);
-      const result = r
-        ? `<div style="margin-top:.75rem;padding-top:.7rem;border-top:1px solid var(--line)">
-             <div style="font-size:22px;font-weight:680;letter-spacing:-.02em;color:var(--uk-blue)">${r.headline}</div>
-             <div class="card__s" style="font-size:11.5px;margin-top:.1rem">${r.label}</div>
-             <div class="card__s" style="font-size:10.5px;margin-top:.25rem;color:var(--ink-3)">${r.sub}</div>
-           </div>`
-        : `<div style="margin-top:.75rem;padding-top:.7rem;border-top:1px solid var(--line)">
-             <div class="card__s" style="font-size:11.5px">no output yet — run this system</div></div>`;
-      return `<a class="card card--hov" id="sys-${s.id}" href="#${s.id}" data-open="${s.id}" style="display:block">
-      <div class="card__b">
-        <div class="row" style="justify-content:space-between">${badge(s.st)}<span class="card__s mono" style="font-size:10px">${s.dom.toUpperCase()}</span></div>
-        <h3 style="font-size:15px;margin-top:.6rem">${s.n}</h3>
-        <p class="card__s" style="margin-top:.3rem">${s.s}</p>
-        <div style="margin-top:.6rem">${spineTag(s.spine)}</div>
-        ${result}
-      </div></a>`;}).join('');
+      const spec = CARDS.SPEC[s.id];
+      const d = Platform.sys(s.id);
+      let statHTML='', pvHTML='';
+      if (spec && d) {
+        const h = spec.headline(d);
+        const v = h.dec!=null ? Number(h.value).toFixed(h.dec) : CARDS.fmt(h.value);
+        const trend = h.trend!=null
+          ? `<span class="syscard__trend ${h.trend>=0?'up':'down'}">${h.trend>=0?'▲':'▼'} ${Math.abs(h.trend)}%</span>` : '';
+        statHTML = `<div class="syscard__stat">
+            <span class="syscard__v">${h.prefix||''}${v}</span>
+            <span class="syscard__u">${h.unit||''}</span>${trend}</div>
+          <div class="syscard__lab">${h.label}</div>
+          <div class="syscard__ctx">${h.context||''}</div>`;
+        try { pvHTML = `<div class="syscard__pv">${GT.preview(spec.preview(d))}</div>`; } catch(e){ pvHTML=''; }
+      } else {
+        statHTML = `<div class="syscard__stat"><span class="card__s">not built yet</span></div>`;
+      }
+      const fr = freshFor(s.id);
+      return `<a class="syscard rise" id="sys-${s.id}" href="#system/${s.id}">
+        <div class="syscard__hd">
+          <span class="syscard__ico">${spec?spec.icon:'▦'}</span>
+          <div style="min-width:0">
+            <div class="syscard__name">${s.n}</div>
+            <div class="syscard__dom">${(spec?spec.domain:s.dom).toUpperCase()} · ${s.spine==='both'?'WHERE + WHO':s.spine==='place'?'WHERE':'WHO'}</div>
+          </div>
+        </div>
+        <div class="syscard__purpose">${spec?spec.purpose:s.s}</div>
+        ${statHTML}
+        ${pvHTML}
+        <div class="syscard__foot">
+          <span class="fresh ${fr.state}"><i></i>${fr.label}</span>
+          <span class="syscard__explore">Explore system →</span>
+        </div>
+        ${(typeof JOINS!=='undefined'&&JOINS[s.id])?(()=>{const j=JOINS[s.id];const none='<span class=\"wwwr__none\">no join</span>';return `
+        <div class="wwwr">
+          <div class="wwwr__r"><span class="wwwr__k">WHAT</span><span>${j.what}</span></div>
+          <div class="wwwr__r wwwr__r--where"><span class="wwwr__k">WHERE</span><span>${j.where||none}</span></div>
+          <div class="wwwr__r wwwr__r--who"><span class="wwwr__k">WHO</span><span>${j.who||none}</span></div>
+        </div>`;})():''}
+      </a>`;}).join('');
     document.getElementById('sysCount').textContent =
-      `${list.length} shown · ${list.filter(s=>Platform.systemResult(s.id)).length} with measured output`;
+      `${list.length} shown · all reading live platform output`;
     GT.reveal();
+    // animate preview fills into view
+    requestAnimationFrame(()=>document.querySelectorAll('#sysGrid .pv__gaugefill, #sysGrid .pv__bt i, #sysGrid .pv__cmpt i').forEach(el=>{
+      const w=el.style.width; el.style.width='0'; requestAnimationFrame(()=>el.style.width=w);
+    }));
   };
   document.getElementById('filters').innerHTML =
     [['all','All 13'],['place','Where'],['entity','Who'],['both','Both']]
@@ -496,119 +596,26 @@
     ? `${GT.fmt(sp.register)} awards registered, ${GT.fmt(sp.registerNumbers)} company numbers`
     : 'entity spine not yet loaded';
 
-  /* ---- system detail drawer ---------------------------------------- */
-  const scrim = document.getElementById('scrim');
-  const drawer = document.getElementById('drawer');
-  const drawerBody = document.getElementById('drawerBody');
-  let lastFocus = null;
+  /* ---- system pages: routed full-screen views (assets/systempage.js) ---- */
+  SystemPage.boot();
 
-  const mbytes = v => v == null ? '' : (v >= 1e6 ? (v/1e6).toFixed(1)+' MB' : Math.round(v/1e3)+' KB');
-  const since = ts => {
-    if (!ts) return 'fetched outside the registry';
-    const h = (Date.now() - new Date(String(ts).replace(' ','T')).getTime())/36e5;
-    return h < 48 ? Math.round(h)+'h ago' : Math.round(h/24)+'d ago';
-  };
 
-  function openSystem(id) {
-    const meta = SYSTEMS.find(x => x.id === id);
-    const info = DETAIL[id];
-    if (!meta || !info) return;
-    const out = Platform.sys(id);
-    // Sources registered against this system specifically. Falling back to the
-    // full catalogue would claim every feed contributes to every system.
-    const sources = Platform.systemProvenance(id);
+  const jnP = document.getElementById('jnPlatform');
+  const pipe = Platform.pipeline() || {};
+  if (jnP && GT.journey) GT.journey(jnP, pipe);
 
-    document.getElementById('drawerKicker').textContent =
-      `${meta.dom.toUpperCase()} · ${meta.spine === 'both' ? 'WHERE + WHO' : meta.spine === 'place' ? 'WHERE' : 'WHO'} · ${meta.st.toUpperCase()}`;
-    document.getElementById('drawerTitle').textContent = meta.n;
-    document.getElementById('drawerSub').textContent = info.question;
-
-    drawerBody.innerHTML = `
-      <div class="note">
-        <div class="note__title">Why this cannot be answered today</div>
-        <p>${info.why}</p>
-      </div>
-
-      <div class="eyebrow mt-5">1 · Where the data comes from</div>
-      <p class="card__s mt-1">${sources.length} published source${sources.length===1?'':'s'}, each retrieved without an account, key or licence fee.</p>
-      <div class="stack mt-3" style="gap:.45rem">
-        ${sources.map(src => `
-          <div class="card" style="box-shadow:none">
-            <div class="card__b" style="padding:.7rem .85rem">
-              <div class="row" style="justify-content:space-between;align-items:baseline">
-                <span style="font-size:13px;font-weight:600">${src.name}</span>
-                <span class="tag ${src.ok?'tag--ok':'tag--bad'}">${src.status}</span>
-              </div>
-              <div class="card__s" style="font-size:11.5px;margin-top:.2rem">${src.publisher}</div>
-              <div class="row card__s mono" style="font-size:10px;margin-top:.3rem;gap:.7rem;color:var(--ink-3)">
-                <span>${src.licence || 'licence not stated'}</span><span>${src.cadence}</span>
-                ${src.bytes ? `<span>${mbytes(src.bytes)}</span>` : ''}<span>${since(src.fetched)}</span>
-              </div>
-            </div></div>`).join('') || '<p class="card__s">No source registered against this system.</p>'}
-      </div>
-
-      <div class="eyebrow mt-5">2 · How it becomes a number</div>
-      <div class="flowbar mt-3">
-        <div class="flowbar__s"><div class="flowbar__k">FETCH</div>
-          <div class="flowbar__v">${sources.length} source${sources.length===1?'':'s'}</div>
-          <div class="flowbar__d">anonymous, hashed</div></div>
-        <div class="flowbar__s"><div class="flowbar__k">RESOLVE</div>
-          <div class="flowbar__v">${meta.spine === 'both' ? 'place + entity' : meta.spine === 'place' ? 'place spine' : 'entity spine'}</div>
-          <div class="flowbar__d">to a district or a company</div></div>
-        <div class="flowbar__s"><div class="flowbar__k">COMPUTE</div>
-          <div class="flowbar__v">${meta.n}</div>
-          <div class="flowbar__d">with coverage attached</div></div>
-        <div class="flowbar__s"><div class="flowbar__k">PUBLISH</div>
-          <div class="flowbar__v">gold tables</div>
-          <div class="flowbar__d">what you see below</div></div>
-      </div>
-      <p class="card__desc mt-3" style="flex:none">${Platform.systemMethod(id) || info.method}</p>
-
-      <div class="eyebrow mt-5">3 · What it found</div>
-      <div class="mt-3">${renderFindings(id, out)}</div>
-
-      <div class="eyebrow mt-5">4 · What it cannot tell you</div>
-      <div class="stack mt-3" style="gap:.5rem">
-        ${info.limits.map((l,i) => `
-          <div class="step">
-            <div class="step__n">${i+1}</div>
-            <p class="card__desc" style="flex:none;padding-top:.15rem">${l}</p>
-          </div>`).join('')}
-      </div>
-
-      <p class="card__s mt-5">Every figure here is computed on this machine from the sources listed above.
-      Nothing is modelled, estimated or filled in.</p>`;
-
-    lastFocus = document.activeElement;
-    scrim.classList.add('on');
-    drawer.classList.add('on');
-    document.body.style.overflow = 'hidden';
-    document.getElementById('drawerClose').focus();
-    drawerBody.scrollTop = 0;
-    GT.countAll(drawerBody);
+  // Keep the footer note honest against the payload rather than hand-edited text.
+  const fn = document.getElementById('footNote');
+  if (fn && pipe.source) {
+    const gen = pipe.public && pipe.public.generated
+      ? String(pipe.public.generated).slice(0, 10) : null;
+    fn.textContent =
+      `Prototype. Every figure on this page is computed on this machine from `
+      + `${pipe.source.sources} published sources across ${pipe.source.publishers} government and regulator `
+      + `publishers, each retrieved without an account, key or fee. Nothing is modelled, estimated or `
+      + `filled in by hand. Source access was verified anonymously on 17 August 2026`
+      + (gen ? `; figures last computed ${gen}.` : '.');
   }
-
-  function closeDrawer() {
-    scrim.classList.remove('on');
-    drawer.classList.remove('on');
-    document.body.style.overflow = '';
-    if (lastFocus) lastFocus.focus();
-    if (location.hash) history.replaceState(null, '', location.pathname);
-  }
-
-  document.getElementById('sysGrid').addEventListener('click', e => {
-    const a = e.target.closest('[data-open]');
-    if (!a) return;
-    e.preventDefault();
-    openSystem(a.dataset.open);
-  });
-  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-  scrim.addEventListener('click', closeDrawer);
-  addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('on')) closeDrawer(); });
-
-  // Deep link: /index.html#catchment opens that system directly.
-  const hash = location.hash.replace('#','');
-  if (hash && SYSTEMS.some(x => x.id === hash)) openSystem(hash);
 
   GT.reveal(); GT.countAll(); GT.meters();
 })();

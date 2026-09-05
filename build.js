@@ -1,5 +1,5 @@
 // Static site generator. Run: node build.js
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, statSync } from 'node:fs';
 import A from './data/systems-a.js';
 import B from './data/systems-b.js';
 import C from './data/systems-c.js';
@@ -7,8 +7,9 @@ import P from './data/platform.js';
 import CHAINS from './data/chains.js';
 import EX from './data/examples.js';
 import RS from './data/research.js';
+import * as SEO from './data/seo.js';
 
-// The thirteen Groundtruth systems: every source fetchable anonymously, no account, no key, no application.
+// The thirteen UK GroundTruth systems: every source fetchable anonymously, no account, no key, no application.
 const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass', 'baseline'];
 const sysById = Object.fromEntries([...A, ...B, ...C].map(s => [s.id, s]));
 
@@ -22,8 +23,13 @@ const THEMES = {
   climate: 'Climate &amp; energy', transport: 'Transport', operations: 'Operations', equity: 'Equity'
 };
 
-const head = (title, desc, depth = 0) => {
+const head = (title, desc, depth = 0, seo = {}) => {
   const p = depth ? '../' : '';
+  const url = SEO.canonical(seo.path || '');
+  const image = SEO.cardImage(seo.card);
+  const meta = SEO.metaTags({ url, title, description: desc, image,
+                              type: seo.type || 'website', robots: seo.robots });
+  const ld = seo.ld ? SEO.graph(seo.ld) : '';
   return `<!doctype html>
 <html lang="en-GB">
 <head>
@@ -31,11 +37,13 @@ const head = (title, desc, depth = 0) => {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title}</title>
 <meta name="description" content="${desc}">
+${meta}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${p}assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+${ld}
 </head>
 <body>`;
 };
@@ -43,7 +51,7 @@ const head = (title, desc, depth = 0) => {
 const nav = (depth = 0) => {
   const p = depth ? '../' : '';
   return `<nav class="nav"><div class="wrap nav__inner">
-<a class="brand" href="${p}index.html"><span class="brand__mark">G</span>Groundtruth<span class="brand__sub">by Dexter DCL</span></a>
+<a class="brand" href="${p}index.html"><span class="brand__mark">G</span>UK GroundTruth<span class="brand__sub">by Dexter DCL</span></a>
 <div class="nav__links">
 <a class="hide-sm" href="${p}index.html#thesis">The problem</a>
 <a class="hide-sm" href="${p}index.html#systems">Systems</a>
@@ -61,22 +69,22 @@ const foot = (depth = 0) => {
   return `<footer class="foot"><div class="wrap">
 <div class="foot__grid">
 <div>
-<h4>Groundtruth systems</h4>
+<h2>UK GroundTruth systems</h2>
 ${DELIVERABLE.slice(0, 7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
-<h4>&nbsp;</h4>
+<h2 class="visually-hidden">UK GroundTruth systems, continued</h2>
 ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
-<h4>Sections</h4>
+<h2>Sections</h2>
 <a href="${p}index.html#chains">How they help each other</a>
 <a href="${p}index.html#sequence">Build order</a>
 <a href="${p}index.html#delivery">Delivery and procurement</a>
 <a href="${p}index.html#rejected">Out of scope</a>
 </div>
 <div>
-<h4>About</h4>
+<h2>About</h2>
 <p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
 </div>
 </div>
@@ -100,10 +108,31 @@ function detailPage(s, i) {
     ['risks', 'Risks &amp; mitigations'], ['sources', 'Sources']
   ];
 
-  return `${head(`${s.name} — Dexter DCL`, esc(s.tagline).slice(0, 180), 1)}
+  const seoPath = `systems/${s.id}.html`;
+  const seoUrl = SEO.canonical(seoPath);
+  const seoTitle = SEO.composeTitle(s.name, s.subtitle);
+  const seoDesc = SEO.composeDescription(s.tagline);
+  const trail = [
+    { name: 'UK GroundTruth', url: SEO.canonical('') },
+    { name: 'Systems', url: `${SEO.canonical('')}#systems` },
+    { name: s.name, url: seoUrl },
+  ];
+  return `${head(seoTitle, seoDesc, 1, {
+    path: seoPath, card: s.id, type: 'article',
+    ld: [
+      SEO.organisation(), SEO.website(), SEO.breadcrumbs(trail),
+      SEO.webPage({
+        url: seoUrl, title: seoTitle, description: seoDesc, trail,
+        // 'about' names the subject in a machine-readable way without
+        // asserting anything the page does not contain.
+        extra: { about: { '@type': 'Thing', name: s.subtitle },
+                 isAccessibleForFree: true },
+      }),
+    ],
+  })}
 ${nav(1)}
 <header class="sysHead"><div class="wrap">
-<a class="backlink" href="../index.html">&larr; Groundtruth</a>
+<nav class="backlink" aria-label="Breadcrumb"><a href="../index.html">&larr; UK GroundTruth</a><span aria-hidden="true"> / </span><a href="../index.html#systems">Systems</a><span aria-hidden="true"> / </span><span aria-current="page">${s.name}</span></nav>
 <div class="eyebrow">System ${s.num} &middot; ${s.status}</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">${s.name}</h1>
 <p class="lede" style="margin-top:.6rem">${esc(s.subtitle)}</p>
@@ -116,7 +145,7 @@ ${nav(1)}
 <main>
 
 <section id="problem">
-<div class="eyebrow">The problem</div>
+<h2 class="eyebrow">The problem</h2>
 <div class="prose mt-2">${s.problem.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
 <div class="impact mt-4">${s.impact.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">${esc(n)}</div><div class="impact__l">${esc(l)}</div></div>`).join('')}</div>
 </section>
@@ -124,14 +153,14 @@ ${nav(1)}
 <hr class="hr">
 
 <section id="solution">
-<div class="eyebrow">The system</div>
+<h2 class="eyebrow">The system</h2>
 <div class="prose mt-2">${s.solution.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
 </section>
 
 ${EX.bySystem[s.id] ? `<hr class="hr">
 
 <section id="examples">
-<div class="eyebrow">Worked examples</div>
+<h2 class="eyebrow">Worked examples</h2>
 <h3 class="mt-2">Two situations this system answers</h3>
 <div class="grid grid--2 mt-4">
 ${EX.bySystem[s.id].map((e, n) => `<div class="card">
@@ -147,7 +176,7 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 <hr class="hr">
 
 <section id="data">
-<div class="eyebrow">Data foundation</div>
+<h2 class="eyebrow">Data foundation</h2>
 <h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
 <div class="tablewrap mt-3">
 <table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
@@ -158,24 +187,24 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 <hr class="hr">
 
 <section id="features">
-<div class="eyebrow">Capabilities</div>
+<h2 class="eyebrow">Capabilities</h2>
 <div class="feat mt-3">${s.features.map(([t, d], n) => `<div class="feat__item"><div class="feat__ico">${String(n + 1).padStart(2, '0')}</div><div><div class="feat__t">${esc(t)}</div><div class="feat__d">${esc(d)}</div></div></div>`).join('')}</div>
 </section>
 
 <hr class="hr">
 
 <section id="benefits">
-<div class="eyebrow">Benefits</div>
+<h2 class="eyebrow">Benefits</h2>
 <div class="grid grid--2 mt-3">
-<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none">${s.benefits.government.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
-<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none">${s.benefits.public.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
+<div class="card"><h3 class="feat__t">For government</h3><ul class="prose small mt-2" style="max-width:none">${s.benefits.government.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
+<div class="card"><h3 class="feat__t">For the public</h3><ul class="prose small mt-2" style="max-width:none">${s.benefits.public.map(b => `<li>${esc(b)}</li>`).join('')}</ul></div>
 </div>
 </section>
 
 <hr class="hr">
 
 <section id="delivery">
-<div class="eyebrow">Delivery</div>
+<h2 class="eyebrow">Delivery</h2>
 <div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">${esc(s.buyer)}</div></div>
 <div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">${esc(s.route)}</div></div>
 <h3 class="mt-4 mb-3">Phasing</h3>
@@ -185,14 +214,14 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 <hr class="hr">
 
 <section id="risks">
-<div class="eyebrow">Risks &amp; mitigations</div>
+<h2 class="eyebrow">Risks &amp; mitigations</h2>
 <div class="grid mt-3">${s.risks.map(([t, d]) => `<div class="card"><div class="card__title" style="font-size:1rem;margin:0">${esc(t)}</div><p class="card__desc">${esc(d)}</p></div>`).join('')}</div>
 </section>
 
 <hr class="hr">
 
 <section id="sources">
-<div class="eyebrow">Sources</div>
+<h2 class="eyebrow">Sources</h2>
 <div class="srcs mt-3">${s.sources.map(([t, u], n) => `<div class="src"><span class="src__n">${String(n + 1).padStart(2, '0')}</span><span><a href="${u}" target="_blank" rel="noopener">${esc(t)}</a></span></div>`).join('')}</div>
 <p class="tiny muted mt-3">All sources checked in August ${YEAR}. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
 </section>
@@ -228,16 +257,23 @@ const OUT = ['transit', 'threshold', 'waypoint', 'hearth', 'freehold'];
 const GT = DELIVERABLE.map(id => sysById[id]);
 const OUTS = OUT.map(id => sysById[id]);
 
-const index = `${head('Groundtruth — one platform, thirteen public data systems',
-  'Groundtruth resolves places and organisations across UK government data. Thirteen systems run on it, every one using data anyone can download without an account.')}
+const indexTrail = [{ name: 'UK GroundTruth', url: SEO.canonical('') }];
+const indexTitle = 'UK GroundTruth — one platform, thirteen public data systems';
+const indexDesc = 'UK GroundTruth resolves places and organisations across UK government data. Thirteen systems run on it, every one using data anyone can download without an account.';
+const index = `${head(indexTitle, indexDesc, 0, {
+  path: '', card: 'index',
+  ld: [SEO.organisation(), SEO.website(),
+       SEO.webPage({ url: SEO.canonical(''), title: indexTitle, description: indexDesc,
+                     extra: { isAccessibleForFree: true } })],
+})}
 ${nav()}
 
 <header class="hero">
 <div class="hero__grid"></div>
 <div class="wrap">
 <div class="eyebrow">Dexter DCL</div>
-<h1 class="display hero__title mt-3">Groundtruth</h1>
-<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. Groundtruth closes it.</p>
+<h1 class="display hero__title mt-3">UK GroundTruth</h1>
+<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. UK GroundTruth closes it.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="#systems">The thirteen systems</a>
 <a class="btn btn--ghost" href="#chains">How they help each other</a>
@@ -296,7 +332,7 @@ ${nav()}
 </div>
 
 <div class="prose mt-4">
-<p>Groundtruth builds those two links once, and gives them away. It is not clever &mdash; it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
+<p>UK GroundTruth builds those two links once, and gives them away. It is not clever &mdash; it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
 </div>
 <div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The technical detail &rarr;</a></div>
 </div>
@@ -422,8 +458,21 @@ ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
 ${foot()}`;
 
 /* ---------------- Platform page ---------------- */
-const platform = `${head(`${P.name} — the unified platform | Dexter DCL`,
-  'Five open-data systems delivered as one platform, on a shared place and entity resolution layer.')}
+const platformTitle = `${P.name} — the unified platform | ${SEO.SITE.publisherShort}`;
+const platformDesc = SEO.composeDescription(
+  'Thirteen public data systems on one platform, sharing a place spine and an entity spine. ' +
+  'Two joins built once as public infrastructure, on data anyone can download without an account.');
+const platformTrail = [
+  { name: 'UK GroundTruth', url: SEO.canonical('') },
+  { name: 'Architecture', url: SEO.canonical('platform.html') },
+];
+const platform = `${head(platformTitle, platformDesc, 0, {
+  path: 'platform.html', card: 'platform',
+  ld: [SEO.organisation(), SEO.website(), SEO.breadcrumbs(platformTrail),
+       SEO.webPage({ url: SEO.canonical('platform.html'), title: platformTitle,
+                     description: platformDesc, trail: platformTrail,
+                     extra: { isAccessibleForFree: true } })],
+})}
 ${nav()}
 
 <header class="hero">
@@ -571,12 +620,24 @@ ${foot()}`;
 
 /* ---------------- Write ---------------- */
 mkdirSync('systems', { recursive: true });
-const examples = `${head('Problems and solutions — all thirteen Groundtruth systems',
-  'Two real situations for every one of the thirteen Groundtruth systems: what goes wrong today, and what the system does about it.')}
+const examplesTitle = 'Problems and solutions — all thirteen UK GroundTruth systems';
+const examplesDesc = SEO.composeDescription(
+  'Two real situations for every one of the thirteen UK GroundTruth systems: what goes wrong today, and what the system does about it.');
+const examplesTrail = [
+  { name: 'UK GroundTruth', url: SEO.canonical('') },
+  { name: 'Problems and solutions', url: SEO.canonical('examples.html') },
+];
+const examples = `${head(examplesTitle, examplesDesc, 0, {
+  path: 'examples.html', card: 'examples',
+  ld: [SEO.organisation(), SEO.website(), SEO.breadcrumbs(examplesTrail),
+       SEO.webPage({ url: SEO.canonical('examples.html'), title: examplesTitle,
+                     description: examplesDesc, trail: examplesTrail,
+                     extra: { isAccessibleForFree: true } })],
+})}
 ${nav()}
 
 <header class="sysHead"><div class="wrap">
-<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<a class="backlink" href="index.html">&larr; UK GroundTruth</a>
 <div class="eyebrow">Problems &amp; solutions</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Twenty-six situations</h1>
 <p class="lede" style="margin-top:.6rem">Two for each of the thirteen systems. On the left, what goes wrong today. On the right, what the system does about it.</p>
@@ -627,12 +688,24 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 </div>
 ${foot()}`;
 
-const research = `${head('Research findings — what is actually open in UK government data',
-  'An access audit of 101 UK government endpoints. 69 returned data to an anonymous request. What that makes possible, and what it rules out.')}
+const researchTitle = 'Research findings — what is actually open in UK government data';
+const researchDesc = SEO.composeDescription(
+  'An access audit of 101 UK government endpoints. 69 returned data to an anonymous request. What that makes possible, and what it rules out.');
+const researchTrail = [
+  { name: 'UK GroundTruth', url: SEO.canonical('') },
+  { name: 'Research', url: SEO.canonical('research.html') },
+];
+const research = `${head(researchTitle, researchDesc, 0, {
+  path: 'research.html', card: 'research', type: 'article',
+  ld: [SEO.organisation(), SEO.website(), SEO.breadcrumbs(researchTrail),
+       SEO.webPage({ url: SEO.canonical('research.html'), title: researchTitle,
+                     description: researchDesc, trail: researchTrail,
+                     extra: { isAccessibleForFree: true } })],
+})}
 ${nav()}
 
 <header class="sysHead"><div class="wrap">
-<a class="backlink" href="index.html">&larr; Groundtruth</a>
+<a class="backlink" href="index.html">&larr; UK GroundTruth</a>
 <div class="eyebrow">Research findings &middot; ${RS.date}</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">What is actually open</h1>
 ${RS.intro.map(p => `<p class="lede" style="margin-top:.9rem;font-size:1.1rem">${p}</p>`).join('\n')}
@@ -646,7 +719,7 @@ ${RS.headline.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">
 
 <div class="note mt-5">
 <div class="note__title">The system runs on your own machine</div>
-<p>This site explains Groundtruth. It does not run it. The working system &mdash; the public,
+<p>This site explains UK GroundTruth. It does not run it. The working system &mdash; the public,
 admin and mobile interfaces, reading figures computed from the live sources &mdash; is
 deliberately not published: it is built and served locally, so the operator holds the data
 and can reproduce every number without depending on anyone else hosting it.</p>
@@ -768,3 +841,64 @@ writeFileSync('research.html', research);
 SYSTEMS.forEach((s, i) => writeFileSync(`systems/${s.id}.html`, detailPage(s, i)));
 console.log(`Built index.html + ${SYSTEMS.length} system pages:`);
 SYSTEMS.forEach(s => console.log(`  systems/${s.id}.html  ${s.num} ${s.name}`));
+
+/* ---------------- Search-engine files ---------------- */
+// Generated, never hand-maintained: a sitemap that has to be edited by hand is
+// a sitemap that goes stale the first time a system is added.
+
+// lastmod comes from the content module that produced the page, not from the
+// build clock. Stamping every page with today's date on every build tells a
+// crawler everything changed when nothing did.
+const modified = (file) => {
+  try { return statSync(file).mtime.toISOString().slice(0, 10); }
+  catch { return undefined; }
+};
+const SYS_MTIME = {
+  ...Object.fromEntries(A.map(s => [s.id, modified('data/systems-a.js')])),
+  ...Object.fromEntries(B.map(s => [s.id, modified('data/systems-b.js')])),
+  ...Object.fromEntries(C.map(s => [s.id, modified('data/systems-c.js')])),
+};
+
+const sitemapUrls = [
+  { path: '', changefreq: 'weekly', priority: 1.0, lastmod: modified('data/platform.js') },
+  { path: 'platform.html', changefreq: 'monthly', priority: 0.9, lastmod: modified('data/platform.js') },
+  { path: 'research.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/research.js') },
+  { path: 'examples.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/examples.js') },
+  // The thirteen deliverable systems first: they are the pages the site is
+  // actually about, and priority is relative within the site.
+  ...DELIVERABLE.map(id => ({ path: `systems/${id}.html`, changefreq: 'monthly',
+                              priority: 0.7, lastmod: SYS_MTIME[id] })),
+  ...OUT.map(id => ({ path: `systems/${id}.html`, changefreq: 'yearly',
+                      priority: 0.3, lastmod: SYS_MTIME[id] })),
+];
+writeFileSync('sitemap.xml', SEO.sitemap(sitemapUrls));
+writeFileSync('robots.txt', SEO.robots());
+
+// GitHub Pages serves 404.html for anything it cannot find. It is noindex --
+// an indexed error page competes with real content and looks like a soft 404 --
+// but it links onwards so a crawler that lands there still reaches the site.
+const notFound = `${head('Page not found | UK GroundTruth', 'That page does not exist. The thirteen UK GroundTruth systems, the research and the architecture are all linked below.', 0,
+  { path: '404.html', card: 'index', robots: 'noindex, follow' })}
+${nav()}
+<div class="wrap section">
+<div class="eyebrow">404</div>
+<h1 class="display mt-3">That page does not exist</h1>
+<p class="lede mt-3" style="max-width:60ch">The address may have changed, or the link that brought you here may be out of date. Everything the site publishes is one click away.</p>
+<div class="grid grid--2 mt-4">
+<div class="card"><h2 class="feat__t">Start here</h2>
+<ul class="prose small mt-2" style="max-width:none">
+<li><a href="index.html">UK GroundTruth — what it is and why</a></li>
+<li><a href="platform.html">The architecture: two joins, one platform</a></li>
+<li><a href="research.html">Research: what is actually open in UK government data</a></li>
+<li><a href="examples.html">Problems and solutions, system by system</a></li>
+</ul></div>
+<div class="card"><h2 class="feat__t">The thirteen systems</h2>
+<ul class="prose small mt-2" style="max-width:none">
+${GT.map(s => `<li><a href="systems/${s.id}.html">${s.num} &middot; ${s.name} — ${esc(s.subtitle)}</a></li>`).join('\n')}
+</ul></div>
+</div>
+</div>
+${foot()}`;
+writeFileSync('404.html', notFound);
+
+console.log(`Wrote sitemap.xml (${sitemapUrls.length} urls), robots.txt, 404.html`);

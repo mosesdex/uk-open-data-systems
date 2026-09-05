@@ -270,3 +270,68 @@ def write(con: duckdb.DuckDBPyConnection, report: Report) -> None:
     if rows:
         insert_many(con, 
             "INSERT INTO gold.watchman_exposure VALUES (?,?,?,?,?,?,?,?,?,?)", rows)
+
+
+# ---------------------------------------------------------------------------
+# Distress by company status.
+# The Gazette channel only fires when an insolvency notice happens to name a
+# registered supplier in the window -- vanishingly rare. This second channel is
+# far stronger: cross-reference every public-role holder (public-contract
+# suppliers and CQC-registered care providers) against the Companies House
+# status snapshot, and surface those in liquidation, administration, receivership
+# or a voluntary arrangement while still holding a public duty.
+# ---------------------------------------------------------------------------
+DISTRESS_STATUSES = (
+    "Liquidation", "In Administration", "Voluntary Arrangement",
+    "In Administration/Administrative Receiver", "In Administration/Receiver Manager",
+    "RECEIVERSHIP", "ADMINISTRATION ORDER", "ADMINISTRATIVE RECEIVER",
+    "RECEIVER MANAGER / ADMINISTRATIVE RECEIVER",
+    "VOLUNTARY ARRANGEMENT / RECEIVER MANAGER",
+    "VOLUNTARY ARRANGEMENT / ADMINISTRATIVE RECEIVER",
+    "Live but Receiver Manager on at least one charge",
+)
+
+
+def check_distress(con: duckdb.DuckDBPyConnection) -> int:
+    """Public-role holders whose Companies House status shows financial distress."""
+    if not con.execute("SELECT count(*) FROM information_schema.tables WHERE "
+                        "table_schema='silver' AND table_name='company'").fetchone()[0]:
+        return 0
+    inlist = ",".join("'" + s.replace("'", "''") + "'" for s in DISTRESS_STATUSES)
+    have_care = con.execute("SELECT count(*) FROM information_schema.tables WHERE "
+                            "table_schema='silver' AND table_name='care_location'").fetchone()[0]
+    roles = ["""
+        SELECT upper(trim(r.company_number)) AS cn, 'Public contract supplier' AS role,
+               count(*) AS activity
+        FROM silver.supplier_register r WHERE r.company_number IS NOT NULL
+        GROUP BY 1"""]
+    if have_care:
+        roles.append("""
+        SELECT upper(trim(cl.company_number)) AS cn, 'CQC care provider' AS role,
+               count(*) AS activity
+        FROM silver.care_location cl WHERE cl.company_number IS NOT NULL
+          AND trim(cl.company_number) <> ''
+        GROUP BY 1""")
+    union = "\nUNION ALL\n".join(roles)
+    con.execute("DROP TABLE IF EXISTS gold.watchman_distress")
+    con.execute(f"""
+        CREATE TABLE gold.watchman_distress AS
+        WITH roles AS ({union})
+        SELECT c.company_number, c.name, c.status AS company_status,
+               roles.role, roles.activity, c.postcode, c.sic_1 AS sic
+        FROM roles JOIN silver.company c
+          ON roles.cn = upper(trim(c.company_number))
+        WHERE c.status IN ({inlist})
+        ORDER BY roles.role, roles.activity DESC
+    """)
+    return con.execute("SELECT count(*) FROM gold.watchman_distress").fetchone()[0]
+
+
+def distress_summary(con: duckdb.DuckDBPyConnection):
+    return con.execute("""
+        SELECT count(*) AS exposures,
+               count(*) FILTER (WHERE role = 'CQC care provider') AS care,
+               count(*) FILTER (WHERE role = 'Public contract supplier') AS contracts,
+               count(DISTINCT company_status) AS statuses
+        FROM gold.watchman_distress
+    """).fetchone()

@@ -197,6 +197,46 @@ REGISTRY: tuple[Source, ...] = (
         ),
     ),
     Source(
+        id="dfe_school_capacity",
+        name="School capacity (places and pupils, per school, 2009/10 onward)",
+        publisher="Department for Education",
+        url=(
+            "https://explore-education-statistics.service.gov.uk/data-catalogue/"
+            "data-set/bf165de6-3b9a-4014-83b5-232454343797/csv"
+        ),
+        fmt="csv",
+        role="domain",
+        licence="OGL v3",
+        cadence="annual",
+        expect_content=("text/csv", "application/octet-stream"),
+        systems=("catchment",),
+        notes=(
+            "Explore Education Statistics SCAP dataset: mainstream primary/secondary "
+            "places and pupils on roll per school, per year 2009/10-2023/24. Keyless "
+            "/csv endpoint (307-redirects to the content host, returns text/csv). Gives "
+            "Catchment its time dimension; keyed by school_urn and new_la_code."
+        ),
+    ),
+    Source(
+        id="planit_planning_wq",
+        name="PlanIt planning applications — water-quality corpus",
+        publisher="PlanIt (planit.org.uk)",
+        url="https://www.planit.org.uk/api/applics/json?search=water+quality",
+        fmt="json",
+        role="domain",
+        licence="aggregated LA public-register data; attribution to PlanIt + source LPAs",
+        cadence="daily",
+        expect_content=("application/json",),
+        systems=("sightline",),
+        needs_backfill="planit_planning",
+        notes=(
+            "No-key API aggregating ~420 LPAs' planning registers. Throttles hard, so "
+            "fetched via a polite paged backfill (gt backfill planit), bounded to the "
+            "on-topic water-quality search terms. Carries decision outcome, dates and "
+            "coordinates — adds a real national corpus beyond the EA objection sample."
+        ),
+    ),
+    Source(
         id="planning_developer_contributions",
         name="Developer agreement contributions",
         publisher="MHCLG",
@@ -207,7 +247,44 @@ REGISTRY: tuple[Source, ...] = (
         cadence="daily",
         expect_content=("application/json",),
         systems=("ledger",),
-        notes="39,325 records, GBP 1.49bn. Property reference populated on 0.0% -- the gap Ledger fills.",
+        notes="39,325 records, GBP 1.49bn. Geometry populated on 0.0%. The parent "
+              "developer-agreement carries no geometry either, but 99% of agreements "
+              "carry a planning-application reference -- see planning_applications.",
+    ),
+    Source(
+        id="planning_developer_agreements",
+        name="Developer agreements",
+        publisher="MHCLG",
+        url="https://www.planning.data.gov.uk/entity.json?dataset=developer-agreement&limit=500",
+        fmt="json",
+        role="domain",
+        licence="OGL v3",
+        cadence="daily",
+        expect_content=("application/json",),
+        systems=("ledger",),
+        needs_backfill="developer_agreements",
+        notes="12,775 agreements. Carries no geometry itself, but 99% carry a "
+              "planning-application reference -- the parent key the contributions "
+              "inherit and the only published route to a site.",
+    ),
+    Source(
+        id="planning_applications",
+        name="Planning applications",
+        publisher="MHCLG",
+        url="https://www.planning.data.gov.uk/entity.json?dataset=planning-application&limit=500",
+        fmt="json",
+        role="domain",
+        licence="OGL v3",
+        cadence="daily",
+        expect_content=("application/json",),
+        systems=("ledger",),
+        needs_backfill="planning_applications",
+        notes="The only published route from a developer agreement to a location. "
+              "100,627 records, 98.1% carrying a point -- but from 4 authorities in "
+              "total. Coverage is the binding constraint, not the join: 2 of the 66 "
+              "authorities that record contributions publish applications here, and "
+              "the join closes for 63 of 39,325 contributions (0.16%, GBP 5.86m of "
+              "GBP 1.49bn). Measured 5 September 2026.",
     ),
     Source(
         id="ea_flood_assets",

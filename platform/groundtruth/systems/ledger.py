@@ -21,6 +21,7 @@ Two things this system is careful about:
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -144,3 +145,191 @@ def national_total(con: duckdb.DuckDBPyConnection) -> tuple[float, int, int]:
     return con.execute("""
         SELECT round(sum(amount), 0), count(amount), count(*) FROM silver.contribution
     """).fetchone()
+
+
+# ---------------------------------------------------------------- location
+# Why this exists, and why it recovers so little.
+#
+# The contribution records carry no geometry: 0 of 39,325, which the coverage
+# figures have always said. The investigation behind this section went one step
+# further and asked whether the location exists anywhere upstream.
+#
+#   1. developer-agreement-contribution   no geometry, no point            0%
+#   2. developer-agreement (the parent)   no geometry, no point            0%
+#      ...but 99% carry a `planning-application` reference.
+#   3. planning-application               100,627 records, ~80% with a point
+#
+# So there is a published route from a contribution to a location, and the
+# platform simply never registered the third dataset. That is a real gap and
+# this closes it.
+#
+# It does not, however, make the money mappable. Of the 66 authorities that
+# record contributions, 2 publish their planning applications to that dataset,
+# so the chain closes for well under 1% of contributions. The rest is not a join
+# this platform failed to make; it is a location no publisher has published.
+#
+# Every join here is qualified by authority. A planning reference is unique per
+# council and not nationally -- 62% of contributions share a reference with a
+# contribution in a different council -- so joining on the reference alone
+# attaches one council's money to another council's site.
+#
+# Both numbers are reported. Fixing the join and quietly still showing zero
+# would hide the fix; reporting the fix without the coverage would imply the
+# money can now be mapped. Neither is true on its own.
+
+def load_applications(con: duckdb.DuckDBPyConnection, applications: Path) -> int:
+    """The planning applications, which are the only published carrier of a site."""
+    con.execute("DROP TABLE IF EXISTS silver.planning_application")
+    con.execute("""
+        CREATE TABLE silver.planning_application (
+          entity BIGINT, reference VARCHAR, organisation_entity BIGINT,
+          longitude DOUBLE, latitude DOUBLE, decision_date VARCHAR
+        )""")
+    rows = json.loads(Path(applications).read_text())
+    if isinstance(rows, dict):
+        rows = rows.get("entities", rows.get("records", []))
+    return insert_many(
+        con, "INSERT INTO silver.planning_application VALUES (?,?,?,?,?,?)",
+        [(_num(r.get("entity")), r.get("reference"), _num(r.get("organisation-entity")),
+          *_point(r.get("point")), r.get("decision-date")) for r in rows])
+
+
+def load_agreements(con: duckdb.DuckDBPyConnection, agreements: Path) -> int:
+    """The agreements, which carry the reference that links the two."""
+    con.execute("DROP TABLE IF EXISTS silver.developer_agreement")
+    con.execute("""
+        CREATE TABLE silver.developer_agreement (
+          entity BIGINT, reference VARCHAR, organisation_entity BIGINT,
+          planning_application VARCHAR, document_url VARCHAR
+        )""")
+    rows = json.loads(Path(agreements).read_text())
+    if isinstance(rows, dict):
+        rows = rows.get("entities", rows.get("records", []))
+    return insert_many(
+        con, "INSERT INTO silver.developer_agreement VALUES (?,?,?,?,?)",
+        [(_num(r.get("entity")), r.get("reference"), _num(r.get("organisation-entity")),
+          (r.get("planning-application") or "").strip() or None,
+          r.get("document-url")) for r in rows])
+
+
+def _point(raw) -> tuple[float | None, float | None]:
+    """Read `POINT (lon lat)` as the publisher writes it.
+
+    Returns a pair of Nones for anything unparseable rather than raising: a
+    malformed point is one unlocated agreement, not a failed run.
+    """
+    if not raw or not str(raw).strip():
+        return (None, None)
+    m = re.match(r"\s*POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)\s*$", str(raw), re.I)
+    if not m:
+        return (None, None)
+    try:
+        return (float(m.group(1)), float(m.group(2)))
+    except ValueError:
+        return (None, None)
+
+
+def locate(con: duckdb.DuckDBPyConnection, lads=None) -> dict:
+    """Join contributions to a site, and report exactly how far it gets.
+
+    The join is on the publisher's own key throughout -- contribution.agreement
+    to agreement.reference, agreement.planning_application to application
+    reference -- so nothing here is a name match and confidence is 1.0 for the
+    link itself. The uncertainty is entirely in coverage, which is reported
+    separately rather than folded into a confidence score.
+    """
+    for t in ("developer_agreement", "planning_application"):
+        if not con.execute(
+                "SELECT count(*) FROM information_schema.tables "
+                "WHERE table_schema='silver' AND table_name=?", [t]).fetchone()[0]:
+            return {"available": False,
+                    "reason": f"silver.{t} not loaded -- run: gt backfill {t}"}
+
+    con.execute("DROP TABLE IF EXISTS silver.agreement_location")
+    con.execute("""
+        CREATE TABLE silver.agreement_location AS
+        SELECT a.reference                AS agreement,
+               a.planning_application     AS application,
+               a.organisation_entity      AS organisation_entity,
+               p.longitude, p.latitude,
+               1.0                        AS confidence,
+               CAST(NULL AS VARCHAR)      AS lad
+        FROM silver.developer_agreement a
+        JOIN silver.planning_application p
+          ON p.reference = a.planning_application
+         AND p.organisation_entity = a.organisation_entity
+        WHERE p.longitude IS NOT NULL AND p.latitude IS NOT NULL
+    """)
+
+    # District assignment is a spatial containment, not a nearest-neighbour
+    # guess, so it is a derived fact rather than an estimate.
+    if lads is not None:
+        rows = con.execute(
+            "SELECT agreement, organisation_entity, longitude, latitude "
+            "FROM silver.agreement_location").fetchall()
+        # Qualified by authority: an agreement reference is unique per council,
+        # not nationally, so updating by reference alone would stamp one
+        # council's district onto another's agreement.
+        upd = [(lads.point(lon, lat), agr, org) for agr, org, lon, lat in rows]
+        upd = [(code, agr, org) for code, agr, org in upd if code]
+        if upd:
+            con.executemany(
+                "UPDATE silver.agreement_location SET lad = ? "
+                "WHERE agreement = ? AND organisation_entity = ?", upd)
+
+    total, located = con.execute("""
+        SELECT count(*),
+               count(*) FILTER (WHERE l.agreement IS NOT NULL)
+        FROM silver.contribution c
+        LEFT JOIN silver.agreement_location l
+               ON l.agreement = c.agreement
+              AND l.organisation_entity = c.organisation_entity
+    """).fetchone()
+    amount_total, amount_located = con.execute("""
+        SELECT coalesce(sum(c.amount), 0),
+               coalesce(sum(c.amount) FILTER (WHERE l.agreement IS NOT NULL), 0)
+        FROM silver.contribution c
+        LEFT JOIN silver.agreement_location l
+               ON l.agreement = c.agreement
+              AND l.organisation_entity = c.organisation_entity
+    """).fetchone()
+
+    return {
+        "available": True,
+        "contributions": total,
+        "located": located,
+        "located_pct": round(100.0 * located / total, 2) if total else 0.0,
+        "amount_total": amount_total,
+        "amount_located": amount_located,
+        "amount_located_pct": (round(100.0 * amount_located / amount_total, 2)
+                               if amount_total else 0.0),
+    }
+
+
+def location_gap(con: duckdb.DuckDBPyConnection, limit: int = 20) -> list[dict]:
+    """Which authorities break the chain, and how much money is behind each.
+
+    This is the useful output of the exercise. The platform cannot publish the
+    missing applications, but it can say precisely who has not published them
+    and what is unmappable as a result -- which is an answer no single dataset
+    can give.
+    """
+    cur = con.execute("""
+        SELECT COALESCE(pa.name, 'organisation ' || CAST(c.organisation_entity AS VARCHAR))
+                                                     AS authority,
+               count(*)                              AS contributions,
+               round(coalesce(sum(c.amount), 0), 0)  AS amount,
+               count(*) FILTER (WHERE l.agreement IS NOT NULL) AS located,
+               count(DISTINCT c.agreement)           AS agreements
+        FROM silver.contribution c
+        LEFT JOIN silver.planning_authority pa ON pa.entity = c.organisation_entity
+        LEFT JOIN silver.agreement_location l
+               ON l.agreement = c.agreement
+              AND l.organisation_entity = c.organisation_entity
+        GROUP BY 1
+        HAVING count(*) FILTER (WHERE l.agreement IS NOT NULL) = 0
+        ORDER BY amount DESC NULLS LAST
+        LIMIT ?
+    """, [limit])
+    cols = [d[0] for d in cur.description]
+    return [dict(zip(cols, r)) for r in cur.fetchall()]

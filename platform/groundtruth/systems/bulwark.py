@@ -163,6 +163,38 @@ def build(con: duckdb.DuckDBPyConnection, today: date | None = None) -> None:
         GROUP BY 1 ORDER BY assets DESC
     """)
 
+    _by_district(con)
+
+
+def _by_district(con: duckdb.DuckDBPyConnection) -> None:
+    """Map assets to districts by the authority name the register already carries.
+    No coordinates are published for the defences, so this joins on the stated
+    local authority — names that do not match a district are dropped, not guessed."""
+    from .. import spatial
+    lads = spatial.load()
+    rows = con.execute("""
+        SELECT local_authority,
+               count(*)                       AS assets,
+               round(sum(length) / 1000.0, 1) AS km,
+               count(*) FILTER (WHERE next_inspection IS NOT NULL
+                                  AND next_inspection < CURRENT_DATE) AS overdue,
+               count(*) FILTER (WHERE owner IS NOT NULL)              AS owner_known
+        FROM silver.flood_defence
+        WHERE local_authority IS NOT NULL
+        GROUP BY 1
+    """).fetchall()
+    out = []
+    for name, assets, km, over, owner in rows:
+        code = lads.code_for_name(name)
+        if code:
+            out.append((code, name, assets, km or 0.0, over, owner))
+    con.execute("DROP TABLE IF EXISTS gold.bulwark_district")
+    con.execute("""CREATE TABLE gold.bulwark_district
+                   (lad_code VARCHAR, lad_name VARCHAR, assets INTEGER,
+                    km DOUBLE, overdue INTEGER, owner_known INTEGER)""")
+    if out:
+        con.executemany("INSERT INTO gold.bulwark_district VALUES (?, ?, ?, ?, ?, ?)", out)
+
 
 def overdue(con: duckdb.DuckDBPyConnection, limit: int = 10):
     """Assets whose own next-inspection date has already passed."""

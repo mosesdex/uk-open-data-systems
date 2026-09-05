@@ -1,4 +1,4 @@
-# Groundtruth — handover
+# UK GroundTruth — handover
 
 ## What this is
 
@@ -11,7 +11,7 @@ API key, no subscription, anywhere.
 
 | Part | Where |
 |---|---|
-| **The website** — what Groundtruth is, the thirteen systems, the research | published at <https://mosesdex.github.io/uk-open-data-systems/> |
+| **The website** — what UK GroundTruth is, the thirteen systems, the research | published at <https://mosesdex.github.io/uk-open-data-systems/> |
 | **The system** — public, admin and mobile interfaces reading real output | **localhost only** |
 | **The engine** — fetchers, spines, systems, database | this directory, on your machine |
 

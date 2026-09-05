@@ -1,6 +1,6 @@
-// Groundtruth — the unified platform. Consumed by build.js.
+// UK GroundTruth — the unified platform. Consumed by build.js.
 export default {
-  name: 'Groundtruth',
+  name: 'UK GroundTruth',
   tagline: 'Thirteen products. Two joins. One platform. No registration anywhere.',
   standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins — resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the thirteen products stop being thirteen builds.',
 
@@ -8,7 +8,7 @@ export default {
     'The eighteen proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
     'The Environment Agency cannot map its own flood objections because the dataset carries no spatial reference. Councils receive school capacity data at a geography whose boundaries are published nowhere. The housing delivery mechanism runs on a measurement three years stale. An insurer, not government, supplies Parliament with evidence on floodplain housebuilding — because the join required a paid Ordnance Survey field. Every one of those is the same missing asset: <strong>a national, resolved record of where development happens</strong>.',
     'On the other side, procurement supplier records resolve inconsistently to company numbers, grid connection registers share no key between transmission and distribution, council spending data carries no company identifiers at all, and there is <strong>no canonical register of UK public sector organisations</strong> — the one that existed was decommissioned and its domains no longer resolve.',
-    'Groundtruth builds those two resolution layers as open infrastructure, then runs thirteen products on top. The products are the revenue. The spines are the moat.'
+    'UK GroundTruth builds those two resolution layers as open infrastructure, then runs thirteen products on top. The products are the revenue. The spines are the moat.'
   ],
 
   spines: [
@@ -23,7 +23,7 @@ export default {
         ['Pupil planning area geography', 'The 3,651 planning areas reconstructed from the school membership table the Department already publishes, with a back-series to 2012/13.'],
         ['Substation gazetteer', 'Free-text connection site names resolved to coordinates, making the grid queue mappable.']
       ],
-      constraint: 'Ordnance Survey’s agreement permits publishing <em>identifiers</em> appended to your own data. It prohibits publishing address strings or coordinates derived from its address products. Groundtruth therefore emits a resolution index — reference to identifier — and lets consumers join to the free identifier file themselves. That is the only architecture that is unambiguously publishable, and it has to be designed in from the start.',
+      constraint: 'Ordnance Survey’s agreement permits publishing <em>identifiers</em> appended to your own data. It prohibits publishing address strings or coordinates derived from its address products. UK GroundTruth therefore emits a resolution index — reference to identifier — and lets consumers join to the free identifier file themselves. That is the only architecture that is unambiguously publishable, and it has to be designed in from the start.',
       gotchas: [
         'The free identifier file carries <strong>no status field</strong>. Its 41.6 million records match the licensed product’s entire property table, which means plots with planning permission, occupied houses and demolished buildings are all present and <strong>indistinguishable</strong>. Anyone treating it as a list of real dwellings is wrong.',
         'The successor table that should record splits and merges is <strong>empty nationally — zero records</strong>. When a house converts into flats, the old identifier goes historical and new ones appear with no machine-readable link between them. Lineage has to be inferred.',
@@ -94,7 +94,7 @@ export default {
 
   honesty: [
     'The place spine depends on resolving planning references across roughly 400 council portals. That is the exact failure mode which killed the original planning alerts project in 2011 and is currently degrading its volunteer successor — which has lost 20-plus councils to bot protection since June 2026 and has authorities frozen as far back as January 2019. Any plan that treats this as solved is wrong. Coverage must be published as a metric, not assumed.',
-    'Groundtruth cannot be built on a public sector contractor licence. That instrument permits using address data for one named client’s purposes, prohibits commercial exploitation of any product incorporating the results, and requires destruction within 30 days. A multi-client product needs a partner licence or the addressing agreement that exists by name in Ordnance Survey’s own template and is published nowhere. <strong>Resolve this before writing code, not after.</strong>',
+    'UK GroundTruth cannot be built on a public sector contractor licence. That instrument permits using address data for one named client’s purposes, prohibits commercial exploitation of any product incorporating the results, and requires destruction within 30 days. A multi-client product needs a partner licence or the addressing agreement that exists by name in Ordnance Survey’s own template and is published nowhere. <strong>Resolve this before writing code, not after.</strong>',
     'Two independent measurements of supplier identifier coverage in procurement data disagree — roughly 65% missing when counting company numbers on supplier records only, roughly 8% when counting the Procurement Act organisation number across all parties. Both were measured against the live feed. The discrepancy is itself the finding: the identifier exists, but not where most consumers look for it.'
   ]
 };

@@ -74,3 +74,28 @@ class TestCrossCheck:
             P.PlaceRef("postcode", .95, None, None, 51.5, -0.14, "E09000033"))
         r = P.cross_check(None, 1, "SW1A 1AA")
         assert r["comparable"] is False and r["conflict"] is False
+
+
+class TestPropertyTierKeepsDistrict:
+    """The property tier gives an exact coordinate but no LAD. If it returns
+    without one, property-resolved records fall out of every by-district
+    statistic -- which silently cut Catchment from 317 districts to 66."""
+
+    def test_property_result_borrows_the_postcode_district(self, tmp_path, monkeypatch):
+        from groundtruth import place as P
+        # UPRN resolves to a point but no district; postcode carries the LAD.
+        monkeypatch.setattr(P, "resolve_uprn", lambda c, u:
+            P.PlaceRef("uprn", 1.0, 529090, 179645, 51.501, -0.142, None))
+        monkeypatch.setattr(P, "resolve_postcode", lambda c, p:
+            P.PlaceRef("postcode", .95, None, None, 51.5, -0.14, "E09000033", "E05000644"))
+        ref = P.resolve(None, uprn=100, postcode="SW1A 1AA")
+        assert ref.tier == "uprn"                 # keeps the precise tier
+        assert ref.lad_code == "E09000033"        # and gains the district
+        assert ref.latitude == 51.501             # coordinate unchanged
+
+    def test_property_without_a_postcode_still_resolves(self, tmp_path, monkeypatch):
+        from groundtruth import place as P
+        monkeypatch.setattr(P, "resolve_uprn", lambda c, u:
+            P.PlaceRef("uprn", 1.0, 1, 2, 51.5, -0.1, None))
+        ref = P.resolve(None, uprn=100, postcode=None)
+        assert ref.tier == "uprn" and ref.lad_code is None

@@ -1,4 +1,4 @@
-# Groundtruth platform
+# UK GroundTruth platform
 
 The engine behind the thirteen systems. Resolves two missing joins in UK
 government data: **place** (where) and **entity** (who).
