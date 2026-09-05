@@ -48,6 +48,7 @@ class Coverage:
     total: int
     resolved: int
     with_capacity: int
+    conflicts: int = 0
 
     @property
     def resolved_pct(self) -> float:
@@ -72,10 +73,16 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
     live = [r for r in rows if r.get("EstablishmentStatus (name)") == OPEN]
 
     records = []
-    resolved = with_capacity = 0
+    resolved = with_capacity = conflicts = 0
     for r in live:
         ref = place.resolve(con, uprn=r.get("UPRN") or None,
                             postcode=r.get("Postcode") or None)
+        # A published property reference that disagrees with its own postcode by
+        # kilometres is not describing the same place. Record the disagreement
+        # rather than trusting whichever tier answered first.
+        check = place.cross_check(con, r.get("UPRN") or None, r.get("Postcode") or None)
+        if check["conflict"]:
+            conflicts += 1
         cap, pup = _int(r.get("SchoolCapacity")), _int(r.get("NumberOfPupils"))
         if ref.resolved:
             resolved += 1
@@ -92,6 +99,7 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
             (r.get("Trusts (code)") or "").strip() or None,
             (r.get("Trusts (name)") or "").strip() or None,
             is_mainstream(r.get("TypeOfEstablishment (name)", "")),
+            check["conflict"], check["metres"],
         ))
 
     con.execute("DROP TABLE IF EXISTS gold.catchment_school")
@@ -103,10 +111,13 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
           latitude DOUBLE, longitude DOUBLE,
           capacity INTEGER, pupils INTEGER,
           trust_code VARCHAR, trust_name VARCHAR,
-          mainstream BOOLEAN
+          mainstream BOOLEAN,
+          -- A published property reference that disagrees with its own
+          -- postcode by kilometres is recorded, not trusted.
+          identifier_conflict BOOLEAN, tier_distance_m INTEGER
         )""")
     insert_many(con, 
-        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
+        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
 
     # District picture. Utilisation is computed only over schools that published
     # both numbers, and the share doing so travels with the figure.
@@ -158,7 +169,7 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
         HAVING count(*) >= 3
         ORDER BY utilisation_pct DESC NULLS LAST
     """)
-    return Coverage(len(live), resolved, with_capacity)
+    return Coverage(len(live), resolved, with_capacity, conflicts)
 
 
 def pressure(con: duckdb.DuckDBPyConnection, limit: int = 10):
@@ -197,3 +208,77 @@ def masking(con: duckdb.DuckDBPyConnection, limit: int = 10):
         HAVING count(*) >= 10 AND min(s.util) < 75 AND max(s.util) > 100
         ORDER BY spread DESC LIMIT {limit}
     """).fetchall()
+
+
+# ---------------------------------------------------------------------------
+# School capacity time series (DfE SCAP, 2009/10 onward).
+# Adds the dimension the GIAS snapshot lacks: how utilisation has moved over
+# fourteen years, nationally and per district. Mainstream primary/secondary
+# only -- that is all this survey covers -- so it sits beside, not inside, the
+# specialist figures.
+# ---------------------------------------------------------------------------
+def load_capacity(con: duckdb.DuckDBPyConnection, csv_path: Path) -> int:
+    """Load the per-school, per-year capacity survey into silver."""
+    con.execute("DROP TABLE IF EXISTS silver.school_capacity")
+    con.execute(f"""
+        CREATE TABLE silver.school_capacity AS
+        SELECT
+          time_period                                   AS period,
+          -- 200910 -> '2009/10', a label the charts can show directly
+          left(time_period::VARCHAR, 4) || '/'
+            || right((left(time_period::VARCHAR, 4)::INT + 1)::VARCHAR, 2) AS year_label,
+          nullif(trim(new_la_code), '')                 AS lad_code,
+          nullif(trim(la_name), '')                     AS la_name,
+          nullif(trim(school_urn), '')                  AS urn,
+          lower(nullif(trim(education_phase), ''))       AS phase,
+          try_cast(school_places AS INTEGER)            AS places,
+          try_cast(pupils_on_roll AS INTEGER)           AS pupils
+        FROM read_csv_auto('{csv_path.as_posix()}', header=true, sample_size=-1, all_varchar=true)
+        WHERE geographic_level = 'School'
+          AND try_cast(school_places AS INTEGER) > 0
+          AND try_cast(pupils_on_roll AS INTEGER) IS NOT NULL
+    """)
+    return con.execute("SELECT count(*) FROM silver.school_capacity").fetchone()[0]
+
+
+def build_trend(con: duckdb.DuckDBPyConnection) -> None:
+    """National and per-district mainstream utilisation, year by year."""
+    con.execute("DROP TABLE IF EXISTS gold.catchment_trend")
+    con.execute("""
+        CREATE TABLE gold.catchment_trend AS
+        SELECT period, year_label,
+               sum(pupils)                                            AS pupils,
+               sum(places)                                            AS capacity,
+               round(100.0 * sum(pupils) / nullif(sum(places), 0), 1) AS utilisation_pct,
+               round(100.0 * sum(pupils) FILTER (WHERE phase = 'primary')
+                     / nullif(sum(places) FILTER (WHERE phase = 'primary'), 0), 1)
+                                                                      AS primary_pct,
+               round(100.0 * sum(pupils) FILTER (WHERE phase = 'secondary')
+                     / nullif(sum(places) FILTER (WHERE phase = 'secondary'), 0), 1)
+                                                                      AS secondary_pct,
+               count(DISTINCT urn)                                    AS schools
+        FROM silver.school_capacity
+        GROUP BY period, year_label
+        ORDER BY period
+    """)
+    con.execute("DROP TABLE IF EXISTS gold.catchment_district_trend")
+    con.execute("""
+        CREATE TABLE gold.catchment_district_trend AS
+        SELECT period, year_label, lad_code, any_value(la_name) AS lad_name,
+               sum(pupils)                                            AS pupils,
+               sum(places)                                            AS capacity,
+               round(100.0 * sum(pupils) / nullif(sum(places), 0), 1) AS utilisation_pct
+        FROM silver.school_capacity
+        WHERE lad_code IS NOT NULL
+        GROUP BY period, year_label, lad_code
+        ORDER BY period, lad_code
+    """)
+
+
+def trend_summary(con: duckdb.DuckDBPyConnection):
+    return con.execute("""
+        SELECT count(*) AS years, min(year_label) AS first, max(year_label) AS last,
+               (SELECT utilisation_pct FROM gold.catchment_trend ORDER BY period LIMIT 1)  AS first_pct,
+               (SELECT utilisation_pct FROM gold.catchment_trend ORDER BY period DESC LIMIT 1) AS last_pct
+        FROM gold.catchment_trend
+    """).fetchone()

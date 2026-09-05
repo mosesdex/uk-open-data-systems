@@ -1,0 +1,19 @@
+# UK GroundTruth — Dexter DCL Limited
+# The operational system (app/), the engine (platform/) and the raw content
+# modules (data/) are not deployed to this site at all. They are excluded by the
+# publish workflow, which fails the build if any of them reach the output, so
+# these rules are a second line rather than the only one.
+
+User-agent: *
+Allow: /
+
+# Never deployed, but stated so an accidental deploy is also disallowed.
+Disallow: /app/
+Disallow: /platform/
+Disallow: /data/
+Disallow: /research/
+
+# Crawlers need the stylesheet and script to render and assess the page.
+Allow: /assets/
+
+Sitemap: https://ukgroundtruth.co.uk/sitemap.xml

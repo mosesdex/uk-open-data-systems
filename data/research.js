@@ -2,7 +2,7 @@
 export default {
   date: '17 August 2026',
   intro: [
-    'The binding constraint on this platform is not modelling skill or computing power. It is <strong>access</strong>. A source that needs an account cannot be part of Groundtruth, because the whole proposition is that a government body can reproduce every number without asking anyone&rsquo;s permission.',
+    'The binding constraint on this platform is not modelling skill or computing power. It is <strong>access</strong>. A source that needs an account cannot be part of UK GroundTruth, because the whole proposition is that a government body can reproduce every number without asking anyone&rsquo;s permission.',
     'So the research began by testing access rather than by reading documentation. 101 endpoints were probed from a clean client &mdash; no account, no key, no subscription, no cookie. <strong>69 returned HTTP 200.</strong> Everything downstream follows from that result.'
   ],
 
@@ -22,7 +22,7 @@ export default {
         'Ordnance Survey documentation steers you to the OS Data Hub, which wants an account. The downloads path does not. A range request against it returned <span class="mono">HTTP 206</span> and real archive bytes with no key of any kind.',
         'That releases the entire free portfolio &mdash; including OS Open UPRN and, critically, <strong>OS Open Linked Identifiers</strong>, which is exactly the property-to-street-to-topographic crosswalk the place spine needs.'
       ],
-      note: 'The earlier working assumption &mdash; that the place spine required a licensed addressing product &mdash; was wrong for the identifier layer. The licensing line still holds for addresses, which is why Groundtruth emits identifiers and never address strings.',
+      note: 'The earlier working assumption &mdash; that the place spine required a licensed addressing product &mdash; was wrong for the identifier layer. The licensing line still holds for addresses, which is why UK GroundTruth emits identifiers and never address strings.',
       table: {
         head: ['Product', 'Format', 'Size', 'Role'],
         rows: [
@@ -126,7 +126,7 @@ export default {
       ['Communications coverage automation', 'Blocked to machines. Usable, but only with a manual download step.'],
       ['Anything about an individual', 'Excluded by design rather than by capability. Compass forecasts from published aggregates and touches no personal record.']
     ],
-    close: 'The ceiling is set by what government chooses to publish, not by what can be computed. Groundtruth&rsquo;s proposition is that the published material already supports far more than is currently extracted from it &mdash; because the two joins that would unlock it have never been built.'
+    close: 'The ceiling is set by what government chooses to publish, not by what can be computed. UK GroundTruth&rsquo;s proposition is that the published material already supports far more than is currently extracted from it &mdash; because the two joins that would unlock it have never been built.'
   },
 
   rules: {

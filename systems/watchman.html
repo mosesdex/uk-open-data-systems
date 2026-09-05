@@ -3,17 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchman — Dexter DCL</title>
+<title>Watchman — Insolvency exposure across public suppliers</title>
 <meta name="description" content="Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.">
+<link rel="canonical" href="https://ukgroundtruth.co.uk/systems/watchman.html">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="UK GroundTruth">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://ukgroundtruth.co.uk/systems/watchman.html">
+<meta property="og:title" content="Watchman — Insolvency exposure across public suppliers">
+<meta property="og:description" content="Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.">
+<meta property="og:image" content="https://ukgroundtruth.co.uk/assets/social/watchman.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Watchman — Insolvency exposure across public suppliers">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Watchman — Insolvency exposure across public suppliers">
+<meta name="twitter:description" content="Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.">
+<meta name="twitter:image" content="https://ukgroundtruth.co.uk/assets/social/watchman.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;450;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D4ED8'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://ukgroundtruth.co.uk/#organisation","name":"Dexter DCL Limited","alternateName":"Dexter DCL","url":"https://ukgroundtruth.co.uk/","description":"An independent UK company. UK GroundTruth is a private proposal document prepared by Dexter DCL; it is not a government publication and carries no government endorsement."},{"@type":"WebSite","@id":"https://ukgroundtruth.co.uk/#website","url":"https://ukgroundtruth.co.uk/","name":"UK GroundTruth","inLanguage":"en-GB","publisher":{"@id":"https://ukgroundtruth.co.uk/#organisation"},"license":"https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"},{"@type":"BreadcrumbList","@id":"https://ukgroundtruth.co.uk/systems/watchman.html#breadcrumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"UK GroundTruth","item":"https://ukgroundtruth.co.uk/"},{"@type":"ListItem","position":2,"name":"Systems","item":"https://ukgroundtruth.co.uk/#systems"},{"@type":"ListItem","position":3,"name":"Watchman","item":"https://ukgroundtruth.co.uk/systems/watchman.html"}]},{"@type":"WebPage","@id":"https://ukgroundtruth.co.uk/systems/watchman.html#webpage","url":"https://ukgroundtruth.co.uk/systems/watchman.html","name":"Watchman — Insolvency exposure across public suppliers","description":"Three million insolvency notices, free, each carrying a company number. Nobody joins them to the register of who holds public contracts.","inLanguage":"en-GB","isPartOf":{"@id":"https://ukgroundtruth.co.uk/#website"},"publisher":{"@id":"https://ukgroundtruth.co.uk/#organisation"},"breadcrumb":{"@id":"https://ukgroundtruth.co.uk/systems/watchman.html#breadcrumbs"},"about":{"@type":"Thing","name":"Insolvency exposure across public suppliers"},"isAccessibleForFree":true}]}</script>
 </head>
 <body>
 <nav class="nav"><div class="wrap nav__inner">
-<a class="brand" href="../index.html"><span class="brand__mark">G</span>Groundtruth<span class="brand__sub">by Dexter DCL</span></a>
+<a class="brand" href="../index.html"><span class="brand__mark">G</span>UK GroundTruth<span class="brand__sub">by Dexter DCL</span></a>
 <div class="nav__links">
 <a class="hide-sm" href="../index.html#thesis">The problem</a>
 <a class="hide-sm" href="../index.html#systems">Systems</a>
@@ -25,7 +42,7 @@
 <button class="themetoggle" aria-label="Toggle theme"></button>
 </div></div></nav>
 <header class="sysHead"><div class="wrap">
-<a class="backlink" href="../index.html">&larr; Groundtruth</a>
+<nav class="backlink" aria-label="Breadcrumb"><a href="../index.html">&larr; UK GroundTruth</a><span aria-hidden="true"> / </span><a href="../index.html#systems">Systems</a><span aria-hidden="true"> / </span><span aria-current="page">Watchman</span></nav>
 <div class="eyebrow">System 17 &middot; Free interface, structured identifiers, unused</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Watchman</h1>
 <p class="lede" style="margin-top:.6rem">Insolvency exposure across public suppliers</p>
@@ -38,7 +55,7 @@
 <main>
 
 <section id="problem">
-<div class="eyebrow">The problem</div>
+<h2 class="eyebrow">The problem</h2>
 <div class="prose mt-2"><p>When a company holding public contracts fails, the consequences land on whoever depended on it. The failure of a major government contractor in 2018 remains the defining example, and the lesson drawn afterwards was that nobody had a consolidated view of exposure.</p>
 <p>The raw material to build that view is free and better than expected. The official insolvency record publishes a <strong>JSON interface with no key required</strong>, carrying <strong>over three million notices</strong>. Critically, each notice carries a <strong>structured company number</strong> — a direct identifier join, with no name matching required.</p>
 <p>On the other side sit the public procurement record, the care provider registers, the school trust register and the social housing register — millions of contractual and regulatory relationships between the state and companies.</p>
@@ -50,7 +67,7 @@
 <hr class="hr">
 
 <section id="solution">
-<div class="eyebrow">The system</div>
+<h2 class="eyebrow">The system</h2>
 <div class="prose mt-2"><p>Watchman abandons prediction and does something more useful: it watches events, and it knows who depends on whom.</p>
 <p>It ingests insolvency notices continuously, resolves each to an organisation through the entity spine, and checks that organisation against every public relationship the platform knows about — contracts, care registrations, school trusts, social housing, land holdings.</p>
 <p>The output is an exposure alert rather than a risk score. Not "this company might fail" but "this company has entered administration, and here are the seventeen contracts and four hundred care beds that depend on it."</p>
@@ -61,7 +78,7 @@
 <hr class="hr">
 
 <section id="examples">
-<div class="eyebrow">Worked examples</div>
+<h2 class="eyebrow">Worked examples</h2>
 <h3 class="mt-2">Two situations this system answers</h3>
 <div class="grid grid--2 mt-4">
 <div class="card">
@@ -84,7 +101,7 @@
 <hr class="hr">
 
 <section id="data">
-<div class="eyebrow">Data foundation</div>
+<h2 class="eyebrow">Data foundation</h2>
 <h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
 <div class="tablewrap mt-3">
 <table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
@@ -95,24 +112,24 @@
 <hr class="hr">
 
 <section id="features">
-<div class="eyebrow">Capabilities</div>
+<h2 class="eyebrow">Capabilities</h2>
 <div class="feat mt-3"><div class="feat__item"><div class="feat__ico">01</div><div><div class="feat__t">Event ingestion</div><div class="feat__d">Insolvency notices processed continuously, resolved to organisations by identifier rather than by name.</div></div></div><div class="feat__item"><div class="feat__ico">02</div><div><div class="feat__t">Exposure alerting</div><div class="feat__d">When an organisation enters proceedings, everything the public sector depends on it for, immediately.</div></div></div><div class="feat__item"><div class="feat__ico">03</div><div><div class="feat__t">Early signals</div><div class="feat__d">Charge filings, strike-off action and overdue accounts — observable for every company, including those filing minimal accounts.</div></div></div><div class="feat__item"><div class="feat__ico">04</div><div><div class="feat__t">Buyer-side view</div><div class="feat__d">For any council or department, which suppliers show distress and what each failure would cost.</div></div></div><div class="feat__item"><div class="feat__ico">05</div><div><div class="feat__t">Concentration risk</div><div class="feat__d">Where many public bodies depend on one organisation, or one group behind several apparent suppliers.</div></div></div><div class="feat__item"><div class="feat__ico">06</div><div><div class="feat__t">Group awareness</div><div class="feat__d">Distress in a parent or sibling company that the contracting entity’s own record would not show.</div></div></div><div class="feat__item"><div class="feat__ico">07</div><div><div class="feat__t">Historical validation</div><div class="feat__d">Back-tested against known failures, with performance published rather than claimed.</div></div></div></div>
 </section>
 
 <hr class="hr">
 
 <section id="benefits">
-<div class="eyebrow">Benefits</div>
+<h2 class="eyebrow">Benefits</h2>
 <div class="grid grid--2 mt-3">
-<div class="card"><h4>For government</h4><ul class="prose small mt-2" style="max-width:none"><li>Gives the public sector the consolidated supplier exposure view whose absence was the lesson of the 2018 contractor collapse.</li><li>Works for small suppliers, where accounts-based models cannot, because it uses events rather than ratios.</li><li>Supports the care market oversight duties that now sit in statute, from the supplier side.</li><li>Lets buyers act before a failure rather than discovering exposure afterwards.</li></ul></div>
-<div class="card"><h4>For the public</h4><ul class="prose small mt-2" style="max-width:none"><li>Services less likely to stop abruptly when a provider fails.</li><li>Public money less likely to be committed to organisations already in difficulty.</li><li>Transparency over which public services depend on which private companies.</li></ul></div>
+<div class="card"><h3 class="feat__t">For government</h3><ul class="prose small mt-2" style="max-width:none"><li>Gives the public sector the consolidated supplier exposure view whose absence was the lesson of the 2018 contractor collapse.</li><li>Works for small suppliers, where accounts-based models cannot, because it uses events rather than ratios.</li><li>Supports the care market oversight duties that now sit in statute, from the supplier side.</li><li>Lets buyers act before a failure rather than discovering exposure afterwards.</li></ul></div>
+<div class="card"><h3 class="feat__t">For the public</h3><ul class="prose small mt-2" style="max-width:none"><li>Services less likely to stop abruptly when a provider fails.</li><li>Public money less likely to be committed to organisations already in difficulty.</li><li>Transparency over which public services depend on which private companies.</li></ul></div>
 </div>
 </section>
 
 <hr class="hr">
 
 <section id="delivery">
-<div class="eyebrow">Delivery</div>
+<h2 class="eyebrow">Delivery</h2>
 <div class="specrow mt-3"><div class="specrow__k">Likely sponsor</div><div class="specrow__v">Cabinet Office commercial, Public Sector Fraud Authority, CQC and Ofsted oversight, individual councils</div></div>
 <div class="specrow"><div class="specrow__k">Procurement route</div><div class="specrow__v">SBRI for the resolution and alerting engine, then G-Cloud for the service</div></div>
 <h3 class="mt-4 mb-3">Phasing</h3>
@@ -122,14 +139,14 @@
 <hr class="hr">
 
 <section id="risks">
-<div class="eyebrow">Risks &amp; mitigations</div>
+<h2 class="eyebrow">Risks &amp; mitigations</h2>
 <div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Do not build a failure predictor</div><p class="card__desc">The base rate is roughly one in two hundred companies a year. Any model flagging a meaningful share will be wrong the overwhelming majority of the time. Watchman reports events that have happened and dependencies that exist, not probabilities of future failure.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Reputational harm</div><p class="card__desc">Publishing that a company shows distress signals could itself precipitate difficulty. Exposure analysis stays in a restricted tier for public bodies; only aggregate concentration is published.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Identifier gaps</div><p class="card__desc">Several provider registers carry no company number, and under half of social housing providers are Companies House entities at all. Coverage is reported per register rather than assumed uniform.</p></div></div>
 </section>
 
 <hr class="hr">
 
 <section id="sources">
-<div class="eyebrow">Sources</div>
+<h2 class="eyebrow">Sources</h2>
 <div class="srcs mt-3"><div class="src"><span class="src__n">01</span><span><a href="https://www.thegazette.co.uk/data" target="_blank" rel="noopener">The Gazette data services</a></span></div><div class="src"><span class="src__n">02</span><span><a href="https://www.gov.uk/guidance/companies-house-data-products" target="_blank" rel="noopener">Companies House data products</a></span></div><div class="src"><span class="src__n">03</span><span><a href="https://www.gov.uk/government/news/companies-house-to-bring-in-changes-to-accounts-filing-from-april-2028" target="_blank" rel="noopener">Changes to accounts filing from April 2028</a></span></div><div class="src"><span class="src__n">04</span><span><a href="https://www.gov.uk/government/publications/current-registered-providers-of-social-housing" target="_blank" rel="noopener">Registered providers of social housing</a></span></div><div class="src"><span class="src__n">05</span><span><a href="https://www.cqc.org.uk/about-us/transparency/using-cqc-data" target="_blank" rel="noopener">CQC data and transparency</a></span></div></div>
 <p class="tiny muted mt-3">All sources checked in August 2026. Figures carry the reference period of their source, which may differ from publication date. Where a figure could not be verified against a primary source it is not used.</p>
 </section>
@@ -159,7 +176,7 @@
 <footer class="foot"><div class="wrap">
 <div class="foot__grid">
 <div>
-<h4>Groundtruth systems</h4>
+<h2>UK GroundTruth systems</h2>
 <a href="../systems/catchment.html">07 &middot; Catchment</a>
 <a href="../systems/sentinel.html">01 &middot; Sentinel</a>
 <a href="../systems/highwater.html">06 &middot; Highwater</a>
@@ -169,7 +186,7 @@
 <a href="../systems/bellwether.html">12 &middot; Bellwether</a>
 </div>
 <div>
-<h4>&nbsp;</h4>
+<h2 class="visually-hidden">UK GroundTruth systems, continued</h2>
 <a href="../systems/sightline.html">13 &middot; Sightline</a>
 <a href="../systems/lastmile.html">14 &middot; Lastmile</a>
 <a href="../systems/bulwark.html">16 &middot; Bulwark</a>
@@ -178,14 +195,14 @@
 <a href="../systems/baseline.html">18 &middot; Baseline</a>
 </div>
 <div>
-<h4>Sections</h4>
+<h2>Sections</h2>
 <a href="../index.html#chains">How they help each other</a>
 <a href="../index.html#sequence">Build order</a>
 <a href="../index.html#delivery">Delivery and procurement</a>
 <a href="../index.html#rejected">Out of scope</a>
 </div>
 <div>
-<h4>About</h4>
+<h2>About</h2>
 <p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
 </div>
 </div>

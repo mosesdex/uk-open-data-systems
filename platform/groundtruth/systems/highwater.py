@@ -148,6 +148,7 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
                count(*) FILTER (WHERE outcome = '{AGAINST}')  AS granted_against,
                count(*) FILTER (WHERE outcome = '{UNKNOWN}')  AS outcome_unknown,
                round(sum(residential_units))                  AS residential_units,
+               round(sum(residential_units) FILTER (WHERE outcome = '{AGAINST}')) AS homes_against,
                round(100.0 * count(*) FILTER (WHERE outcome = '{AGAINST}')
                      / nullif(count(*) FILTER (WHERE outcome IN ('{FOLLOWED}','{AGAINST}')), 0), 1)
                                                               AS override_rate_pct
@@ -155,6 +156,9 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY lpa HAVING count(*) >= 20
         ORDER BY override_rate_pct DESC NULLS LAST
     """)
+
+    # Place authorities in districts by name (no coordinates are published).
+    build_district(con)
 
 
 def locatability(con: duckdb.DuckDBPyConnection) -> dict:
@@ -164,3 +168,30 @@ def locatability(con: duckdb.DuckDBPyConnection) -> dict:
         FROM silver.flood_objection""").fetchone()
     return {"objections": row[0], "with_reference": row[1],
             "with_public_register_link": row[2], "authorities": row[3]}
+
+
+# ---------------------------------------------------------------------------
+# Geography: where flood advice is overridden.
+# The objections already carry an LPA name and residential unit counts, so the
+# override picture can be broken down by authority -- and, where the LPA name
+# matches a district, placed on the map. No new source needed; this is the WHERE
+# dimension the objections data already supports.
+# ---------------------------------------------------------------------------
+def build_district(con: duckdb.DuckDBPyConnection) -> None:
+    """Place each authority's objections in a district by name match (no coords
+    are published, so this joins on the stated LPA name; unmatched are dropped)."""
+    from .. import spatial
+    lads = spatial.load()
+    rows = con.execute("""SELECT lpa, objections, granted_against
+                          FROM gold.highwater_authority""").fetchall()
+    agg = {}
+    for lpa, obj, against in rows:
+        code = lads.code_for_name(lpa)
+        if code:
+            a = agg.setdefault(code, [0, 0]); a[0] += obj or 0; a[1] += against or 0
+    con.execute("DROP TABLE IF EXISTS gold.highwater_district")
+    con.execute("CREATE TABLE gold.highwater_district (lad_code VARCHAR, objections INTEGER, granted_against INTEGER)")
+    if agg:
+        con.executemany("INSERT INTO gold.highwater_district VALUES (?, ?, ?)",
+                        [(c, v[0], v[1]) for c, v in agg.items()])
+    return len(agg)

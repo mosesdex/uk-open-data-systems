@@ -89,3 +89,44 @@ class TestPrivacy:
                         "phase", "establishment_type", "hospital_school",
                         "provision", "pupils"}
         con.close()
+
+
+class TestBirthCohort:
+    """Births give the incoming cohort. Joining them to the EHC trend lets a
+    planner see demand and population together, not extrapolate counts as if the
+    cohort behind them were fixed."""
+
+    def _seed(self, con, births_rows):
+        # build() rebuilds compass_series from silver.sen_provision, so the trend
+        # must be seeded there: eleven flat years of EHC counts for one authority.
+        con.execute("""CREATE TABLE silver.sen_provision (
+            period VARCHAR, year INTEGER, level VARCHAR, la_name VARCHAR,
+            la_code VARCHAR, region VARCHAR, phase VARCHAR,
+            establishment_type VARCHAR, hospital_school VARCHAR,
+            provision VARCHAR, pupils BIGINT)""")
+        con.executemany("INSERT INTO silver.sen_provision VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            [(f"{y}", y, "Local authority", "Anytown", "E1", "R", "Total",
+              "Total", "Total", "Education, health and care plan", 1000)
+             for y in range(2015, 2026)])
+        con.execute("CREATE TABLE silver.births (lad_code VARCHAR, lad_name VARCHAR, births INTEGER)")
+        con.executemany("INSERT INTO silver.births VALUES (?,?,?)", births_rows)
+
+    def test_cohort_index_is_computed(self, tmp_path):
+        from groundtruth import store
+        from groundtruth.systems import compass as C
+        con = store.connect(tmp_path / "db")
+        self._seed(con, [("E1", "Anytown", 2000)])
+        C.build(con)
+        row = con.execute("""SELECT ehc_per_1000_births, annual_births
+                             FROM gold.compass_cohort""").fetchone()
+        assert row == (500.0, 2000)   # 1000 plans per 2000 births = 500 per 1000
+        con.close()
+
+    def test_authority_without_births_is_left_out_not_zeroed(self, tmp_path):
+        from groundtruth import store
+        from groundtruth.systems import compass as C
+        con = store.connect(tmp_path / "db")
+        self._seed(con, [("E2", "Elsewhere", 2000)])   # different code
+        C.build(con)
+        assert con.execute("SELECT count(*) FROM gold.compass_cohort").fetchone()[0] == 0
+        con.close()

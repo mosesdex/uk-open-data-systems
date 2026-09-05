@@ -1,4 +1,4 @@
-# Groundtruth
+# UK GroundTruth
 
 | | |
 |---|---|
@@ -9,7 +9,7 @@
 **One platform. Thirteen public data systems. No registration anywhere.**
 
 British government publishes records that say *what* happened but not, in any form a
-computer can match, *where* it happened or *who* it involved. Groundtruth resolves those
+computer can match, *where* it happened or *who* it involved. UK GroundTruth resolves those
 two things — and thirteen systems become possible that are not possible today.
 
 Live: **https://mosesdex.github.io/uk-open-data-systems/**
@@ -40,7 +40,7 @@ Live: **https://mosesdex.github.io/uk-open-data-systems/**
 | 17 | Watchman | Insolvency exposure across public suppliers |
 | 18 | Baseline | Sewage spills, adjusted for the weather |
 
-Five further systems are published but sit outside Groundtruth — two need
+Five further systems are published but sit outside UK GroundTruth — two need
 security-cleared UK staff, one needs a registered account, and two were rejected by the
 research itself. Reasons are stated on the site.
 

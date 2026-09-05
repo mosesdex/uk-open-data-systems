@@ -98,3 +98,26 @@ class TestResolution:
         from groundtruth.resolve import resolve
         url = resolve(S.get("gias_establishments"))
         assert "{date}" not in url and "edubasealldata20" in url
+
+
+class TestDiscoveryUrlGuard:
+    """Some registry URLs are an index, a catalogue or a first page, not the
+    data. Fetching one directly stores the pointer -- which once replaced
+    141,468 flood defences with 5,000, and a 61 MB statistics table with the
+    JSON of the page that lists it."""
+
+    def test_sources_needing_backfill_are_marked(self):
+        marked = {s.id for s in S.REGISTRY if getattr(s, "needs_backfill", None)}
+        assert {"ea_aims_defences", "planning_ps2"} <= marked
+
+    def test_every_marked_source_names_a_real_backfill_step(self):
+        from groundtruth import backfill as B
+        for s in S.REGISTRY:
+            step = getattr(s, "needs_backfill", None)
+            if step:
+                assert hasattr(B, f"fetch_{step}"), f"{s.id} names a missing step"
+
+    def test_unmarked_sources_are_direct_downloads(self):
+        # A source without the flag must be safe to fetch directly.
+        assert getattr(S.get("gias_establishments"), "needs_backfill", None) is None
+        assert getattr(S.get("os_open_uprn"), "needs_backfill", None) is None

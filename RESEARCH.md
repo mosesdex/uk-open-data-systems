@@ -1,4 +1,4 @@
-# Groundtruth — deep research
+# UK GroundTruth — deep research
 
 Verification date: **17 August 2026**. Every access claim below was tested from a clean
 client: no account, no API key, no subscription, no cookie, no referrer.
@@ -11,7 +11,7 @@ Raw evidence: [`research/probe-results.tsv`](research/probe-results.tsv),
 ## 1. Method
 
 The binding constraint on this platform is not modelling skill or compute. It is **access**.
-A source that needs an account cannot be part of Groundtruth, because the whole proposition is
+A source that needs an account cannot be part of UK GroundTruth, because the whole proposition is
 that a government body can reproduce every number without asking anyone's permission.
 
 So the research began by testing access rather than by reading documentation. 101 endpoints
@@ -50,7 +50,7 @@ Three things this method caught that documentation review would not have:
 
 Confirmed downloadable anonymously from `https://api.os.uk/downloads/v1/products/{id}/downloads`:
 
-| Product | Format | Size | Role in Groundtruth |
+| Product | Format | Size | Role in UK GroundTruth |
 |---|---|---|---|
 | OS Open UPRN | CSV | 618.5 MB | Every property reference in GB, with coordinates |
 | OS Open Linked Identifiers | CSV | 672.0 MB | **The crosswalk**: property ↔ street ↔ topographic ID |
@@ -61,7 +61,7 @@ Confirmed downloadable anonymously from `https://api.os.uk/downloads/v1/products
 | Boundary-Line | Shapefile | 736.9 MB | Administrative boundaries |
 | OS Open Roads | Shapefile | 606.1 MB | Road network |
 
-**Why this matters.** Groundtruth's place spine needs to turn a messy reference into a stable
+**Why this matters.** UK GroundTruth's place spine needs to turn a messy reference into a stable
 identifier. Linked Identifiers is precisely that crosswalk, and it is free and unregistered.
 The earlier assumption — that the place spine required a licensed addressing product — was wrong
 for the identifier layer.
@@ -69,7 +69,7 @@ for the identifier layer.
 **The licensing line still holds.** These products are open, but the surrounding OS licences
 (notably PSGA clause 2.5.3) permit publishing *identifiers* appended to your own data while
 prohibiting republishing address strings or coordinates derived from licensed address products.
-Groundtruth therefore **emits identifiers, never addresses**. That is an architectural rule, not
+UK GroundTruth therefore **emits identifiers, never addresses**. That is an architectural rule, not
 a preference — see §5.3.
 
 ### 2.2 The entity spine
@@ -380,6 +380,6 @@ before this study, and it is the finding that makes the platform viable.
 - Individual-level anything — excluded by design, not by capability
 
 **The honest summary**: the ceiling is set by what government chooses to publish, not by what can
-be computed. Groundtruth's proposition is that the published material already supports far more
+be computed. UK GroundTruth's proposition is that the published material already supports far more
 than is currently extracted from it — because the two joins that would unlock it have never been
 built.

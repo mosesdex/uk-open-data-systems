@@ -1,4 +1,4 @@
-// Two worked examples per Groundtruth system, plus the overarching case.
+// Two worked examples per UK GroundTruth system, plus the overarching case.
 export default {
 
   overall: {

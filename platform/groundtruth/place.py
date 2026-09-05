@@ -106,10 +106,22 @@ def resolve_uprn(con: duckdb.DuckDBPyConnection, uprn: int | str) -> PlaceRef:
 
 
 def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None) -> PlaceRef:
-    """Best available tier for whatever identifiers a record happens to carry."""
+    """Best available tier for whatever identifiers a record happens to carry.
+
+    The property tier gives an exact coordinate but no administrative district --
+    the UPRN file carries no LAD. When a postcode is also present, its district
+    is grafted onto the property result, so a record keeps the precise point and
+    still aggregates by authority. Without this, property-resolved records fall
+    out of every by-district statistic.
+    """
     if uprn is not None:
         ref = resolve_uprn(con, uprn)
         if ref.resolved:
+            if ref.lad_code is None and postcode is not None:
+                pc = resolve_postcode(con, postcode)
+                if pc.resolved and pc.lad_code:
+                    from dataclasses import replace
+                    return replace(ref, lad_code=pc.lad_code, ward_code=pc.ward_code)
             return ref
     if postcode is not None:
         ref = resolve_postcode(con, postcode)
@@ -122,6 +134,35 @@ def _has(con: duckdb.DuckDBPyConnection, table: str) -> bool:
     return con.execute("""
         SELECT count(*) FROM information_schema.tables
         WHERE table_schema='silver' AND table_name=?""", [table]).fetchone()[0] > 0
+
+
+# A property reference and a postcode that disagree by more than this are not
+# describing the same place. Measured on the school register: genuine estates
+# spread a few hundred metres, while broken identifiers land hundreds of
+# kilometres away.
+CONFLICT_METRES = 2_000
+
+
+def cross_check(con: duckdb.DuckDBPyConnection, uprn, postcode) -> dict:
+    """Resolve a record both ways and report whether the two agree.
+
+    A published property reference can be wrong. In the school register, some
+    point to the opposite end of the country. Nothing downstream should treat
+    such a reference as authoritative simply because it resolved, so the two
+    tiers are compared and the disagreement is reported rather than hidden.
+    """
+    import math
+    p = resolve_uprn(con, uprn) if uprn is not None else UNRESOLVED
+    q = resolve_postcode(con, postcode) if postcode else UNRESOLVED
+    if not (p.resolved and q.resolved):
+        return {"comparable": False, "metres": None, "conflict": False,
+                "tier": p.tier if p.resolved else q.tier}
+    dlat = (p.latitude - q.latitude) * 111_320
+    dlon = ((p.longitude - q.longitude) * 111_320
+            * math.cos(math.radians(q.latitude)))
+    d = math.hypot(dlat, dlon)
+    return {"comparable": True, "metres": round(d), "conflict": d > CONFLICT_METRES,
+            "tier": "uprn"}
 
 
 def coverage(con: duckdb.DuckDBPyConnection) -> dict:
@@ -144,4 +185,9 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
         out["tiers"]["lad"] = {
             "rows": con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
         }
+    for name, table in (("uprn_to_street", "lids_uprn_usrn"),
+                        ("uprn_to_building", "lids_uprn_toid")):
+        if _has(con, table):
+            out.setdefault("crosswalks", {})[name] = con.execute(
+                f"SELECT count(*) FROM silver.{table}").fetchone()[0]
     return out

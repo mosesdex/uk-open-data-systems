@@ -87,3 +87,138 @@ class TestConcentration:
         n, total, pct = S.uncompeted_share(con)
         assert n == 2 and total == 4 and pct == 50.0
         con.close()
+
+
+class TestSharedControl:
+    """Two bidders on one contract controlled by the same person. This is the
+    collusion signal price and bidder-count screens cannot give, because UK
+    data publishes neither. It is a signal to investigate, never a verdict."""
+
+    def _setup(self, con):
+        con.execute("""CREATE TABLE silver.psc (
+            company_number VARCHAR, kind VARCHAR, name VARCHAR,
+            person_key VARCHAR, control VARCHAR)""")
+
+    def _award(self, ocid, company, supplier):
+        return (ocid, 'B1', 'A Council', supplier, supplier.lower(), company,
+                'open', None, 'services', 100000.0, '2026-01-01')
+
+    def test_shared_controller_between_two_bidders_is_found(self, tmp_path):
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        con.executemany("INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        [self._award('c1', '11111111', 'Alpha Ltd'),
+                         self._award('c1', '22222222', 'Beta Ltd')])
+        self._setup(con)
+        con.executemany("INSERT INTO silver.psc VALUES (?,?,?,?,?)", [
+            ('11111111', 'individual-person-with-significant-control', 'Ms Jane Smith', 'jane smith', 'ownership'),
+            ('22222222', 'individual-person-with-significant-control', 'Jane Smith', 'jane smith', 'ownership'),
+        ])
+        S.shared_control(con)
+        rows = con.execute("SELECT person FROM gold.sentinel_shared_control").fetchall()
+        assert len(rows) == 1 and 'Smith' in rows[0][0]
+        con.close()
+
+    def test_different_controllers_are_not_flagged(self, tmp_path):
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        con.executemany("INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        [self._award('c1', '11111111', 'Alpha Ltd'),
+                         self._award('c1', '22222222', 'Beta Ltd')])
+        self._setup(con)
+        con.executemany("INSERT INTO silver.psc VALUES (?,?,?,?,?)", [
+            ('11111111', 'individual-person-with-significant-control', 'Jane Smith', 'jane smith', 'ownership'),
+            ('22222222', 'individual-person-with-significant-control', 'John Doe', 'john doe', 'ownership'),
+        ])
+        S.shared_control(con)
+        assert con.execute("SELECT count(*) FROM gold.sentinel_shared_control").fetchone()[0] == 0
+        con.close()
+
+    def test_framework_co_awards_are_not_flagged(self, tmp_path):
+        """A framework awards many suppliers together. Two of them sharing a
+        director is coincidence, not collusion, so a large field is excluded."""
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        # ten suppliers on one framework, two sharing a controller
+        rows = [self._award('fw', f'{i:08d}', f'Supplier {i}') for i in range(1, 11)]
+        con.executemany("INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)", rows)
+        self._setup(con)
+        con.executemany("INSERT INTO silver.psc VALUES (?,?,?,?,?)", [
+            ('00000001', 'individual-person-with-significant-control', 'Jane Smith', 'jane smith', 'own'),
+            ('00000002', 'individual-person-with-significant-control', 'Jane Smith', 'jane smith', 'own'),
+        ])
+        S.shared_control(con)
+        assert con.execute("SELECT count(*) FROM gold.sentinel_shared_control").fetchone()[0] == 0
+        con.close()
+
+    def test_corporate_parent_of_a_bidder_is_not_flagged(self, tmp_path):
+        """A company controlling its own subsidiary is a group structure, not
+        two independent bidders."""
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        con.executemany("INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                        [self._award('c1', '11111111', 'Parent Ltd'),
+                         self._award('c1', '22222222', 'Sub Ltd')])
+        self._setup(con)
+        con.executemany("INSERT INTO silver.psc VALUES (?,?,?,?,?)", [
+            ('11111111', 'corporate-entity-person-with-significant-control', 'Parent Ltd', 'parent ltd', 'own'),
+            ('22222222', 'corporate-entity-person-with-significant-control', 'Parent Ltd', 'parent ltd', 'own'),
+        ])
+        S.shared_control(con)
+        assert con.execute("SELECT count(*) FROM gold.sentinel_shared_control").fetchone()[0] == 0
+        con.close()
+
+    def test_missing_psc_table_produces_an_empty_result_not_an_error(self, tmp_path):
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        S.shared_control(con)
+        assert con.execute("SELECT count(*) FROM gold.sentinel_shared_control").fetchone()[0] == 0
+        con.close()
+
+
+class TestControlFootprint:
+    """One owner behind several of a buyer's suppliers over time. This is the
+    signal PSC actually powers, since award notices name only winners."""
+
+    def test_one_person_two_companies_same_buyer_is_surfaced(self, tmp_path):
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        con.executemany("INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
+            ('c1','B','A Council','Alpha','alpha','11111111','open',None,'s',1000.0,'2026-01-01'),
+            ('c2','B','A Council','Beta','beta','22222222','open',None,'s',2000.0,'2026-02-01')])
+        con.execute("CREATE TABLE silver.psc (company_number VARCHAR, kind VARCHAR, name VARCHAR, person_key VARCHAR, control VARCHAR)")
+        con.executemany("INSERT INTO silver.psc VALUES (?,?,?,?,?)", [
+            ('11111111','individual','Jo Owner','jo owner','o'),
+            ('22222222','individual','Jo Owner','jo owner','o')])
+        S.build_footprint(con)
+        row = con.execute("SELECT person, companies, awards FROM gold.sentinel_control_footprint").fetchone()
+        assert row == ('Jo Owner', 2, 2)
+        con.close()
+
+    def test_no_psc_gives_empty_table_not_error(self, tmp_path):
+        con = store.connect(tmp_path / "db")
+        con.execute("""CREATE TABLE silver.procurement_award (
+            ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR, supplier VARCHAR,
+            supplier_key VARCHAR, company_number VARCHAR, method VARCHAR,
+            method_detail VARCHAR, category VARCHAR, value DOUBLE, award_date VARCHAR)""")
+        S.build_footprint(con)
+        assert con.execute("SELECT count(*) FROM gold.sentinel_control_footprint").fetchone()[0] == 0
+        con.close()

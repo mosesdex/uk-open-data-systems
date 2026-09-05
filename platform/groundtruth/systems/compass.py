@@ -119,6 +119,37 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
         ORDER BY projected_change_pct DESC NULLS LAST
     """)
 
+    # Births give the incoming cohort. A rising EHC trend in an authority whose
+    # birth cohort is also growing will compound; a rising trend where births are
+    # falling is a different, temporary pressure. This joins the two so a planner
+    # sees the demand signal and the population signal together, rather than
+    # extrapolating EHC counts as if the cohort behind them were fixed.
+    con.execute("DROP TABLE IF EXISTS gold.compass_cohort")
+    _births = con.execute("SELECT count(*) FROM information_schema.tables "
+                          "WHERE table_schema='silver' AND table_name='births'").fetchone()[0]
+    if _births:
+        con.execute(f"""
+        CREATE TABLE gold.compass_cohort AS
+        SELECT t.la_code, t.la_name, t.mean_pupils AS ehc_mean,
+               t.pupils_per_year AS ehc_trend_per_year,
+               t.projected_change_pct AS ehc_projected_pct,
+               b.births AS annual_births,
+               -- EHC plans held per thousand annual births: a demand-intensity
+               -- ratio, high where a small cohort carries many plans. Not a
+               -- per-child rate -- it spans every school age against one birth
+               -- year -- and is labelled as an index, not a prevalence.
+               round(1000.0 * t.mean_pupils / nullif(b.births, 0), 0) AS ehc_per_1000_births
+        FROM gold.compass_trend t
+        JOIN silver.births b ON b.lad_code = t.la_code
+        WHERE t.provision = '{EHC_PLAN}' AND b.births > 0
+        ORDER BY ehc_per_1000_births DESC NULLS LAST
+        """)
+    else:
+        con.execute("""CREATE TABLE gold.compass_cohort (
+            la_code VARCHAR, la_name VARCHAR, ehc_mean DOUBLE,
+            ehc_trend_per_year DOUBLE, ehc_projected_pct DOUBLE,
+            annual_births INTEGER, ehc_per_1000_births DOUBLE)""")
+
     # Where a district moves against its region: the mismatch the system exists
     # to surface, since planning happens locally and projections are published
     # regionally.

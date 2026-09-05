@@ -82,7 +82,12 @@ def load_codepoint(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
 
 
 def load_uprn(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
-    """Load OS Open UPRN: the property tier of the place spine."""
+    """Load OS Open UPRN: the property tier of the place spine.
+
+    2.3 GB of CSV inside the archive. Expanded to a temporary directory, read
+    natively by DuckDB, then removed -- inserting 41 million rows a row at a
+    time from Python is hours of work the database does in under a minute.
+    """
     _require(zip_path)
     tmp = Path(tempfile.mkdtemp(prefix="gt-uprn-"))
     try:
@@ -98,12 +103,13 @@ def load_uprn(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
         con.execute(f"""
             CREATE TABLE silver.place_uprn AS
             SELECT
-              TRY_CAST(UPRN AS BIGINT)      AS uprn,
+              TRY_CAST(UPRN AS BIGINT)         AS uprn,
               TRY_CAST(X_COORDINATE AS DOUBLE) AS easting,
               TRY_CAST(Y_COORDINATE AS DOUBLE) AS northing,
-              TRY_CAST(LATITUDE  AS DOUBLE) AS latitude,
-              TRY_CAST(LONGITUDE AS DOUBLE) AS longitude
-            FROM read_csv('{target}', header=true, ignore_errors=true)
+              TRY_CAST(LATITUDE  AS DOUBLE)    AS latitude,
+              TRY_CAST(LONGITUDE AS DOUBLE)    AS longitude
+            FROM read_csv('{target}', header=true, all_varchar=true, ignore_errors=true)
+            WHERE TRY_CAST(UPRN AS BIGINT) IS NOT NULL
         """)
         return con.execute("SELECT count(*) FROM silver.place_uprn").fetchone()[0]
     finally:
@@ -148,3 +154,240 @@ def load_lad_boundaries(con: duckdb.DuckDBPyConnection, geojson_path: Path) -> i
     con.execute("CREATE TABLE silver.lad (lad_code VARCHAR PRIMARY KEY, lad_name VARCHAR)")
     insert_many(con, "INSERT OR IGNORE INTO silver.lad VALUES (?, ?)", rows)
     return con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
+
+
+def load_crosswalk(con: duckdb.DuckDBPyConnection, zip_path: Path, table: str) -> int:
+    """Load an OS Linked Identifiers file.
+
+    Every crosswalk uses the same shape: IDENTIFIER_1 is the property reference,
+    IDENTIFIER_2 the thing it links to, and CONFIDENCE the publisher's own view
+    of the link. The confidence column is kept rather than dropped -- a link the
+    publisher is unsure about must not be presented as certain downstream.
+    """
+    _require(zip_path)
+    tmp = Path(tempfile.mkdtemp(prefix="gt-lids-"))
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            members = [m for m in z.namelist() if m.lower().endswith(".csv")]
+            if not members:
+                raise LoadError(f"no CSV member in {zip_path.name}")
+            target = tmp / "lids.csv"
+            with z.open(members[0]) as src, open(target, "wb") as dst:
+                shutil.copyfileobj(src, dst, length=1 << 20)
+
+        con.execute(f"DROP TABLE IF EXISTS silver.{table}")
+        con.execute(f"""
+            CREATE TABLE silver.{table} AS
+            SELECT TRY_CAST(IDENTIFIER_1 AS BIGINT) AS uprn,
+                   nullif(trim(CAST(IDENTIFIER_2 AS VARCHAR)), '') AS linked_id,
+                   nullif(trim(CONFIDENCE), '')                    AS confidence
+            FROM read_csv('{target}', header=true, all_varchar=true, ignore_errors=true)
+            WHERE TRY_CAST(IDENTIFIER_1 AS BIGINT) IS NOT NULL
+        """)
+        return con.execute(f"SELECT count(*) FROM silver.{table}").fetchone()[0]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def load_companies(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
+    """Load the Companies House basic company data product.
+
+    This is what the entity spine has been missing: a register to resolve
+    against, rather than only the identifiers that procurement and care records
+    happen to carry. Column names in the published file contain dots and
+    leading spaces, so they are selected by quoted name.
+    """
+    _require(zip_path)
+    tmp = Path(tempfile.mkdtemp(prefix="gt-ch-"))
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            members = [m for m in z.namelist() if m.lower().endswith(".csv")]
+            if not members:
+                raise LoadError("no CSV member in the Companies House archive")
+            target = tmp / "companies.csv"
+            with z.open(members[0]) as src, open(target, "wb") as dst:
+                shutil.copyfileobj(src, dst, length=1 << 20)
+
+        con.execute("DROP TABLE IF EXISTS silver.company")
+        con.execute(f"""
+            CREATE TABLE silver.company AS
+            SELECT
+              nullif(trim("CompanyNumber"), '')                 AS company_number,
+              nullif(trim("CompanyName"), '')                   AS name,
+              nullif(trim("CompanyStatus"), '')                 AS status,
+              nullif(trim("CompanyCategory"), '')               AS category,
+              nullif(trim("RegAddress.PostCode"), '')           AS postcode,
+              nullif(trim("RegAddress.PostTown"), '')           AS post_town,
+              nullif(trim("CountryOfOrigin"), '')               AS country,
+              nullif(trim("IncorporationDate"), '')             AS incorporated,
+              nullif(trim("SICCode.SicText_1"), '')             AS sic_1
+            FROM read_csv('{target}', header=true, all_varchar=true, ignore_errors=true)
+            WHERE nullif(trim("CompanyNumber"), '') IS NOT NULL
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_company_num ON silver.company(company_number)")
+        return con.execute("SELECT count(*) FROM silver.company").fetchone()[0]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def load_charities(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
+    """Load the Charity Commission register.
+
+    Extends the entity spine to bodies a company register cannot name: many care
+    and education providers are charities, not companies. The name is normalised
+    the same way company names are, so the two registers answer to one resolver.
+    """
+    _require(zip_path)
+    tmp = Path(tempfile.mkdtemp(prefix="gt-charity-"))
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            members = [m for m in z.namelist()
+                       if m.endswith(".json") and "charity." in m]
+            if not members:
+                members = [m for m in z.namelist() if m.endswith(".json")]
+            if not members:
+                raise LoadError("no charity JSON in the extract")
+            target = tmp / "charity.json"
+            with z.open(members[0]) as src, open(target, "wb") as dst:
+                shutil.copyfileobj(src, dst, length=1 << 20)
+
+        con.execute("DROP TABLE IF EXISTS silver.charity")
+        con.execute(f"""
+            CREATE TABLE silver.charity AS
+            SELECT
+              CAST(registered_charity_number AS VARCHAR)        AS charity_number,
+              nullif(trim(charity_name), '')                    AS name,
+              nullif(trim(charity_registration_status), '')     AS status
+            FROM read_json('{target}', format='array', maximum_object_size=20000000)
+            WHERE registered_charity_number IS NOT NULL
+              AND linked_charity_number = 0
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_charity_num ON silver.charity(charity_number)")
+        # A normalised-name index over registered charities only, so the entity
+        # spine can resolve a charitable provider the same way it resolves a
+        # company. normalise happens via the shared key, computed in SQL.
+        con.execute("DROP TABLE IF EXISTS silver.charity_key")
+        con.execute("""CREATE TABLE silver.charity_key AS
+            WITH n AS (SELECT charity_number, name,
+                trim(regexp_replace(regexp_replace(regexp_replace(
+                  regexp_replace(lower(trim(name)),'&',' and '),
+                  '[^a-z0-9 ]',' ','g'),' +',' ','g'),'^the ','')) AS k
+              FROM silver.charity WHERE status='Registered' AND name IS NOT NULL)
+            SELECT charity_number, name, k AS name_key FROM n WHERE k <> ''""")
+        con.execute("CREATE INDEX IF NOT EXISTS idx_ckey ON silver.charity_key(name_key)")
+        return con.execute("SELECT count(*) FROM silver.charity").fetchone()[0]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def load_rainfall(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    """Load rainfall readings: the weather side of the spill normalisation.
+
+    Each reading names its measure, and the station id is the first field of the
+    measure id, so spills can be joined to rainfall at the same outlet.
+    """
+    _require(json_path)
+    import json as _json
+    doc = _json.loads(Path(json_path).read_text())
+    rows = []
+    for r in doc.get("items", []):
+        measure = r.get("measure", "")
+        # .../measures/E7050-rainfall-...  -> station E7050
+        station = measure.split("/measures/")[-1].split("-")[0] if measure else None
+        rows.append((station, r.get("dateTime"), r.get("value")))
+    con.execute("DROP TABLE IF EXISTS silver.rainfall_reading")
+    con.execute("""CREATE TABLE silver.rainfall_reading (
+        station VARCHAR, reading_time VARCHAR, value DOUBLE)""")
+    insert_many(con, "INSERT INTO silver.rainfall_reading VALUES (?,?,?)", rows)
+    return len(rows)
+
+
+def load_births(con: duckdb.DuckDBPyConnection, csv_path: Path) -> int:
+    """Load live births per local authority: the cohort input for forecasting."""
+    _require(csv_path)
+    con.execute("DROP TABLE IF EXISTS silver.births")
+    con.execute(f"""
+        CREATE TABLE silver.births AS
+        SELECT trim(GEOGRAPHY_CODE) AS lad_code,
+               trim(GEOGRAPHY_NAME) AS lad_name,
+               TRY_CAST(OBS_VALUE AS INTEGER) AS births
+        FROM read_csv('{csv_path}', header=true, all_varchar=true, ignore_errors=true)
+        WHERE trim(GEOGRAPHY_CODE) <> ''
+    """)
+    return con.execute("SELECT count(*) FROM silver.births").fetchone()[0]
+
+
+# Person names normalise loosely: title and punctuation vary between filings for
+# the same individual, so they are stripped before two records are called the
+# same person. This is deliberately conservative -- a shared-control claim that
+# turns out to be two different people is worse than a missed one.
+def _psc_person_key(name: str) -> str:
+    import re
+    if not name:
+        return ""
+    s = name.lower().strip()
+    s = re.sub(r"^(mr|mrs|ms|miss|dr|prof|sir|dame|lord|lady|rev)\.?\s+", "", s)
+    s = re.sub(r"[^a-z0-9 ]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def load_psc(con: duckdb.DuckDBPyConnection, bronze: Path) -> int:
+    """Load persons of significant control from every snapshot part.
+
+    One row per (company, controlling party). A person is keyed by a normalised
+    name so the same individual controlling several companies collapses to one
+    key -- which is what makes shared control between bidders visible.
+    """
+    import json as _json
+    parts = sorted(p for p in Path(bronze).glob("psc-snapshot-*.zip")
+                   if zipfile.is_zipfile(p))
+    if not parts:
+        raise LoadError("no PSC snapshot parts on disk -- run: gt backfill --only psc")
+
+    con.execute("DROP TABLE IF EXISTS silver.psc")
+    con.execute("""CREATE TABLE silver.psc (
+        company_number VARCHAR, kind VARCHAR, name VARCHAR, person_key VARCHAR,
+        control VARCHAR)""")
+
+    # The snapshot members are newline-delimited JSON, which DuckDB reads
+    # natively -- far faster than a Python loop over 13 GB. The person key still
+    # needs the shared normaliser, so that one column is computed per row after
+    # the bulk read, over the far smaller set of controlling parties.
+    con.create_function("psc_key", _psc_person_key, ["VARCHAR"], "VARCHAR")
+    tmp = Path(tempfile.mkdtemp(prefix="gt-psc-"))
+    total = 0
+    try:
+        for zp in parts:
+            with zipfile.ZipFile(zp) as z:
+                member = [m for m in z.namelist()
+                          if m.endswith(".txt") or m.endswith(".json")]
+                if not member:
+                    continue
+                target = tmp / "psc.ndjson"
+                with z.open(member[0]) as src, open(target, "wb") as dst:
+                    shutil.copyfileobj(src, dst, length=1 << 20)
+            con.execute(f"""
+                INSERT INTO silver.psc
+                WITH raw AS (
+                  SELECT company_number, to_json(data) AS d
+                  FROM read_json('{target}', format='newline_delimited',
+                                 maximum_object_size=10000000, ignore_errors=true,
+                                 records=true)
+                )
+                SELECT company_number,
+                       json_extract_string(d, '$.kind')  AS kind,
+                       json_extract_string(d, '$.name')  AS name,
+                       psc_key(json_extract_string(d, '$.name')) AS person_key,
+                       array_to_string(
+                         CAST(json_extract(d, '$.natures_of_control') AS VARCHAR[]), ';')
+                FROM raw
+                WHERE json_extract_string(d, '$.kind') LIKE '%person-with-significant-control%'
+            """)
+            target.unlink(missing_ok=True)
+        total = con.execute("SELECT count(*) FROM silver.psc").fetchone()[0]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    con.execute("CREATE INDEX IF NOT EXISTS idx_psc_company ON silver.psc(company_number)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_psc_person ON silver.psc(person_key)")
+    return total
