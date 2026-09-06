@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import posixpath
 import re
 import sys
 from html.parser import HTMLParser
@@ -18,7 +19,21 @@ from html.parser import HTMLParser
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = "https://ukgroundtruth.co.uk"
 
-PAGES = sorted(p for p in ROOT.glob("*.html")) + sorted(ROOT.glob("systems/*.html"))
+# The published set, mirroring what .github/workflows/pages.yml assembles.
+# Globbing the repo would check pages that never ship (the proposal homepage at
+# index.html) and miss the ones that do (the app, which serves from app/).
+PUBLISHED = {
+    "app/index.html": "",              # served at the root
+    "app/mobile.html": "mobile.html",
+    "platform.html": "platform.html",
+    "research.html": "research.html",
+    "examples.html": "examples.html",
+    "404.html": "404.html",
+}
+for _s in sorted(ROOT.glob("systems/*.html")):
+    PUBLISHED[f"systems/{_s.name}"] = f"systems/{_s.name}"
+
+PAGES = [ROOT / rel for rel in PUBLISHED]
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -46,6 +61,23 @@ def rel(p: pathlib.Path) -> str:
     return str(p.relative_to(ROOT))
 
 
+def repo_path(served: str) -> pathlib.Path | None:
+    """Where a published path lives in the repository.
+
+    The publish step merges two trees into one: the app supplies /, /mobile.html,
+    /assets and /data from app/, while the site supplies /systems, the
+    explanatory pages and the rest of /assets. A checker that only looks at repo
+    paths reports the app's own stylesheet as a broken link.
+    """
+    served = served.lstrip("/")
+    for candidate in (ROOT / "app" / served, ROOT / served):
+        if candidate.exists():
+            return candidate
+    if served in ("", "index.html"):
+        return ROOT / "app" / "index.html"
+    return None
+
+
 def check_page(p: pathlib.Path) -> None:
     name = rel(p)
     h = p.read_text()
@@ -69,6 +101,12 @@ def check_page(p: pathlib.Path) -> None:
         err(name, f"expected exactly 1 canonical, found {len(canon)}")
     elif not canon[0].startswith(SITE):
         err(name, f"canonical is not an absolute site URL: {canon[0]}")
+    else:
+        served = PUBLISHED.get(name)
+        expect = f"{SITE}/" if served == "" else f"{SITE}/{served}"
+        if canon[0] != expect:
+            err(name, f"canonical {canon[0]} does not match where the page is "
+                      f"served ({expect})")
 
     if len(robots) != 1:
         err(name, f"expected exactly 1 robots meta, found {len(robots)}")
@@ -86,8 +124,7 @@ def check_page(p: pathlib.Path) -> None:
 
     # og:image must point at a file that exists, or the preview is blank.
     for img in re.findall(r'<meta property="og:image" content="([^"]+)">', h):
-        local = ROOT / img.replace(SITE + "/", "")
-        if not local.is_file():
+        if repo_path(img.replace(SITE + "/", "")) is None:
             err(name, f"og:image does not exist: {img}")
 
     # Structured data must parse. Invalid JSON-LD is ignored silently by
@@ -142,9 +179,25 @@ def check_page(p: pathlib.Path) -> None:
     for href in re.findall(r'href="([^"#?][^"]*?)"', h):
         if href.startswith(("http://", "https://", "mailto:", "data:", "//")):
             continue
-        target = (p.parent / href.split("#")[0].split("?")[0]).resolve()
-        if not target.exists():
-            err(name, f"broken internal link: {href}")
+        raw = href.split("#")[0].split("?")[0]
+        if not raw:
+            continue
+        # A template placeholder is a link built at runtime, not a link in the
+        # document. The values these produce are checked against the live site.
+        if "${" in raw or "{{" in raw:
+            continue
+        # An app page is served from the root, so '../systems/x' from it lands
+        # at '/systems/x'. Resolve against the served path, not the repo path.
+        served = PUBLISHED.get(name, name)
+        # Resolve against the served location, then map back into the repo. A
+        # '../systems/x' link from a root-served app page lands at '/systems/x',
+        # which the browser clamps to the site root.
+        base = posixpath.dirname("/" + served)
+        # normpath applies '..' properly and clamps it at the root, which is
+        # exactly what a browser does with '../systems/x' on a root-served page.
+        landed = posixpath.normpath(posixpath.join(base, raw)).lstrip("/")
+        if repo_path(landed or "index.html") is None:
+            err(name, f"broken internal link: {href} (serves as /{landed})")
 
 
 def check_site() -> None:
@@ -162,9 +215,9 @@ def check_site() -> None:
         if not loc.startswith(SITE):
             err("sitemap.xml", f"URL outside the site: {loc}")
             continue
-        path = loc[len(SITE) + 1:] or "index.html"
-        if not (ROOT / path).is_file():
-            err("sitemap.xml", f"lists a page that does not exist: {path}")
+        path = loc[len(SITE) + 1:]
+        if repo_path(path or "index.html") is None:
+            err("sitemap.xml", f"lists a page that does not exist: /{path}")
 
     # Every canonical URL on the site should appear in the sitemap, and vice
     # versa: an indexable page missing from the sitemap is a page nobody asked

@@ -117,6 +117,11 @@ def systems() -> list[dict]:
 
 
 PAGES = [
+    # The two app interfaces, which are what the domain now serves.
+    ("app", "The system", "UK GroundTruth",
+     "Thirteen public data systems on one platform. Every figure computed from a published record."),
+    ("mobile", "Mobile", "In the field",
+     "Alerts, the local picture, the thirteen systems and search — on a phone."),
     ("default", "", "UK GroundTruth",
      "One platform, thirteen public data systems. Every source open to an anonymous request."),
     ("index", "", "UK GroundTruth",

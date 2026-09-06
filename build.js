@@ -860,10 +860,13 @@ const SYS_MTIME = {
 };
 
 const sitemapUrls = [
-  { path: '', changefreq: 'weekly', priority: 1.0, lastmod: modified('data/platform.js') },
-  { path: 'platform.html', changefreq: 'monthly', priority: 0.9, lastmod: modified('data/platform.js') },
-  { path: 'research.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/research.js') },
-  { path: 'examples.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/examples.js') },
+  // The root is the app, not the write-up: app/index.html is what the publish
+  // workflow copies to '/'. The explanatory pages sit behind it.
+  { path: '', changefreq: 'daily', priority: 1.0, lastmod: modified('app/data/platform.json') },
+  { path: 'mobile.html', changefreq: 'daily', priority: 0.9, lastmod: modified('app/data/platform.json') },
+  { path: 'platform.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/platform.js') },
+  { path: 'research.html', changefreq: 'monthly', priority: 0.7, lastmod: modified('data/research.js') },
+  { path: 'examples.html', changefreq: 'monthly', priority: 0.7, lastmod: modified('data/examples.js') },
   // The thirteen deliverable systems first: they are the pages the site is
   // actually about, and priority is relative within the site.
   ...DELIVERABLE.map(id => ({ path: `systems/${id}.html`, changefreq: 'monthly',
