@@ -1,12 +1,15 @@
-# Publishes the informational website only.
+# Publishes the operational app, with the explanatory pages behind it.
 #
-# The operational system -- the dashboards that read real platform output -- is
-# deliberately not published. It runs on localhost, against a database built on
-# the operator's own machine. See platform/HANDOVER.md.
+# The app is the product: app/index.html serves at the root, and the system
+# briefs it links to are published alongside. What still never ships is the
+# engine -- platform/ -- which holds the fetchers, the DuckDB database and the
+# credentials-free source registry. That runs on the operator's own machine.
 #
-# Published:   index.html, platform.html, research.html, examples.html,
-#              404.html, sitemap.xml, robots.txt, CNAME, systems/, assets/
-# Not published: app/ (the system), platform/ (the engine), data/, research/
+# Published:     app/index.html -> /, app/mobile.html, app/assets, app/data,
+#                systems/, platform.html, research.html, examples.html,
+#                404.html, sitemap.xml, robots.txt, CNAME, assets/
+# Not published: platform/ (the engine), data/ (raw content modules),
+#                research/, app/admin.html (the operator console)
 name: Publish website
 
 on:
@@ -31,49 +34,63 @@ jobs:
 
       - name: Assemble the website
         run: |
-          mkdir -p _site
-          cp index.html platform.html research.html examples.html 404.html _site/
+          mkdir -p _site/assets
+
+          # The app, at the root. Its own relative paths (assets/, data/) work
+          # unchanged there, and its links to ../systems/ resolve to /systems/.
+          cp app/index.html app/mobile.html _site/
+          cp -r app/assets/. _site/assets/
+          cp -r app/data _site/data
+
+          # The explanatory pages the app links out to.
+          cp platform.html research.html examples.html 404.html _site/
+          cp -r systems _site/
+          cp -r assets/. _site/assets/
+
           cp sitemap.xml robots.txt _site/
-          cp -r systems assets _site/
           cp .nojekyll LICENSE CNAME _site/ 2>/dev/null || true
+
+          # The operator console is not part of the public product.
+          rm -f _site/admin.html
 
       - name: Refuse to publish the system
         run: |
-          # The operational interfaces must never reach the public site.
-          for forbidden in app platform data research; do
+          # The engine never ships. It holds the fetchers, the source registry and
+          # the database the app's figures are computed from; publishing it would
+          # put the operator's whole pipeline on the public web.
+          for forbidden in platform research; do
             if [ -e "_site/$forbidden" ]; then
-              echo "::error::_site contains $forbidden — the system must stay local"
+              echo "::error::_site contains $forbidden — the engine must stay local"
               exit 1
             fi
           done
-          if grep -rl 'app/index\.html\|app/admin\.html\|app/mobile\.html' _site/ ; then
-            echo "::error::published pages link to the local-only system"
+          # The operator console is not public.
+          if [ -e "_site/admin.html" ]; then
+            echo "::error::_site contains admin.html — the operator console is not public"
             exit 1
           fi
-          echo "checked: website only, no system, no engine"
+          # The app must actually be at the root, or the deploy silently serves
+          # the old proposal site instead of the product.
+          if ! grep -q 'public interface' _site/index.html; then
+            echo "::error::_site/index.html is not the app"
+            exit 1
+          fi
+          echo "checked: app at root, engine absent, console absent"
 
       - name: Check every sitemap URL ships
         run: |
           # A sitemap entry for a page that is not in the artifact is a 404
           # served to a crawler, and Search Console reports it as an error.
-          #
-          # Strip the origin generically rather than a hard-coded project path:
-          # the site now sits at an apex domain, so a pattern naming the old
-          # /uk-open-data-systems/ subpath matches nothing and every URL is
-          # mistaken for a missing page.
-          #
-          # Read from a process substitution, not a pipeline: a `while` on the
-          # right of a pipe runs in a subshell under bash, so `missing=1` would
-          # be set on a copy and the check could never fail the build.
           missing=0
-          while read -r path; do
-            [ -z "$path" ] && path="index.html"
-            if [ ! -f "_site/$path" ]; then
-              echo "::error::sitemap lists $path, which is not published"
-              missing=1
-            fi
-          done < <(grep -o '<loc>[^<]*</loc>' _site/sitemap.xml \
-                    | sed -E 's|<loc>https?://[^/]+/||; s|</loc>||')
+          grep -o '<loc>[^<]*</loc>' _site/sitemap.xml \
+            | sed 's|<loc>https://[^/]*/uk-open-data-systems/||; s|</loc>||' \
+            | while read -r path; do
+                [ -z "$path" ] && path="index.html"
+                if [ ! -f "_site/$path" ]; then
+                  echo "::error::sitemap lists $path, which is not published"
+                  missing=1
+                fi
+              done
           test "$missing" -eq 0
           echo "checked: every sitemap URL is present"
 

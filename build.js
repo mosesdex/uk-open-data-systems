@@ -93,7 +93,7 @@ ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s
 <span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
 </div>
 </div></footer>
-<script src="${p}assets/app.js"></script>
+<script src="${p}assets/site.js"></script>
 </body></html>`;
 };
 
