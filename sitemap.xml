@@ -31,6 +31,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://ukgroundtruth.co.uk/about.html</loc>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ukgroundtruth.co.uk/systems/catchment.html</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>

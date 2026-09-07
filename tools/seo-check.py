@@ -28,6 +28,7 @@ PUBLISHED = {
     "platform.html": "platform.html",
     "research.html": "research.html",
     "examples.html": "examples.html",
+    "about.html": "about.html",
     "404.html": "404.html",
     "app/admin.html": "admin.html",   # published, but noindex
 }

@@ -1,5 +1,5 @@
 // Static site generator. Run: node build.js
-import { writeFileSync, mkdirSync, statSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import A from './data/systems-a.js';
 import B from './data/systems-b.js';
@@ -86,7 +86,9 @@ ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s
 </div>
 <div>
 <h2>About</h2>
-<p class="small muted">Prepared by Dexter DCL, an independent UK company. This is a private proposal document. It is not a government publication and carries no government endorsement.</p>
+<a href="${p}about.html">About and contact</a>
+<a href="mailto:${SEO.SITE.email}">${SEO.SITE.email}</a>
+<p class="small muted">Built by Dexter DCL Limited, an independent UK company. Not a government publication; carries no government endorsement.</p>
 </div>
 </div>
 <div class="foot__bottom">
@@ -835,6 +837,102 @@ ${RS.rules.items.map(([t, d], i) => `<div class="card mt-2"><div class="card__b"
 </div>
 ${foot()}`;
 
+/* ---------------- About and contact ---------------- */
+// The counts come out of the payload the app renders from, not out of this
+// file. A number typed here is a number that disagrees with the platform the
+// first time a source is added, which is the failure the whole project argues
+// against.
+const PJ = JSON.parse(readFileSync('app/data/platform.json', 'utf8'));
+const SRC = PJ.sources.status;
+const SRC_OK = SRC.filter(x => x.ok).length;
+const SRC_BLOCKED = SRC.length - SRC_OK;
+const BUILT = PJ.built_systems.length;
+
+const aboutTitle = SEO.composeTitle('About and contact');
+const aboutDesc = SEO.composeDescription(
+  `UK GroundTruth is built by Dexter DCL Limited on published UK government data. Who publishes it, what every figure rests on, and how to report a correction.`);
+const aboutTrail = [
+  { name: 'UK GroundTruth', url: SEO.canonical('') },
+  { name: 'About and contact', url: SEO.canonical('about.html') },
+];
+const about = `${head(aboutTitle, aboutDesc, 0, {
+  path: 'about.html', card: 'about',
+  ld: [SEO.organisation(), SEO.website(), SEO.breadcrumbs(aboutTrail),
+       SEO.webPage({ url: SEO.canonical('about.html'), title: aboutTitle,
+                     description: aboutDesc, trail: aboutTrail,
+                     // AboutPage, and mainEntity is the publisher: the page
+                     // exists to say who stands behind the figures.
+                     extra: { '@type': 'AboutPage',
+                              mainEntity: { '@id': `${SEO.SITE.url}/#organisation` },
+                              isAccessibleForFree: true } })],
+})}
+${nav()}
+
+<header class="sysHead"><div class="wrap">
+<a class="backlink" href="index.html">&larr; UK GroundTruth</a>
+<div class="eyebrow">About and contact</div>
+<h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Who stands behind the figures</h1>
+<p class="lede" style="margin-top:.9rem;font-size:1.1rem">UK GroundTruth is built and published by
+Dexter DCL Limited, an independent UK company. It is not a government publication, it carries no
+government endorsement, and nobody has commissioned it.</p>
+</div></header>
+
+<div class="wrap section">
+
+<div class="grid grid--2">
+<div class="card"><div class="card__b">
+<h2 class="feat__t">Contact</h2>
+<p class="prose small mt-2" style="max-width:none">One address, for everything &mdash; questions,
+corrections, and anything about how a figure was reached.</p>
+<p class="mt-3"><a class="btn btn--ghost" href="mailto:${SEO.SITE.email}">${SEO.SITE.email}</a></p>
+</div></div>
+
+<div class="card"><div class="card__b">
+<h2 class="feat__t">Reporting a correction</h2>
+<p class="prose small mt-2" style="max-width:none">Corrections are welcome and are the point. To make
+one actionable, name the page, the figure, and the published record you think it disagrees with. Every
+number on this site traces back to a named government source, so a correction can always be settled
+against one rather than argued about.</p>
+</div></div>
+</div>
+
+<h2 class="mt-5">What every figure rests on</h2>
+<p class="prose mt-2">Every number published here is computed from a record a UK government body or
+regulator has already published, and each one carries the coverage it rests on rather than a bare
+total. Nothing is modelled, estimated, or filled in by hand. On the last run,
+<strong>${SRC_OK} of ${SRC.length}</strong> registered sources returned data to a request carrying no
+account, key or fee, and <strong>${BUILT} of ${DELIVERABLE.length}</strong> systems had measured output.</p>
+
+<p class="prose mt-3">The engine that does the work &mdash; the fetchers, the source registry and the
+database &mdash; is not published on this domain. It runs on the operator's own machine, so the
+figures can be reproduced without depending on anyone else hosting them. What this site serves is the
+interface and the result.</p>
+
+<h2 class="mt-5">What it cannot tell you</h2>
+<p class="prose mt-2">${SRC_BLOCKED} of the ${SRC.length} registered sources did not return data to an
+unauthenticated request on the last run &mdash; some need a subscription key, some answer with a
+sign-in page. They are listed on the front page under <a href="index.html#honesty">What this cannot
+do</a> rather than quietly dropped, because a platform that only shows what worked is not reporting
+coverage, it is reporting its own successes.</p>
+
+<h2 class="mt-5">No bylines</h2>
+<p class="prose mt-2">No page here carries an author's name or a publication date, and none is asserted
+in the site's structured data either. That is deliberate rather than an omission: the figures are not
+anybody's opinion, and the authority behind each one is the government source named beside it, not the
+person who wrote the page. Where a judgement has been made &mdash; what to count, what to exclude
+&mdash; the method is set out on the page that makes it.</p>
+
+<h2 class="mt-5">Data and licensing</h2>
+<p class="prose mt-2">The underlying records are public sector information licensed under the
+<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open
+Government Licence v3.0</a>. The research behind the platform &mdash; an access audit of UK government
+endpoints &mdash; is published in full at <a href="research.html">What is actually open</a>, and the
+architecture at <a href="platform.html">Two joins, one platform</a>.</p>
+
+</div>
+${foot()}`;
+writeFileSync('about.html', about);
+
 writeFileSync('index.html', index);
 writeFileSync('platform.html', platform);
 writeFileSync('examples.html', examples);
@@ -868,6 +966,7 @@ const sitemapUrls = [
   { path: 'platform.html', changefreq: 'monthly', priority: 0.8, lastmod: modified('data/platform.js') },
   { path: 'research.html', changefreq: 'monthly', priority: 0.7, lastmod: modified('data/research.js') },
   { path: 'examples.html', changefreq: 'monthly', priority: 0.7, lastmod: modified('data/examples.js') },
+  { path: 'about.html', changefreq: 'yearly', priority: 0.6, lastmod: modified('build.js') },
   // The thirteen deliverable systems first: they are the pages the site is
   // actually about, and priority is relative within the site.
   ...DELIVERABLE.map(id => ({ path: `systems/${id}.html`, changefreq: 'monthly',
@@ -895,6 +994,7 @@ ${nav()}
 <li><a href="platform.html">The architecture: two joins, one platform</a></li>
 <li><a href="research.html">Research: what is actually open in UK government data</a></li>
 <li><a href="examples.html">Problems and solutions, system by system</a></li>
+<li><a href="about.html">About and contact</a></li>
 </ul></div>
 <div class="card"><h2 class="feat__t">The thirteen systems</h2>
 <ul class="prose small mt-2" style="max-width:none">

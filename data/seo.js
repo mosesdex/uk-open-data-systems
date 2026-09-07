@@ -29,6 +29,9 @@ export const SITE = {
   tagline: 'One platform, thirteen public data systems',
   publisher: 'Dexter DCL Limited',
   publisherShort: 'Dexter DCL',
+  // The one contact route the site publishes. Corrections arrive here too, so
+  // it is asserted in the Organization node rather than only rendered in HTML.
+  email: 'moses@dextercyberlab.com',
   locale: 'en_GB',
   lang: 'en-GB',
   // No verified brand account, so no twitter:site tag is emitted. A card still
@@ -77,16 +80,21 @@ const jsonld = (obj) =>
     // is the difference between structured data and an XSS vector.
     .replace(/</g, '\\u003c')}</script>`;
 
+// The description said "a private proposal document" for as long as the domain
+// served the write-up. It now serves the platform, so it says what the platform
+// is. No company number or address is asserted: neither has been published, and
+// a structured-data field is not the place to guess one.
 export const organisation = () => ({
   '@type': 'Organization',
   '@id': `${SITE.url}/#organisation`,
   name: SITE.publisher,
   alternateName: SITE.publisherShort,
   url: `${SITE.url}/`,
+  email: SITE.email,
   description:
-    'An independent UK company. UK GroundTruth is a private proposal document ' +
-    'prepared by Dexter DCL; it is not a government publication and carries no ' +
-    'government endorsement.',
+    'An independent UK company. UK GroundTruth is a platform built by Dexter DCL ' +
+    'on published UK government data. It is not a government publication and ' +
+    'carries no government endorsement.',
 });
 
 export const website = () => ({

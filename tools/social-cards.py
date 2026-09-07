@@ -132,6 +132,8 @@ PAGES = [
      "An access audit of 101 UK government endpoints. 69 returned data to an anonymous request."),
     ("examples", "Problems and solutions", "One problem, thirteen times",
      "Two real situations for every system: what goes wrong today, and what the system does about it."),
+    ("about", "About and contact", "Who stands behind the figures",
+     "Built by Dexter DCL Limited on published UK government data. Not a government publication."),
 ]
 
 

@@ -7,6 +7,7 @@
 #
 # Published:     app/index.html -> /, app/mobile.html, app/assets, app/data,
 #                systems/, platform.html, research.html, examples.html,
+#                about.html,
 #                app/admin.html (noindex), 404.html, sitemap.xml, robots.txt,
 #                CNAME, assets/
 # Not published: platform/ (the engine), data/ (raw content modules), research/
@@ -43,7 +44,7 @@ jobs:
           cp -r app/data _site/data
 
           # The explanatory pages the app links out to.
-          cp platform.html research.html examples.html 404.html _site/
+          cp platform.html research.html examples.html about.html 404.html _site/
           cp -r systems _site/
           cp -r assets/. _site/assets/
 
