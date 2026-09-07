@@ -29,9 +29,14 @@ PUBLISHED = {
     "research.html": "research.html",
     "examples.html": "examples.html",
     "404.html": "404.html",
+    "app/admin.html": "admin.html",   # published, but noindex
 }
 for _s in sorted(ROOT.glob("systems/*.html")):
     PUBLISHED[f"systems/{_s.name}"] = f"systems/{_s.name}"
+
+# Reachable, deliberately kept out of search: an error page and an operations
+# console. Neither belongs in results, and neither goes in the sitemap.
+NOINDEX = {"404.html", "app/admin.html"}
 
 PAGES = [ROOT / rel for rel in PUBLISHED]
 
@@ -110,10 +115,10 @@ def check_page(p: pathlib.Path) -> None:
 
     if len(robots) != 1:
         err(name, f"expected exactly 1 robots meta, found {len(robots)}")
-    elif name != "404.html" and "noindex" in robots[0]:
+    elif name not in NOINDEX and "noindex" in robots[0]:
         err(name, "an indexable page carries noindex")
-    elif name == "404.html" and "noindex" not in robots[0]:
-        err(name, "the error page should be noindex")
+    elif name in NOINDEX and "noindex" not in robots[0]:
+        err(name, f"{name} should be noindex")
 
     for prop in ("og:title", "og:description", "og:url", "og:image", "og:type"):
         if f'property="{prop}"' not in h:

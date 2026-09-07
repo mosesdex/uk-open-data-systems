@@ -7,9 +7,9 @@
 #
 # Published:     app/index.html -> /, app/mobile.html, app/assets, app/data,
 #                systems/, platform.html, research.html, examples.html,
-#                404.html, sitemap.xml, robots.txt, CNAME, assets/
-# Not published: platform/ (the engine), data/ (raw content modules),
-#                research/, app/admin.html (the operator console)
+#                app/admin.html (noindex), 404.html, sitemap.xml, robots.txt,
+#                CNAME, assets/
+# Not published: platform/ (the engine), data/ (raw content modules), research/
 name: Publish website
 
 on:
@@ -38,7 +38,7 @@ jobs:
 
           # The app, at the root. Its own relative paths (assets/, data/) work
           # unchanged there, and its links to ../systems/ resolve to /systems/.
-          cp app/index.html app/mobile.html _site/
+          cp app/index.html app/mobile.html app/admin.html _site/
           cp -r app/assets/. _site/assets/
           cp -r app/data _site/data
 
@@ -50,8 +50,6 @@ jobs:
           cp sitemap.xml robots.txt _site/
           cp .nojekyll LICENSE CNAME _site/ 2>/dev/null || true
 
-          # The operator console is not part of the public product.
-          rm -f _site/admin.html
 
       - name: Refuse to publish the system
         run: |
@@ -64,9 +62,10 @@ jobs:
               exit 1
             fi
           done
-          # The operator console is not public.
-          if [ -e "_site/admin.html" ]; then
-            echo "::error::_site contains admin.html — the operator console is not public"
+          # The console is published but must stay out of search: it is an
+          # operations view, and it has no business competing with the product.
+          if ! grep -q 'name="robots" content="noindex' _site/admin.html; then
+            echo "::error::admin.html is published without noindex"
             exit 1
           fi
           # The app must actually be at the root, or the deploy silently serves

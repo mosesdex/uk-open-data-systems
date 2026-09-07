@@ -7,6 +7,28 @@
 <meta name="description" content="UK GroundTruth operator console: source health, ingest runs, system state, match review.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="canonical" href="https://ukgroundtruth.co.uk/admin.html">
+<!-- Reachable, not searchable. noindex keeps the operator console out of
+     results; it is deliberately NOT disallowed in robots.txt, because a
+     crawler that cannot fetch the page never sees the noindex and may list
+     the bare URL regardless. Nothing here is secret -- it is a read-only
+     view of the same platform.json the public interface reads -- but an
+     operations console has no business competing with the product. -->
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="UK GroundTruth">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://ukgroundtruth.co.uk/admin.html">
+<meta property="og:title" content="UK GroundTruth &mdash; admin console">
+<meta property="og:description" content="Operator console: source health, ingest runs, system state and the match review queue.">
+<meta property="og:image" content="https://ukgroundtruth.co.uk/assets/social/default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="UK GroundTruth admin console">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UK GroundTruth &mdash; admin console">
+<meta name="twitter:description" content="Operator console: source health, ingest runs, system state and the match review queue.">
+<meta name="twitter:image" content="https://ukgroundtruth.co.uk/assets/social/default.png">
 <link rel="stylesheet" href="assets/app.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
 </head>
@@ -34,7 +56,7 @@
 <header class="top"><div class="top__in">
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
   <div><div class="top__crumb">UK GroundTruth · Admin console · 127.0.0.1</div>
-       <div class="top__title">Control room</div></div>
+       <h1 class="top__title">Control room</h1></div>
   <div class="spacer"></div>
   <span class="live" id="stateTag"><i></i>READING DATABASE…</span>
   <a class="btn btn--ghost" href="index.html" style="font-size:12px">← Public site</a>
