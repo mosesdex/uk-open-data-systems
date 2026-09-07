@@ -661,6 +661,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .topsearch{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:9px;
   padding:.4rem .7rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;transition:border-color .14s,background .14s}
 .topsearch:hover{border-color:var(--blue-300);background:var(--blue-050);color:var(--ink-2)}
+.topsearch:focus-within{border-color:var(--blue-500);background:var(--surface);
+  box-shadow:0 0 0 3px var(--blue-100)}
+/* A real input, so clicking it and typing does what it looks like it does.
+   It was a link styled as a search field, which is the worst of both. */
+.topsearch input{flex:1;min-width:0;border:0;background:none;font:inherit;color:var(--ink);
+  padding:0;outline:none;font-size:13px}
+.topsearch input::placeholder{color:var(--ink-3)}
+.topsearch input::-webkit-search-cancel-button{display:none}
 .topsearch__ico{font-size:15px}
 .topsearch__k{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:5px;
   padding:0 .35rem;color:var(--ink-3)}

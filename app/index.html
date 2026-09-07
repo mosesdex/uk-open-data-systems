@@ -55,14 +55,17 @@
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
   <div><div class="top__crumb">UK GroundTruth · Public interface</div><div class="top__title">National picture</div></div>
   <div class="spacer"></div>
-  <a class="topsearch" href="#search" aria-label="Search across all systems">
-    <span class="topsearch__ico">⌕</span><span class="topsearch__t">Search organisations, places, systems</span>
-    <span class="topsearch__k">/</span></a>
+  <div class="topsearch">
+    <span class="topsearch__ico" aria-hidden="true">⌕</span>
+    <input id="topSearch" type="search" autocomplete="off" spellcheck="false"
+           placeholder="Search organisations, places, systems"
+           aria-label="Search organisations, places and systems">
+    <span class="topsearch__k" aria-hidden="true">/</span></div>
   <span class="live"><i></i>13 SYSTEMS LIVE</span>
   <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
 </div></header>
 
-<div class="pad" id="top">
+<main class="pad" id="top">
 
   <section class="hero rise" id="hero">
     <div class="hero__inner">
@@ -257,7 +260,7 @@ cannot tell you.</p>
   </p>
 </div>
 </div>
-</div>
+</main>
 
 <div id="syshost"><div class="syspage" id="syspage"></div></div>
 

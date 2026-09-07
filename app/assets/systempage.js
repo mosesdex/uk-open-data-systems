@@ -605,9 +605,22 @@ const SystemPage = (() => {
       }));
     };
     input.addEventListener('input', () => render(input.value));
-    render('');
+    if (pendingQuery) { input.value = pendingQuery; pendingQuery = ''; }
+    render(input.value);
     host.classList.add('on'); document.body.style.overflow = 'hidden'; root.scrollTop = 0;
     setTimeout(() => input.focus(), 50);
+  }
+
+  // Carries a query typed in the top bar across the route change, so the
+  // search view opens already showing results rather than an empty box.
+  let pendingQuery = '';
+  function seedSearch(q) {
+    const input = document.getElementById('gsInput');
+    if (!input) return;
+    input.value = q;
+    input.dispatchEvent(new Event('input', {bubbles: true}));
+    input.focus();
+    input.setSelectionRange(q.length, q.length);
   }
 
   function go(id) { location.hash = 'system/' + id; }
@@ -634,9 +647,26 @@ const SystemPage = (() => {
     };
     addEventListener('hashchange', route);
     addEventListener('keydown', e => { if (e.key === 'Escape' && host.classList.contains('on')) { go(''); close(); } });
+
+    // The top bar carries a real input. Typing in it opens the search view and
+    // hands the query straight over, so the first keystroke is not thrown away.
+    const top = document.getElementById('topSearch');
+    if (top) {
+      const handoff = () => {
+        const q = top.value;
+        pendingQuery = q;
+        if (location.hash !== '#search') location.hash = 'search';
+        else seedSearch(q);
+        top.value = '';
+      };
+      top.addEventListener('input', () => { if (top.value.trim()) handoff(); });
+      top.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); handoff(); } });
+    }
+
     addEventListener('keydown', e => {
       if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '') && !host.classList.contains('on')) {
-        e.preventDefault(); location.hash = 'search';
+        e.preventDefault();
+        if (top) top.focus(); else location.hash = 'search';
       }
     });
     route();
