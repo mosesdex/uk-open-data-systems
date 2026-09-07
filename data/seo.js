@@ -189,22 +189,26 @@ ${urls.map(u => `  <url>
  * rather than silently accepted.
  */
 export const robots = () => `# ${SITE.name} — ${SITE.publisher}
-# The operational system (app/), the engine (platform/) and the raw content
-# modules (data/) are not deployed to this site at all. They are excluded by the
-# publish workflow, which fails the build if any of them reach the output, so
-# these rules are a second line rather than the only one.
+#
+# What ships is the app: the interfaces at / and /mobile.html, the data they
+# read, and the system briefs they link to. What never ships is the engine in
+# platform/ -- the fetchers, the source registry and the database -- and the
+# operator console, which the publish workflow removes and then fails the build
+# if it reappears.
 
 User-agent: *
 Allow: /
 
-# Never deployed, but stated so an accidental deploy is also disallowed.
-Disallow: ${SITE.base}/app/
-Disallow: ${SITE.base}/platform/
-Disallow: ${SITE.base}/data/
-Disallow: ${SITE.base}/research/
-
-# Crawlers need the stylesheet and script to render and assess the page.
+# The app renders from these at runtime. Blocking them would let a crawler load
+# the page and see an application with no figures in it, which is worse than
+# not being crawled at all.
 Allow: ${SITE.base}/assets/
+Allow: ${SITE.base}/data/
+
+# Never deployed. Stated so that an accidental deploy is also disallowed.
+Disallow: ${SITE.base}/platform/
+Disallow: ${SITE.base}/research/
+Disallow: ${SITE.base}/admin.html
 
 Sitemap: ${SITE.url}/sitemap.xml
 `;

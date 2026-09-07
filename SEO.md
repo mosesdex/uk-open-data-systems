@@ -1,12 +1,17 @@
 # SEO
 
-Everything search engines see is generated. There is no page with hand-written
-metadata, because a hand-written tag is one that goes stale the first time a
-system is added.
+The domain serves the **app**: `app/index.html` at `/` and `app/mobile.html`
+beside it, with the system briefs they link to published behind them. The
+engine in `platform/` never ships.
+
+Almost everything search engines see is generated. The two app pages are the
+exception — they are hand-maintained HTML, so their tags are literal, and
+`tools/seo-check.py` fails the build if they drift from where the page is
+actually served.
 
 ```bash
-node build.js              # pages + sitemap.xml + robots.txt + 404.html
-python3 tools/social-cards.py   # 23 Open Graph images, after a content change
+node build.js                   # briefs + sitemap.xml + robots.txt + 404.html
+python3 tools/social-cards.py   # 25 Open Graph images, after a content change
 python3 tools/seo-check.py      # validate; exits non-zero on error
 ```
 
@@ -19,6 +24,7 @@ python3 tools/seo-check.py      # validate; exits non-zero on error
 | Social card generation | `tools/social-cards.py` |
 | Validation | `tools/seo-check.py` |
 | Publish + guards | `.github/workflows/pages.yml` |
+| The published set the validator checks | `PUBLISHED` in `tools/seo-check.py` |
 
 Adding a system to `data/systems-*.js` is enough. It gets a title, description,
 canonical, robots directive, Open Graph and Twitter tags, a `WebPage` and
@@ -95,12 +101,25 @@ Update `CNAME`, and the `SITE` constant at the top of `tools/seo-check.py`.
 
 The publish workflow refuses to ship if:
 
-- `app/`, `platform/`, `data/` or `research/` reach the output
-- any published page links to the local-only system
+- `platform/` or `research/` reach the output — the engine holds the fetchers,
+  the source registry and the database, and publishing it would put the whole
+  pipeline on the public web
+- `admin.html` reaches the output — the operator console is not public
+- `index.html` in the artifact is not the app, so a deploy cannot silently
+  revert to serving the proposal write-up
 - the sitemap lists a page that is not in the artifact
 
-`tools/seo-check.py` additionally verifies, for all 23 pages: one `h1`, no
-heading-level jumps, exactly one canonical, unique canonicals across the site,
-present and parseable JSON-LD, sequential breadcrumb positions, an `og:image`
-that exists on disk, no `noindex` on an indexable page, resolving internal
-links, and sitemap/canonical agreement in both directions.
+`tools/seo-check.py` verifies, across the 24 published pages: one `h1`, no
+heading-level jumps, exactly one canonical that matches **where the page is
+actually served**, unique canonicals across the site, present and parseable
+JSON-LD, sequential breadcrumb positions, an `og:image` that exists, no
+`noindex` on an indexable page, resolving internal links, sitemap/canonical
+agreement in both directions, and that `robots.txt` never blocks a path the app
+fetches at runtime.
+
+Two of those exist because the check they replaced was inert. The sitemap guard
+stripped a hard-coded project subpath that stops existing at an apex domain and
+set its failure flag inside a subshell, so it annotated 22 errors on a passing
+build. The validator itself globbed the repository, so it checked a homepage
+that no longer ships and never once looked at the app. Both now have a negative
+test behind them: remove a page, or block `/data/`, and the check fails.

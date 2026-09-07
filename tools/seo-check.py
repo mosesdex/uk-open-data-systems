@@ -244,7 +244,29 @@ def check_site() -> None:
             err("robots.txt", "does not reference the sitemap")
         if re.search(r"^Disallow:\s*/\s*$", text, re.M):
             err("robots.txt", "disallows the whole site")
-        for asset in ("assets/style.css", "assets/app.js"):
+        # Anything the pages fetch at runtime must stay crawlable. A blocked
+        # payload lets a crawler render the app with no figures in it, which
+        # looks like an empty product rather than a blocked resource.
+        disallowed = [ln.split(":", 1)[1].strip()
+                      for ln in text.splitlines()
+                      if ln.strip().lower().startswith("disallow:")
+                      and ln.split(":", 1)[1].strip()]
+        runtime = set()
+        for page in PAGES:
+            body = page.read_text()
+            runtime |= set(re.findall(r"""fetch\(\s*['"`]([^'"`?]+)""", body))
+            runtime |= set(re.findall(r'data-geo="([^"]+)"', body))
+        for src in ROOT.glob("app/assets/*.js"):
+            body = src.read_text()
+            runtime |= set(re.findall(r"""fetch\(\s*['"`]([^'"`?$]+)""", body))
+            runtime |= set(re.findall(r"""=\s*['"]([\w./-]+\.json)['"]""", body))
+        for res in sorted(runtime):
+            served = "/" + res.lstrip("./")
+            for rule in disallowed:
+                if served.startswith(rule.rstrip("*")):
+                    err("robots.txt", f"blocks {served}, which the app fetches "
+                                      f"at runtime (rule: Disallow: {rule})")
+        for asset in ("assets/style.css", "assets/app.css", "assets/app.js"):
             if re.search(rf"^Disallow:.*{re.escape(asset)}", text, re.M):
                 err("robots.txt", f"blocks a render-critical asset: {asset}")
 
