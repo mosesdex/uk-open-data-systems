@@ -1,5 +1,6 @@
 // Static site generator. Run: node build.js
 import { writeFileSync, mkdirSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import A from './data/systems-a.js';
 import B from './data/systems-b.js';
 import C from './data/systems-c.js';
@@ -905,3 +906,10 @@ ${foot()}`;
 writeFileSync('404.html', notFound);
 
 console.log(`Wrote sitemap.xml (${sitemapUrls.length} urls), robots.txt, 404.html`);
+
+/* ---------------- Static content for the app ---------------- */
+// The app fills its containers from platform.json in the browser, so a crawler
+// that does not run JavaScript sees an empty shell. This renders the same
+// figures into those containers at build time; the app overwrites them the
+// moment its scripts run, so nothing changes for a person.
+execFileSync('node', ['tools/app-content.mjs'], { stdio: 'inherit' });

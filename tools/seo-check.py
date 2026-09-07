@@ -170,6 +170,19 @@ def check_page(p: pathlib.Path) -> None:
         if "width=" not in tag or "height=" not in tag:
             warn(name, f"image without width/height (layout shift): {tag[:70]}")
 
+    # The app's containers ship empty and fill from JavaScript. If the static
+    # copy ever stops being generated, the page silently loses almost all of
+    # its crawlable content while still looking perfectly fine in a browser.
+    if name in ("app/index.html", "app/mobile.html"):
+        if "<!-- generated:static-content -->" not in h:
+            err(name, "static content block is missing; run: node tools/app-content.mjs")
+        else:
+            body = re.sub(r"(?is)<script.*?</script>|<style.*?</style>", " ", h)
+            wordcount = len(re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", body)).split())
+            if wordcount < 250:
+                err(name, f"only {wordcount} words of crawlable HTML; the app's "
+                          "content is not reaching non-rendering crawlers")
+
     # The operational system must never be linked from the public site.
     for bad in ("app/index.html", "app/admin.html", "app/mobile.html"):
         if bad in h:
