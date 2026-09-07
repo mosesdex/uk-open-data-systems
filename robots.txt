@@ -1,4 +1,4 @@
-# UK GroundTruth — Dexter DCL Limited
+# UK GroundTruth — Dexter DCL
 #
 # What ships is the app: the interfaces at / and /mobile.html, the data they
 # read, and the system briefs they link to. What never ships is the engine in

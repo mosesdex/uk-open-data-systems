@@ -88,11 +88,11 @@ ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s
 <h2>About</h2>
 <a href="${p}about.html">About and contact</a>
 <a href="mailto:${SEO.SITE.email}">${SEO.SITE.email}</a>
-<p class="small muted">Built by Dexter DCL Limited, an independent UK company. Not a government publication; carries no government endorsement.</p>
+<p class="small muted">Built by Dexter DCL, an independent UK company. Not a government publication; carries no government endorsement.</p>
 </div>
 </div>
 <div class="foot__bottom">
-<span>&copy; <span data-year>${YEAR}</span> Dexter DCL Limited. Research compiled August ${YEAR}.</span>
+<span>&copy; <span data-year>${YEAR}</span> Dexter DCL. Research compiled August ${YEAR}.</span>
 <span>Contains public sector information licensed under the Open Government Licence v3.0.</span>
 </div>
 </div></footer>
@@ -850,7 +850,7 @@ const BUILT = PJ.built_systems.length;
 
 const aboutTitle = SEO.composeTitle('About and contact');
 const aboutDesc = SEO.composeDescription(
-  `UK GroundTruth is built by Dexter DCL Limited on published UK government data. Who publishes it, what every figure rests on, and how to report a correction.`);
+  `UK GroundTruth is built by Dexter DCL on published UK government data. Who publishes it, what every figure rests on, and how to report a correction.`);
 const aboutTrail = [
   { name: 'UK GroundTruth', url: SEO.canonical('') },
   { name: 'About and contact', url: SEO.canonical('about.html') },
@@ -873,7 +873,7 @@ ${nav()}
 <div class="eyebrow">About and contact</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Who stands behind the figures</h1>
 <p class="lede" style="margin-top:.9rem;font-size:1.1rem">UK GroundTruth is built and published by
-Dexter DCL Limited, an independent UK company. It is not a government publication, it carries no
+Dexter DCL, an independent UK company. It is not a government publication, it carries no
 government endorsement, and nobody has commissioned it.</p>
 </div></header>
 

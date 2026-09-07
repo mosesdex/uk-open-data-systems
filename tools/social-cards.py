@@ -133,7 +133,7 @@ PAGES = [
     ("examples", "Problems and solutions", "One problem, thirteen times",
      "Two real situations for every system: what goes wrong today, and what the system does about it."),
     ("about", "About and contact", "Who stands behind the figures",
-     "Built by Dexter DCL Limited on published UK government data. Not a government publication."),
+     "Built by Dexter DCL on published UK government data. Not a government publication."),
 ]
 
 

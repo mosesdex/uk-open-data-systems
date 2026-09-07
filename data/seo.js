@@ -27,7 +27,7 @@ export const SITE = {
   url: `${ORIGIN}${BASE}`,
   name: 'UK GroundTruth',
   tagline: 'One platform, thirteen public data systems',
-  publisher: 'Dexter DCL Limited',
+  publisher: 'Dexter DCL',
   publisherShort: 'Dexter DCL',
   // The one contact route the site publishes. Corrections arrive here too, so
   // it is asserted in the Organization node rather than only rendered in HTML.
@@ -88,7 +88,9 @@ export const organisation = () => ({
   '@type': 'Organization',
   '@id': `${SITE.url}/#organisation`,
   name: SITE.publisher,
-  alternateName: SITE.publisherShort,
+  // Only when it says something the name does not. With the suffix dropped the
+  // two are the same string, and an alternateName echoing the name is noise.
+  ...(SITE.publisherShort !== SITE.publisher ? { alternateName: SITE.publisherShort } : {}),
   url: `${SITE.url}/`,
   email: SITE.email,
   description:
