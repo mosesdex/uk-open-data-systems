@@ -61,16 +61,31 @@ it into the artifact — GitHub Pages will not serve a custom domain without it.
 Point the apex at GitHub Pages' four addresses, and `www` at the Pages host.
 In hPanel: **Domains → DNS / Nameservers → Manage DNS records**.
 
-| Type | Name | Value | TTL |
+| Type | Name | Value | Purpose |
 |---|---|---|---|
-| A | `@` | `185.199.108.153` | 3600 |
-| A | `@` | `185.199.109.153` | 3600 |
-| A | `@` | `185.199.110.153` | 3600 |
-| A | `@` | `185.199.111.153` | 3600 |
-| CNAME | `www` | `mosesdex.github.io.` | 3600 |
+| A | `@` | `185.199.108.153` | GitHub Pages |
+| A | `@` | `185.199.109.153` | GitHub Pages |
+| A | `@` | `185.199.110.153` | GitHub Pages |
+| A | `@` | `185.199.111.153` | GitHub Pages |
+| CNAME | `www` | `mosesdex.github.io.` | `www` to the Pages host |
+| TXT | `@` | `google-site-verification=k0HtctVplKR9DyGF3xbTsa_U37c2I9Re-nMtpmH6WO4` | Search Console |
+| CNAME | `8bcd715f73f558587c64170e3a5869a4` | `verify.bing.com` | Bing Webmaster Tools |
 
 Delete any existing A or CNAME record on `@` or `www` first — Hostinger parks
 new domains on its own page, and a leftover record will win.
+
+**The last two records are not optional and are not one-time.** Both search
+engines re-check them, and both drop the property when the record disappears —
+losing the search data, not just the badge. hPanel puts a **Reset DNS records**
+button on the same screen, which restores Hostinger's defaults and takes all
+seven of these with it. If verification is ever lost, that button is the first
+thing to suspect.
+
+Hostinger has a **Quick setup → Google site verification** action that writes
+the TXT record for you; its record-type dropdown is a custom widget, so the
+quick setup is more reliable than the generic Add Record form. Note that the
+generic form renames its own value field per record type — `pointsTo` for TXT,
+`target` for CNAME — which is worth knowing before automating against it.
 
 Then in the repository: **Settings → Pages → Custom domain**, enter
 `ukgroundtruth.co.uk`, save, and tick **Enforce HTTPS** once the certificate is
@@ -81,9 +96,25 @@ Verify from a terminal:
 
 ```bash
 dig +short ukgroundtruth.co.uk A          # the four 185.199.x addresses
+dig +short ukgroundtruth.co.uk TXT        # the Search Console token
+dig +short 8bcd715f73f558587c64170e3a5869a4.ukgroundtruth.co.uk CNAME   # verify.bing.com.
 curl -sI https://ukgroundtruth.co.uk/     # HTTP/2 200
 curl -s  https://ukgroundtruth.co.uk/robots.txt | head -1
 ```
+
+### Search engines
+
+Both properties are verified by DNS, so neither depends on a file or a meta tag
+surviving a redesign.
+
+| | Property | Method | Sitemap |
+|---|---|---|---|
+| Google Search Console | `sc-domain:ukgroundtruth.co.uk` (domain property, so it covers http, https, `www` and every subdomain) | DNS TXT | submitted, 23 URLs discovered |
+| Bing Webmaster Tools | `https://ukgroundtruth.co.uk/` | DNS CNAME | submitted, 0 errors |
+
+Bing offers a one-click import from Search Console. It is not used here: it
+grants Bing OAuth access to the Google account, and the DNS route costs one
+record and grants nothing.
 
 ### If the domain ever moves again
 
