@@ -59,6 +59,7 @@ class SectorCoverage:
     label: str
     via_register: int = 0
     via_charity: int = 0
+    via_nhs: int = 0
 
     @property
     def identified_pct(self) -> float:
@@ -87,6 +88,7 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
     identified = 0
     via_register = 0
     via_charity = 0
+    via_nhs = 0
     for header, row in table(ods_path):
         if idx is None:
             idx = _index(header)
@@ -104,13 +106,23 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
                 identified += 1
                 via_register += 1
             else:
-                # Third authority: the charity register. Most misses here are
-                # councils and NHS bodies, which are neither company nor charity.
+                # Third authority: the charity register.
                 cref = entity.resolve_charity(con, name=_get(row, idx, COL_PROVIDER))
                 if cref.resolved:
                     num = cref.company_number   # a GB-CHC- charity number
                     identified += 1
                     via_charity += 1
+                else:
+                    # Fourth: the NHS register, which answers the councils and
+                    # NHS bodies the note above named as the remaining miss. It
+                    # refuses names that look like a person -- a great many care
+                    # homes are run by one, and both registers list individuals,
+                    # so a name match there would identify a person as a body.
+                    nref = entity.resolve_nhs(con, name=_get(row, idx, COL_PROVIDER))
+                    if nref.resolved:
+                        num = nref.company_number   # a GB-NHS- organisation code
+                        identified += 1
+                        via_nhs += 1
         records.append((
             _get(row, idx, COL_LOCATION),
             _get(row, idx, COL_LA),
@@ -131,7 +143,7 @@ def load_care(con: duckdb.DuckDBPyConnection, ods_path: Path) -> SectorCoverage:
         )""")
     insert_many(con, 
         "INSERT INTO silver.care_location VALUES (?,?,?,?,?,?,?,?)", records)
-    return SectorCoverage(len(records), identified, "care", via_register, via_charity)
+    return SectorCoverage(len(records), identified, "care", via_register, via_charity, via_nhs)
 
 
 def build(con: duckdb.DuckDBPyConnection) -> None:

@@ -259,6 +259,69 @@ def resolve_charity(con, name=None) -> EntityRef:
                      note=f"{len(hits)} charities share {key!r} -- ambiguous")
 
 
+# The NHS organisation register lists individual practitioners alongside bodies:
+# sole traders, GP partners, dentists. Care data does the same -- a great many
+# care homes are run by a named person. Matching those two on name identifies a
+# *person*, not an organisation, and two people share a name far more readily
+# than two organisations do.
+#
+# Matching on name alone found 2,880 care providers in the NHS register, and 600
+# of them were people: "Mrs Stella Shaw", "Dr M J Sturgess", "Mr & Mrs Ryan
+# Godwin". So a positive signal is required rather than a negative one -- a
+# title-stripping heuristic still let "Basdeo Kaydoo" and "A Wilks" through.
+ORG_TOKEN = re.compile(
+    r"\b(nhs|trust|council|borough|county|partnership|practice|surgery|centre|center|"
+    r"clinic|hospital|pharmacy|home|homes|care|ltd|limited|plc|llp|cic|foundation|"
+    r"group|services|health|school|academy|association|charity|society|community|"
+    r"lodge|manor|house|court|grange|hall|village|authority|board|nursing|residential)\b"
+)
+
+
+def looks_like_an_organisation(key: str) -> bool:
+    """Whether a normalised name carries any signal that it names a body.
+
+    Deliberately a whitelist. Asking "does this look like a person" fails on
+    every unadorned surname; asking "does this say it is an organisation"
+    fails safe, by declining to identify rather than by inventing.
+    """
+    return bool(key) and bool(ORG_TOKEN.search(key))
+
+
+def resolve_nhs(con, name=None) -> EntityRef:
+    """Resolve a name against the NHS organisation register.
+
+    A fourth identifier authority. The charity register's own note says most of
+    what it misses is "councils and NHS bodies, which are neither" -- this is
+    half of that sentence answered. Same rules as the others: a unique match
+    scores high but never 1.0, because a name match is not an identifier, and a
+    shared name is reported as ambiguous rather than picked from.
+
+    Plus one rule the others do not need: the name must look like an
+    organisation. See ORG_TOKEN above for why.
+    """
+    ready = con.execute("SELECT count(*) FROM information_schema.tables "
+                        "WHERE table_schema='silver' AND table_name='nhs_key'").fetchone()[0]
+    if not ready:
+        return EntityRef("none", 0.0, None, name, note="NHS index not built")
+    key = normalise_name(name)
+    if not key:
+        return UNRESOLVED
+    if not looks_like_an_organisation(key):
+        return EntityRef("none", 0.0, None, name,
+                         note=f"{key!r} names a person, not a body -- not identified")
+    hits = con.execute(
+        "SELECT org_id, name FROM silver.nhs_key WHERE name_key = ? LIMIT 6",
+        [key]).fetchall()
+    if not hits:
+        return EntityRef("none", 0.0, None, name, note=f"no NHS organisation for {key!r}")
+    if len(hits) == 1:
+        return EntityRef("name", 0.95, "GB-NHS-" + str(hits[0][0]), hits[0][1],
+                         note=f"unique NHS organisation on {key!r}")
+    return EntityRef("name", 0.0, None, name,
+                     candidates=tuple("GB-NHS-" + str(h[0]) for h in hits),
+                     note=f"{len(hits)} NHS organisations share {key!r} -- ambiguous")
+
+
 def register_stats(con) -> dict:
     if not _register_ready(con):
         return {"loaded": False}

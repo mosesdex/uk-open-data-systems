@@ -464,6 +464,19 @@ def load_nhs_ods(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
                upper(replace(trim(CAST(o.PostCode AS VARCHAR)), ' ', '')) AS postcode_key
         FROM raw
     """)
+    # A name index, built the same way the charity one is, so the entity spine
+    # can offer a fourth identifier authority. Only active organisations: a
+    # closed trust is not who is running a care home today.
+    con.execute("DROP TABLE IF EXISTS silver.nhs_key")
+    con.execute("""CREATE TABLE silver.nhs_key AS
+        WITH n AS (SELECT org_id, name,
+            trim(regexp_replace(regexp_replace(regexp_replace(
+              regexp_replace(lower(trim(name)),'&',' and '),
+              '[^a-z0-9 ]',' ','g'),' +',' ','g'),'^the ','')) AS k
+          FROM silver.nhs_organisation
+          WHERE name IS NOT NULL AND lower(status) = 'active')
+        SELECT org_id, name, k AS name_key FROM n WHERE k <> ''""")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_nhskey ON silver.nhs_key(name_key)")
     return con.execute("SELECT count(*) FROM silver.nhs_organisation").fetchone()[0]
 
 def load_naptan(con: duckdb.DuckDBPyConnection, csv_path: Path) -> int:

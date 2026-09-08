@@ -189,3 +189,44 @@ class TestCharityResolution:
         con = store.connect(tmp_path / "empty")
         assert not E.resolve_charity(con, name="Anything").resolved
         con.close()
+
+
+class TestNhsRegisterRefusesPeople:
+    """The NHS register lists individual practitioners, and care data is full of
+    homes run by a named person. Matching those two on name identifies a person,
+    not a body -- and two people share a name far more readily than two
+    organisations do. Name matching alone found 2,880 care providers in the NHS
+    register and 600 of them were people."""
+
+    @staticmethod
+    def _register():
+        import duckdb
+        con = duckdb.connect(":memory:")
+        con.execute("CREATE SCHEMA silver")
+        con.execute("CREATE TABLE silver.nhs_key(org_id VARCHAR, name VARCHAR, name_key VARCHAR)")
+        con.execute("""INSERT INTO silver.nhs_key VALUES
+            ('325','Blackpool Borough Council','blackpool borough council'),
+            ('C15W','Mrs Stella Shaw','mrs stella shaw'),
+            ('ZZ1','Basdeo Kaydoo','basdeo kaydoo')""")
+        return con
+
+    def test_an_organisation_resolves(self):
+        ref = E.resolve_nhs(self._register(), name="Blackpool Borough Council")
+        assert ref.resolved and ref.company_number == "GB-NHS-325"
+
+    def test_a_titled_person_is_refused(self):
+        ref = E.resolve_nhs(self._register(), name="Mrs Stella Shaw")
+        assert not ref.resolved
+        assert "person" in ref.note
+
+    def test_an_untitled_person_is_also_refused(self):
+        # The reason the rule is a whitelist. Asking "does this look like a
+        # person" fails on every unadorned surname; this one has no title at all.
+        ref = E.resolve_nhs(self._register(), name="Basdeo Kaydoo")
+        assert not ref.resolved
+
+    def test_the_signal_is_a_whitelist(self):
+        assert E.looks_like_an_organisation("blackpool borough council")
+        assert E.looks_like_an_organisation("drake dental practice")
+        assert not E.looks_like_an_organisation("basdeo kaydoo")
+        assert not E.looks_like_an_organisation("a wilks")
