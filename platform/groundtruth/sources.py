@@ -42,6 +42,11 @@ class Source:
     # the concrete file is resolved at fetch time. See resolve.py.
     os_product: str | None = None
     os_file_pattern: str | None = None
+    # Extra request headers a publisher requires for content negotiation --
+    # an API version, a specific Accept. Never credentials: the fetcher runs
+    # these through the same anonymity check as its own headers, so an
+    # Authorization or api-key entry here raises rather than being sent.
+    headers: tuple[tuple[str, str], ...] = ()
     # Set when a source is known to fail the anonymous test. Kept in the registry
     # deliberately: a platform that silently drops unreachable sources cannot be
     # trusted on coverage.
@@ -649,6 +654,97 @@ REGISTRY: tuple[Source, ...] = (
             "more: company numbers, bed counts and brand."
         ),
     ),
+    # ---------------- corroboration and breadth (added 8 September 2026) ----
+    # Every entry below was re-probed on the day it was added rather than
+    # trusted from the August sweep. One candidate, the FSA authorities
+    # endpoint, had changed shape in the meantime and needed a second header --
+    # which is the argument for re-checking rather than copying a spreadsheet.
+    Source(
+        id="nhs_ods",
+        name="NHS Organisation Data Service directory",
+        publisher="NHS England",
+        url="https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations?Limit=1000",
+        fmt="json", role="entity_spine", licence="OGL v3", cadence="daily",
+        expect_content=("application/json",), systems=("bellwether", "watchman"),
+        needs_backfill="nhs_ods",
+        notes=(
+            "The entity spine resolved organisations to Companies House numbers only, so "
+            "every NHS body -- trusts, ICBs, GP practices -- was an organisation the "
+            "platform could name but not identify. This is the register that names them."
+        ),
+    ),
+    Source(
+        id="fsa_food_hygiene",
+        name="Food hygiene rating authorities",
+        publisher="Food Standards Agency",
+        url="https://api.ratings.food.gov.uk/Authorities/basic",
+        fmt="json", role="domain", licence="OGL v3", cadence="daily",
+        expect_content=("application/json",), systems=(),
+        headers=(("x-api-version", "2"), ("Accept", "application/json")),
+        notes=(
+            "Every local authority as the FSA lists it, with its own identifier. Used to "
+            "corroborate the place spine's authority list against a second publisher: "
+            "where the two disagree about which authorities exist, that disagreement is "
+            "reportable rather than resolved silently."
+        ),
+    ),
+    Source(
+        id="ea_hydrology",
+        name="Environment Agency hydrology stations",
+        publisher="Environment Agency",
+        url="https://environment.data.gov.uk/hydrology/id/stations?_limit=10000",
+        fmt="json", role="domain", licence="OGL v3", cadence="daily",
+        expect_content=("application/json",), systems=("baseline",),
+        notes=(
+            "A second, independent rainfall and river-level network. Baseline normalises "
+            "spills against flood-monitoring rainfall alone; this is the cross-check on "
+            "that denominator, and it matters because the flood-monitoring readings "
+            "currently hold data with no fetch record."
+        ),
+    ),
+    Source(
+        id="neso_tec",
+        name="NESO transmission entry capacity register",
+        publisher="National Energy System Operator",
+        url=("https://api.neso.energy/api/3/action/datastore_search"
+             "?resource_id=17becbab-e3e8-473f-b303-3806f43a6a10&limit=10000"),
+        fmt="json", role="domain", licence="OGL v3", cadence="varies",
+        expect_content=("application/json",), systems=("junction",),
+        notes=(
+            "The national connection position. Junction reads four DNO embedded capacity "
+            "registers, one of which serves a header and no rows; this is the independent "
+            "view of the same queue, so a gap in a DNO register can be shown as a gap "
+            "rather than as zero capacity."
+        ),
+    ),
+    Source(
+        id="naptan_access_nodes",
+        name="NaPTAN public transport access nodes",
+        publisher="Department for Transport",
+        url="https://naptan.api.dft.gov.uk/v1/access-nodes?dataFormat=csv",
+        fmt="csv", role="place_spine", licence="OGL v3", cadence="daily",
+        expect_content=("text/csv", "application/csv"), systems=(),
+        notes=(
+            "Every stop and station with a grid reference and an administrative area code. "
+            "A second route from a coordinate to a district, independent of UPRN, for "
+            "records that carry a location but no property reference."
+        ),
+    ),
+    Source(
+        id="data_gov_uk_ckan",
+        name="data.gov.uk CKAN catalogue",
+        publisher="Central Digital and Data Office",
+        url="https://ckan.publishing.service.gov.uk/api/3/action/package_search?rows=1000",
+        fmt="json", role="domain", licence="OGL v3", cadence="daily",
+        expect_content=("application/json",), systems=(),
+        needs_backfill="ckan",
+        notes=(
+            "The catalogue government publishes about itself. Held so this registry can be "
+            "audited against it -- the platform should be able to say what it is not using "
+            "and why, not only what it is."
+        ),
+    ),
+
 )
 
 BY_ID: dict[str, Source] = {s.id: s for s in REGISTRY}

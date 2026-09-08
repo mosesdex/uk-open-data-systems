@@ -120,6 +120,12 @@ def fetch(
                            f"skipped: {source.blocked}", url)
 
     session = _clean_session()
+    # Content negotiation only. These go through the same check as the session's
+    # own headers, so a credential smuggled into the registry raises here.
+    if getattr(source, "headers", ()):
+        extra = {k: v for k, v in source.headers}
+        _assert_anonymous(extra)
+        session.headers.update(extra)
     _assert_anonymous(session.headers)
 
     try:

@@ -760,7 +760,8 @@ def cmd_backfill(args) -> int:
     """Complete the sources that were originally taken in part."""
     from . import backfill as B
     sess = B._session()
-    parts = args.only or ["bduk", "edm", "companies", "aims", "ps2", "psc", "contracts", "gazette"]
+    parts = args.only or ["bduk", "edm", "companies", "aims", "ps2", "psc", "contracts", "gazette",
+                          "nhs_ods", "ckan"]
     results = []
     if "bduk" in parts:
         print(f"{BOLD}BDUK premises, all regions{OFF}")
@@ -786,6 +787,10 @@ def cmd_backfill(args) -> int:
     if "psc" in parts:
         print(f"{BOLD}Companies House PSC, all snapshot parts{OFF}")
         results.append(B.fetch_psc(BRONZE, sess))
+    if "nhs_ods" in parts:
+        results.append(B.fetch_nhs_ods(BRONZE, s=sess))
+    if "ckan" in parts:
+        results.append(B.fetch_ckan(BRONZE, s=sess))
     if "gazette" in parts:
         print(f"{BOLD}Gazette insolvency backfill{OFF}")
         results.append(B.fetch_gazette(BRONZE, pages=args.pages, s=sess))
@@ -1424,7 +1429,7 @@ def main(argv=None) -> int:
 
     pbf = sub.add_parser("backfill", help="complete sources taken only in part")
     pbf.add_argument("--only", nargs="*",
-                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette", "planit"])
+                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette", "planit", "nhs_ods", "ckan"])
     pbf.add_argument("--pages", type=int, default=200)
     pbf.add_argument("--strict", action="store_true")
     pbf.set_defaults(fn=cmd_backfill)

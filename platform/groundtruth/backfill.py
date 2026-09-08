@@ -495,3 +495,80 @@ def fetch_developer_agreements(bronze: Path, s: requests.Session | None = None) 
     that is the only published route from a contribution to a site."""
     return _planning_dataset(bronze, "developer-agreement",
                              "developer_agreements", s, min_rows=500)
+
+# ---------------------------------------------------------------- NHS ODS
+# The entity spine resolved organisations to Companies House numbers only, so
+# every NHS body was an organisation the platform could name and not identify.
+# The directory pages 1,000 at a time and stops returning Organisations when it
+# is exhausted; there is no total to trust, so exhaustion is the stop condition.
+def fetch_nhs_ods(bronze: Path, s: requests.Session | None = None,
+                  limit: int = 1000, max_pages: int = 200) -> Result:
+    s = s or _session()
+    dest = bronze / "nhs_ods.json"
+    seen: dict[str, dict] = {}
+    if dest.exists():
+        try:
+            for o in json.loads(dest.read_text()).get("Organisations", []):
+                if o.get("OrgId"):
+                    seen[o["OrgId"]] = o
+        except json.JSONDecodeError:
+            pass
+    # The directory is 1-indexed and answers HTTP 406 to Offset=0 -- "Supplied
+    # Offset must be greater than 1" -- so paging from zero returns nothing at
+    # all rather than an error anyone would notice.
+    for page in range(max_pages):
+        url = ("https://directory.spineservices.nhs.uk/ORD/2-0-0/organisations"
+               f"?Limit={limit}&Offset={page * limit + 1}")
+        try:
+            r = s.get(url, timeout=120)
+            if r.status_code != 200:
+                break
+            orgs = r.json().get("Organisations", [])
+        except Exception:                                         # noqa: BLE001
+            time.sleep(2); continue
+        if not orgs:
+            break
+        for o in orgs:
+            if o.get("OrgId"):
+                seen[o["OrgId"]] = o
+        time.sleep(0.2)
+    dest.write_text(json.dumps({"Organisations": list(seen.values())}))
+    return Result(dest.name, bool(seen), f"{len(seen):,} NHS organisations",
+                  dest.stat().st_size)
+
+
+# ---------------------------------------------------------------- data.gov.uk
+# The catalogue government publishes about itself, held so this registry can be
+# audited against it. CKAN reports its own result count, so that is the stop
+# condition rather than exhaustion.
+def fetch_ckan(bronze: Path, s: requests.Session | None = None,
+               rows: int = 1000, max_pages: int = 120) -> Result:
+    s = s or _session()
+    dest = bronze / "data_gov_uk_ckan.json"
+    seen: dict[str, dict] = {}
+    total = None
+    for page in range(max_pages):
+        url = ("https://ckan.publishing.service.gov.uk/api/3/action/package_search"
+               f"?rows={rows}&start={page * rows}")
+        try:
+            r = s.get(url, timeout=120)
+            if r.status_code != 200:
+                break
+            res = r.json().get("result", {})
+        except Exception:                                         # noqa: BLE001
+            time.sleep(2); continue
+        if total is None:
+            total = res.get("count")
+        got = res.get("results", [])
+        if not got:
+            break
+        for d in got:
+            if d.get("id"):
+                seen[d["id"]] = d
+        if total is not None and len(seen) >= total:
+            break
+        time.sleep(0.2)
+    dest.write_text(json.dumps({"count": total, "results": list(seen.values())}))
+    return Result(dest.name, bool(seen),
+                  f"{len(seen):,} of {total if total is not None else '?'} datasets",
+                  dest.stat().st_size)
