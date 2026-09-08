@@ -99,3 +99,47 @@ class TestPropertyTierKeepsDistrict:
             P.PlaceRef("uprn", 1.0, 1, 2, 51.5, -0.1, None))
         ref = P.resolve(None, uprn=100, postcode=None)
         assert ref.tier == "uprn" and ref.lad_code is None
+
+
+class TestCoordinateTier:
+    """A record with a location and no identifier could not reach a district:
+    the UPRN file carries no LAD, so anything without a postcode fell out of
+    every by-district statistic. This tier closes that, and must refuse rather
+    than guess when nothing is near."""
+
+    @staticmethod
+    def _spine():
+        import duckdb
+        con = duckdb.connect(":memory:")
+        con.execute("CREATE SCHEMA silver")
+        con.execute("""CREATE TABLE silver.place_postcode(
+            postcode_key VARCHAR, postcode VARCHAR, positional_quality INTEGER,
+            easting INTEGER, northing INTEGER, lad_code VARCHAR,
+            ward_code VARCHAR, country_code VARCHAR)""")
+        con.execute("""INSERT INTO silver.place_postcode VALUES
+            ('SW1A1AA','SW1A 1AA',10, 529090, 179645,'E09000033','E05013806','E92000001')""")
+        return con
+
+    def test_a_grid_reference_resolves_to_a_district(self):
+        con = self._spine()
+        ref = place.resolve_coordinate(con, 529100, 179650)
+        assert ref.resolved and ref.tier == "coordinate"
+        assert ref.lad_code == "E09000033"
+
+    def test_it_refuses_beyond_its_radius(self):
+        con = self._spine()
+        # A point 5 km away. The nearest centroid is not an answer -- returning
+        # it would be a fabricated resolution dressed as a real one.
+        ref = place.resolve_coordinate(con, 534090, 179645)
+        assert not ref.resolved
+        assert ref.lad_code is None
+        assert "within" in ref.note
+
+    def test_confidence_never_beats_the_postcode_tier(self):
+        con = self._spine()
+        ref = place.resolve_coordinate(con, 529090, 179645)
+        # Sitting exactly on a centroid is still only as good as that centroid.
+        assert ref.confidence <= 0.60
+
+    def test_it_survives_no_connection(self):
+        assert not place.resolve_coordinate(None, 1, 2).resolved

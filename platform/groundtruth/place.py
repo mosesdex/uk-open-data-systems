@@ -7,9 +7,17 @@ carries the tier it achieved and a confidence derived from the publisher's own
 quality flag -- never an invented number.
 
 Tiers, best first:
-  uprn     an exact property reference
-  postcode a postcode centroid, from Code-Point Open
-  lad      an administrative district only
+  uprn       an exact property reference
+  postcode   a postcode centroid, from Code-Point Open
+  coordinate a grid reference, resolved to the district of the nearest postcode
+             centroid -- for records that carry a location and no identifier
+  lad        an administrative district only
+
+The coordinate tier exists because the property tier could not reach a district
+on its own: the UPRN file carries no LAD, so a record with an exact point and no
+postcode fell out of every by-district statistic. It is deliberately the weakest
+tier, its confidence falls with distance, and it refuses beyond a stated radius
+rather than guessing.
 """
 from __future__ import annotations
 
@@ -105,7 +113,61 @@ def resolve_uprn(con: duckdb.DuckDBPyConnection, uprn: int | str) -> PlaceRef:
                     lat, lon, None, uprn=key, note="exact property")
 
 
-def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None) -> PlaceRef:
+def resolve_coordinate(con: duckdb.DuckDBPyConnection,
+                       easting: float | None, northing: float | None,
+                       *, max_metres: int = 500) -> PlaceRef:
+    """District of the nearest postcode centroid to a British National Grid point.
+
+    For records that carry a location and no identifier at all -- the case the
+    property tier could not serve, because the UPRN file has no district in it.
+
+    Confidence falls with distance and the search stops at ``max_metres``. A
+    point in the middle of a moor genuinely has no nearby centroid, and
+    returning the nearest one from ten miles away would be a fabricated answer
+    dressed as a resolved one.
+    """
+    if con is None:
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note="no database connection")
+    if easting is None or northing is None:
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note="no grid reference given")
+    if not _has(con, "place_postcode"):
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note="postcode tier not loaded -- fetch os_code_point_open")
+    try:
+        e, n = int(easting), int(northing)
+    except (TypeError, ValueError):
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note=f"not a grid reference: {easting!r}, {northing!r}")
+
+    row = con.execute("""
+        SELECT lad_code, ward_code, easting, northing,
+               sqrt((easting - ?) * (easting - ?) + (northing - ?) * (northing - ?)) AS d
+        FROM silver.place_postcode
+        WHERE lad_code IS NOT NULL
+          AND easting  BETWEEN ? - ? AND ? + ?
+          AND northing BETWEEN ? - ? AND ? + ?
+        ORDER BY d
+        LIMIT 1
+    """, [e, e, n, n, e, max_metres, e, max_metres,
+          n, max_metres, n, max_metres]).fetchone()
+
+    if row is None or row[4] > max_metres:
+        return PlaceRef("none", 0.0, e, n, None, None, None,
+                        note=f"no postcode centroid within {max_metres} m")
+
+    lad, ward, _pe, _pn, d = row
+    lat, lon = bng_to_wgs84(e, n)
+    # Linear falloff from the postcode tier's weakest confidence. A point on top
+    # of a centroid is still only as good as that centroid.
+    conf = round(max(0.10, 0.60 * (1.0 - d / max_metres)), 2)
+    return PlaceRef("coordinate", conf, e, n, lat, lon, lad, ward_code=ward,
+                    note=f"nearest postcode centroid, {d:.0f} m")
+
+
+def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None,
+            easting=None, northing=None) -> PlaceRef:
     """Best available tier for whatever identifiers a record happens to carry.
 
     The property tier gives an exact coordinate but no administrative district --
@@ -114,17 +176,29 @@ def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None) -> Plac
     still aggregates by authority. Without this, property-resolved records fall
     out of every by-district statistic.
     """
+    from dataclasses import replace
     if uprn is not None:
         ref = resolve_uprn(con, uprn)
         if ref.resolved:
             if ref.lad_code is None and postcode is not None:
                 pc = resolve_postcode(con, postcode)
                 if pc.resolved and pc.lad_code:
-                    from dataclasses import replace
                     return replace(ref, lad_code=pc.lad_code, ward_code=pc.ward_code)
+            if ref.lad_code is None:
+                # No postcode to graft. The property still has a point, so the
+                # coordinate tier can supply the district it was missing --
+                # keeping the exact location and its own confidence.
+                co = resolve_coordinate(con, ref.easting, ref.northing)
+                if co.resolved and co.lad_code:
+                    return replace(ref, lad_code=co.lad_code, ward_code=co.ward_code,
+                                   note=ref.note + f"; district from {co.note}")
             return ref
     if postcode is not None:
         ref = resolve_postcode(con, postcode)
+        if ref.resolved:
+            return ref
+    if easting is not None and northing is not None:
+        ref = resolve_coordinate(con, easting, northing)
         if ref.resolved:
             return ref
     return UNRESOLVED
@@ -184,6 +258,30 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
     if _has(con, "lad"):
         out["tiers"]["lad"] = {
             "rows": con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
+        }
+    # The coordinate tier has no table of its own -- it is a lookup against the
+    # postcode tier. Its coverage is therefore measured, not counted: NaPTAN is
+    # 435,000 real locations published by a department that is not Ordnance
+    # Survey, so it tests the tier against something the spine did not build.
+    if _has(con, "place_postcode") and _has(con, "naptan_node"):
+        total, within = con.execute("""
+            WITH s AS (
+              SELECT easting, northing FROM silver.naptan_node
+              WHERE easting IS NOT NULL USING SAMPLE 2000 ROWS
+            )
+            SELECT count(*),
+                   count(*) FILTER (WHERE EXISTS (
+                     SELECT 1 FROM silver.place_postcode p
+                     WHERE p.lad_code IS NOT NULL
+                       AND p.easting  BETWEEN s.easting  - 500 AND s.easting  + 500
+                       AND p.northing BETWEEN s.northing - 500 AND s.northing + 500))
+            FROM s
+        """).fetchone()
+        out["tiers"]["coordinate"] = {
+            "tested_against": "NaPTAN access nodes",
+            "sample": total,
+            "resolved_within_500m": within,
+            "resolved_pct": round(100.0 * within / total, 1) if total else None,
         }
     for name, table in (("uprn_to_street", "lids_uprn_usrn"),
                         ("uprn_to_building", "lids_uprn_toid")):

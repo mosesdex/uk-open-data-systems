@@ -466,3 +466,28 @@ def load_nhs_ods(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
     """)
     return con.execute("SELECT count(*) FROM silver.nhs_organisation").fetchone()[0]
 
+def load_naptan(con: duckdb.DuckDBPyConnection, csv_path: Path) -> int:
+    """Every public transport access node, with a grid reference.
+
+    Held as the test set for the coordinate tier of the place spine: 435,000
+    real locations, published by a department that is not Ordnance Survey, each
+    of which should resolve to a district if that tier works.
+    """
+    _require(csv_path)
+    con.execute("DROP TABLE IF EXISTS silver.naptan_node")
+    con.execute(f"""
+        CREATE TABLE silver.naptan_node AS
+        SELECT trim(ATCOCode)                    AS atco_code,
+               trim(CommonName)                  AS name,
+               trim(LocalityName)                AS locality,
+               trim(AdministrativeAreaCode)      AS admin_area_code,
+               trim(StopType)                    AS stop_type,
+               TRY_CAST(Easting  AS INTEGER)     AS easting,
+               TRY_CAST(Northing AS INTEGER)     AS northing,
+               TRY_CAST(Latitude  AS DOUBLE)     AS lat,
+               TRY_CAST(Longitude AS DOUBLE)     AS long
+        FROM read_csv('{csv_path}', header=true, all_varchar=true, ignore_errors=true)
+        WHERE trim(ATCOCode) <> ''
+    """)
+    return con.execute("SELECT count(*) FROM silver.naptan_node").fetchone()[0]
+
