@@ -158,6 +158,7 @@ def cmd_load(args) -> int:
         ("neso",       lambda: load_mod.load_neso_tec(con, BRONZE / "neso_tec.json")),
         ("nhs orgs",   lambda: load_mod.load_nhs_ods(con, BRONZE / "nhs_ods.json")),
         ("naptan",     lambda: load_mod.load_naptan(con, BRONZE / "naptan_access_nodes.csv")),
+        ("streets",    lambda: load_mod.load_usrn_streets(con, BRONZE / "os_open_usrn.zip")),
     ]
     if args.full:
         steps += [

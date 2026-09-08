@@ -504,3 +504,42 @@ def load_naptan(con: duckdb.DuckDBPyConnection, csv_path: Path) -> int:
     """)
     return con.execute("SELECT count(*) FROM silver.naptan_node").fetchone()[0]
 
+def load_usrn_streets(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
+    """The national street register: every USRN, its type and where it is.
+
+    Note what this product does not contain: a street name. Its columns are
+    id, geometry, usrn and street_type, and nothing in OS Open USRN will tell
+    you a street is called Acacia Avenue. What it gives is that the reference
+    exists, what kind of street it is, and a coordinate -- so a USRN carried by
+    another record can be checked against the register rather than trusted, and
+    placed rather than only referenced.
+
+    The archive holds a 963 MB GeoPackage, so it is extracted to a temporary
+    directory and read through the spatial extension.
+    """
+    _require(zip_path)
+    tmp = Path(tempfile.mkdtemp(prefix="gt-usrn-"))
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            member = next((n for n in z.namelist() if n.endswith(".gpkg")), None)
+            if member is None:
+                raise LoadError(f"no GeoPackage inside {zip_path.name}")
+            z.extract(member, tmp)
+        gpkg = tmp / member
+        con.execute("INSTALL spatial")
+        con.execute("LOAD spatial")
+        con.execute("DROP TABLE IF EXISTS silver.place_street")
+        con.execute(f"""
+            CREATE TABLE silver.place_street AS
+            SELECT CAST(usrn AS BIGINT)                                AS usrn,
+                   CAST(street_type AS VARCHAR)                        AS street_type,
+                   CAST(round(ST_X(ST_Centroid(geometry))) AS INTEGER) AS easting,
+                   CAST(round(ST_Y(ST_Centroid(geometry))) AS INTEGER) AS northing
+            FROM ST_Read('{gpkg}')
+            WHERE usrn IS NOT NULL
+        """)
+        con.execute("CREATE INDEX IF NOT EXISTS idx_street_usrn ON silver.place_street(usrn)")
+        return con.execute("SELECT count(*) FROM silver.place_street").fetchone()[0]
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+

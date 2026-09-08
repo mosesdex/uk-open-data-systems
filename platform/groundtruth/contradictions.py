@@ -237,6 +237,28 @@ CHECKS: tuple[Check, ...] = (
              "a spine the whole platform rests on can be tested against a large "
              "independent register instead of being assumed complete.",
     ),
+    Check(
+        id="street-register-crosswalk",
+        quantity="streets the property-to-street crosswalk references",
+        left="distinct streets named by silver.lids_uprn_usrn",
+        right="those present in silver.place_street, the national register",
+        tables=("silver.lids_uprn_usrn", "silver.place_street"),
+        sql="""
+            WITH x AS (SELECT DISTINCT TRY_CAST(linked_id AS BIGINT) AS usrn
+                       FROM silver.lids_uprn_usrn)
+            SELECT 'street references' AS subject,
+                   (SELECT count(*) FROM x) AS left_value,
+                   (SELECT count(*) FROM x JOIN silver.place_street s ON s.usrn = x.usrn)
+                     AS right_value,
+                   'crosswalk against the street register' AS detail
+        """,
+        note="Two products from the same publisher. Ordnance Survey's "
+             "identifier crosswalk points properties at streets, and its street "
+             "register lists which streets exist; they do not entirely agree. "
+             "Neither is declared wrong -- the gap is small and the point is "
+             "that a reference the platform carries has been checked against "
+             "the register rather than trusted.",
+    ),
 )
 
 

@@ -143,3 +143,42 @@ class TestCoordinateTier:
 
     def test_it_survives_no_connection(self):
         assert not place.resolve_coordinate(None, 1, 2).resolved
+
+
+class TestStreetTier:
+    """OS Open USRN has no street name in it -- usrn, street_type, geometry and
+    nothing else. The tier says a reference exists, what kind of street it is
+    and where; it must not look like it names one."""
+
+    @staticmethod
+    def _register():
+        import duckdb
+        con = duckdb.connect(":memory:")
+        con.execute("CREATE SCHEMA silver")
+        con.execute("""CREATE TABLE silver.place_street(
+            usrn BIGINT, street_type VARCHAR, easting INTEGER, northing INTEGER)""")
+        con.execute("INSERT INTO silver.place_street VALUES (38692053,'Officially Described Street',638240,260351)")
+        return con
+
+    def test_a_known_street_places(self):
+        ref = place.resolve_street(self._register(), 38692053)
+        assert ref.resolved and ref.tier == "street"
+        assert ref.usrn == 38692053
+        assert ref.street_type == "Officially Described Street"
+
+    def test_a_street_absent_from_the_register_is_refused(self):
+        # 954 references in the crosswalk are not in the register. Returning a
+        # location for one would invent a street the publisher does not list.
+        ref = place.resolve_street(self._register(), 999999999)
+        assert not ref.resolved
+        assert "not in the register" in ref.note
+
+    def test_it_never_claims_a_name(self):
+        ref = place.resolve_street(self._register(), 38692053)
+        assert not hasattr(ref, "street_name")
+        # street_type is a classification, not a name
+        assert ref.street_type in {"Officially Described Street", "Designated Street Name",
+                                   "Numbered Street", "Unofficial Street Name"}
+
+    def test_it_survives_no_connection(self):
+        assert not place.resolve_street(None, 1).resolved

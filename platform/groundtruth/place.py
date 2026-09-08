@@ -11,6 +11,7 @@ Tiers, best first:
   postcode   a postcode centroid, from Code-Point Open
   coordinate a grid reference, resolved to the district of the nearest postcode
              centroid -- for records that carry a location and no identifier
+  street     a street reference checked against the national register
   lad        an administrative district only
 
 The coordinate tier exists because the property tier could not reach a district
@@ -50,6 +51,8 @@ class PlaceRef:
     lad_code: str | None
     ward_code: str | None = None
     uprn: int | None = None
+    usrn: int | None = None
+    street_type: str | None = None
     note: str = ""
 
     @property
@@ -166,6 +169,45 @@ def resolve_coordinate(con: duckdb.DuckDBPyConnection,
                     note=f"nearest postcode centroid, {d:.0f} m")
 
 
+def resolve_street(con: duckdb.DuckDBPyConnection, usrn: int | str) -> PlaceRef:
+    """Place a street reference against the national street register.
+
+    OS Open USRN carries no street name -- its columns are usrn, street_type and
+    a geometry, and nothing in it will tell you a street is called Acacia
+    Avenue. So this does not name a street. It says the reference exists, what
+    kind of street it is, and where it is, which is the difference between
+    carrying a number and having checked it.
+    """
+    if con is None:
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note="no database connection")
+    if not _has(con, "place_street"):
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note="street tier not loaded -- fetch os_open_usrn")
+    try:
+        key = int(usrn)
+    except (TypeError, ValueError):
+        return PlaceRef("none", 0.0, None, None, None, None, None,
+                        note=f"not a street reference: {usrn!r}")
+    row = con.execute(
+        "SELECT street_type, easting, northing FROM silver.place_street WHERE usrn = ?",
+        [key]).fetchone()
+    if row is None:
+        # 954 references in the property-to-street crosswalk are not in the
+        # register. Saying so beats returning a location for a street that the
+        # register does not list.
+        return PlaceRef("none", 0.0, None, None, None, None, None, usrn=key,
+                        note=f"street {key} is not in the register")
+    stype, e, n = row
+    lat, lon = bng_to_wgs84(e, n)
+    # A street centroid locates a line, not a point on it: weaker than a
+    # postcode centroid, which at least aims at a cluster of addresses.
+    return PlaceRef("street", 0.40, e, n, lat, lon, None,
+                    usrn=key, street_type=stype,
+                    note=f"street register centroid, {stype.lower()}" if stype
+                         else "street register centroid")
+
+
 def resolve(con: duckdb.DuckDBPyConnection, *, uprn=None, postcode=None,
             easting=None, northing=None) -> PlaceRef:
     """Best available tier for whatever identifiers a record happens to carry.
@@ -255,6 +297,15 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
     if _has(con, "place_uprn"):
         n = con.execute("SELECT count(*) FROM silver.place_uprn").fetchone()[0]
         out["tiers"]["uprn"] = {"rows": n}
+    if _has(con, "place_street"):
+        n, types = con.execute(
+            "SELECT count(*), count(DISTINCT street_type) FROM silver.place_street"
+        ).fetchone()
+        # carries_a_name is stated rather than left to be assumed: OS Open
+        # USRN has no street name in it, and a street tier that looks like
+        # it might would be read as one.
+        out["tiers"]["street"] = {"rows": n, "street_types": types,
+                                  "carries_a_name": False}
     if _has(con, "lad"):
         out["tiers"]["lad"] = {
             "rows": con.execute("SELECT count(*) FROM silver.lad").fetchone()[0]
