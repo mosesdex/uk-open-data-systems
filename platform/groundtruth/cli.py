@@ -151,6 +151,12 @@ def cmd_load(args) -> int:
         ("postcodes",  lambda: load_mod.load_codepoint(con, BRONZE / "os_code_point_open.zip")),
         ("boundaries", lambda: load_mod.load_lad_boundaries(con, BRONZE / "ons_lad_boundaries.geojson")),
         ("properties", lambda: load_mod.load_uprn(con, BRONZE / "os_open_uprn.zip")),
+        # Corroboration sources: each is a second route to something the
+        # platform already publishes, so the cross-checks have something to
+        # compare against instead of asserting consistency untested.
+        ("hydrology",  lambda: load_mod.load_hydrology_stations(con, BRONZE / "ea_hydrology.json")),
+        ("neso",       lambda: load_mod.load_neso_tec(con, BRONZE / "neso_tec.json")),
+        ("nhs orgs",   lambda: load_mod.load_nhs_ods(con, BRONZE / "nhs_ods.json")),
     ]
     if args.full:
         steps += [

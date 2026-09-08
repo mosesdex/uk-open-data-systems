@@ -17,6 +17,20 @@ without ever comparing them is asserting a consistency it has not tested.
 
 A check whose tables are absent is reported as *unrun*, not as agreement. An
 untested claim and a tested one that passed must never look the same.
+
+Two checks were designed against newly registered sources and then abandoned,
+which is recorded here because the reasoning is the point:
+
+  * EA hydrology stations against Baseline's rainfall stations. The two
+    networks share no identifier -- station GUID, WISKI id and notation all
+    match zero of 266 rows -- so any join would have been invented.
+  * NESO's connection register against Junction's DNO capacity registers.
+    NESO's "HOST TO" names transmission owners (NGET, SPT, SHET); Junction
+    reads distribution operators (UKPN, NPg, ENWL, SPEN). They are different
+    populations, and comparing them would be the false join this platform
+    exists to argue against.
+
+Registering a source is not the same as being able to check something with it.
 """
 from __future__ import annotations
 
@@ -200,6 +214,28 @@ CHECKS: tuple[Check, ...] = (
              "buyers that meet its threshold, not all of them. The check exists "
              "so the size of that gap is stated rather than discovered by a "
              "reader adding up two screens.",
+    ),
+    Check(
+        id="nhs-postcode-spine",
+        quantity="postcodes the NHS publishes that the national register holds",
+        left="NHS organisations carrying a postcode, from the ODS directory",
+        right="those whose postcode exists in silver.place_postcode",
+        tables=("silver.nhs_organisation", "silver.place_postcode"),
+        sql="""
+            SELECT 'NHS estate' AS subject,
+                   (SELECT count(*) FROM silver.nhs_organisation
+                     WHERE postcode_key <> '') AS left_value,
+                   (SELECT count(*) FROM silver.nhs_organisation n
+                      JOIN silver.place_postcode p ON p.postcode_key = n.postcode_key
+                     WHERE n.postcode_key <> '') AS right_value,
+                   'ODS directory against Code-Point Open' AS detail
+        """,
+        note="Two arms of government disagreeing about which postcodes exist. "
+             "The place spine is built from Code-Point Open; the NHS publishes "
+             "306,259 postcodes of its own, and the register does not contain "
+             "all of them. Neither is declared wrong here -- the point is that "
+             "a spine the whole platform rests on can be tested against a large "
+             "independent register instead of being assumed complete.",
     ),
 )
 

@@ -391,3 +391,78 @@ def load_psc(con: duckdb.DuckDBPyConnection, bronze: Path) -> int:
     con.execute("CREATE INDEX IF NOT EXISTS idx_psc_company ON silver.psc(company_number)")
     con.execute("CREATE INDEX IF NOT EXISTS idx_psc_person ON silver.psc(person_key)")
     return total
+
+# ---------------------------------------------------------------- corroboration
+# These three exist to be compared against something the platform already holds.
+# None of them feeds a headline figure; each one is a second route to a quantity
+# the platform publishes, so the contradictions module can test a consistency
+# this system would otherwise be asserting without evidence.
+
+def load_hydrology_stations(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    """The Environment Agency's hydrology station register.
+
+    Baseline normalises spills against the flood-monitoring rainfall network.
+    This is the agency's other station register, and the two are expected to
+    overlap -- where they do not, one arm of the EA is measuring at a station
+    the other does not list.
+    """
+    _require(json_path)
+    con.execute("DROP TABLE IF EXISTS silver.hydrology_station")
+    con.execute(f"""
+        CREATE TABLE silver.hydrology_station AS
+        WITH raw AS (
+          SELECT unnest(items) AS i
+          FROM read_json_auto('{json_path}', maximum_object_size=400000000)
+        )
+        SELECT trim(CAST(i.notation AS VARCHAR))    AS notation,
+               trim(CAST(i.stationGuid AS VARCHAR)) AS station_guid,
+               trim(CAST(i.wiskiID AS VARCHAR))     AS wiski_id,
+               CAST(i.label AS VARCHAR)             AS label,
+               TRY_CAST(i.lat AS DOUBLE)            AS lat,
+               TRY_CAST(i.long AS DOUBLE)           AS long,
+               CAST(i.riverName AS VARCHAR)         AS river
+        FROM raw
+    """)
+    return con.execute("SELECT count(*) FROM silver.hydrology_station").fetchone()[0]
+
+
+def load_neso_tec(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    """NESO's transmission connection register, keyed by the DNO hosting each project."""
+    _require(json_path)
+    con.execute("DROP TABLE IF EXISTS silver.neso_connection")
+    con.execute(f"""
+        CREATE TABLE silver.neso_connection AS
+        WITH raw AS (
+          SELECT unnest(result.records) AS r
+          FROM read_json_auto('{json_path}', maximum_object_size=200000000)
+        )
+        SELECT CAST(r."Project Name"   AS VARCHAR) AS project,
+               CAST(r."Customer Name"  AS VARCHAR) AS customer,
+               CAST(r."Connection Site" AS VARCHAR) AS site,
+               CAST(r."Project Status" AS VARCHAR) AS status,
+               CAST(r."HOST TO"        AS VARCHAR) AS host_to,
+               TRY_CAST(r."MW Connected" AS DOUBLE) AS mw_connected
+        FROM raw
+    """)
+    return con.execute("SELECT count(*) FROM silver.neso_connection").fetchone()[0]
+
+
+def load_nhs_ods(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    """The NHS organisation register: a large, independent set of UK postcodes."""
+    _require(json_path)
+    con.execute("DROP TABLE IF EXISTS silver.nhs_organisation")
+    con.execute(f"""
+        CREATE TABLE silver.nhs_organisation AS
+        WITH raw AS (
+          SELECT unnest(Organisations) AS o
+          FROM read_json_auto('{json_path}', maximum_object_size=400000000)
+        )
+        SELECT CAST(o.OrgId AS VARCHAR)                  AS org_id,
+               CAST(o.Name AS VARCHAR)                   AS name,
+               CAST(o.Status AS VARCHAR)                 AS status,
+               CAST(o.PrimaryRoleDescription AS VARCHAR) AS role,
+               upper(replace(trim(CAST(o.PostCode AS VARCHAR)), ' ', '')) AS postcode_key
+        FROM raw
+    """)
+    return con.execute("SELECT count(*) FROM silver.nhs_organisation").fetchone()[0]
+
