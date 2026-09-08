@@ -7,6 +7,7 @@ function returns an empty result and the interface says so.
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import duckdb
@@ -196,7 +197,60 @@ def registry_gaps(bronze: Path) -> dict:
     truncated = sorted(p.name for p in on_disk
                        if p.suffix == ".zip" and 20_900_000 < p.stat().st_size < 21_100_000)
     return {"unregistered": unregistered, "truncated": truncated,
-            "registered_ids": len(S.REGISTRY)}
+            "registered_ids": len(S.REGISTRY),
+            "catalogue": catalogue_audit(bronze)}
+
+
+def catalogue_audit(bronze: Path) -> dict:
+    """This registry measured against the catalogue government publishes.
+
+    A platform that says what it uses, and never what it does not, is reporting
+    its own successes. data.gov.uk is the list of everything on offer, so the
+    honest denominator is available rather than assumed -- and the answer is
+    unflattering by design: 44 registered sources against tens of thousands of
+    published datasets.
+
+    Nothing here is a join on dataset identity. The only match attempted is on
+    publisher name, which is a small controlled vocabulary rather than the open
+    set of organisation names that makes entity matching hazardous.
+    """
+    path = Path(bronze) / "data_gov_uk_ckan.json"
+    if not path.exists():
+        return {"available": False,
+                "note": "catalogue not held -- run: gt backfill --only ckan"}
+    try:
+        doc = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError) as exc:
+        return {"available": False, "note": f"catalogue unreadable: {exc}"}
+
+    results = doc.get("results") or []
+    published = doc.get("count")
+    held = len(results)
+
+    publishers: dict[str, int] = {}
+    for d in results:
+        title = ((d.get("organization") or {}).get("title") or "").strip()
+        if title:
+            publishers[title.casefold()] = publishers.get(title.casefold(), 0) + 1
+
+    ours = {s.publisher.casefold() for s in S.REGISTRY if s.publisher}
+    matched = sorted(p for p in ours if p in publishers)
+    return {
+        "available": True,
+        "datasets_published": published,
+        "datasets_held": held,
+        # The catalogue reports its own total. Holding fewer than that is a
+        # short read, and saying so beats quoting the smaller number as if it
+        # were the catalogue.
+        "complete": published is not None and held >= published,
+        "short_by": (published - held) if (published is not None and held < published) else 0,
+        "distinct_publishers": len(publishers),
+        "registry_sources": len(S.REGISTRY),
+        "publishers_we_read": len(ours),
+        "publishers_found_in_catalogue": len(matched),
+        "share_of_catalogue_used_pct": (
+            round(100.0 * len(S.REGISTRY) / published, 4) if published else None),
+    }
 
 
 def review_queue(con: duckdb.DuckDBPyConnection, limit: int = 40) -> list[dict]:

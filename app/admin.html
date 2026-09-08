@@ -313,7 +313,25 @@
       <p class="card__desc mt-1" style="flex:none">Capped at 21 MB while disk was tight. The place spine runs on
       Code-Point Open instead; the property tier needs these re-fetched in full.</p>
       <div class="flexrow mt-2">${tr.map(f=>`<span class="tag tag--bad">${f}</span>`).join('')}</div>` : ''}
-    ${!un.length && !tr.length ? '<p class="card__s">Every file on disk maps to a registered source. A clean machine could rebuild this.</p>' : ''}`;
+    ${!un.length && !tr.length ? '<p class="card__s">Every file on disk maps to a registered source. A clean machine could rebuild this.</p>' : ''}
+    ${(()=>{ const c = (Platform.admin()||{}).registry && Platform.admin().registry.catalogue;
+      if (!c) return '';
+      if (!c.available) return `<div class="feat__t mt-4">Catalogue not held</div>
+        <p class="card__desc mt-1" style="flex:none">${c.note||''}</p>`;
+      const pct = c.share_of_catalogue_used_pct;
+      return `<div class="feat__t mt-4">This registry against the catalogue government publishes</div>
+      <p class="card__desc mt-1" style="flex:none">A platform that says what it uses and never what it does not
+      is reporting its own successes. data.gov.uk lists everything on offer, so the denominator is measured
+      rather than assumed.</p>
+      <div class="grid g3 mt-2">
+        <div><div class="card__s mono">DATASETS PUBLISHED</div><div class="feat__t">${Number(c.datasets_published||0).toLocaleString('en-GB')}</div></div>
+        <div><div class="card__s mono">SOURCES REGISTERED</div><div class="feat__t">${c.registry_sources}</div></div>
+        <div><div class="card__s mono">SHARE IN USE</div><div class="feat__t">${pct != null ? pct + '%' : '—'}</div></div>
+      </div>
+      <p class="card__desc mt-2" style="flex:none">${c.publishers_found_in_catalogue} of the
+      ${c.publishers_we_read} publishers this platform reads appear among the ${Number(c.distinct_publishers||0).toLocaleString('en-GB')}
+      in the catalogue.${c.complete ? '' : ` <strong>Read ${c.short_by} short of the catalogue's own count</strong> \u2014 it is a live index and gains datasets while it is paged.`}</p>`;
+    })()}`;
 
   GT.reveal(); GT.countAll(); GT.meters();
 

@@ -577,9 +577,17 @@ def fetch_ckan(bronze: Path, s: requests.Session | None = None,
         if total is not None and len(seen) >= total:
             break
         time.sleep(0.2)
-    short = total is not None and len(seen) < total
+    # Two different ways to come up short, and they are not the same failure.
+    # Hitting the page cap is this code's fault and must fail. Ending a page or
+    # two behind is the catalogue moving while it is paged -- it gained twelve
+    # datasets during one run here -- and reporting that as truncation is crying
+    # wolf. The distinction is the cap, not a tolerance on the number.
+    capped = page == max_pages - 1 and (total is None or len(seen) < total)
+    missing = (total - len(seen)) if total is not None else None
     dest.write_text(json.dumps({"count": total, "results": list(seen.values())}))
     note = f"{len(seen):,} of {total if total is not None else '?'} datasets"
-    if short:
-        note += " -- SHORT of the catalogue's own count"
-    return Result(dest.name, bool(seen) and not short, note, dest.stat().st_size)
+    if capped:
+        note += f" -- STOPPED AT THE {max_pages}-PAGE CAP, not exhaustion"
+    elif missing:
+        note += f" -- {missing} behind; the catalogue moved while it was paged"
+    return Result(dest.name, bool(seen) and not capped, note, dest.stat().st_size)
