@@ -30,6 +30,7 @@
 <meta name="twitter:description" content="Operator console: source health, ingest runs, system state and the match review queue.">
 <meta name="twitter:image" content="https://ukgroundtruth.co.uk/assets/social/default.png">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/shell.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
 </head>
 <body>
@@ -56,16 +57,27 @@
 <header class="top"><div class="top__in">
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
   <div><div class="top__crumb">UK GroundTruth · Admin console · 127.0.0.1</div>
-       <h1 class="top__title">Control room</h1></div>
+       <div class="top__title">Control room</div></div>
   <div class="spacer"></div>
   <span class="live" id="stateTag"><i></i>READING DATABASE…</span>
   <a class="btn btn--ghost" href="index.html" style="font-size:12px">← Public site</a>
   <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
 </div></header>
 
-<div class="pad" id="ops">
+<main class="pad" id="ops">
+  <!-- Seven destinations, each a URL. The sidebar changes the view rather than
+       scrolling one 4,000px page. -->
+  <div class="view" data-view="ops" hidden>
+    <div class="vhead"><div><h1 class="vhead__t">Control room</h1>
+      <p class="vhead__s">What this database holds, what last ran, and what is waiting on a
+      person. Every figure is read from the database or the filesystem on this machine.</p></div>
+      <div class="vhead__r"><span class="mono card__s" id="opsStamp">&nbsp;</span></div></div>
   <div class="grid g4" id="kpis"></div>
 
+    <div id="opsAttention" style="margin-top:1.4rem"></div>
+  </div>
+
+  <div class="view" data-view="runs" hidden>
   <section class="card rise" id="runs" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">Ingest runs</div>
       <div class="card__s">Every fetch this database has recorded. Append-only.</div></div>
@@ -76,6 +88,9 @@
       <tbody id="runRows"></tbody></table></div>
   </section>
 
+  </div>
+
+  <div class="view" data-view="sources" hidden>
   <section class="card rise" id="sources" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">Data sources</div>
       <div class="card__s" id="srcNote">&nbsp;</div></div>
@@ -87,6 +102,9 @@
       <tbody id="srcRows"></tbody></table></div>
   </section>
 
+  </div>
+
+  <div class="view" data-view="systems" hidden>
   <section class="card rise" id="systems" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">System state</div>
       <div class="card__s">Rows each system has written, and whether its inputs are on disk</div></div></div>
@@ -96,13 +114,19 @@
       <tbody id="sysRows"></tbody></table></div>
   </section>
 
+  </div>
+
+  <div class="view" data-view="review" hidden>
   <section class="card rise" id="review" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">Match review</div>
       <div class="card__s" id="revNote">Ambiguity found in the data. Nothing here has been merged.</div></div></div>
     <div class="card__b card__b--flush"><div class="feed" id="revFeed"></div></div>
   </section>
+  </div>
 
-  <div class="grid g-2-1" style="margin-top:1rem">
+  <div class="view" data-view="storage" hidden>
+
+  <div style="margin-top:1rem">
     <section class="card rise" id="storage">
       <div class="card__hd"><div><div class="card__t">Storage</div>
         <div class="card__s">Rows held, by layer</div></div>
@@ -111,17 +135,24 @@
         <table class="tbl"><thead><tr><th>Layer</th><th>Table</th><th>Rows</th></tr></thead>
         <tbody id="tblRows"></tbody></table></div>
     </section>
-    <section class="card rise" id="integrity">
+  </div>
+  </div>
+
+  <div class="view" data-view="integrity" hidden>
+    <section class="card rise">
       <div class="card__hd"><div><div class="card__t">Reproducibility</div>
         <div class="card__s">Could another machine rebuild this?</div></div></div>
       <div class="card__b" id="gapBody"></div>
     </section>
   </div>
 
+
   <p class="card__s" style="margin-top:1.6rem;max-width:74ch">
     Every figure on this page is read from the database or the filesystem on this machine.
     Where there is nothing to show, the panel says so rather than showing a placeholder.
   </p>
+</main>
+
 </div>
 </div>
 </div>
@@ -129,6 +160,8 @@
 <script src="assets/shared.js"></script>
 <script src="assets/platform.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/shell.js"></script>
+<script src="assets/admin.js"></script>
 <script>
 (async function(){
   await Platform.load();
@@ -173,7 +206,7 @@
       <div class="kpi__m">${k.m}</div></div>`).join('');
 
   /* Runs */
-  document.getElementById('runRows').innerHTML = s.runs.length ? s.runs.map(r=>`<tr>
+  document.getElementById('runRows').innerHTML = s.runs.length ? s.runs.map(r=>`<tr data-run="${r.run_id}">
     <td class="mono" style="font-size:11.5px">${r.run_id}</td>
     <td class="mono" style="font-size:11.5px">${String(r.started).slice(0,16).replace('T',' ')}</td>
     <td>${r.sources}</td>
@@ -196,7 +229,7 @@
     return r.ok ? `<span class="tag tag--ok">${r.http_status}</span>`
                 : `<span class="tag tag--bad">${r.http_status || 'ERR'}</span>`;
   };
-  const srcHtml = list => list.map(r=>`<tr title="${(r.note||r.blocked||'').replace(/"/g,'')}">
+  const srcHtml = list => list.map(r=>`<tr data-src="${String(r.name).replace(/"/g,'&quot;')}" title="${(r.note||r.blocked||'').replace(/"/g,'')}">
     <td>${r.name}</td><td>${r.publisher}</td>
     <td><span class="tag">${String(r.role).replace('_',' ')}</span></td>
     <td class="mono" style="font-size:11.5px">${r.cadence}</td>
@@ -257,7 +290,7 @@
 
   /* Storage */
   const tbls = (a.tables||[]).filter(t=>t.rows).sort((x,y)=>y.rows-x.rows);
-  document.getElementById('tblRows').innerHTML = tbls.map(t=>`<tr>
+  document.getElementById('tblRows').innerHTML = tbls.map(t=>`<tr data-tbl="${String(t.table).replace(/"/g,'&quot;')}">
     <td><span class="tag">${t.schema}</span></td><td>${t.table}</td>
     <td class="mono">${fmt(t.rows)}</td></tr>`).join('');
   document.getElementById('storeMeta').textContent = `${fmt(s.rowsHeld)} rows`;
@@ -283,6 +316,9 @@
     ${!un.length && !tr.length ? '<p class="card__s">Every file on disk maps to a registered source. A clean machine could rebuild this.</p>' : ''}`;
 
   GT.reveal(); GT.countAll(); GT.meters();
+
+  // Same shell as the public app, different configuration.
+  Admin.boot();
 })();
 </script>
 </body>

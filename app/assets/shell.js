@@ -18,7 +18,7 @@ const Shell = (() => {
   const num = v => v == null || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-GB');
 
   /* ---------------------------------------------------------------- nav ---- */
-  const NAV = [
+  const NAV_PUBLIC = [
     { group: 'Explore', items: [
       { id: '',        icon: '◉', label: 'Overview' },
       { id: 'places',  icon: '▣', label: 'Places',        count: () => Platform.placeList().length },
@@ -34,7 +34,7 @@ const Shell = (() => {
     ]},
   ];
 
-  const TITLES = {
+  const TITLES_PUBLIC = {
     '':        ['Explore', 'National picture'],
     places:    ['Explore · Places', 'Places'],
     systems:   ['Explore · Systems', 'The thirteen systems'],
@@ -44,10 +44,30 @@ const Shell = (() => {
     search:    ['Search', 'Search'],
   };
 
+  /* One shell, two consoles. The public app and the admin console are the same
+     product and were two implementations of a sidebar, a top bar and a router.
+     Everything below is driven by this config instead. */
+  const DEFAULTS = {
+    nav: null, titles: null, views: null, legacy: null,
+    tabs: [['', '◉', 'Overview'], ['places', '▣', 'Places'],
+           ['systems', '▦', 'Systems'], ['sources', '⛁', 'Sources']],
+    crumb: 'UK GroundTruth',
+    // Return [[groupName, items]] for the palette, or null to use the default.
+    palette: null,
+    // Handle a route; return true if it was handled. Falls through to the
+    // built-in public routes when it returns anything else.
+    onRoute: null,
+  };
+  let CFG = DEFAULTS;
+  const nav = () => CFG.nav || NAV_PUBLIC;
+  const titles = () => CFG.titles || TITLES_PUBLIC;
+  const views = () => CFG.views || VIEWS_PUBLIC;
+  const legacy = () => CFG.legacy || LEGACY_PUBLIC;
+
   function renderNav() {
     const box = $('.side__scroll');
     if (!box) return;
-    box.innerHTML = NAV.map(g => `
+    box.innerHTML = nav().map(g => `
       <div class="side__group">${esc(g.group)}</div>
       ${g.items.map(it => {
         let c = null;
@@ -56,9 +76,9 @@ const Shell = (() => {
         return `<a class="navi" data-nav="${it.id}" href="#/${it.id}">
           <i class="navi__dot" aria-hidden="true"></i>${esc(it.label)}${badge}</a>`;
       }).join('')}
-    `).join('') + `
+    `).join('') + (CFG.systemList === false ? '' : `
       <div class="side__group">Jump to a system</div>
-      <div id="navSystems">${systemNav()}</div>`;
+      <div id="navSystems">${systemNav()}</div>`);
   }
 
   /* The system list used to be anchors into one long page, with a scroll-spy
@@ -88,12 +108,7 @@ const Shell = (() => {
     const bar = document.createElement('nav');
     bar.className = 'tabbar';
     bar.setAttribute('aria-label', 'Sections');
-    bar.innerHTML = [
-      ['',        '◉', 'Overview'],
-      ['places',  '▣', 'Places'],
-      ['systems', '▦', 'Systems'],
-      ['sources', '⛁', 'Sources'],
-    ].map(([id, ic, l]) =>
+    bar.innerHTML = (CFG.tabs || DEFAULTS.tabs).map(([id, ic, l]) =>
       `<a data-tab="${id}" href="#/${id}"><i aria-hidden="true">${ic}</i><span>${l}</span></a>`).join('');
     document.body.appendChild(bar);
   }
@@ -131,10 +146,21 @@ const Shell = (() => {
     const stamp = $('#ovStamp');
     if (stamp && gen) stamp.textContent = 'computed ' + String(gen).slice(0, 10);
 
-    const blocked = src.total - src.ok;
+    /* "not ok" is three different things, and calling all of them "would not
+       answer anonymously" was false: five of the ten hold data and are only
+       missing a fetch-log record. Counted separately, and only the ones that
+       genuinely refused are described that way. */
+    const rows = src.rows || [];
+    const blocked  = rows.filter(r => r.blocked).length;
+    const absent   = rows.filter(r => !r.blocked && r.provenance === 'absent').length;
+    const unlogged = rows.filter(r => r.provenance === 'unlogged').length;
+    const holding  = src.total - blocked - absent;
+
     const tiles = [
       { l: 'Systems with output', v: `${built} of ${SYSTEMS.length}`, s: 'each one measured, none estimated', k: built === SYSTEMS.length ? 'ok' : 'warn', href: '#/systems' },
-      { l: 'Sources returning data', v: `${src.ok} of ${src.total}`, s: `${blocked} would not answer anonymously`, k: blocked ? 'warn' : 'ok', href: '#/sources' },
+      { l: 'Sources holding data', v: `${holding} of ${src.total}`,
+        s: `${blocked} refused an anonymous request, ${absent} never fetched`,
+        k: blocked ? 'warn' : 'ok', href: '#/sources' },
       { l: 'Rows held', v: a ? num(a.rowsHeld) : '—', s: a ? `across ${num(a.tableCount)} tables` : 'platform output not loaded', k: '' },
       { l: 'Districts covered', v: num(Platform.placeList().length), s: 'every English district with a figure', k: '', href: '#/places' },
     ];
@@ -147,11 +173,17 @@ const Shell = (() => {
 
     /* Needs attention: the mobile app had this and the desktop never did. */
     const items = [];
-    (src.rows || []).filter(r => r.blocked || (!r.ok && r.provenance !== 'unlogged')).forEach(r => items.push({
-      sev: r.blocked ? 'bad' : 'warn',
-      tag: r.blocked ? 'blocked' : 'not fetched',
-      t: `${r.name} is not returning data`,
-      s: [r.publisher, r.blocked].filter(Boolean).join(' · ').slice(0, 160),
+    rows.filter(r => r.blocked).forEach(r => items.push({
+      sev: 'bad', tag: 'blocked', t: `${r.name} refused an anonymous request`,
+      s: [r.publisher, r.blocked].filter(Boolean).join(' · ').slice(0, 180), href: '#/sources',
+    }));
+    rows.filter(r => !r.blocked && r.provenance === 'absent').forEach(r => items.push({
+      sev: 'warn', tag: 'never fetched', t: `${r.name} holds no data yet`,
+      s: `${r.publisher || ''} · registered, nothing on disk`, href: '#/sources',
+    }));
+    rows.filter(r => r.provenance === 'unlogged').forEach(r => items.push({
+      sev: 'none', tag: 'unlogged', t: `${r.name} has data but no fetch record`,
+      s: 'a backfill wrote it directly, so the platform cannot say when it arrived',
       href: '#/sources',
     }));
     // Both arrive as objects carrying a summary plus their rows, not as arrays.
@@ -371,10 +403,10 @@ const Shell = (() => {
   }
 
   /* -------------------------------------------------------------- router --- */
-  const VIEWS = ['overview', 'places', 'systems', 'sources', 'method', 'detail'];
+  const VIEWS_PUBLIC = ['overview', 'places', 'systems', 'sources', 'method', 'detail'];
 
   function show(view) {
-    VIEWS.forEach(v => {
+    views().forEach(v => {
       const el = $(`[data-view="${v}"]`);
       if (el) el.hidden = v !== view;
     });
@@ -384,9 +416,10 @@ const Shell = (() => {
   }
 
   function setChrome(key) {
-    const [crumb, title] = TITLES[key] || TITLES[''];
+    const T = titles();
+    const [crumb, title] = T[key] || T[''] || ['', ''];
     const c = $('.top__crumb'), t = $('.top__title');
-    if (c) c.textContent = 'UK GroundTruth · ' + crumb;
+    if (c) c.textContent = (CFG.crumb || DEFAULTS.crumb) + ' · ' + crumb;
     if (t) t.textContent = title;
     $$('[data-nav]').forEach(a => a.classList.toggle('is-on', a.dataset.nav === key));
     const activeSys = (location.hash.match(/^#\/systems\/([a-z0-9_-]+)/i) || [])[1] || '';
@@ -397,7 +430,7 @@ const Shell = (() => {
   }
 
   /* Hashes the old build produced, kept working so nothing anyone saved breaks. */
-  const LEGACY = {
+  const LEGACY_PUBLIC = {
     '#top': '#/method', '#hero': '#/method', '#spines': '#/method', '#chains': '#/method',
     '#place': '#/places', '#systems': '#/systems', '#compare': '#/systems',
     '#feeds': '#/sources', '#honesty': '#/sources', '#kpis': '#/',
@@ -406,7 +439,8 @@ const Shell = (() => {
 
   function route() {
     const raw = location.hash || '#/';
-    if (LEGACY[raw]) { location.replace(LEGACY[raw]); return; }
+    const L = legacy();
+    if (L[raw]) { location.replace(L[raw]); return; }
     const legacySys = raw.match(/^#system\/([a-z0-9_-]+)$/i);
     if (legacySys) { location.replace('#/systems/' + legacySys[1]); return; }
     const legacyOrg = raw.match(/^#org\/(.+)$/);
@@ -416,6 +450,13 @@ const Shell = (() => {
     const seg = path.split('/').filter(Boolean);
     const head = seg[0] || '';
     closePanel();
+
+    // A console supplies its own routes; the public ones are the fallback.
+    if (CFG.onRoute) {
+      let handled = false;
+      safely(() => { handled = CFG.onRoute(head, seg, { show, setChrome, scrollTop, safely }) === true; });
+      if (handled) return;
+    }
 
     if (head === '' ) {
       show('overview'); setChrome(''); safely(buildOverview, '#viewOverview'); scrollTop(); return;
@@ -550,6 +591,7 @@ const Shell = (() => {
     }
 
     function results(q) {
+      if (CFG.palette) return CFG.palette(q.trim().toLowerCase()) || [];
       const t = q.trim().toLowerCase();
       const out = [];
       const sys = SYSTEMS.filter(s => !t || s.n.toLowerCase().includes(t) || s.s.toLowerCase().includes(t) || s.dom.toLowerCase().includes(t));
@@ -567,7 +609,7 @@ const Shell = (() => {
       if (sys.length) out.push(['Systems', sys.slice(0, 8).map(s => ({
         icon: '▦', t: s.n, s: s.s, w: s.dom,
         go: () => { location.hash = '#/systems/' + s.id; } }))]);
-      if (!t) out.push(['Go to', NAV.flatMap(g => g.items).map(i => ({
+      if (!t) out.push(['Go to', nav().flatMap(g => g.items).map(i => ({
         icon: i.icon, t: i.label, s: 'destination', w: '',
         go: () => { location.hash = '#/' + i.id; } }))]);
       return out;
@@ -621,7 +663,8 @@ const Shell = (() => {
   })();
 
   /* ---------------------------------------------------------------- boot --- */
-  function boot() {
+  function boot(cfg) {
+    CFG = Object.assign({}, DEFAULTS, cfg || {});
     renderNav();
     renderTabbar();
 
@@ -663,5 +706,6 @@ const Shell = (() => {
     route();
   }
 
-  return { boot, route, openPlace, openSystemDetail, openPanel, closePanel, provenanceBlock, Palette, SysTabs };
+  return { boot, route, show, setChrome, openPlace, openSystemDetail, openPanel, closePanel,
+           provenanceBlock, skeleton, emptyFact, emptyFilter, Palette, SysTabs, esc, num };
 })();
