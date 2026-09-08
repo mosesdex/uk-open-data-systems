@@ -1,0 +1,183 @@
+/* Application shell.
+   The admin console already proved this language -- grouped navigation with
+   live counts, a figure row, real tables, status chips. This promotes it to
+   the public app so both are one product rather than two.
+
+   Nothing here restates app.css: it uses the same tokens and adds only the
+   components the old narrative page never needed. */
+
+[hidden]{display:none !important}
+
+/* ---------- views ---------- */
+.view{animation:viewin .16s var(--ease-out)}
+@keyframes viewin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.view{animation:none}}
+
+.vhead{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.vhead__t{font-size:22px;font-weight:650;letter-spacing:-.02em}
+.vhead__s{color:var(--ink-3);font-size:13.5px;margin-top:.2rem;max-width:70ch}
+.vhead__r{margin-left:auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+/* ---------- sidebar counts ---------- */
+.navi__ct{margin-left:auto;font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.11);
+  padding:.1rem .35rem;border-radius:9px;color:#D6E0F0;flex:none}
+.navi__ct--alert{background:rgba(200,16,46,.38);color:#FFD9DE}
+.navi{display:flex;align-items:center;gap:.55rem}
+
+/* ---------- figure tiles ---------- */
+.tiles{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(196px,1fr))}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:.75rem .85rem;border-top:2px solid var(--blue-600)}
+.tile--warn{border-top-color:var(--amber-600)}
+.tile--bad{border-top-color:var(--red-600)}
+.tile--ok{border-top-color:var(--green-600)}
+.tile__l{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);line-height:1.35}
+.tile__v{font-size:26px;font-weight:650;letter-spacing:-.025em;margin-top:.35rem;line-height:1.05}
+.tile__s{font-size:11.5px;color:var(--ink-3);margin-top:.2rem;line-height:1.4}
+a.tile{display:block;transition:border-color .14s,box-shadow .14s}
+a.tile:hover{border-color:var(--blue-300);box-shadow:var(--shadow-2)}
+
+/* ---------- data table ---------- */
+.dt-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.dt{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.dt th{position:sticky;top:0;z-index:2;text-align:left;background:var(--surface-2);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  padding:.55rem .8rem;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+.dt th[data-sort]{cursor:pointer}
+.dt th[data-sort]:hover{color:var(--ink)}
+.dt th .caret{opacity:.35;margin-left:.25rem}
+.dt th.is-sorted .caret{opacity:1;color:var(--blue-600)}
+.dt td{padding:.5rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+.dt tbody tr:last-child td{border-bottom:0}
+.dt tbody tr{transition:background .1s}
+.dt tbody tr:hover{background:var(--blue-050)}
+.dt tbody tr.is-sel{background:var(--blue-100)}
+.dt td.num,.dt th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  white-space:nowrap;color:var(--ink)}
+.dt td b{color:var(--ink);font-weight:600}
+.dt--compact td{padding:.28rem .8rem;font-size:12px}
+.dt tbody tr[data-href]{cursor:pointer}
+
+/* ---------- status chips ---------- */
+.st{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;
+  padding:.15rem .4rem;border-radius:4px;white-space:nowrap}
+.st--ok{background:var(--green-050);color:var(--green-600)}
+.st--warn{background:var(--amber-050);color:var(--amber-600)}
+.st--bad{background:var(--red-050);color:var(--red-600)}
+.st--none{background:var(--surface-2);color:var(--ink-3);border:1px solid var(--line)}
+
+/* ---------- filter bar ---------- */
+.fbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.85rem}
+.fchip{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:11px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+  padding:.28rem .55rem;border-radius:99px;cursor:pointer;transition:all .12s;white-space:nowrap}
+.fchip:hover{border-color:var(--blue-300);color:var(--ink)}
+.fchip.is-on{background:var(--blue-800);border-color:var(--blue-800);color:#fff}
+.fchip--clear{border-style:dashed;color:var(--ink-3)}
+.fbar__n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+
+/* ---------- detail panel ---------- */
+.dpanel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);
+  border-left:1px solid var(--line);box-shadow:var(--shadow-3);z-index:60;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .18s var(--ease-out)}
+.dpanel.on{transform:none}
+@media (prefers-reduced-motion: reduce){.dpanel{transition:none}}
+.dpanel__h{display:flex;align-items:flex-start;gap:.7rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--line)}
+.dpanel__t{font-size:15.5px;font-weight:650;letter-spacing:-.015em}
+.dpanel__k{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.dpanel__b{overflow-y:auto;padding:1.1rem;flex:1}
+/* Inside the panel the table has ~500px, not a full page. Its page min-width
+   would push the value column past the edge, and a clipped figure is a bug. */
+.dpanel .dt{min-width:0}
+.dpanel .dt td,.dpanel .dt th{padding-left:.6rem;padding-right:.6rem}
+.dpanel .dt td.num,.dpanel .dt th.num{width:1%}
+.dpanel .dt-wrap{overflow-x:auto}
+.dpanel__x{margin-left:auto;flex:none}
+.scrim{position:fixed;inset:0;background:rgba(1,20,63,.28);z-index:59;opacity:0;transition:opacity .18s}
+.scrim.on{opacity:1}
+[data-theme="dark"] .scrim{background:rgba(0,0,0,.55)}
+
+/* Provenance never sits in a footnote: it is the product's whole claim. */
+.prov{border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;margin-top:1rem}
+.prov__h{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:.5rem .75rem;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.prov__r{display:grid;grid-template-columns:auto 1fr;gap:.35rem .8rem;padding:.6rem .75rem;font-size:12px;
+  border-bottom:1px solid var(--line)}
+.prov__r:last-child{border-bottom:0}
+.prov__k{font-family:var(--mono);font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+
+/* ---------- command palette ---------- */
+.pal{position:fixed;inset:0;z-index:80;display:none;padding-top:11vh;justify-content:center;
+  background:rgba(1,20,63,.32);backdrop-filter:blur(2px)}
+.pal.on{display:flex}
+[data-theme="dark"] .pal{background:rgba(0,0,0,.6)}
+.pal__box{width:min(620px,94vw);max-height:74vh;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow-3);display:flex;flex-direction:column;overflow:hidden;
+  animation:palin .14s var(--ease-out)}
+@keyframes palin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.pal__box{animation:none}}
+.pal__in{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
+.pal__in input{flex:1;border:0;background:none;font:inherit;font-size:15px;color:var(--ink);outline:none}
+.pal__list{overflow-y:auto;padding:.4rem}
+.pal__g{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:.5rem .6rem .3rem}
+.pal__r{display:flex;align-items:center;gap:.65rem;width:100%;text-align:left;padding:.5rem .6rem;
+  border-radius:7px;cursor:pointer}
+.pal__r:hover,.pal__r.is-on{background:var(--blue-050)}
+.pal__r.is-on{box-shadow:inset 2px 0 0 var(--blue-600)}
+.pal__ri{width:24px;height:24px;border-radius:6px;background:var(--blue-050);display:grid;place-items:center;
+  font-size:12px;flex:none}
+.pal__rt{min-width:0}
+.pal__rt b{display:block;font-size:13.5px;font-weight:600;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pal__rt span{display:block;font-size:11.5px;color:var(--ink-3)}
+.pal__rw{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);flex:none}
+.pal__hint{padding:.5rem 1rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;
+  color:var(--ink-3);display:flex;gap:1rem;flex-wrap:wrap}
+.pal__hint kbd{border:1px solid var(--line);border-radius:4px;padding:0 .25rem;background:var(--surface-2)}
+
+/* ---------- states ---------- */
+.state{border:1px dashed var(--line);border-radius:var(--radius-sm);padding:1.6rem 1.2rem;text-align:center;
+  background:var(--surface-2)}
+.state__t{font-weight:650;color:var(--ink);font-size:14px}
+.state__p{font-size:12.5px;color:var(--ink-3);margin-top:.35rem;max-width:56ch;margin-inline:auto;line-height:1.55}
+.state--fact{border-style:solid;border-left:3px solid var(--amber-600);text-align:left;background:var(--amber-050)}
+.state--bad{border-style:solid;border-left:3px solid var(--red-600);text-align:left;background:var(--red-050)}
+
+/* Skeletons take the shape of the content they replace -- no spinners, and no
+   count-ups: a figure appears at its true value or not at all. */
+.skel{height:9px;border-radius:4px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--line) 50%,var(--surface-2) 75%);
+  background-size:280% 100%;animation:skel 1.4s linear infinite}
+@keyframes skel{from{background-position:180% 0}to{background-position:-80% 0}}
+@media (prefers-reduced-motion: reduce){.skel{animation:none}}
+.skel+.skel{margin-top:.5rem}
+.skel--70{width:70%}.skel--45{width:45%}.skel--90{width:90%}
+.skelcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:.9rem}
+
+/* ---------- mobile: the shell collapses to a tab bar ---------- */
+.tabbar{display:none}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:266px;z-index:70;transform:translateX(-100%);
+    transition:transform .18s var(--ease-out)}
+  .side.on{transform:none}
+  .pad{padding:1rem .9rem 5.2rem}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--surface);
+    border-top:1px solid var(--line);padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom))}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.4rem .2rem;
+    font-size:10.5px;color:var(--ink-3);border-radius:9px}
+  .tabbar a.is-on{color:var(--blue-700);background:var(--blue-050)}
+  .tabbar i{font-style:normal;font-size:15px;line-height:1}
+  .dpanel{width:100%;border-left:0}
+  .vhead__t{font-size:19px}
+  /* The top bar has a menu button, a title and a search box to fit into 390px.
+     The crumb and the "/" hint are the two that carry least, so they go. */
+  .top__in{gap:.55rem;padding:.55rem .8rem}
+  .top__crumb{display:none}
+  .topsearch{min-width:0;flex:1 1 auto}
+  .topsearch__k{display:none}
+  .top__title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:9rem}
+  .live{display:none}
+  .tiles{grid-template-columns:1fr}
+}
+@media(max-width:860px) and (prefers-reduced-motion: reduce){.side{transition:none}}

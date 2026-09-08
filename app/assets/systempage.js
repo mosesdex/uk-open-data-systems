@@ -628,13 +628,15 @@ const SystemPage = (() => {
   function close() {
     host.classList.remove('on');
     document.body.style.overflow = '';
-    if (/^#(system\/|compare|org|search)/.test(location.hash)) history.pushState(null, '', location.pathname);
   }
 
-  function boot() {
+  function boot(opts) {
     host = document.getElementById('syshost');
     root = document.getElementById('syspage');
     if (!host || !root) return;
+    // The shell owns the router now. This keeps working standalone for anything
+    // that still boots this module on its own.
+    if (opts && opts.router === false) return;
     const route = () => {
       const m = location.hash.match(/^#system\/([a-z0-9_-]+)$/i);
       const om = location.hash.match(/^#org\/(.+)$/);
@@ -672,5 +674,5 @@ const SystemPage = (() => {
     route();
   }
 
-  return { boot, render, compare, go };
+  return { boot, render, compare, go, close, search, orgIndex, orgProfile, host: () => host, root: () => root };
 })();

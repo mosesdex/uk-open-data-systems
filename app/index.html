@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/shell.css">
 <link rel="canonical" href="https://ukgroundtruth.co.uk/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta property="og:type" content="website">
@@ -67,32 +68,23 @@
 
 <main class="pad" id="top">
 
-  <section class="hero rise" id="hero">
-    <div class="hero__inner">
-      <div class="row" style="gap:.6rem;margin-bottom:1.1rem">
-        <span class="tag" id="liveTag">READING PLATFORM OUTPUT…</span>
-        <span class="card__s mono" id="builtTag" style="font-size:11px"></span>
-      </div>
-      <h1 class="hero__h">UK government records <em>what</em> happened.<br>
-        It rarely records <em>where</em>, or <em>which organisation</em>.</h1>
-      <p class="hero__p">A flood objection with no location. A billion pounds of developer money that
-        can't be put on a map. A care company quietly running a third of a county's beds.
-        The data exists — but two joins are missing, so nobody can use it.</p>
-      <p class="hero__p">UK GroundTruth adds those two joins — <strong>where</strong> and
-        <strong>who</strong> — to data anyone can download, without an account or a fee.
-        That single fix makes <strong>thirteen</strong> things possible that are impossible today.
-        Every figure below is computed from published records on one machine. Nothing is estimated.</p>
-      <div class="hero__cta">
-        <a class="btn btn--primary" href="#place">See it for your area &rarr;</a>
-        <a class="btn btn--ghost" href="#systems">The thirteen systems</a>
-        <a class="btn btn--ghost" href="#honesty">What it cannot do</a>
-      </div>
+  <!-- One destination per view. The router shows exactly one; nothing takes
+       the screen over any more, so the shell is never lost. -->
+  <div class="view" data-view="overview" id="viewOverview" hidden>
+    <div class="vhead">
+      <div><h1 class="vhead__t">National picture</h1>
+        <p class="vhead__s">What the platform holds right now, what each of the thirteen systems
+        found, and what needs attention. Every figure is computed from a published record.</p></div>
+      <div class="vhead__r"><span class="mono card__s" id="ovStamp">&nbsp;</span></div>
     </div>
-  </section>
-
+    <div class="tiles" id="ovTiles"></div>
   <div class="secmark rise" id="mark-01"><span class="secmark__n">01</span><div><div class="secmark__k">The evidence</div><div class="secmark__t">Thirteen findings, in numbers</div><div class="secmark__s">Each figure is one system's headline. Click any card to see the sources, the method, and what it cannot tell you.</div></div></div>
   <div class="grid g4" id="kpis"></div>
+    <div id="ovAttention" style="margin-top:1.4rem"></div>
+    <div id="ovMap" style="margin-top:1.4rem"></div>
+  </div>
 
+  <div class="view" data-view="places" id="viewPlaces" hidden>
   <div class="secmark rise" id="mark-02"><span class="secmark__n">02</span><div><div class="secmark__k">Your area</div><div class="secmark__t">One place, every system</div><div class="secmark__s">Pick a district. Every system reports what it found there, with the coverage each figure rests on.</div></div></div>
   <section class="card rise" id="place" style="margin-top:1rem">
     <div class="card__hd">
@@ -121,6 +113,9 @@
     </div>
   </section>
 
+  </div>
+
+  <div class="view" data-view="systems" id="viewSystems" hidden>
   <div class="secmark rise" id="mark-03"><span class="secmark__n">03</span><div><div class="secmark__k">The thirteen</div><div class="secmark__t">Every system, and what it found</div><div class="secmark__s">Thirteen questions nobody can currently answer. Each runs only on data anyone can download.</div></div></div>
   <section class="card rise" id="systems" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">All thirteen systems, with what each one found</div>
@@ -171,6 +166,77 @@ cannot tell you.</p>
 </div></div>
   </section>
 
+  </div>
+
+  <div class="view" data-view="sources" id="viewSources" hidden>
+  <div class="secmark rise" id="mark-05"><span class="secmark__n">05</span><div><div class="secmark__k">The evidence base</div><div class="secmark__t">Where every figure comes from</div><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee — and the ones that failed, kept visible.</div></div></div>
+  <div class="grid g-1-2" style="margin-top:1rem">
+    <section class="card rise">
+      <div class="card__hd"><div class="card__t">Where the systems draw from</div></div>
+      <div class="card__b">
+        <div class="row" style="justify-content:center"><div id="donut1"></div></div>
+        <div id="donutKey" style="margin-top:.9rem"></div>
+      </div>
+    </section>
+    <section class="card rise" id="feeds">
+      <div class="card__hd"><div><div class="card__t">Open data sources</div>
+        <div class="card__s">Every row returned HTTP 200 to an unauthenticated request on 17 August 2026</div></div>
+        <div class="spacer"></div>
+        <div class="srch"><span class="card__s">⌕</span><input id="feedSearch" placeholder="Filter sources…" aria-label="Filter sources"></div></div>
+      <div class="card__b card__b--flush" style="max-height:420px;overflow:auto">
+        <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Format</th></tr></thead>
+        <tbody id="feedRows"></tbody></table>
+      </div>
+    </section>
+  </div>
+
+  <div class="secmark rise" id="mark-06"><span class="secmark__n">06</span><div><div class="secmark__k">Honesty</div><div class="secmark__t">What this cannot do</div><div class="secmark__s">The limits are part of the product. A tool a civil servant can defend states plainly what it cannot answer.</div></div></div>
+  <section class="card rise" id="honesty" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">What this cannot do</div>
+      <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
+    <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
+  </section>
+
+  <p class="card__s" style="margin-top:1.6rem;max-width:78ch" id="footNote">
+    Prototype. Every figure on this page is computed on this machine from published sources, each
+    retrieved without an account, key or fee. Nothing is modelled, estimated or filled in by hand.
+    Source access was verified anonymously on 17 August 2026.
+  </p>
+
+  <p class="card__s" style="margin-top:.9rem;max-width:78ch">
+    Built and published by Dexter DCL, an independent UK company. Not a government
+    publication. <a href="about.html">About and contact</a> &middot;
+    <a href="mailto:moses@dextercyberlab.com">moses@dextercyberlab.com</a>
+  </p>
+</div>
+</div>
+  </div>
+
+  <div class="view" data-view="method" id="viewMethod" hidden>
+
+  <section class="hero rise" id="hero">
+    <div class="hero__inner">
+      <div class="row" style="gap:.6rem;margin-bottom:1.1rem">
+        <span class="tag" id="liveTag">READING PLATFORM OUTPUT…</span>
+        <span class="card__s mono" id="builtTag" style="font-size:11px"></span>
+      </div>
+      <h2 class="hero__h">UK government records <em>what</em> happened.<br>
+        It rarely records <em>where</em>, or <em>which organisation</em>.</h2>
+      <p class="hero__p">A flood objection with no location. A billion pounds of developer money that
+        can't be put on a map. A care company quietly running a third of a county's beds.
+        The data exists — but two joins are missing, so nobody can use it.</p>
+      <p class="hero__p">UK GroundTruth adds those two joins — <strong>where</strong> and
+        <strong>who</strong> — to data anyone can download, without an account or a fee.
+        That single fix makes <strong>thirteen</strong> things possible that are impossible today.
+        Every figure below is computed from published records on one machine. Nothing is estimated.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#place">See it for your area &rarr;</a>
+        <a class="btn btn--ghost" href="#systems">The thirteen systems</a>
+        <a class="btn btn--ghost" href="#honesty">What it cannot do</a>
+      </div>
+    </div>
+  </section>
+
   <div class="secmark rise" id="mark-04"><span class="secmark__n">04</span><div><div class="secmark__k">How they connect</div><div class="secmark__t">Two links, shared by everything</div><div class="secmark__s">The same two joins power all thirteen. Fix them once, and one fact sets off several systems at once.</div></div></div>
   <section class="card rise" id="spines" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">The two missing links</div>
@@ -219,50 +285,18 @@ cannot tell you.</p>
     <div class="card__b"><div class="stack" id="chainList"></div></div>
   </section>
 
-  <div class="secmark rise" id="mark-05"><span class="secmark__n">05</span><div><div class="secmark__k">The evidence base</div><div class="secmark__t">Where every figure comes from</div><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee — and the ones that failed, kept visible.</div></div></div>
-  <div class="grid g-1-2" style="margin-top:1rem">
-    <section class="card rise">
-      <div class="card__hd"><div class="card__t">Where the systems draw from</div></div>
-      <div class="card__b">
-        <div class="row" style="justify-content:center"><div id="donut1"></div></div>
-        <div id="donutKey" style="margin-top:.9rem"></div>
-      </div>
-    </section>
-    <section class="card rise" id="feeds">
-      <div class="card__hd"><div><div class="card__t">Open data sources</div>
-        <div class="card__s">Every row returned HTTP 200 to an unauthenticated request on 17 August 2026</div></div>
-        <div class="spacer"></div>
-        <div class="srch"><span class="card__s">⌕</span><input id="feedSearch" placeholder="Filter sources…" aria-label="Filter sources"></div></div>
-      <div class="card__b card__b--flush" style="max-height:420px;overflow:auto">
-        <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Format</th></tr></thead>
-        <tbody id="feedRows"></tbody></table>
-      </div>
-    </section>
   </div>
 
-  <div class="secmark rise" id="mark-06"><span class="secmark__n">06</span><div><div class="secmark__k">Honesty</div><div class="secmark__t">What this cannot do</div><div class="secmark__s">The limits are part of the product. A tool a civil servant can defend states plainly what it cannot answer.</div></div></div>
-  <section class="card rise" id="honesty" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">What this cannot do</div>
-      <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
-    <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
-  </section>
+  <!-- System, organisation, place and search detail render here, inside the
+       shell, instead of into a full-screen overlay. -->
+  <div class="view" data-view="detail" id="viewDetail" hidden>
+    <div id="syshost"><div class="syspage" id="syspage"></div></div>
+  </div>
 
-  <p class="card__s" style="margin-top:1.6rem;max-width:78ch" id="footNote">
-    Prototype. Every figure on this page is computed on this machine from published sources, each
-    retrieved without an account, key or fee. Nothing is modelled, estimated or filled in by hand.
-    Source access was verified anonymously on 17 August 2026.
-  </p>
 
-  <p class="card__s" style="margin-top:.9rem;max-width:78ch">
-    Built and published by Dexter DCL, an independent UK company. Not a government
-    publication. <a href="about.html">About and contact</a> &middot;
-    <a href="mailto:moses@dextercyberlab.com">moses@dextercyberlab.com</a>
-  </p>
-</div>
-</div>
 </main>
 
-<div id="syshost"><div class="syspage" id="syspage"></div></div>
+
 
 <script src="assets/shared.js"></script>
 <script src="assets/platform.js"></script>
@@ -273,6 +307,7 @@ cannot tell you.</p>
 <script src="assets/anime.min.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/systempage.js"></script>
+<script src="assets/shell.js"></script>
 <script>
 (async function(){
   await Platform.load();
@@ -288,31 +323,8 @@ cannot tell you.</p>
       return (h.prefix || '') + (h.value != null ? Number(h.value).toLocaleString('en-GB') : '') + (h.unit || '');
     } catch (e) { return ''; }
   };
-  document.getElementById('navSystems').innerHTML = SYSTEMS.map(s => {
-    const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[s.id];
-    const ico = (spec && spec.icon) || '•';
-    const dom = (spec && spec.domain) || s.dom || '';
-    const fig = navFig(s.id);
-    return `<a class="navx" href="#sys-${s.id}" data-spy="sys-${s.id}">
-      <span class="navx__ico">${ico}</span>
-      <span class="navx__tx"><span class="navx__nm">${s.n}</span>${dom ? `<span class="navx__dm">${dom}</span>` : ''}</span>
-      ${fig ? `<span class="navx__fig">${fig}</span>` : ''}
-    </a>`;
-  }).join('');
-
-  // Scroll-spy: highlight the system whose card is nearest the top of the view.
-  const spyLinks = [...document.querySelectorAll('#navSystems .navx')];
-  const spyTargets = spyLinks.map(a => document.getElementById(a.dataset.spy)).filter(Boolean);
-  if (spyTargets.length) {
-    const spy = new IntersectionObserver(es => {
-      es.forEach(e => {
-        if (!e.isIntersecting) return;
-        const id = e.target.id;
-        spyLinks.forEach(a => a.classList.toggle('is-on', a.dataset.spy === id));
-      });
-    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-    spyTargets.forEach(t => spy.observe(t));
-  }
+  // The sidebar's system list is rendered by the shell: it routes to a
+  // destination now, so there is nothing left to scroll-spy.
 
   const built = Platform.builtSystems();
   const gen = Platform.generated();
@@ -326,7 +338,7 @@ cannot tell you.</p>
     const v = h.money ? (h.value/1e9).toFixed(2) : h.value;
     const pre = h.money ? '£' : (h.prefix||'');
     const suf = h.money ? 'bn' : (h.suffix||'');
-    return `<div class="kpi rise" style="--accent:${accents[i%accents.length]}">
+    return `<div class="kpi rise" data-sysid="${String(h.system).toLowerCase()}" role="button" tabindex="0" style="--accent:${accents[i%accents.length]}">
       <div class="kpi__l">${h.label}</div>
       <div class="kpi__v" data-count="${v}" data-dec="${String(v).includes('.')?(h.money?2:1):0}" data-pre="${pre}" data-suf="${suf}">0</div>
       <div class="kpi__m">${h.note}</div>
@@ -530,7 +542,7 @@ cannot tell you.</p>
         statHTML = `<div class="syscard__stat"><span class="card__s">not built yet</span></div>`;
       }
       const fr = freshFor(s.id);
-      return `<a class="syscard rise" id="sys-${s.id}" href="#system/${s.id}">
+      return `<a class="syscard rise" id="sys-${s.id}" data-sysid="${s.id}" href="#/systems/${s.id}">
         <div class="syscard__hd">
           <span class="syscard__ico">${spec?spec.icon:'▦'}</span>
           <div style="min-width:0">
@@ -663,7 +675,10 @@ cannot tell you.</p>
     : 'entity spine not yet loaded';
 
   /* ---- system pages: routed full-screen views (assets/systempage.js) ---- */
-  SystemPage.boot();
+  // The shell owns routing; SystemPage keeps its renderers and gives up its
+  // router, so a system page draws inside the shell instead of over it.
+  SystemPage.boot({router: false});
+  Shell.boot();
 
 
   const jnP = document.getElementById('jnPlatform');

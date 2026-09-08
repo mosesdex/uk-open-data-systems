@@ -38,28 +38,21 @@ const GT = (() => {
   addEventListener('hashchange', () => reveal());
 
   /* ---- animated counters ---- */
+  /* Figures are written at their true value, once.
+     They used to count up from zero over 1.1s, which meant this platform spent
+     the first second of every visit displaying numbers that were wrong -- 4.3%
+     where the answer was 89.6%. On a product whose entire argument is that the
+     figure traces to a record, that is the one flourish it cannot afford. The
+     animation also ran on requestAnimationFrame, which suspends in a background
+     tab, so a figure could be left frozen part-way up. */
   function count(el, to, opts={}){
-    const dur = opts.dur || 1100, dec = opts.dec || 0, pre = opts.pre || '', suf = opts.suf || '';
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches){
-      el.textContent = pre + to.toLocaleString('en-GB',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf; return;
-    }
-    const t0 = performance.now();
-    const tick = t => {
-      const k = Math.min((t - t0)/dur, 1), e = 1 - Math.pow(1 - k, 3), v = to * e;
-      el.textContent = pre + v.toLocaleString('en-GB',{minimumFractionDigits:dec,maximumFractionDigits:dec}) + suf;
-      if (k < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    const dec = opts.dec || 0, pre = opts.pre || '', suf = opts.suf || '';
+    el.textContent = pre + to.toLocaleString('en-GB',
+      {minimumFractionDigits:dec, maximumFractionDigits:dec}) + suf;
   }
   function countAll(root=document){
-    const io = new IntersectionObserver(es => es.forEach(e => {
-      if (!e.isIntersecting) return;
-      const el = e.target;
-      count(el, parseFloat(el.dataset.count),
-        {dec:+(el.dataset.dec||0), pre:el.dataset.pre||'', suf:el.dataset.suf||''});
-      io.unobserve(el);
-    }), {threshold:.4});
-    root.querySelectorAll('[data-count]').forEach(el => io.observe(el));
+    root.querySelectorAll('[data-count]').forEach(el => count(el, parseFloat(el.dataset.count),
+      {dec:+(el.dataset.dec||0), pre:el.dataset.pre||'', suf:el.dataset.suf||''}));
   }
 
   /* ---- choropleth from real ONS boundaries ---- */

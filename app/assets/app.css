@@ -421,12 +421,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @media(max-width:640px){.jn__arrow{display:none}.jn__track{flex-wrap:wrap}.jn__step{min-width:calc(50% - .4rem);flex:1 1 calc(50% - .4rem)}}
 
 /* ============ full system page ============ */
-#syshost{position:fixed;inset:0;z-index:80;background:var(--bg);overflow-y:auto;
-  opacity:0;visibility:hidden;transition:opacity .2s var(--ease)}
-#syshost.on{opacity:1;visibility:visible}
-.syspage{max-width:1080px;margin:0 auto;padding:0 1.25rem 4rem}
-.sp-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;
-  padding:.9rem 0;background:var(--bg);border-bottom:1px solid var(--line)}
+/* Detail views render inside the shell, not over it. They used to be a
+   fixed, full-screen overlay: opening a system threw away the sidebar, the
+   breadcrumb and the search box, and the only way out was a Back button. */
+#syshost{display:none}
+#syshost.on{display:block}
+.syspage{max-width:1180px;margin:0;padding:0 0 2rem}
+.sp-top{position:sticky;top:52px;z-index:5;display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 0;background:var(--bg);border-bottom:1px solid var(--line)}
 .sp-back{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;
   padding:.42rem .8rem;font-size:13px;font-weight:550;cursor:pointer;transition:background .14s,border-color .14s}
 .sp-back:hover{border-color:var(--ink-3);background:var(--blue-050)}
@@ -659,7 +661,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 /* ---- top-bar search trigger ---- */
 .topsearch{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:9px;
-  padding:.4rem .7rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;transition:border-color .14s,background .14s}
+  padding:.4rem .7rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;
+  min-width:270px;flex:0 1 340px;transition:border-color .14s,background .14s}
 .topsearch:hover{border-color:var(--blue-300);background:var(--blue-050);color:var(--ink-2)}
 .topsearch:focus-within{border-color:var(--blue-500);background:var(--surface);
   box-shadow:0 0 0 3px var(--blue-100)}
