@@ -502,7 +502,7 @@ def fetch_developer_agreements(bronze: Path, s: requests.Session | None = None) 
 # The directory pages 1,000 at a time and stops returning Organisations when it
 # is exhausted; there is no total to trust, so exhaustion is the stop condition.
 def fetch_nhs_ods(bronze: Path, s: requests.Session | None = None,
-                  limit: int = 1000, max_pages: int = 200) -> Result:
+                  limit: int = 1000, max_pages: int = 500) -> Result:
     s = s or _session()
     dest = bronze / "nhs_ods.json"
     seen: dict[str, dict] = {}
@@ -532,8 +532,17 @@ def fetch_nhs_ods(bronze: Path, s: requests.Session | None = None,
             if o.get("OrgId"):
                 seen[o["OrgId"]] = o
         time.sleep(0.2)
+    else:
+        # The loop ran to its limit instead of the directory running out. The
+        # first run of this stopped at exactly 200,000 -- max_pages * limit --
+        # and reported it as the register. A count that is really a ceiling
+        # must never be handed back as if it were a total.
+        capped = True
     dest.write_text(json.dumps({"Organisations": list(seen.values())}))
-    return Result(dest.name, bool(seen), f"{len(seen):,} NHS organisations",
+    note = f"{len(seen):,} NHS organisations"
+    if locals().get("capped"):
+        note += f" -- STOPPED AT THE {max_pages}-PAGE CAP, not exhaustion"
+    return Result(dest.name, bool(seen) and not locals().get("capped"), note,
                   dest.stat().st_size)
 
 
@@ -568,7 +577,9 @@ def fetch_ckan(bronze: Path, s: requests.Session | None = None,
         if total is not None and len(seen) >= total:
             break
         time.sleep(0.2)
+    short = total is not None and len(seen) < total
     dest.write_text(json.dumps({"count": total, "results": list(seen.values())}))
-    return Result(dest.name, bool(seen),
-                  f"{len(seen):,} of {total if total is not None else '?'} datasets",
-                  dest.stat().st_size)
+    note = f"{len(seen):,} of {total if total is not None else '?'} datasets"
+    if short:
+        note += " -- SHORT of the catalogue's own count"
+    return Result(dest.name, bool(seen) and not short, note, dest.stat().st_size)
