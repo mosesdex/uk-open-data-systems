@@ -1,11 +1,15 @@
 # SEO
 
-The domain serves the **app**: `app/index.html` at `/` and `app/mobile.html`
-beside it, with the system briefs they link to published behind them. The
-engine in `platform/` never ships.
+The domain serves the **app**: `app/index.html` at `/`, with the system briefs
+it links to published behind it. The engine in `platform/` never ships.
 
-Almost everything search engines see is generated. The two app pages are the
-exception — they are hand-maintained HTML, so their tags are literal, and
+`/mobile.html` is a handoff page, not a second interface. The app is responsive,
+so a separate mobile URL would only split the same content across two addresses
+for a search engine to weigh against each other. It is `noindex`, kept out of
+the sitemap, and still served so nothing anyone bookmarked breaks.
+
+Almost everything search engines see is generated. The app page is the
+exception — it is hand-maintained HTML, so its tags are literal, and
 `tools/seo-check.py` fails the build if they drift from where the page is
 actually served.
 

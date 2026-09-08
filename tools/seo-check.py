@@ -35,9 +35,10 @@ PUBLISHED = {
 for _s in sorted(ROOT.glob("systems/*.html")):
     PUBLISHED[f"systems/{_s.name}"] = f"systems/{_s.name}"
 
-# Reachable, deliberately kept out of search: an error page and an operations
-# console. Neither belongs in results, and neither goes in the sitemap.
-NOINDEX = {"404.html", "app/admin.html"}
+# Reachable, deliberately kept out of search: an error page, an operations
+# console, and the old mobile URL, which now hands off to '/'. None belongs in
+# results, and none goes in the sitemap.
+NOINDEX = {"404.html", "app/admin.html", "app/mobile.html"}
 
 PAGES = [ROOT / rel for rel in PUBLISHED]
 
@@ -179,7 +180,7 @@ def check_page(p: pathlib.Path) -> None:
     # The app's containers ship empty and fill from JavaScript. If the static
     # copy ever stops being generated, the page silently loses almost all of
     # its crawlable content while still looking perfectly fine in a browser.
-    if name in ("app/index.html", "app/mobile.html"):
+    if name == "app/index.html":
         if "<!-- generated:static-content -->" not in h:
             err(name, "static content block is missing; run: node tools/app-content.mjs")
         else:

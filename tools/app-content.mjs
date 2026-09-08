@@ -3,7 +3,7 @@
 // The app is a JavaScript application: its containers ship empty and fill from
 // data/platform.json in the browser. That is fine for a person and bad for
 // everything else -- a crawler that does not execute JavaScript, and most AI
-// search systems, see 91 words on /mobile.html and no systems at all on /.
+// search systems, saw no systems at all on /.
 // The site's whole substance is invisible to them.
 //
 // So the same figures are rendered here, at build time, into the containers the
@@ -98,6 +98,6 @@ function inject(file, container, block) {
   return html.length;
 }
 
+// One interface, so one page to fill. mobile.html is a handoff to '/' now.
 const n1 = inject('app/index.html', 'sysGrid', systemsBlock());
-const n2 = inject('app/mobile.html', 'mSystems', systemsBlock({ compact: true }));
-console.log(`static content injected: app/index.html (${n1} bytes), app/mobile.html (${n2} bytes)`);
+console.log(`static content injected: app/index.html (${n1} bytes)`);

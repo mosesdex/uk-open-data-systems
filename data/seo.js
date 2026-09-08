@@ -200,8 +200,8 @@ ${urls.map(u => `  <url>
  */
 export const robots = () => `# ${SITE.name} — ${SITE.publisher}
 #
-# What ships is the app: the interfaces at / and /mobile.html, the data they
-# read, and the system briefs they link to. What never ships is the engine in
+# What ships is the app at /, the data it reads, and the system briefs it links
+# to. /mobile.html is a handoff to / and is noindex. What never ships is the engine in
 # platform/ -- the fetchers, the source registry and the database -- and the
 # operator console, which the publish workflow removes and then fails the build
 # if it reappears.

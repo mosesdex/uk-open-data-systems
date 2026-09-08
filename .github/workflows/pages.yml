@@ -5,7 +5,7 @@
 # engine -- platform/ -- which holds the fetchers, the DuckDB database and the
 # credentials-free source registry. That runs on the operator's own machine.
 #
-# Published:     app/index.html -> /, app/mobile.html, app/assets, app/data,
+# Published:     app/index.html -> /, app/mobile.html (handoff, noindex), app/assets, app/data,
 #                systems/, platform.html, research.html, examples.html,
 #                about.html,
 #                app/admin.html (noindex), 404.html, sitemap.xml, robots.txt,

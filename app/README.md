@@ -21,7 +21,7 @@ Three interfaces over the platform:
 |---|---|
 | `index.html` | Public — reads real platform output |
 | `admin.html` | Admin — feed health, pipeline, review queue |
-| `mobile.html` | Mobile — device frame, tabbed |
+| `mobile.html` | Handoff to `/` — the app is responsive; kept so old links work |
 
 ## It reads what the platform computed
 
