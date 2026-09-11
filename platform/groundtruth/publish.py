@@ -497,6 +497,14 @@ def write(con: duckdb.DuckDBPyConnection, dest: Path) -> dict:
     dest.parent.mkdir(parents=True, exist_ok=True)
     _dump(payload, dest)
 
+    # Each headline is recorded with where it came from before the audit
+    # measures how much of the publication can say so.
+    from . import evidence as _evidence
+    try:
+        payload["evidence"] = _evidence.record_headlines(con, payload)
+    except Exception as exc:
+        payload["evidence"] = {"error": str(exc).splitlines()[0]}
+
     # The audit compares the file just written with the database, so it runs
     # after the first write and its findings go into a second.
     from dataclasses import asdict

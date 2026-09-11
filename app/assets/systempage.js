@@ -231,10 +231,26 @@ const SystemPage = (() => {
       present.add('sources');
     }
 
+    // The headline, traced: recorded in the evidence layer at publish with the
+    // source it rests on, the steps that produced it and what it covers.
+    const ev = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const traced = (Platform.evidence ? Platform.evidence(id) : []).map(o => {
+      const cov = o.coverage_of ? `Computed over ${Number(o.coverage_n).toLocaleString('en-GB')} of ${Number(o.coverage_of).toLocaleString('en-GB')} (${o.coverage_pct}%)` : '';
+      return `<div class="sp-trace">
+        <div class="row" style="justify-content:space-between;align-items:baseline;gap:.6rem">
+          <b style="font-size:14px">${ev(o.value_text)}</b><span class="tag">${ev(o.derivation)}</span></div>
+        <div class="card__s" style="font-size:12px;margin-top:.1rem">${ev(o.label)}</div>
+        <ol style="margin:.45rem 0 0;padding-left:1.1rem;font-size:12px;color:var(--ink-2);line-height:1.55">${(o.transformations || []).map(t => `<li>${ev(t)}</li>`).join('')}</ol>
+        <div class="card__s mono" style="font-size:10.5px;margin-top:.4rem;color:var(--ink-3);word-break:break-word">${ev(o.dataset || o.source_id)}${o.publisher ? ' · ' + ev(o.publisher) : ''}${o.retrieved_at ? ' · retrieved ' + ev(String(o.retrieved_at).slice(0, 10)) : ' · no fetch record'}${o.sha256 ? ' · SHA-256 ' + ev(String(o.sha256).slice(0, 12)) + '…' : ''}</div>
+        ${cov || o.note ? `<div class="card__s" style="font-size:11.5px;margin-top:.3rem">${ev(cov)}${cov && o.note ? ' — ' : ''}${ev(o.note || '')}</div>` : ''}
+      </div>`;
+    }).join('');
+
     // Methodology
     const defs = view.definitions || [];
     S.method = `<div class="sp-method">
       <div class="sp-method__row"><div class="sp-method__k">How it is computed</div><p>${Platform.systemMethod(id) || info.method}</p></div>
+      ${traced ? `<div class="sp-method__row"><div class="sp-method__k">The headline, traced</div><div style="min-width:0">${traced}</div></div>` : ''}
       <div class="sp-method__row"><div class="sp-method__k">Collection</div><p>${Platform.collectionNote(id) || 'Every source behind this system is open to an anonymous request — no account, key or fee.'}</p></div>
       <div class="sp-method__row"><div class="sp-method__k">Validation</div><p>Every figure carries the share of records it was computed over; ambiguous matches are reported, not guessed. Nothing is modelled or estimated.</p></div>
       <div class="sp-method__row"><div class="sp-method__k">Coverage</div><p>${view.coverage || 'England, latest published release of each source.'}${Platform.placeJoinNote(id) ? `<br><span style="display:inline-block;margin-top:.4rem">${Platform.placeJoinNote(id)}</span>` : ''}</p></div>

@@ -565,6 +565,9 @@ const Platform = (() => {
   const audit = () => (data && data.audit) || null;
   const gaps = () => (data && data.gaps) || null;
   const history = () => (data && data.history) || null;
+  // Each system's headline as recorded at publish: source, checksum, steps, coverage.
+  const evidenceSummary = () => (data && data.evidence) || null;
+  const evidence = id => ((evidenceSummary() || {}).headlines || {})[id] || [];
 
   return {load, sys, has, pipeline, organisations, headlines, systemResult, sourceSummary, spineSummary,
           districtValues, districtLookup, chains, reuse, admin, adminSummary,
@@ -572,5 +575,5 @@ const Platform = (() => {
           mapMetrics, metricValues, metricSpec, metricProvenance,
           systemProvenance, systemMethod,
           generated, builtSystems, error, contradictions, corrections, liveLimits,
-          collectionNote, placeJoinNote, spineTiers, graph, metricNotes, audit, gaps, history};
+          collectionNote, placeJoinNote, spineTiers, graph, metricNotes, audit, gaps, history, evidence, evidenceSummary};
 })();

@@ -157,6 +157,30 @@ const Admin = (() => {
             <td class="num">${num(x.tables || 0)}</td><td class="num">${num(x.rows || 0)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
+  /* The evidence layer: which figures can name where they came from. */
+  function buildEvidence() {
+    const host = $('#evidenceBody');
+    if (!host) return;
+    const ev = Platform.evidenceSummary ? Platform.evidenceSummary() : null;
+    if (!ev || ev.error) {
+      host.innerHTML = `<div class="state"><div class="state__t">${ev ? 'The evidence layer failed to record' : 'No evidence recorded in this build'}</div>
+        ${ev ? `<p class="state__p">${esc(ev.error)}</p>` : ''}</div>`;
+      return;
+    }
+    const rows = Object.entries(ev.headlines || {}).flatMap(([sys, list]) => list.map(o => ({ sys, ...o })));
+    const su = ev.summary || {};
+    host.innerHTML = `<p class="card__s" style="margin:0 0 .7rem">${num(su.total || 0)} observations held. This publish
+      recorded ${num(rows.length)}, covering every system's headline; district and row-level figures are not yet
+      recorded one by one. Any subject below can be explained with <span class="mono">gt why</span>.</p>
+      <div class="dt-wrap"><table class="dt dt--compact">
+        <thead><tr><th>System</th><th>Figure</th><th>Source</th><th class="num">Coverage</th></tr></thead>
+        <tbody>${rows.map(o => `<tr><td><b>${esc(o.sys)}</b><br><span class="mono" style="font-size:10.5px;color:var(--ink-3);word-break:break-all">${esc(o.subject)}</span></td>
+          <td>${esc(o.value_text)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(o.label)}</span></td>
+          <td style="font-size:12px">${esc(o.source_id || '—')}<br><span class="mono" style="font-size:10.5px;color:var(--ink-3)">${o.sha256 ? 'SHA-256 ' + esc(String(o.sha256).slice(0, 12)) + '…' : 'no fetch record'}</span></td>
+          <td class="num">${o.coverage_pct != null ? esc(o.coverage_pct) + '%' : '—'}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+  }
+
   /* ------------------------------------------------------------ panels ---- */
   function openRun(id) {
     const run = (A().runs || []).find(r => String(r.run_id || r.id) === String(id));
@@ -244,7 +268,7 @@ const Admin = (() => {
     api.setChrome(head);
     if (view === 'ops') buildOps();
     if (view === 'audit') buildAudit();
-    if (view === 'integrity') buildHistory();
+    if (view === 'integrity') { buildHistory(); buildEvidence(); }
     // Every destination gets exactly one h1, naming the view it is on. The
     // card headings inside stay h2 and below.
     promoteHeading(view, (TITLES[head] || TITLES[''])[1]);

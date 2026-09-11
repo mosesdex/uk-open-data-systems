@@ -502,6 +502,15 @@ def check_provenance_coverage(con, a: Audit) -> None:
         a.add("provenance-coverage", MAJOR, "evidence.observation",
               "the evidence table exists but holds no observations",
               remedy="wire provenance.record() into each system's build step")
+        return
+    # Something is recorded; say how far it reaches rather than going quiet.
+    subjects = con.execute(
+        "SELECT count(DISTINCT subject) FROM evidence.observation").fetchone()[0]
+    a.add("provenance-coverage", NOTE, "evidence.observation",
+          f"{n:,} observations across {subjects} subjects; district and row-level "
+          "figures are not yet recorded one by one",
+          remedy="extend each system's build step to record its district figures "
+                 "through provenance.record()")
 
 
 # ------------------------------------------------------------- live publisher

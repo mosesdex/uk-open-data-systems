@@ -321,8 +321,14 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
     if _has(con, "place_postcode") and _has(con, "naptan_node"):
         total, within = con.execute("""
             WITH s AS (
+              -- A fixed sample, not a random one: a random draw moved the
+              -- published rate between builds of unchanged data (98.7%, then
+              -- 99.2%), which is a figure changing for no reason a reader
+              -- could find.
               SELECT easting, northing FROM silver.naptan_node
-              WHERE easting IS NOT NULL USING SAMPLE 2000 ROWS
+              WHERE easting IS NOT NULL
+              ORDER BY hash(easting, northing), easting, northing
+              LIMIT 2000
             )
             SELECT count(*),
                    count(*) FILTER (WHERE EXISTS (

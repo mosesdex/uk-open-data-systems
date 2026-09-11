@@ -206,3 +206,6 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
 
 /* Map hover: whose figure it is, when it is not the district's own. */
 .maptip em{display:block;font-style:normal;font-size:10.5px;opacity:.78;margin-top:2px}
+
+/* A headline's recorded trail on its system page. */
+.sp-trace{border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem;margin-bottom:.55rem}
