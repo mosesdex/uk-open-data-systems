@@ -375,7 +375,7 @@ const Shell = (() => {
     const r = Platform.systemResult(id);
     if (!meta) return;
 
-    const limits = (d && d.limits) || [];
+    const limits = [...((d && d.limits) || []), ...Platform.liveLimits(id)];
     const body = `
       ${r ? `<div class="tile tile--ok" style="margin-bottom:1rem">
         <div class="tile__l">${esc(r.label)}</div>

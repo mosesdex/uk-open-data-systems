@@ -67,6 +67,38 @@ def _int(v) -> int | None:
         return None
 
 
+# Why an open school reached no district, read from the register's own fields
+# rather than inferred. Checked against every unplaced school on 11 September
+# 2026: of 483 mainstream, 452 were outside Great Britain by the register's own
+# establishment type, 13 were online-only or in Wales, and 18 were English
+# schools the spine could not locate. An earlier summary called all of them
+# out of scope; classifying by type is what showed the 18.
+OUTSIDE_GREAT_BRITAIN = frozenset({
+    "British schools overseas", "Offshore schools", "Service children's education",
+})
+
+
+def unplaced_reason(establishment_type: str | None, postcode: str | None,
+                    located: bool = False) -> str:
+    """The reason a school has no district. Only meaningful when it has none."""
+    # The register is cp1252 and is read as latin-1, so a curly apostrophe
+    # arrives as the control character \x92. Unnormalised, "Service children's
+    # education" would miss the set above and be filed as an English school --
+    # the exact misreport this function exists to prevent.
+    t = (establishment_type or "").strip().replace("\u2019", "'").replace("\x92", "'")
+    if t in OUTSIDE_GREAT_BRITAIN:
+        return "outside_great_britain"
+    if t == "Online provider":
+        return "online_only"
+    if t == "Welsh establishment":
+        return "in_wales"
+    if located:
+        return "located_no_district"
+    if (postcode or "").strip():
+        return "postcode_not_in_register"
+    return "no_location_in_record"
+
+
 def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
     """Resolve schools to places and write the gold tables."""
     rows = list(csv.DictReader(io.open(gias_csv, encoding="latin-1")))
@@ -100,6 +132,9 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
             (r.get("Trusts (name)") or "").strip() or None,
             is_mainstream(r.get("TypeOfEstablishment (name)", "")),
             check["conflict"], check["metres"],
+            None if ref.lad_code else unplaced_reason(
+                r.get("TypeOfEstablishment (name)"), r.get("Postcode"),
+                located=ref.resolved),
         ))
 
     con.execute("DROP TABLE IF EXISTS gold.catchment_school")
@@ -114,10 +149,12 @@ def build(con: duckdb.DuckDBPyConnection, gias_csv: Path) -> Coverage:
           mainstream BOOLEAN,
           -- A published property reference that disagrees with its own
           -- postcode by kilometres is recorded, not trusted.
-          identifier_conflict BOOLEAN, tier_distance_m INTEGER
+          identifier_conflict BOOLEAN, tier_distance_m INTEGER,
+          -- Why a school reached no district; NULL when it has one.
+          unplaced_reason VARCHAR
         )""")
     insert_many(con, 
-        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
+        "INSERT INTO gold.catchment_school VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", records)
 
     # District picture. Utilisation is computed only over schools that published
     # both numbers, and the share doing so travels with the figure.

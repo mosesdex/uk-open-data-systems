@@ -19,6 +19,23 @@ import duckdb
 from . import place
 
 
+def _unplaced_reasons(con) -> dict | None:
+    """Mainstream schools with no district, by the reason Catchment recorded.
+
+    Counted over the same rows as schools_unplaced, so the parts sum to the
+    headline. None when the table predates the column, rather than zeros that
+    would read as "no reason to give".
+    """
+    cols = {r[0] for r in con.execute(
+        "SELECT column_name FROM duckdb_columns() "
+        "WHERE schema_name = 'gold' AND table_name = 'catchment_school'").fetchall()}
+    if "unplaced_reason" not in cols:
+        return None
+    return {k: v for k, v in con.execute("""
+        SELECT unplaced_reason, count(*) FROM gold.catchment_school
+        WHERE mainstream AND lad_code IS NULL GROUP BY 1""").fetchall() if k}
+
+
 def _exists(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> bool:
     return con.execute(
         "SELECT count(*) FROM information_schema.tables "
@@ -156,7 +173,8 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
                           WHERE mainstream AND lad_code IS NULL),
                         (SELECT sum(pupils) FROM gold.catchment_school
                           WHERE mainstream AND lad_code IS NULL),
-                        (SELECT sum(schools) FROM gold.catchment_district)""").fetchone()),
+                        (SELECT sum(schools) FROM gold.catchment_district)""").fetchone())
+                | {"unplaced_by_reason": _unplaced_reasons(con)},
             "specialist": _rows(con, """SELECT count(*) AS districts, sum(pupils) AS pupils,
                 sum(capacity) AS capacity,
                 round(100.0*sum(pupils)/nullif(sum(capacity),0),1) AS utilisation_pct,

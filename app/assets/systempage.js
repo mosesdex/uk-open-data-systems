@@ -243,9 +243,9 @@ const SystemPage = (() => {
 
     // Limitations (folded into methodology block visually but its own anchor)
     S.method += `<div class="sp-h mt-5">Data limitations</div>
-      <div class="stack mt-2" style="gap:.5rem">${info.limits.map((l,i) => `
+      <div class="stack mt-2" style="gap:.5rem">${[...(info.limits || []), ...Platform.liveLimits(id)].map((l,i) => `
         <div class="step"><div class="step__n">${i+1}</div>
-        <p class="card__desc" style="flex:none;padding-top:.15rem">${l}</p></div>`).join('')}</div>`;
+        <p class="card__desc" style="flex:1;min-width:0;padding-top:.15rem">${l}</p></div>`).join('')}</div>`;
 
     // Records (secondary — collapsed by default)
     S.records = `<details class="sp-rec"><summary class="sp-rec__sum">View the underlying figures</summary>

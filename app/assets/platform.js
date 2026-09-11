@@ -433,6 +433,46 @@ const Platform = (() => {
     };
   }
 
+  /* Limits that are facts about the current output rather than the method.
+     The static ones live in DETAIL; these are computed from the payload, so
+     they cannot drift from the figures they qualify. Catchment's unplaced
+     schools are the first: a reader who sees "483 not placed" with no reason
+     would fairly take it for a failure, and most of them are not in England. */
+  function liveLimits(id) {
+    const out = [];
+    if (id === 'catchment') {
+      const nat = (sys('catchment') || {}).national || {};
+      const r = nat.unplaced_by_reason;
+      if (r && nat.schools_unplaced) {
+        const n = v => Number(v || 0).toLocaleString('en-GB');
+        const s = (v, one, many) => `${n(v)} ${Number(v) === 1 ? one : many}`;
+        const parts = [];
+        if (r.outside_great_britain) parts.push(`${n(r.outside_great_britain)} are outside Great Britain — British schools overseas, offshore schools and service schools abroad`);
+        if (r.online_only) parts.push(`${n(r.online_only)} are online-only providers with no site`);
+        if (r.in_wales) parts.push(`${n(r.in_wales)} are in Wales, outside this system’s England scope`);
+        let text = `${s(nat.schools_unplaced, 'mainstream school is', 'mainstream schools are')} not placed in a district.`;
+        if (parts.length) text += ` ${parts.join('; ')}.`;
+        const eng = (r.postcode_not_in_register || 0) + (r.no_location_in_record || 0)
+                  + (r.located_no_district || 0);
+        if (eng) {
+          const why = [];
+          if (r.postcode_not_in_register) why.push(`${n(r.postcode_not_in_register)} carry a postcode the national register does not yet hold`);
+          if (r.no_location_in_record) why.push(`${n(r.no_location_in_record)} have no location in their record`);
+          if (r.located_no_district) why.push(`${n(r.located_no_district)} have a location but no district`);
+          text += ` The other ${s(eng, 'is an English school', 'are English schools')} the place spine cannot locate: ${why.join(', and ')}.`;
+        }
+        // A reason this sentence does not name must not disappear from it: if
+        // the parts stop adding up to the headline, say so.
+        const counted = Object.values(r).reduce((a, v) => a + Number(v || 0), 0);
+        if (counted !== Number(nat.schools_unplaced)) {
+          text += ` (The reasons above account for ${n(counted)} of the ${n(nat.schools_unplaced)}.)`;
+        }
+        out.push(text);
+      }
+    }
+    return out;
+  }
+
   const chains = () => (data && data.chains) || [];
   const reuse = () => (data && data.reuse) || null;
   const generated = () => (data && data.generated) || null;
@@ -450,5 +490,5 @@ const Platform = (() => {
           placeCoverage, placeList, placeReport, placeResolution,
           mapMetrics, metricValues, metricSpec, metricProvenance,
           systemProvenance, systemMethod,
-          generated, builtSystems, error, contradictions, corrections};
+          generated, builtSystems, error, contradictions, corrections, liveLimits};
 })();
