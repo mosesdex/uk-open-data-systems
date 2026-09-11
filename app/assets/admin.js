@@ -20,7 +20,8 @@ const Admin = (() => {
     { group: 'Operations', items: [
       { id: '',        icon: '◉', label: 'Control room' },
       { id: 'runs',    icon: '⟳', label: 'Ingest runs',  count: () => (A().runs || []).length },
-      { id: 'sources', icon: '⛁', label: 'Data sources', count: () => A().sourcesBlocked + A().sourcesAbsent, alert: true },
+      // Blocked sources are also absent, so adding the two counted them twice.
+      { id: 'sources', icon: '⛁', label: 'Data sources', count: () => (raw().sources || []).filter(s => s.blocked || s.provenance === 'absent').length, alert: true },
     ]},
     { group: 'Platform', items: [
       { id: 'systems',   icon: '▦', label: 'Systems',         count: () => A().systemsTotal },

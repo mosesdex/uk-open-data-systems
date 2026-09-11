@@ -303,14 +303,33 @@ function renderFindings(id, d) {
       ${table([{label:'Reason',key:'reason'},{label:'Objections',key:'objections',mono:1},
                {label:'Authorities',key:'authorities',mono:1}], d.reasons)}`;
     }
-    case 'watchman':
+    case 'watchman': {
+      // The distressed organisations were published and shown only as the top
+      // one in an insight. None has a profile on this site, so each links to its
+      // own Companies House record rather than to an empty page.
+      const list = d.distress_list || [];
+      const e = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const rows = list.map(x => ({
+        name: x.company_number
+          ? `<a href="https://find-and-update.company-information.service.gov.uk/company/${encodeURIComponent(x.company_number)}" target="_blank" rel="noopener">${e(x.name)}</a>`
+          : e(x.name),
+        company_number: e(x.company_number || '—'),
+        company_status: e(x.company_status),
+        role: e(x.role),
+        activity: x.role === 'CQC care provider' ? `${n(x.activity)} care locations` : n(x.activity),
+      }));
       return `<div class="grid g2">
         ${big(n((d.exposures||[]).length), 'Exposures in the current window', 'the register must accumulate first')}
         ${big('—', 'Historic backfill', 'not yet fetched')}
       </div>
       <p class="card__s mt-3">Zero is the correct answer at this register size, not a failure.
       Matching a few weeks of insolvencies against a few weeks of awards is expected to find
-      almost nothing; the register needs years of award notices before it produces signal.</p>`;
+      almost nothing; the register needs years of award notices before it produces signal.</p>
+      ${rows.length ? `<div class="card__s mt-4 mb-2">Holding a public role while financially distressed · ${n(rows.length)} · each name opens its Companies House record</div>
+      ${table([{label:'Organisation',key:'name'},{label:'Company',key:'company_number',mono:1},
+               {label:'Companies House status',key:'company_status'},{label:'Public role',key:'role'},
+               {label:'Scale',key:'activity',mono:1}], rows)}` : ''}`;
+    }
     default:
       return '<p class="card__s">No renderer for this system yet.</p>';
   }

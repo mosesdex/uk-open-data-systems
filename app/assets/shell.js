@@ -29,7 +29,9 @@ const Shell = (() => {
       // The count here is the number of sources that would not answer an
       // anonymous request. It is red because that is the product's own
       // headline caveat, and it belongs in front of people permanently.
-      { id: 'sources', icon: '⛁', label: 'Sources', count: () => Platform.sourceSummary().total - Platform.sourceSummary().ok, alert: true },
+      // It was total minus ok, which also counted the seven sources that hold
+      // data with no fetch record -- the conflation already fixed in the tiles.
+      { id: 'sources', icon: '⛁', label: 'Sources', count: () => (Platform.sourceSummary().rows || []).filter(r => r.blocked).length, alert: true },
       { id: 'method',  icon: '❋', label: 'Method' },
     ]},
   ];
@@ -327,12 +329,15 @@ const Shell = (() => {
     return `
       ${method ? `<div class="prov"><div class="prov__h">Method</div>
         <div style="padding:.7rem .75rem;font-size:12.5px;color:var(--ink-2);line-height:1.55">${esc(method)}</div></div>` : ''}
+      ${(() => { const cn = Platform.collectionNote(systemId), pj = Platform.placeJoinNote(systemId);
+        return (cn || pj) ? `<div class="prov"><div class="prov__h">Collection and coverage</div>
+          <div style="padding:.7rem .75rem;font-size:12.5px;color:var(--ink-2);line-height:1.55">${cn || ''}${cn && pj ? '<br><br>' : ''}${pj || ''}</div></div>` : ''; })()}
       <div class="prov"><div class="prov__h">Provenance · ${rows.length} source${rows.length === 1 ? '' : 's'}</div>
         ${rows.length ? rows.map(r => `<div class="prov__r">
           <span class="prov__k">Source</span><span><b>${esc(r.name)}</b><br>
             <span style="color:var(--ink-3)">${esc(r.publisher || '')}${r.licence ? ' · ' + esc(r.licence) : ''}</span></span>
           <span class="prov__k">Fetched</span><span class="mono">${r.fetched ? esc(String(r.fetched).slice(0, 19).replace('T', ' ')) : '—'}</span>
-          <span class="prov__k">State</span><span><span class="st st--${r.ok ? 'ok' : 'bad'}">${esc(r.status)}</span></span>
+          <span class="prov__k">State</span><span><span class="st st--${r.ok ? 'ok' : 'bad'}">${esc(r.status)}</span>${r.ok && !r.hashed ? ' <span class="st st--warn">no hash</span>' : ''}</span>
         </div>`).join('') : `<div class="prov__r"><span class="prov__k">—</span>
           <span style="color:var(--ink-3)">No source is registered against this system yet.</span></div>`}
       </div>`;
@@ -400,6 +405,101 @@ const Shell = (() => {
     openPanel('System · ' + (meta.dom || ''), meta.n, body);
     const go = panel.querySelector('[data-goto]');
     if (go) go.onclick = () => closePanel();
+  }
+
+  /* ------------------------------------------------- method and sources --- */
+  /* The spine's tiers, what the joins connect, the platform's corrections to
+     itself and its cross-checks were all published and shown nowhere. */
+  const PREDICATE = {
+    sits_in:      ['Postcode', 'District', 'every postcode the register places in a district: the place spine itself'],
+    settled_by:   ['Developer contribution', 'Payment', 'each payment recorded against a contribution'],
+    collected_by: ['Developer contribution', 'Collecting authority', 'the authority a contribution is owed to'],
+    agreed_under: ['Developer contribution', 'Legal agreement', 'the agreement it falls under'],
+    evidenced_by: ['Legal agreement', 'Planning application', 'the only published route from an agreement to a site'],
+    located_in:   ['Legal agreement', 'District', 'agreements whose site could be placed in a district'],
+  };
+  const LEDGER_EDGES = new Set(['settled_by', 'collected_by', 'agreed_under', 'evidenced_by', 'located_in']);
+
+  function buildMethod() {
+    const spHost = $('#methodSpine');
+    if (!spHost || spHost.dataset.built) return;
+    const sp = Platform.spineTiers(), pl = sp.place || {}, en = sp.entity || {};
+    const tiers = [];
+    if (pl.uprn) tiers.push(['Property', 'OS Open UPRN', `${num(pl.uprn.rows)} properties`,
+      'An exact point. The file carries no district, so one is taken from the postcode or, failing that, the nearest postcode centroid.']);
+    if (pl.postcode) tiers.push(['Postcode', 'Code-Point Open', `${num(pl.postcode.rows)} postcodes`,
+      `${num(pl.postcode.distinct_lads)} districts; ${pl.postcode.best_quality_share}% at the publisher’s best positional quality.`]);
+    if (pl.coordinate) tiers.push(['Coordinate', 'Nearest postcode centroid', `${pl.coordinate.resolved_pct}% resolved`,
+      `Tested against ${esc(pl.coordinate.tested_against)}: ${num(pl.coordinate.resolved_within_500m)} of a ${num(pl.coordinate.sample)} sample within 500 m. Beyond that it refuses rather than guesses.`]);
+    if (pl.street) tiers.push(['Street', 'OS Open USRN', `${num(pl.street.rows)} streets`,
+      `Checks a street reference exists and says what kind of street it is (${num(pl.street.street_types)} types).${pl.street.carries_a_name === false ? ' It carries no street name.' : ''}`]);
+    if (pl.lad) tiers.push(['District', 'ONS boundaries', `${num(pl.lad.rows)} districts`, 'The unit every district figure is published at.']);
+    spHost.innerHTML = tiers.length ? `<div class="dt-wrap"><table class="dt">
+        <thead><tr><th>Tier</th><th>Source</th><th class="num">Size</th><th>What it can and cannot tell you</th></tr></thead>
+        <tbody>${tiers.map(t => `<tr><td><b>${t[0]}</b></td><td>${t[1]}</td><td class="num">${t[2]}</td><td>${t[3]}</td></tr>`).join('')}</tbody>
+      </table></div>
+      ${en.register_rows ? `<p class="mnote">Organisation spine: ${num(en.register_rows)} supplier records carrying ${num(en.distinct_names)} distinct names, resolved to ${num(en.distinct_numbers)} company numbers.</p>` : ''}`
+      : '<div class="state"><div class="state__t">Spine figures are not in this build</div></div>';
+
+    const g = Platform.graph(), gh = $('#methodGraph');
+    if (gh) {
+      const bp = (g && g.by_predicate) || {};
+      const rows = Object.entries(bp).sort((a, b) => b[1] - a[1]);
+      if (!rows.length) gh.innerHTML = '<div class="state"><div class="state__t">Relationship counts are not in this build</div></div>';
+      else {
+        const total = rows.reduce((a, r) => a + Number(r[1] || 0), 0), spine = Number(bp.sits_in || 0);
+        const allLedger = rows.every(([p]) => p === 'sits_in' || LEDGER_EDGES.has(p));
+        const unav = (g.unavailable || []), broken = Object.keys(g.broken || {});
+        gh.innerHTML = `<div class="dt-wrap"><table class="dt">
+            <thead><tr><th>From</th><th>To</th><th class="num">Relationships</th><th>What it means</th></tr></thead>
+            <tbody>${rows.map(([p, c]) => { const d = PREDICATE[p] || [p, '—', '']; return `<tr><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td class="num">${num(c)}</td><td>${esc(d[2])}</td></tr>`; }).join('')}</tbody>
+          </table></div>
+          <p class="mnote">${num(total)} relationships across ${rows.length} declared types. ${unav.length ? `${unav.length} could not be built (${unav.map(esc).join(', ')}).` : 'Every declared type was built'}${broken.length ? `, and ${broken.length} is broken (${broken.map(esc).join(', ')}).` : ', and none is broken.'}
+          ${spine ? `${num(spine)} of them are the place spine itself: postcodes placed in districts.${allLedger ? ' The rest trace a developer contribution to the agreement, application and payments behind it.' : ''}` : ''}</p>`;
+      }
+    }
+
+    const c = Platform.corrections(), ch = $('#methodCorrections');
+    if (ch) {
+      const es = (c && c.entries) || [], su = (c && c.summary) || {};
+      ch.innerHTML = !es.length ? '<div class="state"><div class="state__t">No corrections recorded</div></div>'
+        : `<p class="mnote" style="margin:0 0 .8rem">${num(es.length)} corrections to this platform’s own claims. ${su.unguarded ? `${num(su.unguarded)} are not yet guarded by a test.` : 'Every one is guarded by a test that fails if the mistake comes back.'}</p>`
+          + es.map(e => `<details class="corr"><summary><b>${esc(String(e.id || '').replace(/-/g, ' '))}</b>
+              <span class="st st--${e.severity === 'material' ? 'bad' : 'warn'}">${esc(e.severity || 'noted')}</span>
+              <span class="mono card__s">${esc(e.system || '')} · ${esc(e.corrected_on || '')}</span></summary>
+              <div class="corr__b">
+                <span class="corr__k">Believed</span><span>${esc(e.believed)}</span>
+                <span class="corr__k">Actually</span><span>${esc(e.actually)}</span>
+                <span class="corr__k">How it was caught</span><span>${esc(e.how_caught)}</span>
+                <span class="corr__k">Guarded by</span><span>${e.guard ? `<code>${esc(e.guard)}</code>` : 'no test yet'}${e.guarded ? '' : ' <span class="st st--warn">unguarded</span>'}</span>
+              </div></details>`).join('');
+    }
+    spHost.dataset.built = '1';
+  }
+
+  function buildSources() {
+    const host = $('#sourcesChecks');
+    if (!host || host.dataset.built) return;
+    const c = Platform.contradictions(), rs = (c && c.results) || [];
+    if (!rs.length) { host.innerHTML = '<div class="state"><div class="state__t">No cross-checks in this build</div></div>'; host.dataset.built = '1'; return; }
+    const ran = rs.filter(r => r.run), dis = ran.filter(r => r.disagreed > 0), un = rs.filter(r => !r.run);
+    // A check over one aggregate row compares two totals; "0% agree" would
+    // misstate it, so it shows the two totals instead.
+    const agree = r => {
+      if (!r.run) return '—';
+      const ex = (r.examples || [])[0];
+      if (r.compared === 1 && ex && ex.left_value != null && ex.right_value != null) return `${num(ex.left_value)} vs ${num(ex.right_value)}`;
+      return r.agreement_pct != null ? `${r.agreement_pct}%` : '—';
+    };
+    host.innerHTML = `<p class="mnote" style="margin:0 0 .8rem">${num(rs.length)} checks compare a quantity the platform holds twice, by two routes. ${num(ran.length)} ran and ${num(dis.length)} found a disagreement${un.length ? `; ${num(un.length)} could not run because an input is missing` : ''}. A disagreement is reported, never resolved: the platform has no standing to say which record is right.</p>
+      <div class="dt-wrap"><table class="dt">
+        <thead><tr><th>Quantity</th><th class="num">Compared</th><th class="num">Disagree</th><th class="num">Agreement</th></tr></thead>
+        <tbody>${rs.map(r => `<tr><td><b>${esc(r.quantity || r.check)}</b><br><span style="color:var(--ink-3);font-size:11.5px">${esc(r.note || '')}</span></td>
+          <td class="num">${r.run ? num(r.compared) : '—'}</td>
+          <td class="num">${r.run ? `<span class="st st--${r.disagreed ? 'warn' : 'ok'}">${num(r.disagreed)}</span>` : '<span class="st st--none">not run</span>'}</td>
+          <td class="num">${agree(r)}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+    host.dataset.built = '1';
   }
 
   /* -------------------------------------------------------------- router --- */
@@ -487,8 +587,8 @@ const Shell = (() => {
       return;
     }
 
-    if (head === 'sources') { show('sources'); setChrome('sources'); scrollTop(); return; }
-    if (head === 'method')  { show('method');  setChrome('method');  scrollTop(); return; }
+    if (head === 'sources') { show('sources'); setChrome('sources'); safely(buildSources, '#sourcesChecks'); scrollTop(); return; }
+    if (head === 'method')  { show('method');  setChrome('method');  safely(buildMethod, '#methodSpine'); scrollTop(); return; }
     if (head === 'search')  { show('detail');  setChrome('search'); safely(SystemPage.search, '#syspage'); scrollTop(); return; }
 
     // Unknown route: say so, and offer the way back.

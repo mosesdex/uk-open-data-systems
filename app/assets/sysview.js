@@ -146,7 +146,7 @@ const SYSVIEW = (() => {
         title: 'Buyers most reliant on a single supplier',
         explain: {
           shows: 'The buyers where one supplier takes the largest share of the awards.',
-          read: 'Longer bars mean more of that buyer’s awards concentrate on their top supplier.',
+          read: 'Longer bars mean more of that buyer’s awards — counted by number, not value — go to their top supplier.',
           standout: 'Several buyers put the great majority of their awards through one supplier.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.concentrated.slice(0, 10).map(c => ({ n: c.buyer, v: c.top_supplier_award_share })), { fmt: v => v + '%' }),
@@ -158,6 +158,13 @@ const SYSVIEW = (() => {
         const r = [];
         if (sel) r.push(`Selective tender is the single largest route — ${n(sel.awards)} awards worth £${(sel.value/1e9).toFixed(2)}bn.`);
         if (open) r.push(`Only ${n(open.awards)} awards were openly competed.`);
+        // The value share was published and never shown, and for some buyers it
+        // tells a different story from the count. The award count travels with it.
+        const byValue = (out.concentrated || [])
+          .filter(c => c.top_supplier_value_share != null && c.top_supplier_award_share != null)
+          .sort((a, b) => (b.top_supplier_value_share - b.top_supplier_award_share) - (a.top_supplier_value_share - a.top_supplier_award_share))[0];
+        if (byValue && byValue.top_supplier_value_share > byValue.top_supplier_award_share)
+          r.push(`Counting money rather than awards changes the picture: ${byValue.buyer} sends ${byValue.top_supplier_value_share}% of its contract value to one supplier, from ${byValue.top_supplier_award_share}% of its ${n(byValue.awards)} awards.`);
         if (cf.length) r.push(`${cf.length} individuals each sit behind several suppliers to the same buyer — for example ${cf[0].person}, ${cf[0].companies} companies across ${cf[0].awards} awards to ${cf[0].buyer}.`);
         r.push('Where the procurement route is "not stated", competition cannot be verified at all.');
         return r;
@@ -904,7 +911,8 @@ const SYSVIEW = (() => {
           if (!c) return [];
           return [
             { label: 'Spills, uptime-adjusted', value: n(Math.round(c.availability_adjusted)), sub: `${n(Math.round(c.reported_spills))} reported` },
-            { label: 'Monitored outlets', value: n(c.outlets), sub: `${n(c.under_watched)} under-watched` },
+            { label: 'Monitored outlets', value: n(c.outlets), sub: `${n(c.under_watched)} with the monitor working under 90% of the year` },
+            { label: 'Barely watched', value: n(c.barely_watched), sub: 'monitor working under half the year — the spill counts that say least' },
             { label: 'Monitor uptime', value: c.mean_availability_pct + '%' },
           ];
         },

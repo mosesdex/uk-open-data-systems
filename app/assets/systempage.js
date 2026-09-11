@@ -59,7 +59,7 @@ const SystemPage = (() => {
         detail: `Computed from ${sources.length} published source${sources.length===1?'':'s'}: ` + sources.map(s => s.name).join('; ') + '. None requires an account, key or fee.',
         stat: pubs.length ? `Publishers: ${pubs.join(' · ')}` : '' },
       collect: { one: bytes ? `${mb(bytes)} fetched` : `${live}/${sources.length} live`,
-        detail: 'Each feed is downloaded without credentials, hashed, and its HTTP status recorded. A source that stops responding shows as failing rather than serving stale data.',
+        detail: (Platform.collectionNote(id) || 'Every feed is open to an anonymous request.') + ' A source that stops responding shows as failing rather than serving stale data.',
         stat: `${live} of ${sources.length} live` + (bytes ? ` · ${mb(bytes)} on disk` : '') },
       process: { one: spineOne, detail: spineText + ' This is the join government data is missing.', stat: null },
       validate:{ one: 'coverage attached',
@@ -234,9 +234,9 @@ const SystemPage = (() => {
     const defs = view.definitions || [];
     S.method = `<div class="sp-method">
       <div class="sp-method__row"><div class="sp-method__k">How it is computed</div><p>${Platform.systemMethod(id) || info.method}</p></div>
-      <div class="sp-method__row"><div class="sp-method__k">Collection</div><p>Each source is fetched anonymously — no account, key or fee — and its bytes hashed so the exact file is recorded.</p></div>
+      <div class="sp-method__row"><div class="sp-method__k">Collection</div><p>${Platform.collectionNote(id) || 'Every source behind this system is open to an anonymous request — no account, key or fee.'}</p></div>
       <div class="sp-method__row"><div class="sp-method__k">Validation</div><p>Every figure carries the share of records it was computed over; ambiguous matches are reported, not guessed. Nothing is modelled or estimated.</p></div>
-      <div class="sp-method__row"><div class="sp-method__k">Coverage</div><p>${view.coverage || 'England, latest published release of each source.'}</p></div>
+      <div class="sp-method__row"><div class="sp-method__k">Coverage</div><p>${view.coverage || 'England, latest published release of each source.'}${Platform.placeJoinNote(id) ? `<br><span style="display:inline-block;margin-top:.4rem">${Platform.placeJoinNote(id)}</span>` : ''}</p></div>
       ${defs.length ? `<div class="sp-method__row"><div class="sp-method__k">Definitions</div><dl class="sp-defs">${defs.map(d => `<dt>${d.t}</dt><dd>${d.d}</dd>`).join('')}</dl></div>` : ''}
     </div>`;
     present.add('method');

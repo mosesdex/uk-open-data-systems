@@ -361,7 +361,14 @@ const GT = (() => {
        stat: p.source ? `${p.source.sources} sources · ${p.source.publishers} publishers · ${p.source.blocked} refused because they need a login` : ''},
       {k:'collect', ico:'\u{2B07}', name:'Collect',
        one: p.collect ? `${gb(p.collect.downloaded_bytes)} fetched` : 'fetched anonymously',
-       detail:'Each file is downloaded without credentials, its content hashed, and its HTTP status recorded. A source that starts failing shows as failing rather than quietly going stale.',
+       // Built from the registry: only sources fetched through it are hashed.
+       detail:(() => {
+         const rows = (typeof Platform !== 'undefined' && Platform.sourceSummary().rows) || [];
+         const held = rows.filter(r => r.provenance !== 'absent'), hashed = held.filter(r => r.sha256).length;
+         const tail = ' A source that starts failing shows as failing rather than quietly going stale.';
+         if (!held.length || hashed === held.length) return 'Each file is downloaded without credentials, its content hashed, and its HTTP status recorded.' + tail;
+         return `Each file fetched through the registry is downloaded without credentials, its content hashed and its HTTP status recorded — ${hashed} of the ${held.length} sources holding data. The other ${held.length - hashed} arrived by bulk import and carry no recorded hash.` + tail;
+       })(),
        stat: p.collect ? `${gb(p.collect.downloaded_bytes)} across ${p.collect.runs} recorded fetches` : ''},
       {k:'process', ico:'\u{2699}', name:'Process',
        one: p.process ? `${n(p.process.properties)} places, ${n(p.process.companies)} companies` : 'resolved to place and entity',

@@ -249,6 +249,9 @@ const Platform = (() => {
       status: r.blocked ? 'blocked' : (r.ok ? 'HTTP ' + r.http_status
               : r.provenance === 'unlogged' ? 'in use' : 'not fetched'),
       ok: r.blocked ? false : (r.ok || r.provenance === 'unlogged'),
+      // Only a source fetched through the registry has its bytes hashed; one
+      // that arrived by bulk import holds data with no hash behind it.
+      hashed: !!r.sha256,
     }));
   }
 
@@ -473,6 +476,48 @@ const Platform = (() => {
     return out;
   }
 
+  const _n = v => Number(v || 0).toLocaleString('en-GB');
+  const _esc = v => String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const spineTiers = () => (data && data.spine) || {};
+  const graph = () => (data && data.graph) || null;
+
+  /* How a system's inputs arrived, built from the registry rather than
+     asserted. The method pages used to say every source was "hashed so the
+     exact file is recorded". Seven sources arrived by bulk import and carry no
+     hash, which made that sentence false on eight of the thirteen systems. */
+  function collectionNote(id) {
+    const held = systemProvenance(id).filter(f => f.ok);
+    if (!held.length) return null;
+    const bulk = held.filter(f => !f.hashed);
+    const lead = 'Every source behind this system is open to an anonymous request — no account, key or fee.';
+    const names = bulk.map(f => _esc(f.name)).join('; ');
+    const h = held.length - bulk.length;
+    if (!bulk.length) return held.length === 1
+      ? `${lead} Its one source was fetched through the registry, which hashes the bytes so the exact file is recorded.`
+      : `${lead} All ${_n(held.length)} were fetched through the registry, which hashes the bytes so the exact file is recorded.`;
+    if (!h) return held.length === 1
+      ? `${lead} Its one source arrived by bulk import and carries no recorded hash (${names}).`
+      : `${lead} None was fetched through the registry: all ${_n(held.length)} arrived by bulk import and carry no recorded hash (${names}).`;
+    return `${lead} ${_n(h)} of the ${_n(held.length)} ${h === 1 ? 'was' : 'were'} fetched through the registry, which hashes the bytes so the exact file is recorded; `
+      + `${bulk.length === 1 ? 'the other arrived by bulk import and carries' : `the other ${_n(bulk.length)} arrived by bulk import and carry`} no recorded hash (${names}).`;
+  }
+
+  /* What each system's place join achieved. Every district figure a system
+     publishes rests on it, and it was published and shown nowhere: a reader of
+     Sightline's map had no way to know a third of its authorities are not on
+     it. The source's own names are listed and no reason is asserted for them,
+     because the unmatched are not one kind of thing. */
+  function placeJoinNote(id) {
+    const r = placeResolution()[id];
+    if (!r || !r.names) return null;
+    const miss = r.names - r.matched;
+    if (!miss) return `Place join: all ${_n(r.names)} authorities named in this system’s data matched a district.`;
+    const eg = (r.unmatched || []).filter(x => x && String(x).toLowerCase() !== 'unknown').slice(0, 4);
+    return `Place join: ${_n(r.matched)} of ${_n(r.names)} authorities named in this system’s data matched a district (${r.rate}%). `
+      + `${_n(miss)} did not${eg.length ? `, among them ${eg.map(_esc).join(', ')}` : ''}; ${miss === 1 ? 'its figures are' : 'their figures are'} not on the district map.`;
+  }
+
   const chains = () => (data && data.chains) || [];
   const reuse = () => (data && data.reuse) || null;
   const generated = () => (data && data.generated) || null;
@@ -490,5 +535,6 @@ const Platform = (() => {
           placeCoverage, placeList, placeReport, placeResolution,
           mapMetrics, metricValues, metricSpec, metricProvenance,
           systemProvenance, systemMethod,
-          generated, builtSystems, error, contradictions, corrections, liveLimits};
+          generated, builtSystems, error, contradictions, corrections, liveLimits,
+          collectionNote, placeJoinNote, spineTiers, graph};
 })();
