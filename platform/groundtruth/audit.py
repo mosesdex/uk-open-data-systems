@@ -227,8 +227,12 @@ def check_duplicates(con, a: Audit) -> None:
     candidates = [
         ("silver.place_postcode", "postcode"),
         ("silver.place_uprn", "uprn"),
-        ("silver.contribution", "reference"),
-        ("silver.developer_agreement", "reference"),
+        # Planning references are unique per authority, not nationally: many
+        # councils issue the same "21/00123/FUL". Checked on the authority-
+        # qualified key, as ids.py mints it. The bare reference reported 9,282
+        # and 2,160 "duplicates", and none of them repeat within one authority.
+        ("silver.contribution", ("organisation_entity", "reference")),
+        ("silver.developer_agreement", ("organisation_entity", "reference")),
         ("silver.company", "company_number"),
         ("gold.catchment_school", "urn"),
         ("gold.catchment_district", "lad_code"),
@@ -236,18 +240,21 @@ def check_duplicates(con, a: Audit) -> None:
         ("gold.entity", "company_number"),
     ]
     for table, key in candidates:
-        if not _exists(con, table) or key not in _cols(con, table):
+        keys = key if isinstance(key, tuple) else (key,)
+        if not _exists(con, table) or any(k not in _cols(con, table) for k in keys):
             continue
+        cols = ", ".join(f'"{k}"' for k in keys)
+        notnull = " AND ".join(f'"{k}" IS NOT NULL' for k in keys)
         dupes, worst = con.execute(f"""
             SELECT count(*), max(n) FROM (
-              SELECT "{key}" AS k, count(*) AS n FROM {table}
-              WHERE "{key}" IS NOT NULL GROUP BY 1 HAVING count(*) > 1)""").fetchone()
+              SELECT {cols}, count(*) AS n FROM {table}
+              WHERE {notnull} GROUP BY {cols} HAVING count(*) > 1)""").fetchone()
         if dupes:
             a.add("duplicate-keys",
                   MAJOR if table.startswith("gold.") else MINOR,
-                  f"{table}.{key}",
+                  f"{table}.{'+'.join(keys)}",
                   f"{dupes:,} duplicated keys, worst repeated {worst} times",
-                  evidence=f"SELECT {key}, count(*) FROM {table} GROUP BY 1 HAVING count(*) > 1",
+                  evidence=f"SELECT {cols}, count(*) FROM {table} GROUP BY {cols} HAVING count(*) > 1",
                   remedy="deduplicate at load, or state why the key is not unique")
 
 
@@ -273,6 +280,37 @@ def check_null_keys(con, a: Audit) -> None:
                   f"{missing:,} of {total:,} rows ({pct}%) carry no {key}",
                   evidence=f"these rows cannot participate in any join on {key}",
                   remedy="report the unjoinable share alongside any figure computed over this table")
+
+
+def check_district_codes(con, a: Audit) -> None:
+    """District codes the spine assigns that the boundaries do not hold.
+
+    A code missing from silver.lad has no name and no polygon, so every figure
+    placed under it falls off the map while still counting as placed -- the
+    null-key check passes it. Barnsley and Sheffield sat under reissued codes
+    this way until the spine mapped them back. Scotland is outside the
+    boundaries' scope, so its codes are expected to be missing.
+    """
+    a.checks_run.append("district-codes")
+    if not (_exists(con, "silver.lad") and _exists(con, "silver.place_postcode")):
+        a.skip("district-codes", "the place spine is not loaded")
+        return
+    for table in ("silver.place_postcode", "silver.premises_connectivity",
+                  "gold.catchment_school"):
+        if not _exists(con, table) or "lad_code" not in _cols(con, table):
+            continue
+        rows = con.execute(f"""
+            SELECT lad_code, count(*) FROM {table}
+            WHERE lad_code IS NOT NULL AND left(lad_code, 1) IN ('E', 'W')
+              AND lad_code NOT IN (SELECT lad_code FROM silver.lad)
+            GROUP BY 1 ORDER BY 2 DESC""").fetchall()
+        if rows:
+            n = sum(r[1] for r in rows)
+            a.add("district-codes", MAJOR, f"{table}.lad_code",
+                  f"{n:,} rows sit under {len(rows)} district codes the boundaries do not hold",
+                  evidence=", ".join(f"{c} ({k:,})" for c, k in rows[:6]),
+                  remedy="map reissued codes to the boundary vintage (places.CODE_SUCCESSION), "
+                         "or load boundaries of the same vintage as the spine")
 
 
 # ------------------------------------------------------------- geography/scope
@@ -485,10 +523,26 @@ DELEGATED_HOSTS = (
     "northernpowergrid.opendatasoft.com",
     "electricitynorthwest.opendatasoft.com",
     "spenergynetworks.opendatasoft.com",
+    "api.neso.energy",                           # NESO, the publisher's own API
 )
 
 GOV_SUFFIXES = (".gov.uk", ".gov.scot", ".gov.wales", ".nhs.uk",
                 "thegazette.co.uk", "api.os.uk", "cqc.org.uk")
+
+PUBLISHER, DELEGATED, THIRD_PARTY = "publisher", "delegated", "third party"
+
+
+def source_authority(url: str) -> str:
+    """Who serves a source: the publisher on its own domain, the publisher
+    through hosting it runs elsewhere, or a third party in between. One rule,
+    used by the audit and by every page that labels a source."""
+    import urllib.parse
+    host = urllib.parse.urlparse(url or "").netloc.lower()
+    if any(host.endswith(s) for s in GOV_SUFFIXES):
+        return PUBLISHER
+    if host in DELEGATED_HOSTS:
+        return DELEGATED
+    return THIRD_PARTY
 
 
 def check_source_authority(con, a: Audit) -> None:
@@ -502,9 +556,9 @@ def check_source_authority(con, a: Audit) -> None:
     import urllib.parse
     from . import sources as S
     for src in S.REGISTRY:
-        host = urllib.parse.urlparse(src.url).netloc.lower()
-        if host in DELEGATED_HOSTS or any(host.endswith(s) for s in GOV_SUFFIXES):
+        if source_authority(src.url) != THIRD_PARTY:
             continue
+        host = urllib.parse.urlparse(src.url).netloc.lower()
         a.add("source-authority", MAJOR if not src.blocked else NOTE, src.id,
               "served by a third party rather than the publishing body",
               evidence=f"host {host}",
@@ -577,19 +631,24 @@ NETWORK_CHECKS = (check_live_sources,)
 CHECKS = (
     check_registry_vs_log, check_freshness, check_content_traps,
     check_source_authority,
-    check_orphan_tables, check_duplicates, check_null_keys,
+    check_orphan_tables, check_duplicates, check_null_keys, check_district_codes,
     check_geographic_scope, check_date_ranges,
     check_match_quality, check_ambiguity,
     check_published_payload, check_provenance_coverage,
 )
 
 
-def run(con: duckdb.DuckDBPyConnection, *, network: bool = False) -> Audit:
-    """Run the audit. ``network`` adds the checks that contact publishers."""
+def run(con: duckdb.DuckDBPyConnection, *, network: bool = False,
+        payload_path=None) -> Audit:
+    """Run the audit. ``network`` adds the checks that contact publishers;
+    ``payload_path`` points the payload check at a file other than the site's."""
     a = Audit()
     for check in CHECKS + (NETWORK_CHECKS if network else ()):
         try:
-            check(con, a)
+            if check is check_published_payload and payload_path is not None:
+                check(con, a, payload_path)
+            else:
+                check(con, a)
         except Exception as exc:                # a failing check is a finding
             a.add(check.__name__, MAJOR, "audit",
                   f"the check itself failed: {str(exc).splitlines()[0]}",

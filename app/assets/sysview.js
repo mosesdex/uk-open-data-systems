@@ -165,7 +165,10 @@ const SYSVIEW = (() => {
           .sort((a, b) => (b.top_supplier_value_share - b.top_supplier_award_share) - (a.top_supplier_value_share - a.top_supplier_award_share))[0];
         if (byValue && byValue.top_supplier_value_share > byValue.top_supplier_award_share)
           r.push(`Counting money rather than awards changes the picture: ${byValue.buyer} sends ${byValue.top_supplier_value_share}% of its contract value to one supplier, from ${byValue.top_supplier_award_share}% of its ${n(byValue.awards)} awards.`);
-        if (cf.length) r.push(`${cf.length} individuals each sit behind several suppliers to the same buyer — for example ${cf[0].person}, ${cf[0].companies} companies across ${cf[0].awards} awards to ${cf[0].buyer}.`);
+        if (cf.length) r.push(`${n(out.control_footprint_total || cf.length)} individuals each sit behind several suppliers to the same buyer — for example ${cf[0].person}, ${cf[0].companies} companies across ${cf[0].awards} awards to ${cf[0].buyer}.`);
+        const pr = out.shared_control_probe;
+        if (pr && pr.psc_loaded && !pr.shared_control_pairs)
+          r.push(`No contract naming between two and ${pr.competed_field_max} suppliers has two under the same controlling person: ${n(pr.competed_contracts)} such contracts were checked, which is as far as award notices allow.`);
         r.push('Where the procurement route is "not stated", competition cannot be verified at all.');
         return r;
       },
@@ -302,45 +305,45 @@ const SYSVIEW = (() => {
           const w = out.worst.find(x => x.lpa === key);
           if (!w) return [];
           return [
-            { label: 'Within legal deadline', value: w.statutory_pct + '%' },
+            { label: 'Within 13 weeks, no extension', value: w.statutory_pct + '%' },
             { label: 'Published headline', value: w.headline_pct + '%' },
             { label: 'Major dwelling decisions', value: n(w.dwelling_decisions) },
           ];
         },
       }),
-      whatIs: 'Plumbline measures planning decisions against the deadline set in law, not the softer target councils are allowed to report against.',
-      why: 'The published figure counts an application as on time if it met an agreed extension — so a decision months late can still count as "on time".',
+      whatIs: 'Plumbline measures planning decisions against the statutory 13 weeks alone, not against the extended deadlines councils may agree and then report against.',
+      why: 'The published figure counts an application as on time if it met an agreed extension, so a decision made months after the 13 weeks can still count as on time.',
       shows: 'The statutory on-time rate beside the published headline, and the authorities where the two figures diverge most.',
       coverage: 'England · major dwelling decisions, latest published planning release.',
       metrics: out => [
-        { label: 'Within the legal deadline', value: out.statutory_pct + '%', sub: `${n(out.dwelling_decisions)} major dwelling decisions` },
-        { label: 'The published headline', value: out.headline_pct + '%', sub: 'counts agreed extensions as on time' },
+        { label: 'Within 13 weeks, no extension', value: out.statutory_pct + '%', sub: `${n(out.dwelling_decisions)} major dwelling decisions` },
+        { label: 'The published headline', value: out.headline_pct + '%', sub: `counts agreed extensions as on time · ${n(out.major_decisions)} major decisions` },
         { label: 'The gap', value: (out.headline_pct - out.statutory_pct).toFixed(1) + ' pts', sub: 'masked by extension agreements' },
       ],
       primary: {
         explain: {
           shows: 'The share of major housing decisions made on time — measured two ways.',
-          read: 'The top bar is the real statutory deadline; the bottom bar is the published headline that counts extensions.',
-          standout: 'The headline is roughly five times the statutory rate — almost the entire gap is extension agreements.',
+          read: 'The top bar is decisions made within the statutory 13 weeks without an extension; the bottom bar is the published headline, which counts agreed extensions as on time.',
+          standout: 'Almost the entire gap is decisions made under an agreed extension: in time on the headline, with no published time band to show they met the 13 weeks.',
         },
         draw: (out, el, { GT }) => GT.bars(el, [
-          { n: 'Within legal deadline', v: out.statutory_pct },
+          { n: 'Within 13 weeks, no extension', v: out.statutory_pct },
           { n: 'Published headline', v: out.headline_pct },
         ], { fmt: v => v + '%' }),
       },
       secondary: {
         title: 'Authorities with the widest gap',
         explain: {
-          shows: 'The councils where the headline figure most overstates on-time performance against the legal deadline.',
+          shows: 'The councils where the headline figure is furthest above the share decided within 13 weeks without an extension.',
           read: 'Longer bars mean a bigger gap between the two figures for that authority.',
-          standout: 'In the worst cases the headline is near-perfect while the statutory rate is in the low teens.',
+          standout: 'In the worst cases the headline is near-perfect while almost no decision was made within 13 weeks without an extension.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.worst.slice(0, 10).map(w => ({ n: w.lpa, v: +(w.headline_pct - w.statutory_pct).toFixed(1) })), { fmt: v => v + ' pts' }),
       },
       insights: out => {
         const w = out.worst[0];
         return [
-          `Only ${out.statutory_pct}% of major housing decisions met the deadline in law — the published headline is ${out.headline_pct}%.`,
+          `Only ${out.statutory_pct}% of major housing decisions were made within the statutory 13 weeks without an extension — the published headline, which counts extensions, is ${out.headline_pct}%.`,
           `That is a gap of ${(out.headline_pct - out.statutory_pct).toFixed(1)} points, almost all of it agreed extensions.`,
           w ? `${w.lpa} shows the widest gap: ${w.headline_pct}% headline against ${w.statutory_pct}% statutory.` : '',
           `Extensions are legitimate — but counting them as "on time" hides how long applicants actually wait.`,

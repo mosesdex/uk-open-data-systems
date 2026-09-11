@@ -69,6 +69,10 @@ def load_premises(con: duckdb.DuckDBPyConnection, *zips: Path) -> int:
           current_gigabit VARCHAR, future_gigabit VARCHAR,
           subsidy_status VARCHAR, lad_code VARCHAR, lad_name VARCHAR
         )""")
+    # BDUK already uses the reissued district codes. Mapped to the boundary
+    # vintage so its premises sit in the same districts as everything else.
+    from ..places import boundary_code_sql
+    lad_expr = boundary_code_sql("nullif(trim(local_authority_district_ons_code), '')")
     total = 0
     for zp in zips:
         if not Path(zp).exists():
@@ -89,7 +93,7 @@ def load_premises(con: duckdb.DuckDBPyConnection, *zips: Path) -> int:
                        nullif(trim(current_gigabit), '')            AS current_gigabit,
                        nullif(trim(future_gigabit), '')             AS future_gigabit,
                        nullif(trim(subsidy_control_status), '')     AS subsidy_status,
-                       nullif(trim(local_authority_district_ons_code), '') AS lad_code,
+                       {lad_expr} AS lad_code,
                        nullif(trim(local_authority_district_ons), '')      AS lad_name
                 -- The dialect is pinned rather than sniffed. DuckDB samples
                 -- the first file of the glob and applies what it finds to

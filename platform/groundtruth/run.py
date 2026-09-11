@@ -62,9 +62,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     r = RunReport()
     B = bronze
 
+    # The county lookup loads before any system builds: three of them hand
+    # county figures to districts through it.
     _stage(r, "place spine", lambda: (
         f"{loader.load_codepoint(con, B / 'os_code_point_open.zip'):,} postcodes, "
-        f"{loader.load_lad_boundaries(con, B / 'ons_lad_boundaries.geojson')} districts"))
+        f"{loader.load_lad_boundaries(con, B / 'ons_lad_boundaries.geojson')} districts"
+        + (f", {loader.load_lad_county(con, B / 'ons_lad_county.json')} county links"
+           if (B / "ons_lad_county.json").exists() else ", no county lookup")))
 
     def _catchment():
         c = catchment.build(con, B / "gias_establishments.csv")

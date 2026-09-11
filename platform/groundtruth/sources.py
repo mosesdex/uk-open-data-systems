@@ -587,8 +587,10 @@ REGISTRY: tuple[Source, ...] = (
         url=("https://environment.data.gov.uk/flood-monitoring/data/readings"
              "?parameter=rainfall&_limit=10000"),
         fmt="json", role="domain", licence="OGL v3", cadence="15 minutes",
-        expect_content=("application/json",), systems=("baseline",),
-        notes="Actual rainfall values per station -- the weather side of the spill normalisation.",
+        expect_content=("application/json",), systems=(),
+        notes=("Fifteen-minute rainfall values per station. Registered as the weather side "
+               "of Baseline's spill normalisation, but Baseline normalises against annual "
+               "station totals (ea_rainfall_annual), so no system reads this."),
     ),
     Source(
         id="charity_register",
@@ -715,6 +717,24 @@ REGISTRY: tuple[Source, ...] = (
             "registers, one of which serves a header and no rows; this is the independent "
             "view of the same queue, so a gap in a DNO register can be shown as a gap "
             "rather than as zero capacity."
+        ),
+    ),
+    Source(
+        id="ons_lad_county",
+        name="ONS local authority district to county lookup (May 2024)",
+        publisher="Office for National Statistics",
+        url=("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+             "LAD24_CTY24_EN_LU/FeatureServer/0/query?where=1%3D1&outFields=*&f=json"),
+        fmt="json", role="place_spine", licence="OGL v3", cadence="annual",
+        expect_content=("application/json", "text/plain"),
+        systems=("bellwether", "compass", "catchment"),
+        notes=(
+            "Which county council each two-tier district sits under. Care, special "
+            "educational needs and school capacity are published per upper-tier "
+            "authority, so without this the districts of two-tier areas could not be "
+            "given their county's figures and those systems could not be read district "
+            "by district alongside the rest. Same May 2024 vintage as the boundaries "
+            "the map is drawn from."
         ),
     ),
     Source(

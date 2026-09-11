@@ -129,7 +129,7 @@
 <h2>The thirteen systems, and what each one found</h2>
 <p>Every figure below is computed from a published government record and carries
 the coverage it rests on. 13 of 13 systems have measured
-output; 32 of 44 registered sources returned data to an
+output; 33 of 45 registered sources returned data to an
 unauthenticated request on the last run. Computed 2026-09-11.</p>
 <ul>
 <li><a href="systems/catchment.html"><strong>Catchment</strong></a>
@@ -139,9 +139,9 @@ unauthenticated request on the last run. Computed 2026-09-11.</p>
 <li><a href="systems/highwater.html"><strong>Highwater</strong></a>
  &mdash; Flood risk against what actually got built. <p class="card__s"><strong>635</strong> permissions granted against flood advice &mdash; of 23,336 objections; 7,011 outcomes never recorded</p></li>
 <li><a href="systems/plumbline.html"><strong>Plumbline</strong></a>
- &mdash; Housing delivery measured against the real deadline. <p class="card__s"><strong>15.9%</strong> decided within the legal deadline &mdash; published headline is 82.8%</p></li>
+ &mdash; Housing decisions measured against the statutory 13 weeks. <p class="card__s"><strong>15.9%</strong> decided within 13 weeks without an extension &mdash; of 14,844 major dwelling decisions; the published measure is 90.4%</p></li>
 <li><a href="systems/junction.html"><strong>Junction</strong></a>
- &mdash; Grid connection capacity on one definition. <p class="card__s"><strong>937 of 6,770</strong> capacity records actually served &mdash; 1 of 4 operators serve data openly</p></li>
+ &mdash; Grid connection capacity on one definition. <p class="card__s"><strong>937 of 7,501</strong> capacity records actually served &mdash; 1 of 4 operators serve data openly</p></li>
 <li><a href="systems/ledger.html"><strong>Ledger</strong></a>
  &mdash; Developer contributions traced to the site. <p class="card__s"><strong>£1.49bn</strong> of developer contributions recorded &mdash; 0 of 39,325 carry a location</p></li>
 <li><a href="systems/bellwether.html"><strong>Bellwether</strong></a>
@@ -303,6 +303,11 @@ cannot tell you.</p>
     <div class="card__b" id="methodGraph"></div>
   </section>
 
+  <section class="card" id="gaps" style="margin-top:1rem">
+    <div class="card__hd"><div><div class="card__t">Where the evidence runs out</div>
+      <div class="card__s">The questions the platform tries to answer end to end, walked link by link against its own tables. Each missing link says whose it is to supply.</div></div></div>
+    <div class="card__b" id="methodGaps"></div>
+  </section>
   <section class="card" id="corrections" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">What this platform got wrong</div>
       <div class="card__s">Corrections to its own claims: what it believed, what was true, how it was caught, and the test that stops it recurring.</div></div></div>
@@ -376,6 +381,7 @@ cannot tell you.</p>
   const first = metrics[0];
   const map = await GT.choropleth(mapEl, {
     values: Platform.metricValues(first.id),
+    notes: Platform.metricNotes(first.id),
     label: '{}' + (first.unit === '%' ? '%' : '') + ' — ' + first.label.toLowerCase(),
     ramp: first.good === 'low' ? 'red' : 'blue',
   });
@@ -389,6 +395,7 @@ cannot tell you.</p>
     const prefix = m.unit === '£' ? '£' : '';
     map.setMetric({
       values: vals,
+      notes: Platform.metricNotes(id),
       label: prefix + '{}' + unit + ' — ' + m.label.toLowerCase(),
       ramp: rampKey,
       animate,
@@ -479,8 +486,7 @@ cannot tell you.</p>
     if (!rep) {
       panel.innerHTML = `<div class="card"><div class="card__b">
         <h3 style="font-size:15px">No system reports here</h3>
-        <p class="card__s mt-1">Often a two-tier county, where services are planned across several districts —
-        the geography mismatch these systems exist to expose.</p></div></div>`;
+        <p class="card__s mt-1">No system produced a value for this district in the current build.</p></div></div>`;
       return;
     }
     panel.innerHTML = `
@@ -499,9 +505,11 @@ cannot tell you.</p>
               <div style="font-size:12.5px;font-weight:550;margin-top:.15rem">${i.label}</div>
               <div class="card__s" style="font-size:11.5px;margin-top:.25rem">${i.detail}</div>
               <div class="card__s" style="font-size:10.5px;margin-top:.3rem;color:var(--ink-3)">${i.caveat}</div>
+              ${i.scope ? `<div class="card__s" style="font-size:10.5px;margin-top:.3rem;color:var(--ink-3)"><span class="st st--none">county figure</span> ${i.scope}</div>` : ''}
             </div>
           </div>`).join('')}
       </div>
+      ${rep.capacity && typeof Shell !== 'undefined' && Shell.capacityBlock ? Shell.capacityBlock(rep.capacity) : ''}
       ${rep.silent ? `<p class="card__s" style="font-size:11px;margin-top:.6rem">
         ${rep.silent} systems have nothing to say about this district — either no data reaches it,
         or it is planned at a different geography.</p>` : ''}`;

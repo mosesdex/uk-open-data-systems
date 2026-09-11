@@ -3,7 +3,7 @@ const SYSTEMS = [
   {id:'catchment', n:'Catchment',  s:'School place planning at the geography that matters', spine:'place',  st:'live',  dom:'Education'},
   {id:'sentinel',  n:'Sentinel',   s:'Public procurement integrity and collusion detection', spine:'entity', st:'live',  dom:'Procurement'},
   {id:'highwater', n:'Highwater',  s:'Flood risk against what actually got built',           spine:'place',  st:'live',  dom:'Environment'},
-  {id:'plumbline', n:'Plumbline',  s:'Housing delivery measured against the real deadline',  spine:'place',  st:'live',  dom:'Housing'},
+  {id:'plumbline', n:'Plumbline',  s:'Housing decisions measured against the statutory 13 weeks',  spine:'place',  st:'live',  dom:'Housing'},
   {id:'junction',  n:'Junction',   s:'Grid connection capacity on one definition',           spine:'both',   st:'beta',  dom:'Energy'},
   {id:'ledger',    n:'Ledger',     s:'Developer contributions traced to the site',           spine:'place',  st:'live',  dom:'Housing'},
   {id:'bellwether',n:'Bellwether', s:'Provider concentration in care and education',         spine:'entity', st:'live',  dom:'Social care'},

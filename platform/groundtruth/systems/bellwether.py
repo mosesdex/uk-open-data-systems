@@ -228,6 +228,51 @@ def build_groups(con: duckdb.DuckDBPyConnection) -> None:
         FROM per_la p JOIN totals t USING (local_authority)
         ORDER BY share_pct DESC
     """)
+    build_districts(con)
+
+
+def build_districts(con: duckdb.DuckDBPyConnection) -> None:
+    """Each district's care market, from the council that commissions it.
+
+    CQC files every location under the upper-tier council. In a two-tier area
+    that is the county, so the district receives the county's figure, labelled
+    as the county's. One row per district, so the share of districts with no
+    figure at all -- Wales, which CQC does not regulate -- stays measurable.
+    """
+    from ..places import authority_index, districts_loaded, normalise_authority, upper_tier_sql
+    con.execute("DROP TABLE IF EXISTS gold.bellwether_district")
+    if not districts_loaded(con):
+        return
+    idx = authority_index(con)
+    pairs = []
+    for (name,) in con.execute(
+            "SELECT DISTINCT local_authority FROM gold.bellwether_group").fetchall():
+        hit = idx.get(normalise_authority(name))
+        if hit:
+            pairs.append((name, hit[0]))
+    con.execute("CREATE OR REPLACE TEMP TABLE bw_authority "
+                "(local_authority VARCHAR, authority_code VARCHAR)")
+    if pairs:
+        con.executemany("INSERT INTO bw_authority VALUES (?, ?)", pairs)
+    con.execute(f"""
+        CREATE TABLE gold.bellwether_district AS
+        WITH ut AS ({upper_tier_sql(con)}),
+        ranked AS (
+          SELECT g.*,
+                 row_number() OVER (PARTITION BY g.local_authority
+                                    ORDER BY g.share_pct DESC, g.beds DESC, g.group_name) AS rn,
+                 count(*) OVER (PARTITION BY g.local_authority) AS groups
+          FROM gold.bellwether_group g
+        )
+        SELECT ut.lad_code, ut.lad_name, ut.authority_code, ut.authority_name, ut.figure_for,
+               r.local_authority, r.group_name, r.branded, r.locations, r.beds,
+               r.la_beds, r.share_pct, r.groups
+        FROM ut
+        LEFT JOIN bw_authority a ON a.authority_code = ut.authority_code
+        LEFT JOIN ranked r ON r.local_authority = a.local_authority AND r.rn = 1
+        ORDER BY ut.lad_code
+    """)
+    con.execute("DROP TABLE IF EXISTS bw_authority")
 
 
 def systemic(con: duckdb.DuckDBPyConnection, limit: int = 10):

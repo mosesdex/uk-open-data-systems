@@ -14,6 +14,7 @@ from pathlib import Path
 
 import duckdb
 
+from .places import boundary_code_sql
 from .store import insert_many
 
 # Code-Point Open ships headerless CSVs plus a separate header file.
@@ -60,6 +61,9 @@ def load_codepoint(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
                     shutil.copyfileobj(src, dst, length=1 << 20)
 
         cols = ", ".join(f"'{c}': 'VARCHAR'" for c in CODEPOINT_COLUMNS)
+        # Reissued district codes go back to the boundary vintage; see
+        # places.CODE_SUCCESSION for which, why, and how it was checked.
+        lad_expr = boundary_code_sql("nullif(trim(admin_district_code), '')")
         con.execute("DROP TABLE IF EXISTS silver.place_postcode")
         con.execute(f"""
             CREATE TABLE silver.place_postcode AS
@@ -69,7 +73,7 @@ def load_codepoint(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
               TRY_CAST(positional_quality AS INTEGER)      AS positional_quality,
               TRY_CAST(easting  AS INTEGER)                AS easting,
               TRY_CAST(northing AS INTEGER)                AS northing,
-              nullif(trim(admin_district_code), '')        AS lad_code,
+              {lad_expr}                                   AS lad_code,
               nullif(trim(admin_ward_code), '')            AS ward_code,
               nullif(trim(country_code), '')               AS country_code
             FROM read_csv('{tmp}/*.csv', header=false, columns={{{cols}}})
@@ -543,3 +547,27 @@ def load_usrn_streets(con: duckdb.DuckDBPyConnection, zip_path: Path) -> int:
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
+
+def load_lad_county(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
+    """ONS's district-to-county lookup, as published.
+
+    Every row is kept, the metropolitan-county and London groupings included.
+    Which of them carry council duties is decided where the lookup is used
+    (places.upper_tier_sql), not by dropping rows on the way in.
+    """
+    _require(json_path)
+    import json
+    doc = json.loads(json_path.read_text())
+    if doc.get("exceededTransferLimit"):
+        raise LoadError(f"{json_path.name} is one page of a longer answer; it needs paging")
+    rows = [(a.get("LAD24CD"), a.get("LAD24NM"), a.get("CTY24CD"), a.get("CTY24NM"))
+            for a in (f.get("attributes") or {} for f in doc.get("features", []))]
+    rows = [r for r in rows if r[0] and r[2]]
+    if not rows:
+        raise LoadError(f"{json_path.name} holds no district-to-county rows")
+    con.execute("DROP TABLE IF EXISTS silver.lad_county")
+    con.execute("""CREATE TABLE silver.lad_county (
+        lad_code VARCHAR PRIMARY KEY, lad_name VARCHAR,
+        county_code VARCHAR, county_name VARCHAR)""")
+    insert_many(con, "INSERT INTO silver.lad_county VALUES (?, ?, ?, ?)", rows)
+    return con.execute("SELECT count(*) FROM silver.lad_county").fetchone()[0]

@@ -71,7 +71,7 @@ const GT = (() => {
   }
   const NO_DATA = 'var(--line)';
 
-  async function choropleth(el, {values={}, label='', fallbackSpread=false,
+  async function choropleth(el, {values={}, label='', notes={}, fallbackSpread=false,
                                  ramp:rampKey='blue'}={}){
     const gj = await fetch(el.dataset.geo || 'data/lad.geojson').then(r=>r.json());
     // project lon/lat -> screen, equirectangular scaled for UK latitudes
@@ -113,8 +113,8 @@ const GT = (() => {
     /* Recolour every district for a new metric.
        anime.js interpolates the fills and staggers them from the middle of the
        country outwards, so the map visibly re-shades instead of snapping. */
-    function setMetric({values:vals={}, label:lbl='', ramp:rk='blue', animate=true}={}){
-      current = {values:vals, label:lbl, rampKey:rk};
+    function setMetric({values:vals={}, label:lbl='', notes:nts={}, ramp:rk='blue', animate=true}={}){
+      current = {values:vals, label:lbl, notes:nts, rampKey:rk};
       const real = Object.values(vals).filter(v=>v!=null && !Number.isNaN(v));
       const lo = real.length ? Math.min(...real) : 0;
       const hi = real.length ? Math.max(...real) : 1;
@@ -172,9 +172,12 @@ const GT = (() => {
       p.addEventListener('mousemove', ev => {
         const r = el.getBoundingClientRect();
         const v = p.dataset.v;
-        tip.innerHTML = `<b>${p.dataset.n}</b><span>${v !== '' && v != null
+        const has = v !== '' && v != null;
+        const note = has && (current.notes || {})[p.dataset.c];
+        tip.innerHTML = `<b>${p.dataset.n}</b><span>${has
           ? current.label.replace('{}', (+v).toLocaleString('en-GB'))
-          : 'no value published here'}</span>`;
+          : 'no value published here'}</span>${note
+          ? `<em>${String(note).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}</em>` : ''}`;
         tip.classList.add('on');
         let x = ev.clientX-r.left+12, y = ev.clientY-r.top+12;
         if (x > r.width-190) x -= 200;
@@ -190,7 +193,7 @@ const GT = (() => {
       });
     });
 
-    setMetric({values, label, ramp:rampKey, animate:false});
+    setMetric({values, label, notes, ramp:rampKey, animate:false});
     el.__map = {setMetric, zoomTo, resetZoom, paths, boxes, home};
     return el.__map;
   }

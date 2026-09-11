@@ -28,6 +28,7 @@ const Admin = (() => {
       { id: 'review',    icon: '⚖', label: 'Match review',    count: () => A().reviewCount, alert: true },
       { id: 'storage',   icon: '▤', label: 'Storage',         count: () => A().tableCount },
       { id: 'integrity', icon: '❖', label: 'Reproducibility', count: () => (A().unregistered || []).length, alert: true },
+      { id: 'audit',     icon: '✓', label: 'Audit',           count: () => { const s = (Platform.audit() || {}).summary || {}; return (s.critical || 0) + (s.major || 0); }, alert: true },
     ]},
   ];
 
@@ -39,15 +40,17 @@ const Admin = (() => {
     review:      ['Admin · Platform',          'Match review'],
     storage:     ['Admin · Platform',          'Storage'],
     integrity:   ['Admin · Platform',          'Reproducibility'],
+    audit:       ['Admin · Platform',          'Audit'],
   };
 
   /* Hashes the old build produced. An operator's bookmark keeps working. */
   const LEGACY = {
     '#ops': '#/', '#runs': '#/runs', '#sources': '#/sources', '#systems': '#/systems',
     '#review': '#/review', '#storage': '#/storage', '#integrity': '#/integrity',
+    '#audit': '#/audit',
   };
 
-  const VIEWS = ['ops', 'runs', 'sources', 'systems', 'review', 'storage', 'integrity'];
+  const VIEWS = ['ops', 'runs', 'sources', 'systems', 'review', 'storage', 'integrity', 'audit'];
 
   /* --------------------------------------------------------- attention ---- */
   function buildOps() {
@@ -73,7 +76,15 @@ const Admin = (() => {
       sev: 'warn', tag: 'unregistered', t: String(u), s: 'on disk, absent from the source registry', go: '#/integrity' }));
     (a.truncated || []).forEach(u => items.push({
       sev: 'bad', tag: 'truncated', t: String(u), s: 'the fetch did not complete', go: '#/integrity' }));
+    // The audit's serious findings. Registry-vs-log ones restate the source
+    // rows above, so they are not listed twice.
+    ((Platform.audit() || {}).findings || [])
+      .filter(f => (f.severity === 'critical' || f.severity === 'major') && f.check !== 'registry-vs-log')
+      .forEach(f => items.push({ sev: 'bad', tag: f.check, t: f.subject, s: f.summary, go: '#/audit' }));
 
+    // Blocking problems first: a list shown twenty at a time must not bury them
+    // under warnings, which is what happened once the audit's findings joined it.
+    items.sort((x, y) => (x.sev === 'bad' ? 0 : 1) - (y.sev === 'bad' ? 0 : 1));
     const host = $('#opsAttention');
     if (!host) return;
     host.innerHTML = `
@@ -86,8 +97,64 @@ const Admin = (() => {
         <tbody>${items.slice(0, 20).map(i => `<tr data-href="${i.go}">
           <td><b>${esc(i.t)}</b></td><td>${esc(String(i.s).slice(0, 180))}</td>
           <td><span class="st st--${i.sev}">${esc(i.tag)}</span></td></tr>`).join('')}</tbody>
-      </table></div>` : `<div class="state"><div class="state__t">Nothing is waiting</div>
+      </table></div>${items.length > 20 ? `<p class="card__s" style="margin-top:.5rem">And ${items.length - 20} more, under Data sources, Reproducibility and Audit.</p>` : ''}` : `<div class="state"><div class="state__t">Nothing is waiting</div>
         <p class="state__p">Every source fetched, every match resolved, every artefact registered.</p></div>`}`;
+  }
+
+  /* -------------------------------------------------------------- audit --- */
+  const SEV = { critical: 'bad', major: 'bad', minor: 'warn', note: 'none' };
+
+  function buildAudit() {
+    const host = $('#auditBody');
+    if (!host) return;
+    const au = Platform.audit();
+    if (!au || au.error) {
+      host.innerHTML = `<div class="state"><div class="state__t">${au ? 'The audit failed to run' : 'This build carries no audit'}</div>
+        <p class="state__p">${au ? esc(au.error) : 'It runs on every <span class="mono">gt publish</span>.'}</p></div>`;
+      return;
+    }
+    const s = au.summary || {}, by = s.by_severity || {}, fs = au.findings || [];
+    const skipped = au.checks_skipped || [];
+    host.innerHTML = `
+      <div class="tiles" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+        ${['critical', 'major', 'minor', 'note'].map(k => `<div class="tile${by[k] && SEV[k] !== 'none' ? ' tile--' + SEV[k] : ''}">
+          <div class="tile__l">${k}</div><div class="tile__v">${num(by[k] || 0)}</div></div>`).join('')}
+      </div>
+      <p class="card__s" style="margin:.9rem 0">${num(s.checks_run || 0)} checks ran against the database and the published file${skipped.length ? `; ${num(skipped.length)} could not run (${skipped.map(c => esc(c.check)).join(', ')})` : ''}. Nothing is suppressed: a finding leaves this list when what it describes is fixed.</p>
+      ${fs.length ? `<div class="dt-wrap"><table class="dt dt--compact">
+        <thead><tr><th style="width:1%">Severity</th><th>Subject</th><th>Finding</th></tr></thead>
+        <tbody>${fs.map((f, i) => `<tr data-finding="${i}" style="cursor:pointer">
+          <td><span class="st st--${SEV[f.severity] || 'none'}">${esc(f.severity)}</span></td>
+          <td class="mono" style="font-size:11.5px;word-break:break-all">${esc(f.subject)}</td>
+          <td>${esc(f.summary)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(f.check)}</span></td></tr>`).join('')}</tbody>
+      </table></div>` : `<div class="state"><div class="state__t">No findings</div></div>`}`;
+  }
+
+  function openFinding(f) {
+    if (!f) return;
+    const tone = SEV[f.severity] && SEV[f.severity] !== 'none' ? ' tile--' + SEV[f.severity] : '';
+    Shell.openPanel('Audit · ' + f.check, f.subject, `
+      <div class="tile${tone}"><div class="tile__l">${esc(f.severity)}</div>
+        <div class="tile__v" style="font-size:16px;line-height:1.35">${esc(f.summary)}</div></div>
+      <div class="prov" style="margin-top:1rem"><div class="prov__h">Evidence</div>
+        <div class="prov__r"><span class="mono" style="font-size:12px;white-space:pre-wrap;word-break:break-word">${esc(f.evidence || '—')}</span></div></div>
+      <div class="prov" style="margin-top:1rem"><div class="prov__h">Remedy</div>
+        <div class="prov__r"><span style="font-size:12.5px">${esc(f.remedy || '—')}</span></div></div>`);
+  }
+
+  /* One snapshot per publish: the row count and content hash of every table. */
+  function buildHistory() {
+    const host = $('#histBody');
+    if (!host) return;
+    const h = Platform.history(), snaps = (h && h.snapshots) || [];
+    host.innerHTML = !snaps.length
+      ? `<div class="state"><div class="state__t">No snapshots recorded</div>
+          <p class="state__p">${h && h.error ? esc(h.error) : 'One is taken on every publish.'}</p></div>`
+      : `<div class="dt-wrap"><table class="dt dt--compact">
+          <thead><tr><th>Taken</th><th>Label</th><th>Code</th><th class="num">Tables</th><th class="num">Rows</th></tr></thead>
+          <tbody>${snaps.map(x => `<tr><td class="mono" style="font-size:11.5px">${esc(String(x.taken_at || '').slice(0, 16).replace('T', ' '))}</td>
+            <td>${esc(x.label || '—')}</td><td class="mono" style="font-size:11.5px">${esc(x.code_version || '—')}</td>
+            <td class="num">${num(x.tables || 0)}</td><td class="num">${num(x.rows || 0)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
   /* ------------------------------------------------------------ panels ---- */
@@ -123,7 +190,8 @@ const Admin = (() => {
       <div class="prov" style="margin-top:1rem"><div class="prov__h">Registry entry</div>
         ${[['Publisher', s.publisher], ['Licence', s.licence], ['Role', s.role], ['Cadence', s.cadence],
            ['Systems', s.systems], ['Last fetch', s.fetched_at], ['Bytes', s.bytes_len || s.disk_bytes],
-           ['Provenance', s.provenance]]
+           ['Provenance', s.provenance],
+           ['Served by', s.authority === 'third party' ? 'a third party, not the publisher' : s.authority === 'delegated' ? 'the publisher, through hosting it runs elsewhere' : s.authority === 'publisher' ? 'the publisher' : null]]
           .map(([k, v]) => `<div class="prov__r"><span class="prov__k">${esc(k)}</span>
             <span style="font-size:12.5px">${v == null || v === '' ? '—' : esc(String(v))}</span></div>`).join('')}
       </div>`);
@@ -175,6 +243,8 @@ const Admin = (() => {
     api.show(view);
     api.setChrome(head);
     if (view === 'ops') buildOps();
+    if (view === 'audit') buildAudit();
+    if (view === 'integrity') buildHistory();
     // Every destination gets exactly one h1, naming the view it is on. The
     // card headings inside stay h2 and below.
     promoteHeading(view, (TITLES[head] || TITLES[''])[1]);
@@ -209,11 +279,14 @@ const Admin = (() => {
     // Rows in the operator's tables open the record behind them.
     document.addEventListener('click', e => {
       if (!e.target.closest) return;
-      const tr = e.target.closest('tr[data-run], tr[data-src], tr[data-tbl]');
+      // Rows open their panel from here, after the shell's own click handling;
+      // a handler on the row itself fires first and the shell then closes it.
+      const tr = e.target.closest('tr[data-run], tr[data-src], tr[data-tbl], tr[data-finding]');
       if (!tr) return;
       if (tr.dataset.run) openRun(tr.dataset.run);
       else if (tr.dataset.src) openSource(tr.dataset.src);
       else if (tr.dataset.tbl) openTable(tr.dataset.tbl);
+      else if (tr.dataset.finding != null) openFinding(((Platform.audit() || {}).findings || [])[+tr.dataset.finding]);
     });
   }
 

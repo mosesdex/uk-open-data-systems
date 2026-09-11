@@ -257,9 +257,12 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
     if _exists(con, "gold", "plumbline_quarter"):
         from .systems import plumbline as P
         h, st, md, dd = P.national_gap(con, since="2023")
+        ext_major, ext_dw = P.extension_share(con, since="2023")
         S["plumbline"] = {
             "headline_pct": h, "statutory_pct": st,
             "major_decisions": md, "dwelling_decisions": dd,
+            # What separates the two: decisions made under an agreed extension.
+            "extended_pct": ext_major, "dwellings_extended_pct": ext_dw,
             "worst": _rows(con, "SELECT * FROM gold.plumbline_authority LIMIT 10"),
             # 47 years of PS2 are already loaded; annualise from 2008 so the
             # extension-of-time divergence (post-2013) is visible over time.
@@ -282,7 +285,16 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
             "control_footprint": _rows(con,
                 "SELECT * FROM gold.sentinel_control_footprint LIMIT 15")
                 if _exists(con, "gold", "sentinel_control_footprint") else [],
+            # The list above is capped for size; the count is not.
+            "control_footprint_total": _rows(con,
+                "SELECT count(*) AS n FROM gold.sentinel_control_footprint")[0]["n"]
+                if _exists(con, "gold", "sentinel_control_footprint") else 0,
         }
+        # The shared-control check can find nothing. Publish what it examined,
+        # so a zero reads as a result rather than as a missing section.
+        if _exists(con, "gold", "sentinel_shared_control"):
+            from .systems import sentinel as _sen
+            S["sentinel"]["shared_control_probe"] = _sen.shared_control_stats(con)
 
     if _exists(con, "gold", "junction_register"):
         S["junction"] = {"registers": _rows(con, "SELECT * FROM gold.junction_register")}
@@ -376,6 +388,7 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         "resolution": pv["resolution"],
         "names": lad_names,
         "byLad": pv["places"],
+        "capacityTrend": pv.get("capacity", {}),
     }
 
     # Operator view: everything traceable to a row, nothing invented.
@@ -451,13 +464,62 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
     except Exception as exc:
         out["contradictions"] = {"error": str(exc).splitlines()[0]}
 
+    # Where each evidence chain stops, and whether that is this platform's
+    # doing, a publisher's, or nobody's. Published so the gaps can be argued
+    # with on the same terms as the figures.
+    try:
+        from . import gaps as _gaps
+        out["gaps"] = _gaps.report(con)
+    except Exception as exc:
+        out["gaps"] = {"error": str(exc).splitlines()[0]}
+
     out["built_systems"] = sorted(S)
     return out
+
+
+def _dump(payload: dict, dest: Path) -> None:
+    dest.write_text(json.dumps(payload, default=str, separators=(",", ":")))
+
+
+def _code_version() -> str:
+    import subprocess
+    try:
+        return subprocess.run(["git", "describe", "--always", "--dirty"],
+                              cwd=Path(__file__).resolve().parent, capture_output=True,
+                              text=True, timeout=5).stdout.strip()
+    except Exception:
+        return ""
 
 
 def write(con: duckdb.DuckDBPyConnection, dest: Path) -> dict:
     payload = build_payload(con)
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(json.dumps(payload, default=str, separators=(",", ":")))
+    _dump(payload, dest)
+
+    # The audit compares the file just written with the database, so it runs
+    # after the first write and its findings go into a second.
+    from dataclasses import asdict
+    from . import audit as _audit
+    try:
+        a = _audit.run(con, payload_path=dest)
+        payload["audit"] = {"summary": a.summary(),
+                            "findings": [asdict(f) for f in a.sorted()],
+                            "checks_run": a.checks_run,
+                            "checks_skipped": a.checks_skipped}
+    except Exception as exc:
+        payload["audit"] = {"error": str(exc).splitlines()[0]}
+
+    # Every publish records the shape of what it was built from. A publish
+    # that was not recorded cannot be reconstructed later, so the history
+    # starts with each publish rather than whenever someone remembers.
+    from . import temporal as _temporal
+    try:
+        snap = _temporal.snapshot(con, label="publish", code_version=_code_version())
+        payload["history"] = {"latest": snap,
+                              "snapshots": _temporal.snapshots(con, limit=20)}
+    except Exception as exc:
+        payload["history"] = {"error": str(exc).splitlines()[0]}
+
+    _dump(payload, dest)
     return payload

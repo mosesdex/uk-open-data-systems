@@ -285,14 +285,18 @@ def coverage(con: duckdb.DuckDBPyConnection) -> dict:
     """What the spine can currently resolve, and at which tier."""
     out: dict = {"tiers": {}}
     if _has(con, "place_postcode"):
-        n, lads, quality = con.execute("""
+        n, lads, quality, no_lad = con.execute("""
             SELECT count(*), count(DISTINCT lad_code),
-                   avg(CASE WHEN positional_quality = 10 THEN 1.0 ELSE 0.0 END)
+                   avg(CASE WHEN positional_quality = 10 THEN 1.0 ELSE 0.0 END),
+                   count(*) - count(lad_code)
             FROM silver.place_postcode
         """).fetchone()
         out["tiers"]["postcode"] = {
             "rows": n, "distinct_lads": lads,
             "best_quality_share": round((quality or 0) * 100, 1),
+            # Postcodes the register carries with no district code: anything
+            # placed through one reaches no district figure.
+            "no_district": no_lad,
         }
     if _has(con, "place_uprn"):
         n = con.execute("SELECT count(*) FROM silver.place_uprn").fetchone()[0]

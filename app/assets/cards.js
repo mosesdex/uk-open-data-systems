@@ -31,10 +31,10 @@ const CARDS = (() => {
     },
     plumbline: {
       icon: '\u{1F3D7}', domain: 'Housing',
-      purpose: 'Planning decisions measured against the deadline in law',
+      purpose: 'Planning decisions measured against the statutory 13 weeks',
       headline: d => ({ value: d.statutory_pct, unit: '%',
-        label: 'within the legal deadline',
-        context: `published headline claims ${d.headline_pct}%` }),
+        label: 'within 13 weeks, no extension',
+        context: `of ${Number(d.dwelling_decisions || 0).toLocaleString('en-GB')} major dwelling decisions · published measure ${d.headline_pct}%` }),
       preview: d => ({ kind: 'compare', a:{label:'Statutory',v:d.statutory_pct},
         b:{label:'Headline',v:d.headline_pct}, unit:'%' }),
     },

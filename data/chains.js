@@ -23,7 +23,7 @@ export default {
       spine: 'place',
       label: 'WHERE',
       steps: [
-        ['Plumbline', 'Records how long the decision really took — measured against the legal deadline, not an extended one.'],
+        ['Plumbline', 'Records how long the decision really took — measured against the statutory 13 weeks, not an extended deadline.'],
         ['Ledger', 'Picks up what the builder agreed to pay for schools and roads, and whether that money ever arrives.'],
         ['Sightline', 'Checks whether an expert body objected, and whether the council listened.'],
         ['Highwater', 'Checks whether it is in a flood zone, and whether the Environment Agency warned against it.'],

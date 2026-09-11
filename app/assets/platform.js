@@ -56,9 +56,9 @@ const Platform = (() => {
           + `${Number(b.coverage.assets).toLocaleString('en-GB')} assets`});
 
     if (p) out.push({
-      system: 'Plumbline', label: 'Decided within the statutory deadline',
+      system: 'Plumbline', label: 'Decided within 13 weeks without an extension',
       value: p.statutory_pct, suffix: '%',
-      note: `published headline is ${p.headline_pct}%`});
+      note: `of ${Number(p.dwelling_decisions).toLocaleString('en-GB')} major dwelling decisions; the published measure is ${p.headline_pct}%`});
 
     if (cm && cm.national) {
       const ehc = cm.national.find(r => /Education, health/.test(r.provision));
@@ -136,8 +136,8 @@ const Platform = (() => {
         return d.coverage && {headline: n(d.coverage.overdue), label: 'inspections overdue',
           sub: `maintainer known on ${Math.round(100*d.coverage.maintainer_known/d.coverage.assets)}% of ${n(d.coverage.assets)} defences`};
       case 'plumbline':
-        return {headline: d.statutory_pct + '%', label: 'decided within the legal deadline',
-          sub: `published headline is ${d.headline_pct}%`};
+        return {headline: d.statutory_pct + '%', label: 'decided within 13 weeks without an extension',
+          sub: `of ${n(d.dwelling_decisions)} major dwelling decisions; the published measure is ${d.headline_pct}%`};
       case 'compass': {
         const e = (d.national || []).find(r => /Education, health/.test(r.provision));
         return e && e.earliest && {headline: '+' + (Math.round(1000*(e.latest-e.earliest)/e.earliest)/10) + '%',
@@ -208,7 +208,7 @@ const Platform = (() => {
      unit:'%', hint:'mainstream capacity used', good:'low', pick:d=>d.catchment && d.catchment.utilisation_pct},
     {id:'compass',   system:'Compass',    label:'EHC plan growth projected',
      unit:'%', hint:'three-year projection', good:'low', pick:d=>d.compass && d.compass.projected_change_pct},
-    {id:'plumbline', system:'Plumbline',  label:'Within the legal deadline',
+    {id:'plumbline', system:'Plumbline',  label:'Within 13 weeks, no extension',
      unit:'%', hint:'major dwelling decisions', good:'high', pick:d=>d.plumbline && d.plumbline.statutory_pct},
     {id:'bulwark',   system:'Bulwark',    label:'Flood inspections overdue',
      unit:'', hint:'past their own due date', good:'low', pick:d=>d.bulwark && d.bulwark.inspection_overdue},
@@ -228,7 +228,7 @@ const Platform = (() => {
     coverage:  {system:null, method:'Counts how many of the thirteen systems produced a figure for each district. Districts with none are usually two-tier counties, where services are planned across several districts at once.'},
     catchment: {system:'catchment', method:'Sums pupils and capacity across every open mainstream school resolved to the district, then divides. Specialist provision is counted separately because it reports capacity on a different basis.'},
     compass:   {system:'compass', method:'Fits a straight line to eleven years of published EHC plan counts for the authority and projects three years forward. Aggregate counts only — no record about any individual child is used.'},
-    plumbline: {system:'plumbline', method:'Divides major dwelling decisions reached within the statutory thirteen weeks by all major dwelling decisions. The published headline instead counts agreed extensions as on time.'},
+    plumbline: {system:'plumbline', method:'Divides major dwelling decisions reached within the statutory thirteen weeks without an agreed extension by all major dwelling decisions; those made under an extension have no published time band and count as outside. The published headline instead counts agreed extensions as on time.'},
     bulwark:   {system:'bulwark', method:'Counts flood defences whose own next-inspection date has already passed. Dates are published as DD/MM/YYYY and parsed strictly.'},
     lastmile:  {system:'lastmile', method:'Divides premises flagged gigabit-capable by all surveyed premises in the district. Joined on postcode, not property, because Price Paid carries no property reference.'},
     bellwether:{system:'bellwether', method:'Takes the largest single provider group\u2019s share of care beds in the authority. Grouped by the regulator\u2019s brand field where present; unbranded providers count alone.'},
@@ -252,6 +252,9 @@ const Platform = (() => {
       // Only a source fetched through the registry has its bytes hashed; one
       // that arrived by bulk import holds data with no hash behind it.
       hashed: !!r.sha256,
+      // Who serves it, by the audit's rule: the publisher, the publisher's own
+      // hosting elsewhere, or a third party in between.
+      authority: r.authority || null,
     }));
   }
 
@@ -332,6 +335,12 @@ const Platform = (() => {
     const n = v => v == null ? '—' : Number(v).toLocaleString('en-GB');
     const money = v => v == null ? '—' : (v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
     const items = [];
+    // Care and SEND are published per upper-tier council. In a two-tier area
+    // the district carries its county's figure; say so rather than imply it is
+    // the district's own.
+    const scope = c => c && c.figure_for === 'county'
+      ? `${c.authority_name} County Council figure, shared by each of its districts` : null;
+    const cap = d._capacity && (p.capacityTrend || {})[d._capacity.authority];
 
     if (d.catchment) {
       const c = d.catchment;
@@ -346,11 +355,12 @@ const Platform = (() => {
         label:'projected change in EHC plans',
         detail:`${c.pupils_per_year > 0 ? '+' : ''}${c.pupils_per_year}/year over ${c.years} years, ${n(c.projected_change_3yr)} more in three`,
         caveat:'aggregate counts only — no individual record is used',
+        scope: scope(c),
         tone: c.projected_change_pct > 30 ? 'bad' : c.projected_change_pct > 10 ? 'warn' : 'ok'});
     }
     if (d.plumbline) {
       const c = d.plumbline;
-      items.push({system:'Plumbline', metric: c.statutory_pct + '%', label:'decided within the legal deadline',
+      items.push({system:'Plumbline', metric: c.statutory_pct + '%', label:'decided within 13 weeks without an extension',
         detail:`the published headline for this authority is ${c.headline_pct}%`,
         caveat:`${n(c.dwelling_decisions)} major dwelling decisions`,
         tone: (c.headline_pct - c.statutory_pct) > 50 ? 'bad' : 'warn'});
@@ -366,7 +376,7 @@ const Platform = (() => {
       const c = d.bulwark;
       items.push({system:'Bulwark', metric: n(c.inspection_overdue), label:'flood inspections overdue',
         detail:`${n(c.assets)} defences, maintainer known on ${n(c.maintainer_known)}, owner on ${n(c.owner_known)}`,
-        caveat:`condition graded on ${c.graded_pct}% of them`,
+        caveat:`condition graded on ${c.graded_pct}% of them${c.graded ? `, averaging grade ${c.mean_condition} on the Environment Agency’s scale of 1 (very good) to 5 (very poor)` : ''}`,
         tone: c.inspection_overdue > 100 ? 'bad' : c.inspection_overdue > 0 ? 'warn' : 'ok'});
     }
     if (d.highwater) {
@@ -388,6 +398,7 @@ const Platform = (() => {
       items.push({system:'Bellwether', metric: c.share_pct + '%', label:'of care beds with one group',
         detail:`${(c.group_name||'').replace('BRAND ','')} — ${n(c.beds)} of ${n(c.la_beds)} beds`,
         caveat: c.branded ? 'grouped by the regulator’s brand field' : 'this provider is unbranded, so counted alone',
+        scope: scope(c),
         tone: c.share_pct > 40 ? 'bad' : c.share_pct > 25 ? 'warn' : 'ok'});
     }
     if (d.lastmile) {
@@ -400,7 +411,9 @@ const Platform = (() => {
         tone: c.gigabit_pct < 80 ? 'warn' : 'ok'});
     }
     return {code, name: p.names[code] || code, items,
-            silent: 13 - items.length};
+            silent: 13 - items.length,
+            capacity: cap ? {authority: cap.name, county: d._capacity.figure_for === 'county',
+                             years: cap.years || [], pct: cap.pct || []} : null};
   }
 
   function placeResolution() {
@@ -512,10 +525,28 @@ const Platform = (() => {
     const r = placeResolution()[id];
     if (!r || !r.names) return null;
     const miss = r.names - r.matched;
-    if (!miss) return `Place join: all ${_n(r.names)} authorities named in this system’s data matched a district.`;
+    // Upper-tier systems are matched to councils, and a county's figures go to
+    // every district it covers, so the note says how far they reach.
+    const verb = r.counties != null ? 'matched a council' : 'matched a district';
+    const cty = r.counties ? ` ${_n(r.counties)} ${r.counties === 1 ? 'is a county council, whose figures are' : 'are county councils, whose figures are'} shown on each of the ${_n(r.county_districts)} districts they cover, labelled as county figures.` : '';
+    if (!miss) return `Place join: all ${_n(r.names)} authorities named in this system’s data ${verb}.${cty}`;
     const eg = (r.unmatched || []).filter(x => x && String(x).toLowerCase() !== 'unknown').slice(0, 4);
-    return `Place join: ${_n(r.matched)} of ${_n(r.names)} authorities named in this system’s data matched a district (${r.rate}%). `
+    return `Place join: ${_n(r.matched)} of ${_n(r.names)} authorities named in this system’s data ${verb} (${r.rate}%).${cty} `
       + `${_n(miss)} did not${eg.length ? `, among them ${eg.map(_esc).join(', ')}` : ''}; ${miss === 1 ? 'its figures are' : 'their figures are'} not on the district map.`;
+  }
+
+  /* Districts whose value for a metric is their county council's, so the map
+     can say so on hover instead of implying the district's own figure. */
+  function metricNotes(id) {
+    const p = placesRaw();
+    const m = MAP_METRICS.find(x => x.id === id);
+    if (!p || !m || !m.system) return {};
+    const key = String(m.system).toLowerCase(), out = {};
+    Object.entries(p.byLad).forEach(([code, d]) => {
+      const r = d[key];
+      if (r && r.figure_for === 'county') out[code] = `${r.authority_name} County Council figure`;
+    });
+    return out;
   }
 
   const chains = () => (data && data.chains) || [];
@@ -529,6 +560,11 @@ const Platform = (() => {
      leaving a reader to add up two screens. */
   const contradictions = () => (data && data.contradictions) || null;
   const corrections = () => (data && data.corrections) || null;
+  // What the platform found wrong with itself at publish, where each evidence
+  // chain stops, and the snapshots that make builds comparable.
+  const audit = () => (data && data.audit) || null;
+  const gaps = () => (data && data.gaps) || null;
+  const history = () => (data && data.history) || null;
 
   return {load, sys, has, pipeline, organisations, headlines, systemResult, sourceSummary, spineSummary,
           districtValues, districtLookup, chains, reuse, admin, adminSummary,
@@ -536,5 +572,5 @@ const Platform = (() => {
           mapMetrics, metricValues, metricSpec, metricProvenance,
           systemProvenance, systemMethod,
           generated, builtSystems, error, contradictions, corrections, liveLimits,
-          collectionNote, placeJoinNote, spineTiers, graph};
+          collectionNote, placeJoinNote, spineTiers, graph, metricNotes, audit, gaps, history};
 })();

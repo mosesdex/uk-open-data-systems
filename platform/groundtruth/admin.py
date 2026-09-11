@@ -16,19 +16,19 @@ from . import sources as S
 
 # Tables a system writes, used to report freshness and size per system.
 SYSTEM_TABLES = {
-    "catchment":  ["gold.catchment_district", "gold.catchment_school", "gold.catchment_specialist"],
-    "sentinel":   ["gold.sentinel_buyer", "gold.sentinel_method", "gold.sentinel_repeat"],
-    "highwater":  ["gold.highwater_outcome", "gold.highwater_trend", "gold.highwater_authority"],
+    "catchment":  ["gold.catchment_district", "gold.catchment_school", "gold.catchment_specialist", "gold.catchment_district_trend", "gold.catchment_trend", "gold.catchment_trend_by_district"],
+    "sentinel":   ["gold.sentinel_buyer", "gold.sentinel_method", "gold.sentinel_repeat", "gold.sentinel_control_footprint", "gold.sentinel_shared_control"],
+    "highwater":  ["gold.highwater_outcome", "gold.highwater_trend", "gold.highwater_authority", "gold.highwater_district"],
     "plumbline":  ["gold.plumbline_quarter", "gold.plumbline_authority"],
     "junction":   ["gold.junction_register"],
     "ledger":     ["gold.ledger_authority", "gold.ledger_purpose", "gold.ledger_funding_status"],
-    "bellwether": ["gold.bellwether_care", "gold.bellwether_group", "gold.bellwether_footprint"],
-    "sightline":  ["gold.sightline_reason", "gold.sightline_authority"],
+    "bellwether": ["gold.bellwether_care", "gold.bellwether_group", "gold.bellwether_footprint", "gold.bellwether_district"],
+    "sightline":  ["gold.sightline_reason", "gold.sightline_authority", "gold.sightline_wq_authority", "gold.sightline_wq_district", "gold.sightline_wq_theme"],
     "lastmile":   ["gold.lastmile_postcode", "gold.lastmile_authority"],
-    "bulwark":    ["gold.bulwark_authority", "gold.bulwark_responsibility"],
-    "watchman":   ["gold.watchman_exposure"],
-    "compass":    ["gold.compass_series", "gold.compass_trend", "gold.compass_divergence"],
-    "baseline":   ["gold.baseline_outlet", "gold.baseline_company"],
+    "bulwark":    ["gold.bulwark_authority", "gold.bulwark_responsibility", "gold.bulwark_district"],
+    "watchman":   ["gold.watchman_exposure", "gold.watchman_distress"],
+    "compass":    ["gold.compass_series", "gold.compass_trend", "gold.compass_divergence", "gold.compass_cohort", "gold.compass_district"],
+    "baseline":   ["gold.baseline_outlet", "gold.baseline_company", "gold.baseline_district", "gold.baseline_rainfall", "gold.baseline_trend"],
 }
 
 # Bronze files each system reads. Used to spot inputs that were fetched outside
@@ -94,13 +94,28 @@ DISK_ALIASES = {
     "gazette_insolvency": ["gazette_insolvency_bulk.json", "gazette_insolvency.json"],
     "dfe_sen_provision": ["dfe_sen_provision.csv"],
     "planning_ps2": ["planning_ps2.csv"],
+    # Written by `gt backfill` under their own names, or as several parts.
+    "planning_developer_agreements": ["developer_agreements.json"],
+    "ch_psc": ["psc-snapshot-*.zip"],
+    "ea_rainfall_annual": ["rainfall_annual_*.json"],
+}
+
+# What each `gt backfill` step writes (see backfill.py), by filename pattern.
+# Reproducible on another machine by that command rather than by `gt fetch`.
+BACKFILL_OUTPUTS = {
+    "bduk_*.zip": "bduk", "edm_annual_*.zip": "edm",
+    "companies_house_bulk.zip": "companies", "rainfall_annual_*.json": "rainfall",
+    "psc-snapshot-*.zip": "psc", "contracts_finder_bulk.json": "contracts",
+    "gazette_insolvency_bulk.json": "gazette",
+    "developer_agreements.json": "developer_agreements",
 }
 
 
 def _on_disk(bronze: Path, source_id: str) -> str | None:
     """The file this source's data is actually in, if any."""
     for name in DISK_ALIASES.get(source_id, []):
-        if (bronze / name).exists():
+        # An alias can be a pattern: some sources arrive as several parts.
+        if any(bronze.glob(name)):
             return name
     for suffix in (".csv", ".json", ".geojson", ".zip", ".ods", ".xml", ".bin"):
         p = bronze / f"{source_id}{suffix}"
@@ -129,12 +144,18 @@ def source_health(con: duckdb.DuckDBPyConnection,
         FROM bronze.source_registry r
         LEFT JOIN last l ON l.source_id = r.id AND l.rn = 1
         ORDER BY (l.fetched_at IS NULL) DESC, r.role, r.id""")
+    # Who serves each source, by the audit's rule, so a page can say when a
+    # figure rests on an intermediary rather than the publisher.
+    from .audit import source_authority
+    urls = {s.id: s.url for s in S.REGISTRY}
+    for r in rows:
+        r["authority"] = source_authority(urls.get(r["id"], ""))
     if bronze is not None:
         bronze = Path(bronze)
         for r in rows:
             disk = _on_disk(bronze, r["id"])
             r["disk_file"] = disk
-            r["disk_bytes"] = (bronze / disk).stat().st_size if disk else None
+            r["disk_bytes"] = sum(p.stat().st_size for p in bronze.glob(disk)) if disk else None
             if r["fetched_at"]:
                 r["provenance"] = "logged"
             elif disk:
@@ -192,11 +213,25 @@ def registry_gaps(bronze: Path) -> dict:
         for suffix in (".csv", ".json", ".geojson", ".zip", ".xml", ".ods", ".bin"):
             expected.add(s.id + suffix)
     on_disk = [p for p in bronze.iterdir() if p.is_file() and not p.name.startswith(".")]
-    unregistered = sorted(p.name for p in on_disk if p.name not in expected)
+    # A file a backfill step writes under its own name is reproducible, by
+    # `gt backfill`. Counting those as hand-fetched put all 32 PSC parts and
+    # every BDUK region on the list of files nothing produces.
+    import fnmatch
+    backfilled: dict[str, int] = {}
+    unregistered = []
+    for p in sorted(on_disk, key=lambda p: p.name):
+        if p.name in expected:
+            continue
+        part = next((v for pat, v in BACKFILL_OUTPUTS.items() if fnmatch.fnmatch(p.name, pat)), None)
+        if part:
+            backfilled[part] = backfilled.get(part, 0) + 1
+        else:
+            unregistered.append(p.name)
     # 21 MB exactly is the --max-bytes cap used while disk was tight.
     truncated = sorted(p.name for p in on_disk
                        if p.suffix == ".zip" and 20_900_000 < p.stat().st_size < 21_100_000)
     return {"unregistered": unregistered, "truncated": truncated,
+            "backfilled": backfilled,
             "registered_ids": len(S.REGISTRY),
             "catalogue": catalogue_audit(bronze)}
 

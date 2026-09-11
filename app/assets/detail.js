@@ -31,8 +31,8 @@ const DETAIL = {
   },
   plumbline: {
     question: 'Are planning decisions really made on time?',
-    why: 'The published figure counts an application as on time if it met an agreed extension, not the deadline in law.',
-    method: 'Two rates are computed side by side: the published headline, and the share of major dwelling decisions reached within the statutory thirteen weeks.',
+    why: 'The published figure counts an application as on time if it met an agreed extension, not only if it met the statutory 13 weeks.',
+    method: 'Two rates are computed side by side: the published headline, and the share of major dwelling decisions reached within the statutory thirteen weeks without an agreed extension. Decisions made under one are published with no time band, so they count as outside the thirteen weeks.',
     limits: [
       'The two rates cover slightly different populations, so both counts are always shown.',
       'The column that used to show extension reliance directly was discontinued after 2020.',
@@ -169,9 +169,14 @@ function renderFindings(id, d) {
                {label:'Kilometres',key:'km',mono:1},{label:'Overdue',key:'overdue',mono:1}], d.by_maintainer)}`;
     case 'plumbline':
       return `<div class="grid g2">
-        ${big(d.statutory_pct + '%', 'Within the legal deadline', `${n(d.dwelling_decisions)} major dwelling decisions`)}
-        ${big(d.headline_pct + '%', 'The published headline', 'counts agreed extensions as on time')}
+        ${big(d.statutory_pct + '%', 'Within 13 weeks, no extension', `${n(d.dwelling_decisions)} major dwelling decisions`)}
+        ${big(d.headline_pct + '%', 'The published headline', `counts agreed extensions as on time · ${n(d.major_decisions)} major decisions`)}
       </div>
+      ${d.dwellings_extended_pct != null ? `<div class="note mt-4"><div class="note__title">What separates the two figures</div>
+        <p>${d.dwellings_extended_pct}% of major dwelling decisions, and ${d.extended_pct}% of all major decisions, were made
+        under an agreed extension or performance agreement. Those count as in time on the headline. The published table
+        gives them no time band, so the statutory figure counts them as outside the thirteen weeks. Agreeing an extension
+        is lawful: this measures reliance on extensions, not breaches of the law.</p></div>` : ''}
       <div class="card__s mt-4 mb-2">Widest gap between the two figures</div>
       ${table([{label:'Authority',key:'lpa'},{label:'Headline',key:'headline_pct',mono:1},
                {label:'Statutory',key:'statutory_pct',mono:1}], d.worst,
@@ -264,8 +269,15 @@ function renderFindings(id, d) {
       const fp=d.control_footprint||[];
       return `<div class="grid g2">
         ${big((Math.round(1000*un/tot)/10)+'%', 'Awards skipping open competition', `across ${n(tot)} award records`)}
-        ${big(n(fp.length), 'Owners behind several of a buyer’s suppliers', 'from 8m ownership records')}
+        ${big(n(d.control_footprint_total != null ? d.control_footprint_total : fp.length), 'Owners behind several of a buyer’s suppliers', 'from 8m ownership records')}
       </div>
+      ${(() => { const p = d.shared_control_probe;
+        if (!p || !p.psc_loaded || p.shared_control_pairs) return '';
+        return `<div class="note mt-4"><div class="note__title">Checked, and none found: a shared owner on one contract</div>
+        <p>Of ${n(p.competed_contracts)} contracts naming between two and ${n(p.competed_field_max)} suppliers, none has two
+        under the same controlling person, leaving aside a parent company and its own subsidiary. Award notices name the
+        winners, not the bidders, so the check sees little: ${n(p.multi_supplier_contracts)} of ${n(p.contracts)} contracts
+        name more than one supplier at all.</p></div>`; })()}
       ${fp.length ? `<div class="note mt-4"><div class="note__title">One owner, several suppliers, one buyer</div>
         <p>This is the collusion-adjacent signal that <em>is</em> possible in UK data. Award notices name
         only the winner, not who bid — so shared control on a single contract almost never shows.

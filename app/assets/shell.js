@@ -335,7 +335,8 @@ const Shell = (() => {
       <div class="prov"><div class="prov__h">Provenance · ${rows.length} source${rows.length === 1 ? '' : 's'}</div>
         ${rows.length ? rows.map(r => `<div class="prov__r">
           <span class="prov__k">Source</span><span><b>${esc(r.name)}</b><br>
-            <span style="color:var(--ink-3)">${esc(r.publisher || '')}${r.licence ? ' · ' + esc(r.licence) : ''}</span></span>
+            <span style="color:var(--ink-3)">${esc(r.publisher || '')}${r.licence ? ' · ' + esc(r.licence) : ''}</span>${r.authority === 'third party'
+              ? '<br><span class="st st--warn">aggregator</span> <span style="color:var(--ink-3);font-size:11.5px">served by a third party, not the publisher</span>' : ''}</span>
           <span class="prov__k">Fetched</span><span class="mono">${r.fetched ? esc(String(r.fetched).slice(0, 19).replace('T', ' ')) : '—'}</span>
           <span class="prov__k">State</span><span><span class="st st--${r.ok ? 'ok' : 'bad'}">${esc(r.status)}</span>${r.ok && !r.hashed ? ' <span class="st st--warn">no hash</span>' : ''}</span>
         </div>`).join('') : `<div class="prov__r"><span class="prov__k">—</span>
@@ -343,10 +344,30 @@ const Shell = (() => {
       </div>`;
   }
 
+  /* School capacity is returned per education authority, so a two-tier
+     district's series is its county's. Drawn small, and labelled with whose. */
+  function capacityBlock(c) {
+    const pairs = (c.years || []).map((y, i) => [y, Number((c.pct || [])[i])])
+      .filter(([, v]) => c.pct && !Number.isNaN(v));
+    if (pairs.length < 2) return '';
+    const pts = pairs.map(x => x[1]), lo = Math.min(...pts), hi = Math.max(...pts), W = 220, H = 36;
+    const xy = pts.map((v, i) => `${(i * W / (pts.length - 1)).toFixed(1)},${(H - 3 - (hi > lo ? (v - lo) / (hi - lo) : .5) * (H - 6)).toFixed(1)}`);
+    const a = pts[0], b = pts[pts.length - 1];
+    return `<div class="prov" style="margin-top:1rem"><div class="prov__h">School places in use, ${esc(pairs[0][0])} to ${esc(pairs[pairs.length - 1][0])}</div>
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding:.55rem 0 .35rem">
+        <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="From ${a}% to ${b}%" style="max-width:100%;flex:none">
+          <polyline points="${xy.join(' ')}" fill="none" stroke="var(--blue-500)" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div style="flex:1;min-width:0;font-size:12.5px;color:var(--ink-2)"><b>${a}%</b> → <b>${b}%</b> of places in use across ${esc(c.authority)}${c.county ? ' <span class="st st--none">county figure</span>' : ''}</div>
+      </div>
+      <div class="card__s" style="font-size:11.5px">${c.county
+        ? `Capacity is returned per education authority, so this is ${esc(c.authority)} County Council’s series, shared by each of its districts.`
+        : 'Capacity is returned per education authority; this is the council’s own series.'}</div></div>`;
+  }
+
   function openPlace(code) {
     const rep = Platform.placeReport(code);
     if (!rep) { openPanel('Place', code, emptyFact('No figures for this district',
-      'No system produced a value here. Districts with none are usually two-tier counties, where services are planned across several districts at once.')); return; }
+      'No system produced a value for this district in the current build.')); return; }
     const body = `
       <div class="tiles" style="grid-template-columns:repeat(2,1fr)">
         <div class="tile tile--ok"><div class="tile__l">Systems reporting</div>
@@ -358,9 +379,10 @@ const Shell = (() => {
         <thead><tr><th>System</th><th>What it found</th><th class="num">Value</th></tr></thead>
         <tbody>${rep.items.map(i => `<tr data-sys="${esc(i.system.toLowerCase())}">
           <td><b>${esc(i.system)}</b></td>
-          <td>${esc(i.label)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(i.caveat || '')}</span></td>
+          <td>${esc(i.label)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(i.caveat || '')}</span>${i.scope ? `<br><span class="st st--none">county figure</span> <span style="color:var(--ink-3);font-size:11.5px">${esc(i.scope)}</span>` : ''}</td>
           <td class="num"><span class="st st--${i.tone === 'bad' ? 'bad' : i.tone === 'warn' ? 'warn' : 'ok'}">${esc(i.metric)}</span></td>
         </tr>`).join('')}</tbody></table></div>
+      ${rep.capacity ? capacityBlock(rep.capacity) : ''}
       ${rep.silent ? emptyFact(`${rep.silent} systems have nothing to say here`,
         'That is a fact about the published data, not a gap in the platform — either no data reaches this district, or the system is planned at a different geography.',
         '#/sources', 'See the sources') : ''}`;
@@ -428,7 +450,7 @@ const Shell = (() => {
     if (pl.uprn) tiers.push(['Property', 'OS Open UPRN', `${num(pl.uprn.rows)} properties`,
       'An exact point. The file carries no district, so one is taken from the postcode or, failing that, the nearest postcode centroid.']);
     if (pl.postcode) tiers.push(['Postcode', 'Code-Point Open', `${num(pl.postcode.rows)} postcodes`,
-      `${num(pl.postcode.distinct_lads)} districts; ${pl.postcode.best_quality_share}% at the publisher’s best positional quality.`]);
+      `${num(pl.postcode.distinct_lads)} districts; ${pl.postcode.best_quality_share}% at the publisher’s best positional quality.${pl.postcode.no_district ? ` ${num(pl.postcode.no_district)} carry no district code in the register, so nothing placed through them reaches a district figure.` : ''}`]);
     if (pl.coordinate) tiers.push(['Coordinate', 'Nearest postcode centroid', `${pl.coordinate.resolved_pct}% resolved`,
       `Tested against ${esc(pl.coordinate.tested_against)}: ${num(pl.coordinate.resolved_within_500m)} of a ${num(pl.coordinate.sample)} sample within 500 m. Beyond that it refuses rather than guesses.`]);
     if (pl.street) tiers.push(['Street', 'OS Open USRN', `${num(pl.street.rows)} streets`,
@@ -472,7 +494,44 @@ const Shell = (() => {
                 <span class="corr__k">Actually</span><span>${esc(e.actually)}</span>
                 <span class="corr__k">How it was caught</span><span>${esc(e.how_caught)}</span>
                 <span class="corr__k">Guarded by</span><span>${e.guard ? `<code>${esc(e.guard)}</code>` : 'no test yet'}${e.guarded ? '' : ' <span class="st st--warn">unguarded</span>'}</span>
+                ${(e.tags || []).length ? `<span class="corr__k">Kind of mistake</span><span>${e.tags.map(t => `<span class="st st--none">${esc(t)}</span>`).join(' ')}</span>` : ''}
               </div></details>`).join('');
+    }
+    const gp = Platform.gaps(), gph = $('#methodGaps');
+    if (gph) {
+      const chains = (gp && gp.detail) || [];
+      if (!chains.length) gph.innerHTML = `<div class="state"><div class="state__t">${gp && gp.error ? 'The gap report failed to build' : 'The gap report is not in this build'}</div></div>`;
+      else {
+        // Short label for a link's state, and the longer phrase for the summary.
+        const CAUSE = {nowhere: ['bad', 'published by nobody', 'are published by nobody', 'is published by nobody'],
+                       publisher: ['warn', 'held, not released', 'are held by a publisher that does not release them', 'is held by a publisher that does not release it'],
+                       platform: ['warn', 'this platform’s to fix', 'are this platform’s to fix', 'is this platform’s to fix'],
+                       unmeasured: ['none', 'not measured', 'could not be measured', 'could not be measured']};
+        const bc = gp.by_cause || {}, breaks = Object.values(bc).reduce((x, y) => x + y, 0);
+        const and = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+        const parts = Object.entries(bc).sort((x, y) => y[1] - x[1])
+          .map(([k, v]) => breaks === 1 ? (CAUSE[k] || [])[3] || k : `${num(v)} ${(CAUSE[k] || [])[2] || k}`);
+        const title = s => String(s).replace(/-/g, ' ').replace(/^./, ch => ch.toUpperCase());
+        gph.innerHTML = `<p class="mnote" style="margin:0 0 .8rem">${num(gp.chains)} questions, ${num(gp.complete)} answerable end to end. `
+          + (!breaks ? 'No link is missing.' : breaks === 1 ? `The one missing link ${parts[0]}.` : `Of the ${num(breaks)} missing links, ${and(parts)}.`)
+          + (breaks && !bc.platform ? ' None is this platform’s to supply.' : '') + '</p>'
+          + chains.map(c => {
+              const st = c.complete ? ['ok', 'complete'] : ['bad', 'breaks at ' + c.breaks_at];
+              return `<details class="corr"><summary><b>${esc(title(c.chain))}</b>
+                <span class="st st--${st[0]}">${esc(st[1])}</span>
+                <span class="mono card__s">${num(c.steps_available)} of ${num(c.steps)} links</span></summary>
+                <p style="margin:.6rem 0 .5rem;font-size:13px;color:var(--ink-2)">${esc(c.asks)}</p>
+                <div class="dt-wrap"><table class="dt dt--compact">
+                  <thead><tr><th>Link</th><th>Where it lives</th><th class="num">Populated</th><th>State</th></tr></thead>
+                  <tbody>${(c.detail || []).map(s => {
+                    const cz = s.available ? ['ok', 'present'] : (CAUSE[s.absent_because] || ['none', s.absent_because || 'absent']);
+                    return `<tr><td><b>${esc(s.step)}</b><br><span style="color:var(--ink-3);font-size:11.5px">${esc(s.question || '')}</span>${s.reason ? `<br><span style="color:var(--ink-3);font-size:11.5px">${esc(s.reason)}</span>` : ''}</td>
+                      <td class="mono" style="font-size:11.5px;word-break:break-all">${s.table ? esc(s.table + '.' + s.column) : '—'}</td>
+                      <td class="num">${s.populated_pct != null ? esc(s.populated_pct) + '%' : '—'}</td>
+                      <td><span class="st st--${cz[0]}">${esc(cz[1])}</span></td></tr>`;
+                  }).join('')}</tbody></table></div></details>`;
+            }).join('');
+      }
     }
     spHost.dataset.built = '1';
   }
@@ -806,6 +865,6 @@ const Shell = (() => {
     route();
   }
 
-  return { boot, route, show, setChrome, openPlace, openSystemDetail, openPanel, closePanel,
+  return { boot, route, show, setChrome, openPlace, openSystemDetail, openPanel, closePanel, capacityBlock,
            provenanceBlock, skeleton, emptyFact, emptyFilter, Palette, SysTabs, esc, num };
 })();

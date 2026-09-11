@@ -67,7 +67,7 @@ headline that system produced — not a description of what it would do:
 | Catchment | 89.6% of mainstream school places in use |
 | Sentinel | 6.6% of awards skipped open competition |
 | Highwater | 635 permissions granted against flood advice |
-| Plumbline | 15.9% decided within the legal deadline |
+| Plumbline | 15.9% of major housing decisions within 13 weeks without an extension, against a 90.4% published headline |
 | Junction | 937 of 6,770 capacity records actually served |
 | Ledger | £1.49bn recorded, 0 of it mappable |
 | Bellwether | 124 authorities depend on one care group |

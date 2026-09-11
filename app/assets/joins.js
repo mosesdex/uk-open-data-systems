@@ -35,7 +35,7 @@ const JOINS = {
     what: 'Planning decisions on major housing, with their timing.',
     where: 'Each decision is tied to its planning authority.',
     who: null,
-    before: 'The published on-time figure counts an application as on time if it met an agreed extension, not the deadline in law.',
+    before: 'The published on-time figure counts an application as on time if it met an agreed extension, not only if it met the statutory 13 weeks.',
     connect: 'Each decision is measured against the statutory deadline as well as the headline target.',
     after: 'The real on-time rate beside the published one, per authority.',
     possible: 'See the gap between what the headline claims and what the law actually requires.',

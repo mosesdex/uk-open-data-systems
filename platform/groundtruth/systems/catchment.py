@@ -310,6 +310,28 @@ def build_trend(con: duckdb.DuckDBPyConnection) -> None:
         GROUP BY period, year_label, lad_code
         ORDER BY period, lad_code
     """)
+    build_trend_by_district(con)
+
+
+def build_trend_by_district(con: duckdb.DuckDBPyConnection) -> None:
+    """The capacity series each district sits under.
+
+    Capacity is returned per education authority. A single-tier council's
+    series is its own; a district in a two-tier area shares its county's, and
+    carries it labelled as the county's.
+    """
+    from ..places import districts_loaded, upper_tier_sql
+    con.execute("DROP TABLE IF EXISTS gold.catchment_trend_by_district")
+    if not districts_loaded(con):
+        return
+    con.execute(f"""
+        CREATE TABLE gold.catchment_trend_by_district AS
+        WITH ut AS ({upper_tier_sql(con)})
+        SELECT ut.lad_code, ut.lad_name, ut.authority_code, ut.authority_name, ut.figure_for,
+               t.period, t.year_label, t.pupils, t.capacity, t.utilisation_pct
+        FROM ut JOIN gold.catchment_district_trend t ON t.lad_code = ut.authority_code
+        ORDER BY ut.lad_code, t.period
+    """)
 
 
 def trend_summary(con: duckdb.DuckDBPyConnection):

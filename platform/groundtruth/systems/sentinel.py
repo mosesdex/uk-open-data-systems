@@ -249,9 +249,16 @@ def shared_control_stats(con: duckdb.DuckDBPyConnection) -> dict:
         SELECT ocid FROM silver.procurement_award
         WHERE company_number IS NOT NULL AND ocid IS NOT NULL
         GROUP BY ocid HAVING count(DISTINCT company_number) > 1)""").fetchone()[0]
+    # The contracts the check actually examines: a small field of suppliers.
+    competed = con.execute(f"""SELECT count(*) FROM (
+        SELECT ocid FROM silver.procurement_award
+        WHERE company_number IS NOT NULL AND ocid IS NOT NULL
+        GROUP BY ocid
+        HAVING count(DISTINCT company_number) BETWEEN 2 AND {MAX_COMPETED_FIELD})""").fetchone()[0]
     pairs = con.execute("SELECT count(*) FROM gold.sentinel_shared_control").fetchone()[0]
     return {"psc_loaded": True, "contracts": total,
-            "multi_supplier_contracts": multi, "shared_control_pairs": pairs}
+            "multi_supplier_contracts": multi, "competed_contracts": competed,
+            "competed_field_max": MAX_COMPETED_FIELD, "shared_control_pairs": pairs}
 
 
 def control_footprint(con: duckdb.DuckDBPyConnection, limit: int = 10):

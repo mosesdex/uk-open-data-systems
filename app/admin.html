@@ -65,7 +65,7 @@
 </div></header>
 
 <main class="pad" id="ops">
-  <!-- Seven destinations, each a URL. The sidebar changes the view rather than
+  <!-- Eight destinations, each a URL. The sidebar changes the view rather than
        scrolling one 4,000px page. -->
   <div class="view" data-view="ops" hidden>
     <div class="vhead"><div><h1 class="vhead__t">Control room</h1>
@@ -144,6 +144,20 @@
         <div class="card__s">Could another machine rebuild this?</div></div></div>
       <div class="card__b" id="gapBody"></div>
     </section>
+    <section class="card rise" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">Snapshots</div>
+        <div class="card__s">Every table's row count and content hash at each publish, so two builds can be compared table by table</div></div></div>
+      <div class="card__b" id="histBody"></div>
+    </section>
+  </div>
+
+  <div class="view" data-view="audit" hidden>
+    <div class="vhead"><div><h2 class="vhead__t">Audit</h2>
+      <p class="vhead__s">The platform checking itself on every publish: its sources against its fetch log,
+      its tables against each other, and the published file against the database.</p></div></div>
+    <section class="card rise" style="margin-top:1rem">
+      <div class="card__b" id="auditBody"></div>
+    </section>
   </div>
 
 
@@ -189,7 +203,9 @@
 
   /* KPIs — each is a count of something real */
   const kpis = [
-    {l:'Sources holding data', v:s.sourcesWithData, m:`of ${s.sourcesTotal} registered · ${s.sourcesAbsent} absent, both deliberately blocked`, a:'var(--green-600)'},
+    {l:'Sources holding data', v:s.sourcesWithData, m:`of ${s.sourcesTotal} registered · ${!s.sourcesAbsent ? 'none absent'
+       : s.sourcesAbsent === s.sourcesBlocked ? `${s.sourcesAbsent} absent, ${s.sourcesAbsent === 1 ? 'deliberately blocked' : s.sourcesAbsent === 2 ? 'both deliberately blocked' : 'all deliberately blocked'}`
+       : `${s.sourcesAbsent} absent, ${s.sourcesBlocked} of them deliberately blocked`}`, a:'var(--green-600)'},
     {l:'Systems built', v:s.systemsBuilt, m:`of ${s.systemsTotal} · ${s.systemsMissingInputs} missing an input`, a:'var(--uk-blue)'},
     {l:'Rows held', v:s.rowsHeld, m:`across ${s.tableCount} tables`, a:'var(--blue-500)'},
     {l:'Awaiting review', v:s.reviewCount, m:'real ambiguity, nothing merged', a: s.reviewCount ? 'var(--amber-600)' : 'var(--green-600)'},
@@ -309,6 +325,13 @@
       <span class="mono">gt fetch</span> would not reproduce them on another machine.</p>
       <div class="flexrow mt-2">${un.slice(0,8).map(f=>`<span class="tag tag--warn">${f}</span>`).join('')}
       ${un.length>8?`<span class="card__s">+${un.length-8} more</span>`:''}</div>` : ''}
+    ${(()=>{ const bf = ((Platform.admin()||{}).registry || {}).backfilled || {};
+      const parts = Object.entries(bf).sort((x,y)=>y[1]-x[1]), tot = parts.reduce((t,p)=>t+p[1],0);
+      return tot ? `<div class="feat__t mt-4">${tot} files come from backfill steps</div>
+      <p class="card__desc mt-1" style="flex:none">Written by <span class="mono">gt backfill</span>, which pages or
+      resolves its way to a file, so another machine reproduces them with that command rather than
+      <span class="mono">gt fetch</span>. Each step records a fetch-log row when it runs.</p>
+      <div class="flexrow mt-2">${parts.map(([k,v])=>`<span class="tag">${k} · ${v}</span>`).join('')}</div>` : ''; })()}
     ${tr.length ? `<div class="feat__t mt-4" style="color:var(--hot)">${tr.length} downloads are truncated</div>
       <p class="card__desc mt-1" style="flex:none">Capped at 21 MB while disk was tight. The place spine runs on
       Code-Point Open instead; the property tier needs these re-fetched in full.</p>

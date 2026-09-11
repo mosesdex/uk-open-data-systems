@@ -18,7 +18,7 @@ def _seed(con, rows):
 class TestHeadlineVersusStatutory:
     def test_both_figures_are_produced(self, tmp_path):
         """An authority can be at 100% on the published measure and a fraction
-        of that against the deadline in law. Both must be reported."""
+        of that against the statutory 13 weeks. Both must be reported."""
         con = store.connect(tmp_path / "db")
         _seed(con, [("Anytown", "E1", "2024 Q1",
                      100.0, 100.0, 0.0, 0.0,   # every major decision 'in time'
@@ -73,3 +73,42 @@ class TestSchemaGuard:
         with pytest.raises(ValueError, match="PS2 columns not found"):
             P.load(con, bad)
         con.close()
+
+
+class TestHeadlineBase:
+    """The headline once read only the decisions made without a performance
+    agreement, leaving out three quarters of them."""
+    HEAD = [P.C_LPA, P.C_QUARTER, P.C_MAJOR_DECISIONS, P.C_MAJOR_IN_TIME,
+            P.C_MAJOR_IN_TIME_PA, P.C_MAJOR_PA, P.C_MAJDW_TOTAL, P.C_MAJDW_8,
+            P.C_MAJDW_8_13, P.C_MAJDW_MAX, P.C_MAJDW_PA]
+
+    def _csv(self, tmp_path, values):
+        import csv
+        p = tmp_path / "ps2.csv"
+        with open(p, "w", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(["title"])
+            w.writerow(["subtitle"])
+            w.writerow(self.HEAD)
+            w.writerow(values)
+        return p
+
+    def test_the_headline_counts_decisions_made_under_an_extension(self, tmp_path):
+        """Bournemouth, Christchurch and Poole, 2024 Q2, as published: 29 major
+        decisions, 2 without an agreement (both in time) and 27 under one (23 in
+        time). Reading only the first half gave 2 of 2."""
+        con = store.connect(tmp_path / "db")
+        P.load(con, self._csv(tmp_path, ["BCP", "2024 Q2", 29, 2, 23, 27, 21, 0, 2, "", 19]))
+        P.build(con)
+        headline, statutory = con.execute(
+            "SELECT headline_pct, statutory_pct FROM gold.plumbline_quarter").fetchone()
+        assert headline == round(100 * 25 / 29, 1)
+        assert statutory == round(100 * 2 / 21, 1)
+        assert P.extension_share(con, since="2024") == (round(100 * 27 / 29, 1),
+                                                         round(100 * 19 / 21, 1))
+        con.close()
+
+    def test_both_halves_of_the_headline_come_from_the_same_scope(self):
+        assert P.C_MAJOR_DECISIONS.endswith("(all)")
+        assert P.C_MAJOR_IN_TIME.endswith("(excluding PAs)")
+        assert P.C_MAJOR_IN_TIME_PA.endswith("(PAs only)")

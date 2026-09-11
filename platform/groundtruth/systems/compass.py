@@ -174,6 +174,33 @@ def build(con: duckdb.DuckDBPyConnection) -> None:
         WHERE la.projected_change_pct IS NOT NULL
         ORDER BY abs(la.projected_change_pct - reg.region_change_pct) DESC
     """)
+    build_districts(con)
+
+
+def build_districts(con: duckdb.DuckDBPyConnection) -> None:
+    """Each district's EHC plan trend, from the authority responsible for it.
+
+    Joined on the authority code DfE publishes, not the name. Authorities
+    reorganised since 2020 left their series under retired codes, and a name
+    match would hand the new Somerset council the old county's series, which
+    stops in 2022. A council whose own code has too few years for a trend gets
+    no figure rather than its predecessor's.
+    """
+    from ..places import districts_loaded, upper_tier_sql
+    con.execute("DROP TABLE IF EXISTS gold.compass_district")
+    if not districts_loaded(con):
+        return
+    con.execute(f"""
+        CREATE TABLE gold.compass_district AS
+        WITH ut AS ({upper_tier_sql(con)})
+        SELECT ut.lad_code, ut.lad_name, ut.authority_code, ut.authority_name, ut.figure_for,
+               t.la_code, t.la_name, t.provision, t.years, t.first_year, t.last_year,
+               t.mean_pupils, t.pupils_per_year, t.projected_change_3yr, t.projected_change_pct
+        FROM ut
+        LEFT JOIN gold.compass_trend t
+          ON t.la_code = ut.authority_code AND t.provision = '{EHC_PLAN}'
+        ORDER BY ut.lad_code
+    """)
 
 
 def national(con: duckdb.DuckDBPyConnection):

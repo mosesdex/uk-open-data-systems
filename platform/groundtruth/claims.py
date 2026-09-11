@@ -323,6 +323,31 @@ ARCHIVE: tuple[Claim, ...] = (
         severity="material",
         tags=("access",),
     ),
+    Claim(
+        id="plumbline-headline-left-out-extensions",
+        system="plumbline",
+        believed="The published headline Plumbline set beside its statutory figure was "
+                 "82.8% of 7,894 major decisions since 2023, and the statutory figure was "
+                 "described as the share decided within the legal deadline.",
+        actually="The headline read only the table's '(excluding PAs)' columns -- "
+                 "decisions made without a performance agreement -- and so left out the "
+                 "76.1% of major decisions made under one. On Plumbline's own definition, "
+                 "every decision in time over every decision, it is 90.4% of 33,058. The "
+                 "statutory figure, 15.9% of 14,844 major dwelling decisions, stands, but it "
+                 "counts the 79.9% decided under an agreed extension as outside the 13 weeks "
+                 "because the table gives them no time band; and an agreed extension is "
+                 "lawful, so the figure is now described as decided within 13 weeks without "
+                 "an extension.",
+        how_caught="Putting each figure's denominator beside it: 7,894 major decisions "
+                   "against 14,844 major dwelling decisions, a subset larger than the whole. "
+                   "The source header then showed the split, and the six time bands "
+                   "reconcile with all decisions less extended ones in every one of 4,049 "
+                   "authority-quarters.",
+        guard="tests/test_plumbline.py::TestHeadlineBase",
+        corrected_on="2026-09-11",
+        severity="material",
+        tags=("definition", "denominator", "overclaim"),
+    ),
 )
 
 

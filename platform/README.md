@@ -89,7 +89,7 @@ tests/         24 offline tests, 2 network tests (-m network)
 | M9 Baseline | **done** — spills adjusted for monitor availability |
 | M10 Sentinel | **done** — concentration, within what the data supports |
 | M11 Highwater | **done** — override rate flat for nine years |
-| M12 Plumbline | **done** — 82.8% headline against 15.9% statutory |
+| M12 Plumbline | **done** — 90.4% headline against 15.9% statutory (headline corrected 2026-09-11 from 82.8%, which left out extended decisions) |
 | M13 Sightline | **done** — one advice stream has no outcome field at all |
 | M14 Lastmile | **done** — new-build postcodes 21 points worse connected |
 | M15 Junction | **done** — schemas standardised, 5,833 records withheld |
@@ -514,12 +514,12 @@ in half. `normalise_year` converges them, with tests for both forms.
 ```
 
 The published performance figure counts an application as decided on time if it
-met an **agreed extension**, not the deadline in law. Both numbers are true;
+met an **agreed extension**, not only the statutory 13 weeks. Both numbers are true;
 only one is the one people think they are reading.
 
 | Since 2023 | |
 |---|---|
-| Published headline "in time" | **82.8%** (7,894 major decisions) |
+| Published headline "in time" | **90.4%** (33,058 major decisions) |
 | Major dwellings within 13 weeks | **15.9%** (14,844 decisions) |
 | Gap | **66.9 points** |
 
@@ -715,7 +715,7 @@ test that runs the chains against an empty database and requires zero steps.
 
 | System | Answer |
 |---|---|
-| Plumbline | 15.9% decided within the legal deadline, against an 82.8% headline |
+| Plumbline | 15.9% of major housing decisions within 13 weeks without an extension, against a 90.4% headline |
 | Ledger | £1,491,818,575 recorded, **0 of it mappable** |
 | Highwater | 635 of 23,336 objections overridden |
 | Sightline | 180 water quality objections, **none with a recorded outcome** |

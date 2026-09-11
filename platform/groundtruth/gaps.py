@@ -157,14 +157,15 @@ CHAINS: tuple[Chain, ...] = (
             Step("sewage", "is the water clean?",
                  "gold.baseline_district", "adjusted_spills"),
             Step("care capacity", "who provides care here?",
-                 absent_because=PLATFORM,
-                 reason="Bellwether is published against 152 upper-tier "
-                        "authorities and this chain is keyed to 317 districts. "
-                        "The platform holds no district-to-county mapping, so "
-                        "the join is unmade rather than impossible."),
+                 "gold.bellwether_district", "la_beds",
+                 reason="Published per upper-tier authority. In two-tier areas "
+                        "each district carries its county's figure, labelled as "
+                        "the county's; nothing published divides it between them."),
             Step("SEND demand", "is specialist provision under pressure?",
-                 absent_because=PLATFORM,
-                 reason="Compass is likewise upper-tier. Same missing mapping."),
+                 "gold.compass_district", "projected_change_pct",
+                 reason="Also upper-tier, and joined on DfE's authority code, so a "
+                        "council created in a reorganisation has no trend until it "
+                        "has enough years under its own code."),
         ),
     ),
 )

@@ -95,7 +95,7 @@ def chain_development_approved(con: duckdb.DuckDBPyConnection) -> Chain:
         from .systems import plumbline as P
         h, st, md, dd = P.national_gap(con, since="2023")
         if h is not None and st is not None:
-            c.steps.append(Step("Plumbline", "was it decided within the legal deadline?",
+            c.steps.append(Step("Plumbline", "was it decided within 13 weeks without an extension?",
                                 f"{st}% were, against a published headline of {h}%", 1))
 
     if _has(con, "silver", "contribution"):

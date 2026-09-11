@@ -91,3 +91,45 @@ class TestChecks:
         a = A.Audit()
         assert "services1.arcgis.com" in A.DELEGATED_HOSTS
         assert "www.planit.org.uk" not in A.DELEGATED_HOSTS
+
+
+class TestTheAuditChecksTheCorpusItHas:
+    """Two of the audit's major findings were the audit's own mistakes: a table
+    map that listed one of Watchman's two tables, and a host allowlist that did
+    not know NESO publishes on its own domain. Both came from adding things
+    without updating what enumerates them, so these fail when that happens."""
+
+    def test_every_gold_table_a_system_builds_is_mapped(self):
+        import pathlib, re
+        from groundtruth import admin
+        root = pathlib.Path(__file__).resolve().parent.parent / "groundtruth" / "systems"
+        src = "\n".join(p.read_text() for p in root.glob("*.py"))
+        made = set(re.findall(r"(?:CREATE(?: OR REPLACE)? TABLE|TABLE IF EXISTS)\s+gold\.(\w+)", src))
+        for sid, tabs in admin.SYSTEM_TABLES.items():
+            for t in sorted(made):
+                if t.startswith(sid + "_"):
+                    assert f"gold.{t}" in tabs, f"gold.{t} is built by {sid} but not mapped"
+
+    def test_only_the_known_aggregator_fails_source_authority(self):
+        import urllib.parse
+        from groundtruth import audit, sources as S
+        host = lambda s: urllib.parse.urlparse(s.url).netloc.lower()
+        failing = {s.id for s in S.REGISTRY if not s.blocked
+                   and host(s) not in audit.DELEGATED_HOSTS
+                   and not any(host(s).endswith(x) for x in audit.GOV_SUFFIXES)}
+        # PlanIt is a volunteer-run aggregator. Anything else on an unclassified
+        # host fails here until someone decides which it is.
+        assert failing == {"planit_planning_wq"}
+
+    def test_planning_references_are_unique_per_authority_not_nationally(self):
+        import duckdb
+        from groundtruth import audit
+        con = duckdb.connect(":memory:"); con.execute("CREATE SCHEMA silver")
+        con.execute("CREATE TABLE silver.contribution(organisation_entity INTEGER, reference VARCHAR)")
+        con.execute("INSERT INTO silver.contribution VALUES (1, '21/0001'), (2, '21/0001')")
+        a = audit.Audit(); audit.check_duplicates(con, a)
+        assert not [f for f in a.findings if "contribution" in f.subject]
+        con.execute("INSERT INTO silver.contribution VALUES (1, '21/0001')")
+        a = audit.Audit(); audit.check_duplicates(con, a)
+        assert [f for f in a.findings if "contribution" in f.subject]
+

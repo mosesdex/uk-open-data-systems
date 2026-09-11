@@ -150,6 +150,7 @@ def cmd_load(args) -> int:
     steps = [
         ("postcodes",  lambda: load_mod.load_codepoint(con, BRONZE / "os_code_point_open.zip")),
         ("boundaries", lambda: load_mod.load_lad_boundaries(con, BRONZE / "ons_lad_boundaries.geojson")),
+        ("counties",   lambda: load_mod.load_lad_county(con, BRONZE / "ons_lad_county.json")),
         ("properties", lambda: load_mod.load_uprn(con, BRONZE / "os_open_uprn.zip")),
         # Corroboration sources: each is a second route to something the
         # platform already publishes, so the cross-checks have something to
@@ -764,47 +765,109 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def _record_backfill(con, run_id: str, part: str, res, started: float,
+                     bronze: Path = BRONZE) -> int:
+    """Log a backfill step the way `gt fetch` logs a fetch.
+
+    Backfill steps page or resolve their way to a file rather than making one
+    request, and they used to write it with no fetch-log row: the data was
+    there with no record of when it came or what it was. Each registry source
+    a step completes now gets one -- when, how long, how many bytes, and the
+    file's SHA-256. A step that found its file already complete fetched
+    nothing, and records nothing.
+    """
+    import hashlib
+    import time
+    from datetime import timezone
+    from types import SimpleNamespace
+    if str(res.detail).startswith("already complete"):
+        return 0
+    srcs = [s for s in S.REGISTRY if s.needs_backfill == part]
+    path = Path(bronze) / res.name
+    digest = size = None
+    if path.is_file():
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        digest, size = h.hexdigest(), path.stat().st_size
+    for s in srcs:
+        store.record_fetch(con, run_id, SimpleNamespace(
+            source_id=s.id,
+            fetched_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            http_status=200 if res.ok else None, ok=bool(res.ok), sha256=digest,
+            bytes_len=size if size is not None else (res.bytes or None),
+            content_type=None, elapsed_ms=int((time.time() - started) * 1000),
+            path=str(path) if path.is_file() else None,
+            note=f"gt backfill {part}: {res.detail}"[:300], final_url=s.url))
+    return len(srcs)
+
+
 def cmd_backfill(args) -> int:
     """Complete the sources that were originally taken in part."""
     from . import backfill as B
     sess = B._session()
     parts = args.only or ["bduk", "edm", "companies", "aims", "ps2", "psc", "contracts", "gazette",
                           "nhs_ods", "ckan"]
+    # Each step's outcome goes into the fetch log as a fetch's does. The
+    # database is opened only to record, never held across a download.
+    import time
+    run_id = uuid.uuid4().hex[:12]
+
+    def step(part, fn):
+        t0 = time.time()
+        out = fn()
+        con = store.connect(DB)
+        try:
+            for res in (out if isinstance(out, list) else [out]):
+                _record_backfill(con, run_id, part, res, t0)
+        finally:
+            con.close()
+        return out
+
     results = []
     if "bduk" in parts:
         print(f"{BOLD}BDUK premises, all regions{OFF}")
-        results += B.fetch_bduk(BRONZE, sess)
+        results += step("bduk", lambda: B.fetch_bduk(BRONZE, sess))
     if "edm" in parts:
         print(f"{BOLD}EDM storm overflow, all years{OFF}")
-        results += B.fetch_edm(BRONZE, sess)
+        results += step("edm", lambda: B.fetch_edm(BRONZE, sess))
     if "companies" in parts:
         print(f"{BOLD}Companies House basic company data{OFF}")
-        results.append(B.fetch_companies_house(BRONZE, sess))
+        results.append(step("companies", lambda: B.fetch_companies_house(BRONZE, sess)))
     if "contracts" in parts:
         print(f"{BOLD}Contracts Finder backfill{OFF}")
-        results.append(B.fetch_contracts(BRONZE, pages=args.pages, s=sess))
+        results.append(step("contracts", lambda: B.fetch_contracts(BRONZE, pages=args.pages, s=sess)))
     if "aims" in parts:
         print(f"{BOLD}Environment Agency flood defences, all pages{OFF}")
-        results.append(B.fetch_aims(BRONZE, sess))
+        results.append(step("aims", lambda: B.fetch_aims(BRONZE, sess)))
     if "ps2" in parts:
         print(f"{BOLD}Planning statistics PS2 table{OFF}")
-        results.append(B.fetch_ps2(BRONZE, sess))
+        results.append(step("ps2", lambda: B.fetch_ps2(BRONZE, sess)))
     if "rainfall" in parts:
         print(f"{BOLD}Annual rainfall totals per station{OFF}")
-        results.append(B.fetch_rainfall(BRONZE, s=sess))
+        results.append(step("rainfall", lambda: B.fetch_rainfall(BRONZE, s=sess)))
     if "psc" in parts:
         print(f"{BOLD}Companies House PSC, all snapshot parts{OFF}")
-        results.append(B.fetch_psc(BRONZE, sess))
+        results.append(step("psc", lambda: B.fetch_psc(BRONZE, sess)))
     if "nhs_ods" in parts:
-        results.append(B.fetch_nhs_ods(BRONZE, s=sess))
+        results.append(step("nhs_ods", lambda: B.fetch_nhs_ods(BRONZE, s=sess)))
     if "ckan" in parts:
-        results.append(B.fetch_ckan(BRONZE, s=sess))
+        results.append(step("ckan", lambda: B.fetch_ckan(BRONZE, s=sess)))
+    # Not in the default set: both page the planning data API, and the
+    # agreements are the only published route from a contribution to a site.
+    if "developer_agreements" in parts:
+        print(f"{BOLD}Planning developer agreements, every page{OFF}")
+        results.append(step("developer_agreements", lambda: B.fetch_developer_agreements(BRONZE, sess)))
+    if "planning_applications" in parts:
+        print(f"{BOLD}Planning applications, every page{OFF}")
+        results.append(step("planning_applications", lambda: B.fetch_planning_applications(BRONZE, sess)))
     if "gazette" in parts:
         print(f"{BOLD}Gazette insolvency backfill{OFF}")
-        results.append(B.fetch_gazette(BRONZE, pages=args.pages, s=sess))
+        results.append(step("gazette", lambda: B.fetch_gazette(BRONZE, pages=args.pages, s=sess)))
     if "planit" in parts:
         print(f"{BOLD}PlanIt water-quality planning corpus (polite, rate-limited){OFF}")
-        results.append(B.fetch_planit_planning(BRONZE, sess))
+        results.append(step("planit_planning", lambda: B.fetch_planit_planning(BRONZE, sess)))
 
     print()
     for r in results:
@@ -1437,7 +1500,8 @@ def main(argv=None) -> int:
 
     pbf = sub.add_parser("backfill", help="complete sources taken only in part")
     pbf.add_argument("--only", nargs="*",
-                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette", "planit", "nhs_ods", "ckan"])
+                     choices=["bduk", "edm", "companies", "aims", "ps2", "psc", "rainfall", "contracts", "gazette", "planit", "nhs_ods", "ckan",
+                              "developer_agreements", "planning_applications"])
     pbf.add_argument("--pages", type=int, default=200)
     pbf.add_argument("--strict", action="store_true")
     pbf.set_defaults(fn=cmd_backfill)

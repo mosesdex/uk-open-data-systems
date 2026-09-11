@@ -203,3 +203,6 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
   .tiles{grid-template-columns:1fr}
 }
 @media(max-width:860px) and (prefers-reduced-motion: reduce){.side{transition:none}}
+
+/* Map hover: whose figure it is, when it is not the district's own. */
+.maptip em{display:block;font-style:normal;font-size:10.5px;opacity:.78;margin-top:2px}

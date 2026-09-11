@@ -46,6 +46,75 @@ ALIASES = {
     "the vale of glamorgan": "vale of glamorgan",
 }
 
+# District codes ONS reissued after the May 2024 boundaries this platform draws
+# its map from. The postcode register and BDUK's premises file already carry
+# the new codes; the boundaries, the county lookup and every system that names
+# its authority carry the old. Left alone, Barnsley and Sheffield each became
+# two districts -- one with a name and a polygon, the other holding every
+# postcode-placed figure -- and the two never met. Mapped back to the boundary
+# vintage because that is what the map is drawn from. Checked against the
+# schools themselves: GIAS names all 191 schools the spine had placed in
+# E08000039 as Sheffield, and all 97 in E08000038 as Barnsley.
+CODE_SUCCESSION = {
+    "E08000038": "E08000016",   # Barnsley
+    "E08000039": "E08000019",   # Sheffield
+}
+
+
+def boundary_code_sql(expr: str) -> str:
+    """SQL mapping a district-code expression to the boundary vintage."""
+    whens = " ".join(f"WHEN '{new}' THEN '{old}'" for new, old in CODE_SUCCESSION.items())
+    return f"(CASE {expr} {whens} ELSE {expr} END)"
+
+
+# Care, special educational needs and school place planning are duties of the
+# upper-tier council. For most districts that is the district's own council; in
+# two-tier areas it is the county. ONS's lookup also groups metropolitan
+# boroughs into metropolitan counties (E11) and London boroughs into Inner and
+# Outer London (E13), but no council holds these duties at either level, so
+# only the E10 county councils are used.
+UPPER_TIER_PREFIX = "E10"
+
+
+def districts_loaded(con: duckdb.DuckDBPyConnection) -> bool:
+    """Whether there are districts to hand figures to at all."""
+    return _table_exists(con, "silver.lad")
+
+
+def upper_tier_sql(con: duckdb.DuckDBPyConnection) -> str:
+    """One row per district, naming the authority whose figures describe it.
+
+    ``figure_for`` is 'district' where the district's own council publishes the
+    figure and 'county' where it is the county council's, shared by every
+    district in the county and never divided between them, because nothing
+    published says how. Without the lookup every district stands for itself,
+    so a two-tier district matches nothing rather than being handed a figure
+    that is not its own.
+    """
+    if not _table_exists(con, "silver.lad_county"):
+        return ("SELECT lad_code, lad_name, lad_code AS authority_code, "
+                "lad_name AS authority_name, 'district' AS figure_for FROM silver.lad")
+    return f"""
+        SELECT l.lad_code, l.lad_name,
+               COALESCE(c.county_code, l.lad_code) AS authority_code,
+               COALESCE(c.county_name, l.lad_name) AS authority_name,
+               CASE WHEN c.county_code IS NULL THEN 'district' ELSE 'county' END AS figure_for
+        FROM silver.lad l
+        LEFT JOIN silver.lad_county c
+          ON c.lad_code = l.lad_code AND c.county_code LIKE '{UPPER_TIER_PREFIX}%'"""
+
+
+def authority_index(con: duckdb.DuckDBPyConnection) -> dict[str, tuple[str, str]]:
+    """Map a normalised name to (code, name) for every upper-tier authority."""
+    idx: dict[str, tuple[str, str]] = {}
+    for code, name in con.execute(
+            f"SELECT DISTINCT authority_code, authority_name FROM ({upper_tier_sql(con)})"
+            ).fetchall():
+        key = normalise_authority(name)
+        if key:
+            idx[key] = (code, name)
+    return idx
+
 
 @dataclass
 class ResolutionReport:
@@ -112,11 +181,25 @@ SOURCES = {
     "bulwark":    ("gold.bulwark_authority",   "local_authority"),
     "ledger":     ("gold.ledger_authority",    "authority"),
     "lastmile":   ("gold.lastmile_authority",  "lad_name"),
-    "compass":    ("gold.compass_trend",       "la_name"),
+    "compass":    ("gold.compass_district",    "lad_name"),
     "plumbline":  ("gold.plumbline_authority", "lpa"),
     "highwater":  ("gold.highwater_authority", "lpa"),
     "sightline":  ("gold.sightline_authority", "lpa"),
-    "bellwether": ("gold.bellwether_group",    "local_authority"),
+    "bellwether": ("gold.bellwether_district", "lad_name"),
+}
+
+# Systems published per upper-tier authority. Their district tables hold one
+# row per district with the authority's figures and whether they are the
+# district's own or its county's. Resolution is reported against what the
+# system itself publishes -- authority names, or DfE's codes -- so the rate says
+# how many authorities were placed, not how many districts a county's figure
+# was copied to.
+TIERED = {
+    "bellwether": {"published": "gold.bellwether_group", "key": "local_authority",
+                   "label": "local_authority", "where": ""},
+    "compass":    {"published": "gold.compass_trend", "key": "la_code",
+                   "label": "la_name || ' (series ends ' || last_year || ')'",
+                   "where": "provision = 'Education, health and care plan'"},
 }
 
 
@@ -140,7 +223,7 @@ def place_view(con: duckdb.DuckDBPyConnection) -> dict:
     resolution: dict[str, dict] = {}
 
     for system, (table, col) in SOURCES.items():
-        if not _table_exists(con, table):
+        if system in TIERED or not _table_exists(con, table):
             continue
         cur = con.execute(f"SELECT * FROM {table}")
         cols = [d[0] for d in cur.description]
@@ -155,19 +238,56 @@ def place_view(con: duckdb.DuckDBPyConnection) -> dict:
             code = mapping.get(r.get(col))
             if not code:
                 continue
-            entry = places.setdefault(code, {})
-            # Bellwether publishes one row per provider; keep the largest share.
-            if system == "bellwether":
-                cur_best = entry.get("bellwether")
-                if not cur_best or (r.get("share_pct") or 0) > (cur_best.get("share_pct") or 0):
-                    entry["bellwether"] = r
-            elif system == "compass":
-                if r.get("provision") == "Education, health and care plan":
-                    entry["compass"] = r
-            else:
-                entry[system] = r
+            places.setdefault(code, {})[system] = r
+
+    for system, spec in TIERED.items():
+        table, key = SOURCES[system][0], spec["key"]
+        if not (_table_exists(con, table) and _table_exists(con, spec["published"])):
+            continue
+        cur = con.execute(f"SELECT * FROM {table} WHERE {key} IS NOT NULL")
+        cols = [d[0] for d in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        for r in rows:
+            places.setdefault(r["lad_code"], {})[system] = r
+        where = f"WHERE {spec['where']}" if spec["where"] else ""
+        published = dict(con.execute(
+            f"SELECT DISTINCT {key}, {spec['label']} FROM {spec['published']} {where}").fetchall())
+        placed = {r[key] for r in rows} & set(published)
+        resolution[system] = {
+            "names": len(published), "matched": len(placed),
+            "rate": round(100 * len(placed) / len(published), 1) if published else 0.0,
+            "unmatched": sorted(str(v) for k, v in published.items() if k not in placed)[:12],
+            "counties": len({r[key] for r in rows if r.get("figure_for") == "county"}),
+            "county_districts": sum(1 for r in rows if r.get("figure_for") == "county"),
+        }
+        # These repeat what the row's own key and label already say, and no
+        # page reads them; dropped once resolution has been measured from them.
+        for r in rows:
+            for k in ("lad_code", "lad_name", "authority_code", "la_code", "la_name",
+                      "local_authority", "provision", "first_year"):
+                r.pop(k, None)
+
+    # School capacity is returned per education authority, so a two-tier
+    # district's series is its county's. Held once per authority; each district
+    # points at the series it sits under.
+    capacity: dict[str, dict] = {}
+    if _table_exists(con, "gold.catchment_trend_by_district"):
+        for auth, name, label, pct in con.execute("""
+                SELECT authority_code, any_value(authority_name), year_label,
+                       any_value(utilisation_pct)
+                FROM gold.catchment_trend_by_district
+                GROUP BY authority_code, period, year_label
+                ORDER BY authority_code, period""").fetchall():
+            s = capacity.setdefault(auth, {"name": name, "years": [], "pct": []})
+            s["years"].append(label)
+            s["pct"].append(pct)
+        for code, auth, level in con.execute("""
+                SELECT DISTINCT lad_code, authority_code, figure_for
+                FROM gold.catchment_trend_by_district""").fetchall():
+            places.setdefault(code, {})["_capacity"] = {"authority": auth, "figure_for": level}
 
     for code, entry in places.items():
         entry["_systems"] = sorted(k for k in entry if not k.startswith("_"))
 
-    return {"places": places, "resolution": resolution, "districts": len(places)}
+    return {"places": places, "resolution": resolution, "districts": len(places),
+            "capacity": capacity}

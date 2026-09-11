@@ -222,7 +222,8 @@ const SystemPage = (() => {
           <div class="row" style="justify-content:space-between;align-items:baseline">
             <span style="font-size:13.5px;font-weight:600">${src.name}</span>
             <span class="tag ${src.ok?'tag--ok':'tag--bad'}">${src.status}</span></div>
-          <div class="card__s" style="font-size:12px;margin-top:.15rem">${src.publisher}</div>
+          <div class="card__s" style="font-size:12px;margin-top:.15rem">${src.publisher}${src.authority === 'third party'
+            ? ' <span class="tag tag--warn">aggregator</span> <span style="font-size:11px;color:var(--ink-3)">served by a third party, not the publisher</span>' : ''}</div>
           <div class="row card__s mono" style="font-size:10.5px;margin-top:.35rem;gap:.8rem;color:var(--ink-3)">
             <span>${src.licence || 'licence not stated'}</span><span>${src.cadence || 'cadence not stated'}</span>
             ${src.bytes ? `<span>${(src.bytes/1e6).toFixed(1)} MB</span>` : ''}
