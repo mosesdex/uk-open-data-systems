@@ -15,14 +15,14 @@ const Shell = (() => {
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const esc = v => String(v == null ? '' : v)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const num = v => v == null || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-GB');
+  const num = v => v == null || Number.isNaN(Number(v)) ? 'n/a' : Number(v).toLocaleString('en-GB');
 
   /* ---------------------------------------------------------------- nav ---- */
   const NAV_PUBLIC = [
     { group: 'Explore', items: [
       { id: '',        icon: '◉', label: 'Overview' },
       { id: 'places',  icon: '▣', label: 'Places',        count: () => Platform.placeList().length },
-      { id: 'systems', icon: '▦', label: 'Systems',       count: () => Platform.builtSystems().length },
+      { id: 'systems', icon: '▦', label: 'What it answers', count: () => Platform.builtSystems().length },
       { id: 'orgs',    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
     ]},
     { group: 'Evidence', items: [
@@ -39,7 +39,7 @@ const Shell = (() => {
   const TITLES_PUBLIC = {
     '':        ['Explore', 'National picture'],
     places:    ['Explore · Places', 'Places'],
-    systems:   ['Explore · Systems', 'The thirteen systems'],
+    systems:   ['Explore · What it answers', 'The thirteen questions'],
     orgs:      ['Explore · Organisations', 'Organisations'],
     sources:   ['Evidence · Sources', 'Where every figure comes from'],
     method:    ['Evidence · Method', 'How GroundTruth works'],
@@ -79,7 +79,7 @@ const Shell = (() => {
           <i class="navi__dot" aria-hidden="true"></i>${esc(it.label)}${badge}</a>`;
       }).join('')}
     `).join('') + (CFG.systemList === false ? '' : `
-      <div class="side__group">Jump to a system</div>
+      <div class="side__group">Jump to a question</div>
       <div id="navSystems">${systemNav()}</div>`);
   }
 
@@ -163,7 +163,7 @@ const Shell = (() => {
       { l: 'Sources holding data', v: `${holding} of ${src.total}`,
         s: `${blocked} refused an anonymous request, ${absent} never fetched`,
         k: blocked ? 'warn' : 'ok', href: '#/sources' },
-      { l: 'Rows held', v: a ? num(a.rowsHeld) : '—', s: a ? `across ${num(a.tableCount)} tables` : 'platform output not loaded', k: '' },
+      { l: 'Rows held', v: a ? num(a.rowsHeld) : 'n/a', s: a ? `across ${num(a.tableCount)} tables` : 'platform output not loaded', k: '' },
       { l: 'Districts covered', v: num(Platform.placeList().length), s: 'every English district with a figure', k: '', href: '#/places' },
     ];
     $('#ovTiles').innerHTML = tiles.map(t => {
@@ -223,7 +223,7 @@ const Shell = (() => {
 
     $('#ovMap').innerHTML = `
       <div class="vhead"><div>
-        <div class="vhead__t" style="font-size:17px">One place, every system</div>
+        <div class="vhead__t" style="font-size:17px">One place, the whole record</div>
         <div class="vhead__s">Every district, shaded by how many of the thirteen can say anything
         there.</div></div>
         <div class="vhead__r"><a class="btn btn--ghost" href="#/places">Open Places &rarr;</a></div></div>`;
@@ -255,7 +255,7 @@ const Shell = (() => {
     box.innerHTML = `
       <div class="vhead"><div>
         <div class="vhead__t" style="font-size:17px">Every district</div>
-        <div class="vhead__s">Each row opens what all thirteen systems found there.</div></div></div>
+        <div class="vhead__s">Each row opens everything the record holds for that place.</div></div></div>
       <div class="fbar">
         <button class="fchip${placeFilter.min === 0 ? ' is-on' : ''}" data-min="0">All districts</button>
         <button class="fchip${placeFilter.min === 5 ? ' is-on' : ''}" data-min="5">5+ systems</button>
@@ -337,9 +337,9 @@ const Shell = (() => {
           <span class="prov__k">Source</span><span><b>${esc(r.name)}</b><br>
             <span style="color:var(--ink-3)">${esc(r.publisher || '')}${r.licence ? ' · ' + esc(r.licence) : ''}</span>${r.authority === 'third party'
               ? '<br><span class="st st--warn">aggregator</span> <span style="color:var(--ink-3);font-size:11.5px">served by a third party, not the publisher</span>' : ''}</span>
-          <span class="prov__k">Fetched</span><span class="mono">${r.fetched ? esc(String(r.fetched).slice(0, 19).replace('T', ' ')) : '—'}</span>
+          <span class="prov__k">Fetched</span><span class="mono">${r.fetched ? esc(String(r.fetched).slice(0, 19).replace('T', ' ')) : 'n/a'}</span>
           <span class="prov__k">State</span><span><span class="st st--${r.ok ? 'ok' : 'bad'}">${esc(r.status)}</span>${r.ok && !r.hashed ? ' <span class="st st--warn">no hash</span>' : ''}</span>
-        </div>`).join('') : `<div class="prov__r"><span class="prov__k">—</span>
+        </div>`).join('') : `<div class="prov__r"><span class="prov__k">n/a</span>
           <span style="color:var(--ink-3)">No source is registered against this system yet.</span></div>`}
       </div>`;
   }
@@ -384,7 +384,7 @@ const Shell = (() => {
         </tr>`).join('')}</tbody></table></div>
       ${rep.capacity ? capacityBlock(rep.capacity) : ''}
       ${rep.silent ? emptyFact(`${rep.silent} systems have nothing to say here`,
-        'That is a fact about the published data, not a gap in the platform — either no data reaches this district, or the system is planned at a different geography.',
+        'That is a fact about the published data, not a gap in the platform, either no data reaches this district, or the system is planned at a different geography.',
         '#/sources', 'See the sources') : ''}`;
     openPanel('Place · ' + code, rep.name, body);
     panel.querySelectorAll('[data-sys]').forEach(tr => tr.onclick = () => {
@@ -474,7 +474,7 @@ const Shell = (() => {
         const unav = (g.unavailable || []), broken = Object.keys(g.broken || {});
         gh.innerHTML = `<div class="dt-wrap"><table class="dt">
             <thead><tr><th>From</th><th>To</th><th class="num">Relationships</th><th>What it means</th></tr></thead>
-            <tbody>${rows.map(([p, c]) => { const d = PREDICATE[p] || [p, '—', '']; return `<tr><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td class="num">${num(c)}</td><td>${esc(d[2])}</td></tr>`; }).join('')}</tbody>
+            <tbody>${rows.map(([p, c]) => { const d = PREDICATE[p] || [p, 'n/a', '']; return `<tr><td>${esc(d[0])}</td><td>${esc(d[1])}</td><td class="num">${num(c)}</td><td>${esc(d[2])}</td></tr>`; }).join('')}</tbody>
           </table></div>
           <p class="mnote">${num(total)} relationships across ${rows.length} declared types. ${unav.length ? `${unav.length} could not be built (${unav.map(esc).join(', ')}).` : 'Every declared type was built'}${broken.length ? `, and ${broken.length} is broken (${broken.map(esc).join(', ')}).` : ', and none is broken.'}
           ${spine ? `${num(spine)} of them are the place spine itself: postcodes placed in districts.${allLedger ? ' The rest trace a developer contribution to the agreement, application and payments behind it.' : ''}` : ''}</p>`;
@@ -526,8 +526,8 @@ const Shell = (() => {
                   <tbody>${(c.detail || []).map(s => {
                     const cz = s.available ? ['ok', 'present'] : (CAUSE[s.absent_because] || ['none', s.absent_because || 'absent']);
                     return `<tr><td><b>${esc(s.step)}</b><br><span style="color:var(--ink-3);font-size:11.5px">${esc(s.question || '')}</span>${s.reason ? `<br><span style="color:var(--ink-3);font-size:11.5px">${esc(s.reason)}</span>` : ''}</td>
-                      <td class="mono" style="font-size:11.5px;word-break:break-all">${s.table ? esc(s.table + '.' + s.column) : '—'}</td>
-                      <td class="num">${s.populated_pct != null ? esc(s.populated_pct) + '%' : '—'}</td>
+                      <td class="mono" style="font-size:11.5px;word-break:break-all">${s.table ? esc(s.table + '.' + s.column) : 'n/a'}</td>
+                      <td class="num">${s.populated_pct != null ? esc(s.populated_pct) + '%' : 'n/a'}</td>
                       <td><span class="st st--${cz[0]}">${esc(cz[1])}</span></td></tr>`;
                   }).join('')}</tbody></table></div></details>`;
             }).join('');
@@ -545,16 +545,16 @@ const Shell = (() => {
     // A check over one aggregate row compares two totals; "0% agree" would
     // misstate it, so it shows the two totals instead.
     const agree = r => {
-      if (!r.run) return '—';
+      if (!r.run) return 'n/a';
       const ex = (r.examples || [])[0];
       if (r.compared === 1 && ex && ex.left_value != null && ex.right_value != null) return `${num(ex.left_value)} vs ${num(ex.right_value)}`;
-      return r.agreement_pct != null ? `${r.agreement_pct}%` : '—';
+      return r.agreement_pct != null ? `${r.agreement_pct}%` : 'n/a';
     };
     host.innerHTML = `<p class="mnote" style="margin:0 0 .8rem">${num(rs.length)} checks compare a quantity the platform holds twice, by two routes. ${num(ran.length)} ran and ${num(dis.length)} found a disagreement${un.length ? `; ${num(un.length)} could not run because an input is missing` : ''}. A disagreement is reported, never resolved: the platform has no standing to say which record is right.</p>
       <div class="dt-wrap"><table class="dt">
         <thead><tr><th>Quantity</th><th class="num">Compared</th><th class="num">Disagree</th><th class="num">Agreement</th></tr></thead>
         <tbody>${rs.map(r => `<tr><td><b>${esc(r.quantity || r.check)}</b><br><span style="color:var(--ink-3);font-size:11.5px">${esc(r.note || '')}</span></td>
-          <td class="num">${r.run ? num(r.compared) : '—'}</td>
+          <td class="num">${r.run ? num(r.compared) : 'n/a'}</td>
           <td class="num">${r.run ? `<span class="st st--${r.disagreed ? 'warn' : 'ok'}">${num(r.disagreed)}</span>` : '<span class="st st--none">not run</span>'}</td>
           <td class="num">${agree(r)}</td></tr>`).join('')}</tbody>
       </table></div>`;
@@ -579,7 +579,8 @@ const Shell = (() => {
     const [crumb, title] = T[key] || T[''] || ['', ''];
     const c = $('.top__crumb'), t = $('.top__title');
     if (c) c.textContent = (CFG.crumb || DEFAULTS.crumb) + ' · ' + crumb;
-    if (t) t.textContent = title;
+    // A detail route names the thing itself; the section name is the fallback.
+    if (t) t.textContent = docName || title;
     $$('[data-nav]').forEach(a => a.classList.toggle('is-on', a.dataset.nav === key));
     const activeSys = (location.hash.match(/^#\/systems\/([a-z0-9_-]+)/i) || [])[1] || '';
     $$('[data-sysnav]').forEach(a => a.classList.toggle('is-on', a.dataset.sysnav === activeSys));
@@ -596,6 +597,50 @@ const Shell = (() => {
     '#org': '#/orgs', '#search': '#/search',
   };
 
+  /* One title and description per route. The shell left both at the homepage
+     values, so every tab, bookmark and shared link read the same, and a screen
+     reader announced the same sentence on every navigation. The canonical link
+     deliberately stays on the root: these are fragments, not separate URLs, and
+     a crawler is served the static pages instead. */
+  const DOCS = {
+    '':        ['National picture', 'What the connected record holds right now, and what each of the thirteen questions answers.'],
+    places:    ['Places', 'Every district, with school places, planning speed, flood defences, care ownership and connectivity read side by side.'],
+    systems:   ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    orgs:      ['Organisations', 'Companies and public bodies resolved to one identifier across procurement, care and ownership records.'],
+    sources:   ['Sources', 'Every source the record reads, when it was last fetched, and what failed.'],
+    method:    ['Method', 'The two joins, what each figure assumes, and every correction published so far.'],
+    search:    ['Search', 'Search organisations, places and the thirteen questions.'],
+  };
+
+  let docName = '';
+
+  function setDoc(head, seg) {
+    let [name, desc] = DOCS[head] || DOCS[''];
+    const specific = !!seg[1];
+    try {
+      if (head === 'places' && seg[1]) {
+        const pl = (Platform.placeList() || []).find(x => x.code === seg[1]);
+        if (pl) { name = pl.name;
+          desc = `What the connected record says about ${pl.name}: school places, planning speed, flood `
+               + `defences, care ownership and connectivity, each computed from a published file.`; }
+      } else if (head === 'systems' && seg[1]) {
+        const sy = SYSTEMS.find(x => x.id === seg[1]);
+        if (sy) { name = sy.n; desc = `${sy.n}: ${sy.s || 'one of the thirteen questions the connected record answers'}.`; }
+      } else if (head === 'orgs' && seg[1]) {
+        name = decodeURIComponent(seg[1]);
+        desc = `${name} across procurement, care and ownership records, resolved to one identifier.`;
+      }
+    } catch (e) { /* the payload may not be in yet; the route title still stands */ }
+    docName = specific ? name : '';
+    document.title = `${name} | UK GroundTruth`;
+    const meta = (sel, val) => { const el = document.querySelector(sel); if (el) el.setAttribute('content', val); };
+    meta('meta[name="description"]', desc);
+    meta('meta[property="og:title"]', document.title);
+    meta('meta[property="og:description"]', desc);
+    meta('meta[name="twitter:title"]', document.title);
+    meta('meta[name="twitter:description"]', desc);
+  }
+
   function route() {
     const raw = location.hash || '#/';
     const L = legacy();
@@ -609,6 +654,7 @@ const Shell = (() => {
     const seg = path.split('/').filter(Boolean);
     const head = seg[0] || '';
     closePanel();
+    setDoc(head, seg);
 
     // A console supplies its own routes; the public ones are the fallback.
     if (CFG.onRoute) {
@@ -759,7 +805,7 @@ const Shell = (() => {
         t && String(o.name || '').toLowerCase().includes(t)).slice(0, 8);
 
       if (places.length) out.push(['Places', places.slice(0, 8).map(p => ({
-        icon: '▣', t: p.name, s: `${p.systems} of 13 systems report here`, w: `${p.systems}/13`,
+        icon: '▣', t: p.name, s: `${p.systems} of thirteen questions answered here`, w: `${p.systems}/13`,
         go: () => { location.hash = '#/places'; setTimeout(() => openPlace(p.code), 30); } }))]);
       if (orgs.length) out.push(['Organisations', orgs.map(o => ({
         icon: '⬢', t: o.name, s: o.number ? 'Company ' + o.number : 'organisation',

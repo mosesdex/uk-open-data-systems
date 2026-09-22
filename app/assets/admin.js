@@ -68,7 +68,7 @@ const Admin = (() => {
       s: (s.publisher || '') + ' · registered, no data on disk', go: '#/sources' }));
     (r.sources || []).filter(s => s.provenance === 'unlogged').forEach(s => items.push({
       sev: 'warn', tag: 'unlogged', t: s.name,
-      s: 'holds data with no fetch record — backfill wrote it directly', go: '#/integrity' }));
+      s: 'holds data with no fetch record, backfill wrote it directly', go: '#/integrity' }));
     if (a.reviewCount) items.push({
       sev: 'warn', tag: 'review', t: `${num(a.reviewCount)} matches await a person`,
       s: 'real ambiguity in the data; nothing has been merged', go: '#/review' });
@@ -137,9 +137,9 @@ const Admin = (() => {
       <div class="tile${tone}"><div class="tile__l">${esc(f.severity)}</div>
         <div class="tile__v" style="font-size:16px;line-height:1.35">${esc(f.summary)}</div></div>
       <div class="prov" style="margin-top:1rem"><div class="prov__h">Evidence</div>
-        <div class="prov__r"><span class="mono" style="font-size:12px;white-space:pre-wrap;word-break:break-word">${esc(f.evidence || '—')}</span></div></div>
+        <div class="prov__r"><span class="mono" style="font-size:12px;white-space:pre-wrap;word-break:break-word">${esc(f.evidence || 'n/a')}</span></div></div>
       <div class="prov" style="margin-top:1rem"><div class="prov__h">Remedy</div>
-        <div class="prov__r"><span style="font-size:12.5px">${esc(f.remedy || '—')}</span></div></div>`);
+        <div class="prov__r"><span style="font-size:12.5px">${esc(f.remedy || 'n/a')}</span></div></div>`);
   }
 
   /* One snapshot per publish: the row count and content hash of every table. */
@@ -153,7 +153,7 @@ const Admin = (() => {
       : `<div class="dt-wrap"><table class="dt dt--compact">
           <thead><tr><th>Taken</th><th>Label</th><th>Code</th><th class="num">Tables</th><th class="num">Rows</th></tr></thead>
           <tbody>${snaps.map(x => `<tr><td class="mono" style="font-size:11.5px">${esc(String(x.taken_at || '').slice(0, 16).replace('T', ' '))}</td>
-            <td>${esc(x.label || '—')}</td><td class="mono" style="font-size:11.5px">${esc(x.code_version || '—')}</td>
+            <td>${esc(x.label || 'n/a')}</td><td class="mono" style="font-size:11.5px">${esc(x.code_version || 'n/a')}</td>
             <td class="num">${num(x.tables || 0)}</td><td class="num">${num(x.rows || 0)}</td></tr>`).join('')}</tbody></table></div>`;
   }
 
@@ -176,8 +176,8 @@ const Admin = (() => {
         <thead><tr><th>System</th><th>Figure</th><th>Source</th><th class="num">Coverage</th></tr></thead>
         <tbody>${rows.map(o => `<tr><td><b>${esc(o.sys)}</b><br><span class="mono" style="font-size:10.5px;color:var(--ink-3);word-break:break-all">${esc(o.subject)}</span></td>
           <td>${esc(o.value_text)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(o.label)}</span></td>
-          <td style="font-size:12px">${esc(o.source_id || '—')}<br><span class="mono" style="font-size:10.5px;color:var(--ink-3)">${o.sha256 ? 'SHA-256 ' + esc(String(o.sha256).slice(0, 12)) + '…' : 'no fetch record'}</span></td>
-          <td class="num">${o.coverage_pct != null ? esc(o.coverage_pct) + '%' : '—'}</td></tr>`).join('')}</tbody>
+          <td style="font-size:12px">${esc(o.source_id || 'n/a')}<br><span class="mono" style="font-size:10.5px;color:var(--ink-3)">${o.sha256 ? 'SHA-256 ' + esc(String(o.sha256).slice(0, 12)) + '…' : 'no fetch record'}</span></td>
+          <td class="num">${o.coverage_pct != null ? esc(o.coverage_pct) + '%' : 'n/a'}</td></tr>`).join('')}</tbody>
       </table></div>`;
   }
 
@@ -195,7 +195,7 @@ const Admin = (() => {
       </div>
       <div class="prov" style="margin-top:1rem"><div class="prov__h">Every field this run recorded</div>
         ${rows.map(([k, v]) => `<div class="prov__r"><span class="prov__k">${esc(k)}</span>
-          <span class="mono" style="font-size:12px">${esc(v == null ? '—' : String(v))}</span></div>`).join('')}
+          <span class="mono" style="font-size:12px">${esc(v == null ? 'n/a' : String(v))}</span></div>`).join('')}
       </div>`);
   }
 
@@ -217,7 +217,7 @@ const Admin = (() => {
            ['Provenance', s.provenance],
            ['Served by', s.authority === 'third party' ? 'a third party, not the publisher' : s.authority === 'delegated' ? 'the publisher, through hosting it runs elsewhere' : s.authority === 'publisher' ? 'the publisher' : null]]
           .map(([k, v]) => `<div class="prov__r"><span class="prov__k">${esc(k)}</span>
-            <span style="font-size:12.5px">${v == null || v === '' ? '—' : esc(String(v))}</span></div>`).join('')}
+            <span style="font-size:12.5px">${v == null || v === '' ? 'n/a' : esc(String(v))}</span></div>`).join('')}
       </div>`);
   }
 
@@ -227,11 +227,11 @@ const Admin = (() => {
     Shell.openPanel('Table', name, `
       <div class="tiles" style="grid-template-columns:repeat(2,1fr)">
         <div class="tile"><div class="tile__l">Rows</div><div class="tile__v">${num(t.rows)}</div></div>
-        <div class="tile"><div class="tile__l">Layer</div><div class="tile__v" style="font-size:18px">${esc(t.layer || '—')}</div></div>
+        <div class="tile"><div class="tile__l">Layer</div><div class="tile__v" style="font-size:18px">${esc(t.layer || 'n/a')}</div></div>
       </div>
       <div class="prov" style="margin-top:1rem"><div class="prov__h">Every field recorded for this table</div>
         ${Object.entries(t).map(([k, v]) => `<div class="prov__r"><span class="prov__k">${esc(k)}</span>
-          <span class="mono" style="font-size:12px">${esc(v == null ? '—' : String(v))}</span></div>`).join('')}
+          <span class="mono" style="font-size:12px">${esc(v == null ? 'n/a' : String(v))}</span></div>`).join('')}
       </div>`);
   }
 

@@ -8,7 +8,7 @@
    Rule: metrics and insights are computed from `out` (the system's gold
    tables). No figure is hand-typed. */
 const SYSVIEW = (() => {
-  const n = v => v == null ? '—' : Number(v).toLocaleString('en-GB');
+  const n = v => v == null ? 'n/a' : Number(v).toLocaleString('en-GB');
 
   return {
     catchment: {
@@ -44,7 +44,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'How full mainstream school places are in every English district. Darker means more of the places are already taken.',
           read: 'Each shape is a local authority district. Hover any district for its exact utilisation; the deepest shades are the districts closest to running out of room.',
-          standout: 'Pressure is regional, not national — the average sits near 90%, but individual districts range from the low 70s to over 100%.',
+          standout: 'Pressure is regional, not national, the average sits near 90%, but individual districts range from the low 70s to over 100%.',
         },
         draw: (out, el, { GT }) => {
           const values = {};
@@ -58,7 +58,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'The ten districts with the highest share of mainstream places already in use.',
           read: 'Longer bars mean fuller schools. The figure is pupils divided by published capacity for that district.',
-          standout: 'The leaders cluster just under or over 100% — these are the places where a single new development leaves no room.',
+          standout: 'The leaders cluster just under or over 100%, these are the places where a single new development leaves no room.',
         },
         draw: (out, el, { GT }) => {
           const rows = out.by_district.filter(d => d.utilisation_pct != null)
@@ -74,13 +74,13 @@ const SYSVIEW = (() => {
         const bot = [...bd].sort((a, b) => a.utilisation_pct - b.utilisation_pct)[0];
         const over = bd.filter(d => d.utilisation_pct > 100).length;
         return [
-          `Specialist provision runs tighter than mainstream — ${out.specialist.utilisation_pct}% of places in use against ${out.national.utilisation_pct}% for mainstream.`,
+          `Specialist provision runs tighter than mainstream: ${out.specialist.utilisation_pct}% of places in use against ${out.national.utilisation_pct}% for mainstream.`,
           `${n(out.specialist.over_capacity)} specialist settings are already over capacity.`,
           `${top.lad_name} is the most pressured district, at ${top.utilisation_pct}% of mainstream places in use.`,
           `${bot.lad_name} has the most room to spare, at ${bot.utilisation_pct}%.`,
           over > 1
             ? `${over} districts are over 100% of mainstream capacity.`
-            : `Only ${over} district is over 100% capacity — the strain shows as districts nearing the line, not breaching it.`,
+            : `Only ${over} district is over 100% capacity, the strain shows as districts nearing the line, not breaching it.`,
         ];
       },
       definitions: [
@@ -100,9 +100,9 @@ const SYSVIEW = (() => {
             { label: 'Secondary low point', value: secLow.secondary_pct + '%', sub: secLow.year_label + ', before the bulge arrived' },
           ],
           explain: {
-            shows: 'Mainstream school-place utilisation each year since 2009/10 — primary and secondary shown separately.',
+            shows: 'Mainstream school-place utilisation each year since 2009/10, primary and secondary shown separately.',
             read: 'The horizontal axis is the school year; the vertical axis is the share of places in use. Blue is primary, red is secondary.',
-            standout: 'The two phases move out of step: secondary emptied to the mid-80s by 2015/16, then filled back up as the primary bulge moved through — a demographic wave, not a policy change.',
+            standout: 'The two phases move out of step: secondary emptied to the mid-80s by 2015/16, then filled back up as the primary bulge moved through, a demographic wave, not a policy change.',
           },
           draw: (out, el, { GT }) => {
             const tt = out.trend || [];
@@ -131,12 +131,12 @@ const SYSVIEW = (() => {
         return [
           { label: 'Awards skipping open competition', value: (100 * uncompeted / awards).toFixed(1) + '%', sub: `${n(uncompeted)} of ${n(awards)} awards direct or limited` },
           { label: 'Awards analysed', value: n(awards), sub: 'grouped by buyer, supplier and route' },
-          { label: 'Let by selective tender', value: sel ? sel.share_pct + '%' : '—', sub: sel ? `${n(sel.awards)} awards, £${(sel.value/1e9).toFixed(2)}bn` : '' },
+          { label: 'Let by selective tender', value: sel ? sel.share_pct + '%' : 'n/a', sub: sel ? `${n(sel.awards)} awards, £${(sel.value/1e9).toFixed(2)}bn` : '' },
         ];
       },
       primary: {
         explain: {
-          shows: 'How many awards were let by each procurement route — from openly advertised to directly awarded.',
+          shows: 'How many awards were let by each procurement route, from openly advertised to directly awarded.',
           read: 'Longer bars mean more awards by that route. Selective and "not stated" together dwarf openly competed awards.',
           standout: 'Openly competed awards are a minority; most are selective or unrecorded, where a shared owner can hide.',
         },
@@ -146,7 +146,7 @@ const SYSVIEW = (() => {
         title: 'Buyers most reliant on a single supplier',
         explain: {
           shows: 'The buyers where one supplier takes the largest share of the awards.',
-          read: 'Longer bars mean more of that buyer’s awards — counted by number, not value — go to their top supplier.',
+          read: 'Longer bars mean more of that buyer’s awards, counted by number, not value, go to their top supplier.',
           standout: 'Several buyers put the great majority of their awards through one supplier.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.concentrated.slice(0, 10).map(c => ({ n: c.buyer, v: c.top_supplier_award_share })), { fmt: v => v + '%' }),
@@ -156,7 +156,7 @@ const SYSVIEW = (() => {
         const open = out.method.find(m => m.method === 'open');
         const cf = out.control_footprint || [];
         const r = [];
-        if (sel) r.push(`Selective tender is the single largest route — ${n(sel.awards)} awards worth £${(sel.value/1e9).toFixed(2)}bn.`);
+        if (sel) r.push(`Selective tender is the single largest route: ${n(sel.awards)} awards worth £${(sel.value/1e9).toFixed(2)}bn.`);
         if (open) r.push(`Only ${n(open.awards)} awards were openly competed.`);
         // The value share was published and never shown, and for some buyers it
         // tells a different story from the count. The award count travels with it.
@@ -165,7 +165,7 @@ const SYSVIEW = (() => {
           .sort((a, b) => (b.top_supplier_value_share - b.top_supplier_award_share) - (a.top_supplier_value_share - a.top_supplier_award_share))[0];
         if (byValue && byValue.top_supplier_value_share > byValue.top_supplier_award_share)
           r.push(`Counting money rather than awards changes the picture: ${byValue.buyer} sends ${byValue.top_supplier_value_share}% of its contract value to one supplier, from ${byValue.top_supplier_award_share}% of its ${n(byValue.awards)} awards.`);
-        if (cf.length) r.push(`${n(out.control_footprint_total || cf.length)} individuals each sit behind several suppliers to the same buyer — for example ${cf[0].person}, ${cf[0].companies} companies across ${cf[0].awards} awards to ${cf[0].buyer}.`);
+        if (cf.length) r.push(`${n(out.control_footprint_total || cf.length)} individuals each sit behind several suppliers to the same buyer, for example ${cf[0].person}, ${cf[0].companies} companies across ${cf[0].awards} awards to ${cf[0].buyer}.`);
         const pr = out.shared_control_probe;
         if (pr && pr.psc_loaded && !pr.shared_control_pairs)
           r.push(`No contract naming between two and ${pr.competed_field_max} suppliers has two under the same controlling person: ${n(pr.competed_contracts)} such contracts were checked, which is as far as award notices allow.`);
@@ -174,7 +174,7 @@ const SYSVIEW = (() => {
       },
       definitions: [
         { t: 'Procurement route', d: 'How a contract was let: open (advertised), selective (invited shortlist), direct/limited (no competition), or not stated.' },
-        { t: 'Control footprint', d: 'One person controlling several suppliers that bid to the same buyer — invisible in the contract records alone.' },
+        { t: 'Control footprint', d: 'One person controlling several suppliers that bid to the same buyer, invisible in the contract records alone.' },
       ],
       related: [
         { id: 'bellwether', why: 'Uses the same company-ownership join to spot providers spanning many councils.' },
@@ -206,8 +206,8 @@ const SYSVIEW = (() => {
         },
       }),
       whatIs: 'Highwater tracks how often homes are approved against Environment Agency flood advice, and whether that override rate is actually rising.',
-      why: 'The Agency objects on flood grounds, then frequently never learns what the council decided — so no one can say whether objections are being ignored.',
-      shows: 'The outcome of every flood objection, and the override rate across nine years — measured only over decisions whose outcome is known.',
+      why: 'The Agency objects on flood grounds, then frequently never learns what the council decided, so no one can say whether objections are being ignored.',
+      shows: 'The outcome of every flood objection, and the override rate across nine years, measured only over decisions whose outcome is known.',
       coverage: 'England · Environment Agency published objections, 2016-17 to 2024-25.',
       metrics: out => {
         const against = out.outcomes.find(o => /granted against/i.test(o.outcome));
@@ -216,23 +216,23 @@ const SYSVIEW = (() => {
         return [
           { label: 'Approved against advice', value: n(against ? against.objections : null), sub: `${n(against && against.residential_units)} homes` },
           { label: 'Objections in all', value: n(total), sub: 'across nine years' },
-          { label: 'Override rate, latest year', value: last ? last.override_rate_pct + '%' : '—', sub: last ? `${last.year} · of decided cases` : '' },
+          { label: 'Override rate, latest year', value: last ? last.override_rate_pct + '%' : 'n/a', sub: last ? `${last.year} · of decided cases` : '' },
         ];
       },
       primary: {
         explain: {
           shows: 'What happened to homes the Environment Agency objected to on flood grounds.',
           read: 'Each bar is an outcome, sized by the number of objections. "Unknown" means the Agency was never told the result.',
-          standout: 'Advice is usually followed — but thousands of outcomes are simply never recorded.',
+          standout: 'Advice is usually followed, but thousands of outcomes are simply never recorded.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.outcomes.map(o => ({ n: o.outcome, v: o.objections })), { fmt: v => v.toLocaleString('en-GB') }),
       },
       secondary: {
         title: 'Where flood advice is overridden',
         explain: {
-          shows: 'Homes approved against Environment Agency flood advice, by district — every objection placed by the authority that decided it.',
+          shows: 'Homes approved against Environment Agency flood advice, by district, every objection placed by the authority that decided it.',
           read: 'Each shape is a district; darker means more homes approved against advice. Grey districts had none, or an authority name that did not match a district.',
-          standout: 'Overrides concentrate in a few authorities rather than spreading evenly — a handful drive most of the national total.',
+          standout: 'Overrides concentrate in a few authorities rather than spreading evenly, a handful drive most of the national total.',
         },
         draw: (out, el, { GT }) => {
           if (!out.by_district || !out.by_district.length) {
@@ -271,7 +271,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'The share of decided flood objections where permission was granted anyway, year by year.',
           read: 'The horizontal axis is the year; the vertical axis is the override rate as a percentage.',
-          standout: 'The rate is flat, not rising — but the share of outcomes never reported back has climbed sharply.',
+          standout: 'The rate is flat, not rising, but the share of outcomes never reported back has climbed sharply.',
         },
         draw: (out, el, { GT }) => GT.line(el, [{ v: out.trend.map(t => t.override_rate_pct), c: 'var(--uk-blue)' }], { labels: out.trend.map(t => t.year.replace('20', '')) }),
       }),
@@ -282,16 +282,16 @@ const SYSVIEW = (() => {
         const topA = (out.by_authority || [])[0];
         return [
           `${n(against && against.objections)} homes were approved against flood advice; advice was followed on ${n(out.outcomes.find(o=>/followed/i.test(o.outcome)).objections)}.`,
-          `The override rate has stayed near 4% for nine years — it is flat, not rising.`,
-          topA ? `${topA.lpa} overrides most — ${n(topA.granted_against)} approvals against advice (${topA.override_rate_pct}% of its objections).` : '',
-          unknown ? `${n(unknown.objections)} objections have no recorded outcome — the Agency was never told.` : '',
+          `The override rate has stayed near 4% for nine years, it is flat, not rising.`,
+          topA ? `${topA.lpa} overrides most: ${n(topA.granted_against)} approvals against advice (${topA.override_rate_pct}% of its objections).` : '',
+          unknown ? `${n(unknown.objections)} objections have no recorded outcome, the Agency was never told.` : '',
         ];
       },
       definitions: [
         { t: 'Override rate', d: 'Homes granted against Agency advice as a share of decisions whose outcome is known. Unknown outcomes are excluded so the rate cannot improve just by going unrecorded.' },
       ],
       related: [
-        { id: 'sightline', why: 'Also reads planning objections — on water-quality rather than flood grounds.' },
+        { id: 'sightline', why: 'Also reads planning objections, on water-quality rather than flood grounds.' },
         { id: 'bulwark', why: 'The flood defences behind the advice, and who maintains them.' },
       ],
     },
@@ -322,7 +322,7 @@ const SYSVIEW = (() => {
       ],
       primary: {
         explain: {
-          shows: 'The share of major housing decisions made on time — measured two ways.',
+          shows: 'The share of major housing decisions made on time, measured two ways.',
           read: 'The top bar is decisions made within the statutory 13 weeks without an extension; the bottom bar is the published headline, which counts agreed extensions as on time.',
           standout: 'Almost the entire gap is decisions made under an agreed extension: in time on the headline, with no published time band to show they met the 13 weeks.',
         },
@@ -343,10 +343,10 @@ const SYSVIEW = (() => {
       insights: out => {
         const w = out.worst[0];
         return [
-          `Only ${out.statutory_pct}% of major housing decisions were made within the statutory 13 weeks without an extension — the published headline, which counts extensions, is ${out.headline_pct}%.`,
+          `Only ${out.statutory_pct}% of major housing decisions were made within the statutory 13 weeks without an extension, the published headline, which counts extensions, is ${out.headline_pct}%.`,
           `That is a gap of ${(out.headline_pct - out.statutory_pct).toFixed(1)} points, almost all of it agreed extensions.`,
           w ? `${w.lpa} shows the widest gap: ${w.headline_pct}% headline against ${w.statutory_pct}% statutory.` : '',
-          `Extensions are legitimate — but counting them as "on time" hides how long applicants actually wait.`,
+          `Extensions are legitimate, but counting them as "on time" hides how long applicants actually wait.`,
         ];
       },
       definitions: [
@@ -367,7 +367,7 @@ const SYSVIEW = (() => {
           explain: {
             shows: 'The published headline on-time rate against the real statutory (13-week) rate, each year since 2008.',
             read: 'The horizontal axis is the year; the vertical axis is the on-time percentage. Blue is the published headline, red is the statutory reality.',
-            standout: 'The two lines tracked closely until about 2013 — then extension-of-time agreements became routine, the headline climbed toward 86%, and the real statutory rate collapsed to the mid-teens. The gap the system exposes is not old; it opened in the last decade.',
+            standout: 'The two lines tracked closely until about 2013, then extension-of-time agreements became routine, the headline climbed toward 86%, and the real statutory rate collapsed to the mid-teens. The gap the system exposes is not old; it opened in the last decade.',
           },
           draw: (out, el, { GT }) => {
             const tt = out.trend || [];
@@ -399,7 +399,7 @@ const SYSVIEW = (() => {
         },
       }),
       whatIs: 'Junction checks how much grid connection capacity a developer can actually find, against how much the network operators advertise.',
-      why: 'Operators publish capacity registers a developer cannot compare or, in most cases, even download — the data exists but is withheld.',
+      why: 'Operators publish capacity registers a developer cannot compare or, in most cases, even download, the data exists but is withheld.',
       shows: 'Which operators genuinely serve their register data, and which publish only a schema while keeping the rows behind a catalogue entry.',
       coverage: 'Great Britain · the four embedded-capacity registers reachable anonymously.',
       metrics: out => {
@@ -426,10 +426,10 @@ const SYSVIEW = (() => {
         const advertised = out.registers.reduce((a, r) => a + (r.catalogue_records || 0), 0);
         const served = out.registers.reduce((a, r) => a + (r.rows || 0), 0);
         return [
-          serving ? `Only ${serving.operator} serves its register — ${n(serving.rows)} records.` : '',
+          serving ? `Only ${serving.operator} serves its register: ${n(serving.rows)} records.` : '',
           `${withheld.length} of ${out.registers.length} operators publish a schema but withhold every row.`,
           `${(100 * (advertised - served) / advertised).toFixed(1)}% of advertised capacity records cannot be reached without an account.`,
-          `Every operator returns HTTP 200 — the withholding is by design, not a broken link.`,
+          `Every operator returns HTTP 200, the withholding is by design, not a broken link.`,
         ];
       },
       definitions: [
@@ -454,11 +454,11 @@ const SYSVIEW = (() => {
           return [
             { label: 'Recorded amount', value: money(p.total_amount) },
             { label: 'Contributions', value: n(p.contributions), sub: `${n(p.with_amount)} carry an amount` },
-            { label: 'Average', value: p.with_amount ? money(p.total_amount / p.with_amount) : '—', sub: 'per recorded contribution' },
+            { label: 'Average', value: p.with_amount ? money(p.total_amount / p.with_amount) : 'n/a', sub: 'per recorded contribution' },
           ];
         },
       }),
-      whatIs: 'Ledger follows the money developers promise through planning — Section 106 and the Community Infrastructure Levy — and whether it was ever received or spent.',
+      whatIs: 'Ledger follows the money developers promise through planning: Section 106 and the Community Infrastructure Levy, and whether it was ever received or spent.',
       why: 'Contributions are recorded as free text with no location, so none of it can be mapped, compared, or chased to delivery.',
       shows: 'How much was promised, secured, allocated and spent, what it was meant for, and how little of it can be located.',
       coverage: 'England · developer contribution records, latest published release.',
@@ -469,7 +469,7 @@ const SYSVIEW = (() => {
       ],
       primary: {
         explain: {
-          shows: 'Developer money by stage — from first received through to actually spent.',
+          shows: 'Developer money by stage, from first received through to actually spent.',
           read: 'Each bar is a stage, sized by the total amount recorded against it.',
           standout: 'Far more is received and secured than is ever recorded as spent.',
         },
@@ -520,7 +520,7 @@ const SYSVIEW = (() => {
           ];
         },
       }),
-      whatIs: 'Bellwether reveals how much of a council’s social-care capacity sits with a single company group — something no individual council can see.',
+      whatIs: 'Bellwether reveals how much of a council’s social-care capacity sits with a single company group, something no individual council can see.',
       why: 'Each council sees only its own contracts, so a provider that matters across dozens of authorities looks unremarkable in each one.',
       shows: 'The care groups spanning the most authorities, and the councils most dependent on one provider.',
       coverage: 'England · CQC active locations resolved to company ownership.',
@@ -536,7 +536,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'The care groups present across the most local authorities.',
           read: 'Each bar is a company group, sized by the number of authorities it operates in.',
-          standout: 'The largest groups span over a hundred councils — invisible to any one of them.',
+          standout: 'The largest groups span over a hundred councils, invisible to any one of them.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.systemic.slice(0, 10).map(s => ({ n: (s.brand || '').replace(/^BRAND /, ''), v: s.authorities })), { fmt: v => v.toLocaleString('en-GB') }),
       },
@@ -553,7 +553,7 @@ const SYSVIEW = (() => {
         const top = out.systemic[0];
         const conc = out.top_share[0];
         return [
-          `${(top.brand||'').replace(/^BRAND /,'')} operates across ${n(top.authorities)} authorities through ${n(top.companies)} companies — ${n(top.locations)} locations, ${n(top.beds)} beds.`,
+          `${(top.brand||'').replace(/^BRAND /,'')} operates across ${n(top.authorities)} authorities through ${n(top.companies)} companies: ${n(top.locations)} locations, ${n(top.beds)} beds.`,
           `A group can look small in any single council while being systemic across the country.`,
           conc ? `${conc.local_authority} is the most concentrated: ${conc.share_pct}% of its care beds sit with ${(conc.group_name||'').replace(/^BRAND /,'')}.` : '',
           `The "brand" is one operator; the many company numbers behind it are what hides the scale.`,
@@ -570,7 +570,7 @@ const SYSVIEW = (() => {
     },
 
     sightline: {
-      whatIs: 'Sightline gathers planning where water quality is a live issue — applications flagged for nutrient neutrality, phosphate or water-quality concerns — and places them on the map, alongside a sample of formal objection reasons.',
+      whatIs: 'Sightline gathers planning where water quality is a live issue, applications flagged for nutrient neutrality, phosphate or water-quality concerns, and places them on the map, alongside a sample of formal objection reasons.',
       why: 'These records sit scattered across ~420 individual authority registers and are never counted together, so the national pattern of where water quality shapes planning is invisible.',
       shows: 'The national corpus of water-quality-related planning applications by district and authority, the themes driving them, and the reasons behind formal objections.',
       coverage: 'England & Wales · PlanIt-aggregated planning applications matching water-quality terms, plus a sampled EA objection-reason release.',
@@ -580,16 +580,16 @@ const SYSVIEW = (() => {
         const rows = [];
         if (c) {
           rows.push({ label: 'Water-quality planning applications', value: n(c.applications), sub: `across ${n(c.authorities)} authorities` });
-          rows.push({ label: 'Decisions made', value: n(c.decided), sub: `of ${n(c.applications)} — the rest still open` });
+          rows.push({ label: 'Decisions made', value: n(c.decided), sub: `of ${n(c.applications)}, the rest still open` });
         }
         rows.push({ label: 'Objection reasons sampled', value: n(objTotal), sub: `across ${out.reasons.length} distinct reasons` });
         return rows;
       },
       primary: {
         explain: {
-          shows: 'Where water-quality concerns arise in planning — every matched application placed in its district by its own coordinates.',
+          shows: 'Where water-quality concerns arise in planning, every matched application placed in its district by its own coordinates.',
           read: 'Each shape is a district; darker means more water-quality-related applications. Grey districts have none in the corpus.',
-          standout: 'Concentration follows the nutrient-neutrality catchments — a handful of river catchments account for most of the activity.',
+          standout: 'Concentration follows the nutrient-neutrality catchments, a handful of river catchments account for most of the activity.',
         },
         draw: (out, el, { GT }) => {
           if (!out.by_district || !out.by_district.length) {
@@ -606,7 +606,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'The reasons most often cited when planning is formally objected to on water-quality grounds.',
           read: 'Each bar is a reason, sized by the number of objections citing it.',
-          standout: 'A few reasons — led by insufficient information — account for most objections.',
+          standout: 'A few reasons, led by insufficient information, account for most objections.',
         },
         draw: (out, el, { GT }) => GT.bars(el, out.reasons.slice(0, 10).map(r => ({ n: r.reason, v: r.objections })), { fmt: v => v.toLocaleString('en-GB') }),
       },
@@ -615,8 +615,8 @@ const SYSVIEW = (() => {
         const c = out.corpus;
         const th = out.by_theme || [];
         const aw = out.by_authority_wq || [];
-        if (c) r.push(`${n(c.applications)} planning applications flag water quality across ${n(c.authorities)} authorities — a national pattern no single register shows.`);
-        if (th.length) { const t = [...th].sort((a, b) => b.applications - a.applications)[0]; r.push(`The largest theme is “${t.term}” — ${n(t.applications)} applications, ${n(t.refused)} refused.`); }
+        if (c) r.push(`${n(c.applications)} planning applications flag water quality across ${n(c.authorities)} authorities, a national pattern no single register shows.`);
+        if (th.length) { const t = [...th].sort((a, b) => b.applications - a.applications)[0]; r.push(`The largest theme is “${t.term}”: ${n(t.applications)} applications, ${n(t.refused)} refused.`); }
         if (aw.length) r.push(`${aw[0].lpa} sees the most: ${n(aw[0].applications)} water-quality applications.`);
         const top = out.reasons[0];
         if (top) r.push(`Among formal objections, the most common reason is “${top.reason}”, cited ${n(top.objections)} times.`);
@@ -643,13 +643,13 @@ const SYSVIEW = (() => {
           const rank = ranked.findIndex(x => x.lad_code === key) + 1;
           return [
             { label: 'Gigabit coverage', value: d.gigabit_pct + '%', sub: `${n(d.premises)} premises` },
-            { label: 'Rank', value: rank ? `${rank} of ${ranked.length}` : '—', sub: 'best-connected first' },
+            { label: 'Rank', value: rank ? `${rank} of ${ranked.length}` : 'n/a', sub: 'best-connected first' },
             { label: 'Against national', value: (d.gigabit_pct - out.other_pct).toFixed(1) + ' pts', sub: `national ${out.other_pct}%` },
           ];
         },
       }),
       whatIs: 'Lastmile checks whether new-build homes actually get gigabit broadband, by comparing them against existing premises.',
-      why: 'New builds are assumed to be the best-connected homes there are — but nobody checks that against the existing housing stock.',
+      why: 'New builds are assumed to be the best-connected homes there are, but nobody checks that against the existing housing stock.',
       shows: 'Gigabit coverage in new-build versus other premises, and the authorities where new builds fall furthest behind.',
       coverage: 'United Kingdom · premises-level gigabit availability, latest release.',
       metrics: out => [
@@ -661,7 +661,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'Gigabit broadband coverage in every English district. Darker means more premises can already get a gigabit connection.',
           read: 'Each shape is an English local authority district; hover for its exact coverage. The palest districts are the least connected. (The headline figures above cover the whole UK; the map shows the English districts the boundary set carries.)',
-          standout: 'Coverage is uneven — strong in cities, thin in rural and some urban-fringe districts.',
+          standout: 'Coverage is uneven, strong in cities, thin in rural and some urban-fringe districts.',
         },
         draw: (out, el, { GT }) => {
           const values = {};
@@ -682,7 +682,7 @@ const SYSVIEW = (() => {
       insights: out => {
         const w = out.worst_gap[0];
         return [
-          `New-build postcodes reach ${out.new_build_pct}% gigabit coverage — fractionally below the ${out.other_pct}% for existing premises.`,
+          `New-build postcodes reach ${out.new_build_pct}% gigabit coverage, fractionally below the ${out.other_pct}% for existing premises.`,
           `The assumption that new homes are automatically well connected does not hold.`,
           w ? `${w.lad_name} is the worst case: ${w.gigabit_pct_new_build}% in new builds against ${w.gigabit_pct}% area-wide, a ${w.gap}-point gap.` : '',
         ];
@@ -750,7 +750,7 @@ const SYSVIEW = (() => {
         return [
           `The owner is on record for only ${Math.round(100 * c.owner_known / c.assets)}% of ${n(c.assets)} flood-defence assets.`,
           `${n(c.overdue)} inspections are past their due date.`,
-          top ? `${top.maintainer} holds the most — ${n(top.assets)} assets, ${n(top.overdue)} of them overdue.` : '',
+          top ? `${top.maintainer} holds the most: ${n(top.assets)} assets, ${n(top.overdue)} of them overdue.` : '',
           `A defence with no recorded owner is one no one is clearly accountable for.`,
         ];
       },
@@ -766,7 +766,7 @@ const SYSVIEW = (() => {
 
     watchman: {
       whatIs: 'Watchman is an early-warning check: it cross-references company financial distress against active public duties, flagging organisations in liquidation, administration or a voluntary arrangement that still hold public contracts or run regulated care.',
-      why: 'Company distress and active public roles are never routinely cross-referenced, so a failing provider is noticed only after it collapses — often mid-service.',
+      why: 'Company distress and active public roles are never routinely cross-referenced, so a failing provider is noticed only after it collapses, often mid-service.',
       shows: 'Every public-role holder whose Companies House status shows financial distress: care providers with live CQC registrations and suppliers with public contracts.',
       coverage: 'England · Companies House status snapshot joined to CQC care providers and public-contract suppliers.',
       metrics: out => {
@@ -781,7 +781,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'The distressed public-role holders broken down by the exact Companies House status.',
           read: 'Each bar is an insolvency status, sized by how many public-role holders are in it.',
-          standout: 'Most are in outright liquidation — not a soft warning, but firms being wound up while still on the CQC register.',
+          standout: 'Most are in outright liquidation, not a soft warning, but firms being wound up while still on the CQC register.',
         },
         draw: (out, el, { GT }) => GT.bars(el, (out.by_status || []).map(s => ({ n: s.status, v: s.n })), { fmt: v => v.toLocaleString('en-GB') }),
       },
@@ -790,10 +790,10 @@ const SYSVIEW = (() => {
         const list = out.distress_list || [];
         const top = list[0];
         const r = [];
-        if (d.total) r.push(`${n(d.total)} organisations hold a public duty while financially distressed — ${n(d.care)} of them run regulated care.`);
+        if (d.total) r.push(`${n(d.total)} organisations hold a public duty while financially distressed: ${n(d.care)} of them run regulated care.`);
         if (top && top.role === 'CQC care provider') r.push(`${top.name} is in ${top.company_status.toLowerCase()} while still registered for ${n(top.activity)} CQC care locations.`);
         const liq = (out.by_status || []).find(s => /liquidation/i.test(s.status));
-        if (liq) r.push(`${n(liq.n)} are in outright liquidation — being wound up, not merely warned.`);
+        if (liq) r.push(`${n(liq.n)} are in outright liquidation, being wound up, not merely warned.`);
         r.push('This is the join that was missing: distress data and public-duty data existed separately, and no one connected them until a service failed.');
         return r;
       },
@@ -819,7 +819,7 @@ const SYSVIEW = (() => {
           ];
         },
       }),
-      whatIs: 'Compass tracks the surge in special educational needs — Education, Health and Care plans and SEN support — and shows where it is growing fastest.',
+      whatIs: 'Compass tracks the surge in special educational needs: Education, Health and Care plans and SEN support, and shows where it is growing fastest.',
       why: 'Demand is rising far faster than the number of children, but the local picture is buried inside national totals.',
       shows: 'National growth in EHC plans and SEN support, the authorities projected to rise fastest, and where a local trend diverges from its region.',
       coverage: 'England · Department for Education SEN statistics, earliest to latest published year.',
@@ -858,14 +858,14 @@ const SYSVIEW = (() => {
         draw: (out, el, { GT }) => GT.bars(el, out.rising.slice(0, 10).map(r => ({ n: r.la_name, v: r.projected_change_pct })), { fmt: v => '+' + v + '%' }),
       },
       insights: out => {
-        const g = p => { const r = out.national.find(x => x.provision === p); return r ? (100 * (r.latest - r.earliest) / r.earliest).toFixed(1) : '—'; };
+        const g = p => { const r = out.national.find(x => x.provision === p); return r ? (100 * (r.latest - r.earliest) / r.earliest).toFixed(1) : 'n/a'; };
         const rise = out.rising[0];
         const div = out.divergence[0];
         return [
           `EHC plans are up ${g('Education, health and care plan')}% while the pupil population rose just ${g('Total')}%.`,
-          rise ? `${rise.la_name} is projected to rise fastest — ${rise.projected_change_pct}% over three years.` : '',
+          rise ? `${rise.la_name} is projected to rise fastest: ${rise.projected_change_pct}% over three years.` : '',
           div ? `${div.la_name} diverges most from its region, by ${div.divergence} points against ${div.region} as a whole.` : '',
-          `The need is growing many times faster than the number of children — a system-level pressure, not a local blip.`,
+          `The need is growing many times faster than the number of children, a system-level pressure, not a local blip.`,
         ];
       },
       definitions: [
@@ -886,7 +886,7 @@ const SYSVIEW = (() => {
           explain: {
             shows: `The three groups indexed to ${b.year} = 100, so their very different sizes can be compared on one axis.`,
             read: 'The horizontal axis is the year; the vertical axis is each group relative to its own 2015 level. Red is EHC plans, blue is SEN support, grey is all pupils.',
-            standout: `EHC plans have more than doubled (index ${ix(last.ehc, b.ehc)}) while the pupil population barely moved (index ${ix(last.total, b.total)}) — and total pupils have actually fallen since 2023 even as EHC plans keep climbing. The demand is detaching from the size of the child population.`,
+            standout: `EHC plans have more than doubled (index ${ix(last.ehc, b.ehc)}) while the pupil population barely moved (index ${ix(last.total, b.total)}), and total pupils have actually fallen since 2023 even as EHC plans keep climbing. The demand is detaching from the size of the child population.`,
           },
           draw: (out, el, { GT }) => {
             const tt = out.trend || [];
@@ -915,13 +915,13 @@ const SYSVIEW = (() => {
           return [
             { label: 'Spills, uptime-adjusted', value: n(Math.round(c.availability_adjusted)), sub: `${n(Math.round(c.reported_spills))} reported` },
             { label: 'Monitored outlets', value: n(c.outlets), sub: `${n(c.under_watched)} with the monitor working under 90% of the year` },
-            { label: 'Barely watched', value: n(c.barely_watched), sub: 'monitor working under half the year — the spill counts that say least' },
+            { label: 'Barely watched', value: n(c.barely_watched), sub: 'monitor working under half the year, the spill counts that say least' },
             { label: 'Monitor uptime', value: c.mean_availability_pct + '%' },
           ];
         },
       }),
       whatIs: 'Baseline measures sewage spills from storm overflows, adjusted for how long each monitor was actually working.',
-      why: 'Raw spill counts flatter companies whose monitors were offline — a low number can mean a broken sensor, not a clean river.',
+      why: 'Raw spill counts flatter companies whose monitors were offline, a low number can mean a broken sensor, not a clean river.',
       shows: 'Spills nationally after adjusting for monitor uptime, the companies with the most, and how spills track rainfall.',
       coverage: 'England · Event Duration Monitoring returns, latest reporting year.',
       metrics: out => [
@@ -933,7 +933,7 @@ const SYSVIEW = (() => {
         explain: {
           shows: 'Uptime-adjusted sewage spills by district, from every monitored storm overflow placed on the map by its own coordinates.',
           read: 'Each shape is a district; darker means more adjusted spills. Hover for the count. Grey districts have no monitored overflow.',
-          standout: 'Spills concentrate in the rural West and North where combined sewers meet high rainfall — not in the big cities.',
+          standout: 'Spills concentrate in the rural West and North where combined sewers meet high rainfall, not in the big cities.',
         },
         draw: (out, el, { GT }) => {
           const values = {};
@@ -958,7 +958,7 @@ const SYSVIEW = (() => {
         return [
           `Adjusting for monitor downtime adds about ${n(add)} spills the raw count missed.`,
           top ? `${top.company} has the most, at ${n(Math.round(top.availability_adjusted))} adjusted spills across ${n(top.outlets)} outlets.` : '',
-          wet ? `Even per 100mm of rain, ${wet.company} spills most — ${n(Math.round(wet.spills_per_100mm_rain))} times.` : '',
+          wet ? `Even per 100mm of rain, ${wet.company} spills most: ${n(Math.round(wet.spills_per_100mm_rain))} times.` : '',
           `Where uptime is low, a small reported number may hide a large real one.`,
         ];
       },
@@ -976,12 +976,12 @@ const SYSVIEW = (() => {
           cards: [
             { label: `Reported peak, ${peak.year}`, value: n(Math.round(peak.reported_spills)), sub: 'the wettest reporting year' },
             { label: `Latest reported, ${last.year}`, value: n(Math.round(last.reported_spills)), sub: `${last.mean_uptime}% monitor uptime` },
-            { label: `Hidden by downtime, ${first.year}`, value: n(gap(first)), sub: `vs ${n(gap(last))} in ${last.year} — the gap has closed` },
+            { label: `Hidden by downtime, ${first.year}`, value: n(gap(first)), sub: `vs ${n(gap(last))} in ${last.year}, and the gap has closed` },
           ],
           explain: {
             shows: 'Sewage spills each year, reported (blue) against uptime-adjusted (red), 2021 onward.',
             read: 'The horizontal axis is the reporting year; the vertical axis is the spill count. The gap between the lines is the spills that broken monitors missed.',
-            standout: 'Spills swing with the weather (2023 wettest, 2022 driest), but the reported-vs-adjusted gap has closed sharply — from ~172,000 hidden by monitor downtime in 2021 to under 10,000 in 2025, as uptime rose from 94.9% to 97.3%. Early raw counts understated reality far more than recent ones.',
+            standout: 'Spills swing with the weather (2023 wettest, 2022 driest), but the reported-vs-adjusted gap has closed sharply, from ~172,000 hidden by monitor downtime in 2021 to under 10,000 in 2025, as uptime rose from 94.9% to 97.3%. Early raw counts understated reality far more than recent ones.',
           },
           draw: (out, el, { GT }) => {
             const tt = out.trend || [];

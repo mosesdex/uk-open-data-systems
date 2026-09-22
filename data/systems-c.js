@@ -1,4 +1,4 @@
-// Systems 11–17. The UK GroundTruth extension. Consumed by build.js.
+// Systems 11 to 17. The UK GroundTruth extension. Consumed by build.js.
 export default [
 
 {
@@ -11,14 +11,14 @@ export default [
   status: 'Schema designed, unpopulated',
 
   problem: [
-    'When housebuilders get permission, they pay councils for the schools, roads and affordable housing the development will need. These are Section 106 agreements, and the money is enormous. Roughly <strong>£9bn sits unspent</strong> across English councils, including about <strong>£817m of affordable housing money — some 11,000 homes</strong> — with one London borough holding over £250m.',
+    'When housebuilders get permission, they pay councils for the schools, roads and affordable housing the development will need. These are Section 106 agreements, and the money is enormous. Roughly <strong>£9bn sits unspent</strong> across English councils, including about <strong>£817m of affordable housing money, some 11,000 homes</strong>, with one London borough holding over £250m.',
     'The Ministry already runs a national schema for this. It holds <strong>39,325 contribution records totalling £1,491,818,575</strong>, models purposes from affordable housing to education to highways, and even tracks whether money has been received or spent. Councils are being asked publicly why the money is sitting there.',
-    'Every one of those 39,325 records has <strong>zero geometry</strong>. Not sparse — none. And the reason traces to one field: in the linked planning application dataset, the <strong>property identifier is populated in 0.0% of 100,627 records</strong>, while the free-text address field is populated in <strong>98.1%</strong>.',
-    'That single contrast is the whole argument. The Ministry has already agreed the identifier belongs there. It cannot fill it. Coverage compounds the problem — 67 of roughly 330 authorities publish agreements, and 4 publish applications.'
+    'Every one of those 39,325 records has <strong>zero geometry</strong>. Not sparse, none. And the reason traces to one field: in the linked planning application dataset, the <strong>property identifier is populated in 0.0% of 100,627 records</strong>, while the free-text address field is populated in <strong>98.1%</strong>.',
+    'That single contrast is the whole argument. The Ministry has already agreed the identifier belongs there. It cannot fill it. Coverage compounds the problem, 67 of roughly 330 authorities publish agreements, and 4 publish applications.'
   ],
 
   solution: [
-    'Ledger resolves the addresses that exist into the identifiers that do not, then attaches contributions to sites. The moment that join is made, £1.49bn of recorded obligations becomes mappable for the first time — by council, by ward, by development, by purpose.',
+    'Ledger resolves the addresses that exist into the identifiers that do not, then attaches contributions to sites. The moment that join is made, £1.49bn of recorded obligations becomes mappable for the first time, by council, by ward, by development, by purpose.',
     'It then answers the question councils are actually being asked: what was promised, what was received, what was spent, and what is sitting. The schema already carries funding status; nothing currently reads it spatially.',
     'It also fixes the identity problem underneath. Agreements link to authority-local application references that are not nationally unique, so the same reference string exists in multiple councils. Resolution must be constrained by authority or the entire dataset silently mislocates.',
     'And it publishes coverage as a headline metric rather than a footnote. A national picture built from a fifth of authorities is useful only if it says so.'
@@ -26,15 +26,15 @@ export default [
 
   datasets: [
     ['Developer agreement contributions', 'MHCLG', '39,325 records, £1.49bn, purpose-coded. Open licence, live API. No geometry on any record.'],
-    ['Developer agreement transactions', 'MHCLG', '49,891 records carrying received and spent status — the promised-versus-delivered signal, already modelled.'],
+    ['Developer agreement transactions', 'MHCLG', '49,891 records carrying received and spent status, the promised-versus-delivered signal, already modelled.'],
     ['Planning applications', 'MHCLG', '100,627 records. Address text 98.1% populated, property identifier 0.0%. Four contributing authorities.'],
-    ['Infrastructure funding statements', 'MHCLG', '236 records from 172 authorities — but each is a link to a PDF, not data.'],
+    ['Infrastructure funding statements', 'MHCLG', '236 records from 172 authorities, but each is a link to a PDF, not data.'],
     ['Title boundaries', 'HM Land Registry via MHCLG', '8,220,990 polygons republished under an open licence. Keyed on a spatial identifier, not a title number.'],
     ['New-build energy certificates', 'MHCLG', 'Address-level completion signal, for testing whether contributed-for development actually happened.']
   ],
 
   features: [
-    ['Address-to-identifier resolution', 'The 98,713 free-text addresses converted into property identifiers — the specific gap the Ministry cannot close itself.'],
+    ['Address-to-identifier resolution', 'The 98,713 free-text addresses converted into property identifiers, the specific gap the Ministry cannot close itself.'],
     ['Contribution mapping', 'Every recorded obligation placed, by council, ward and site.'],
     ['Promised versus delivered', 'Received and spent status read spatially, answering the question councils are being asked publicly.'],
     ['Purpose analysis', 'Affordable housing, education, transport, open space and monitoring fees separated and compared across authorities.'],
@@ -54,7 +54,7 @@ export default [
     government: [
       'Answers the unspent-contributions question spatially for the first time, for a Ministry already under pressure on it.',
       'Fills a field the Ministry designed and cannot populate, improving its own platform rather than competing with it.',
-      'Gives councils an audit position on money they hold — an average of roughly £19m each is a real liability.',
+      'Gives councils an audit position on money they hold, an average of roughly £19m each is a real liability.',
       'Produces the evidence base for whether developer contributions are delivering the infrastructure they were collected for.'
     ],
     public: [
@@ -74,15 +74,15 @@ export default [
   risks: [
     ['Coverage, not capability', 'The limiting factor is that most authorities do not publish. Ledger can resolve everything published and must state plainly how much of England that represents.'],
     ['Reference collisions', 'Authority-local references are not nationally unique. Matching must be constrained by authority; failing to do so produces confidently wrong output.'],
-    ['Political sensitivity', 'Mapping unspent money names councils. Reporting presents context — money is often legitimately committed but not yet drawn — rather than a naked league table.']
+    ['Political sensitivity', 'Mapping unspent money names councils. Reporting presents context, money is often legitimately committed but not yet drawn, rather than a naked league table.']
   ],
 
   buyer: 'MHCLG Digital Planning, individual planning authorities, the Home Builders Federation',
   route: 'DOS7 Lot 1, aligned to the planning data standards programme',
 
   sources: [
-    ['Planning Data Platform — developer agreement contributions', 'https://www.planning.data.gov.uk/dataset/developer-agreement-contribution'],
-    ['Planning Data Platform — planning applications', 'https://www.planning.data.gov.uk/dataset/planning-application'],
+    ['Planning Data Platform, developer agreement contributions', 'https://www.planning.data.gov.uk/dataset/developer-agreement-contribution'],
+    ['Planning Data Platform, planning applications', 'https://www.planning.data.gov.uk/dataset/planning-application'],
     ['Infrastructure funding statement dataset', 'https://www.planning.data.gov.uk/dataset/infrastructure-funding-statement'],
     ['Planning Data Platform dataset index', 'https://www.planning.data.gov.uk/dataset/'],
     ['Title boundary dataset', 'https://www.planning.data.gov.uk/dataset/title-boundary']
@@ -95,22 +95,22 @@ export default [
   name: 'Bellwether',
   subtitle: 'Provider concentration and failure exposure',
   themes: ['children', 'local', 'money'],
-  tagline: 'Parliament made computing this a statutory function in July 2026 — and the register deliberately withholds the company number needed to do it.',
+  tagline: 'Parliament made computing this a statutory function in July 2026, and the register deliberately withholds the company number needed to do it.',
   status: 'Statutory duty live since 15 July 2026',
 
   problem: [
     'Councils buy care from companies. When a large operator collapses, councils discover their exposure afterwards. The care home sector has done this twice at national scale, and each time the state absorbed the consequences.',
     'The data to see it coming mostly exists. The adult social care regulator publishes <strong>57,009 active locations</strong> with a Companies House number attached to <strong>91.1% of care home locations and 93.9% of beds</strong>. That is enough to compute, today, which councils depend on which operators. Measured directly: <strong>40 council-and-company pairs where one company runs more than 15% of an area’s care home beds</strong>, including one London borough at <strong>67.4%</strong>.',
     'Children’s social care is where it becomes urgent. The <strong>Children’s Wellbeing and Schools Act 2026 came into force on 15 July 2026</strong>, and its financial oversight provision sets out how to decide which providers get monitored. The criteria include <strong>"the geographical concentration of those establishments or agencies"</strong> and <strong>"the share of any market within England"</strong>. Somebody now has a legal duty to compute exactly this.',
-    'The oversight gap is not an inference — the auditors have stated it. The care regulator monitors the financial sustainability of roughly <strong>65 "difficult-to-replace" providers, about 30% of the market by beds</strong>. The National Audit Office found that councils get no benefit from that monitoring until the regulator warns them failure is likely, that sizeable regional providers fall outside the scheme entirely, and that <strong>the department collects no provider finance data of its own</strong>. The Public Accounts Committee was blunter: the department "appears complacent about the risks of local market failure" and "does not have a good grasp of how most providers on the ground are faring." <strong>Bellwether reaches 93.9% of beds.</strong>',
-    'The regulator also has no power to intervene to prevent a failure — only to notify councils once it is likely. The scheme exists because of a collapse in 2011; a second major operator entered administration in 2019. Committees have twice recommended provider cost transparency, most recently that from April 2022 all providers publish a breakdown of how their fees are spent. It was not implemented.',
-    'And the children’s register <strong>publishes owner names but no company numbers</strong>. The same is true of independent special schools, where the identifier field exists and is populated in 13 of 52,486 records. Measured consequence: naive name counting <strong>understates the largest special school group by 70%</strong> — 30 schools where the real figure is 51 — because the same owner appears as three different strings.'
+    'The oversight gap is not an inference, the auditors have stated it. The care regulator monitors the financial sustainability of roughly <strong>65 "difficult-to-replace" providers, about 30% of the market by beds</strong>. The National Audit Office found that councils get no benefit from that monitoring until the regulator warns them failure is likely, that sizeable regional providers fall outside the scheme entirely, and that <strong>the department collects no provider finance data of its own</strong>. The Public Accounts Committee was blunter: the department "appears complacent about the risks of local market failure" and "does not have a good grasp of how most providers on the ground are faring." <strong>Bellwether reaches 93.9% of beds.</strong>',
+    'The regulator also has no power to intervene to prevent a failure, only to notify councils once it is likely. The scheme exists because of a collapse in 2011; a second major operator entered administration in 2019. Committees have twice recommended provider cost transparency, most recently that from April 2022 all providers publish a breakdown of how their fees are spent. It was not implemented.',
+    'And the children’s register <strong>publishes owner names but no company numbers</strong>. The same is true of independent special schools, where the identifier field exists and is populated in 13 of 52,486 records. Measured consequence: naive name counting <strong>understates the largest special school group by 70%</strong>, 30 schools where the real figure is 51, because the same owner appears as three different strings.'
   ],
 
   solution: [
     'Bellwether resolves care providers to canonical organisations across three registers, then computes concentration and exposure at council level.',
-    'Where the regulator already publishes a company number, the join is direct — that covers most of adult social care. Where it does not, resolution is the product: matching owner names to companies through the corporate graph, handling the variants that defeat simple normalisation, and publishing match confidence rather than asserting certainty.',
-    'It then produces the exposure view: for each council, which operators hold what share of local capacity, and for each operator, how many councils depend on it and how concentrated that dependency is. One operator in the data runs over four thousand beds across only twelve councils — a very different risk shape from one running more beds across fifty-seven.',
+    'Where the regulator already publishes a company number, the join is direct, that covers most of adult social care. Where it does not, resolution is the product: matching owner names to companies through the corporate graph, handling the variants that defeat simple normalisation, and publishing match confidence rather than asserting certainty.',
+    'It then produces the exposure view: for each council, which operators hold what share of local capacity, and for each operator, how many councils depend on it and how concentrated that dependency is. One operator in the data runs over four thousand beds across only twelve councils, a very different risk shape from one running more beds across fifty-seven.',
     'Financial distress signals attach on top, drawn from insolvency notices, charges and overdue filings rather than from accounting ratios, for reasons set out under risks.'
   ],
 
@@ -118,19 +118,19 @@ export default [
     ['Active locations register', 'Care Quality Commission', '57,009 locations, 122 fields. Carries company number, charity number, bed counts, council and coordinates. Free, no key.'],
     ['Children’s social care providers', 'Ofsted', 'Provider-level data with owner name at 99.4%, places and sector. No company number. Home names and addresses redacted.'],
     ['Schools register', 'DfE', 'Independent special schools with proprietor name at 100%, capacity and pupil counts. Company number field effectively empty.'],
-    ['Academy trust membership', 'DfE', 'Company number on 100% of open trusts — the cleanest identifier join available in the sector.'],
+    ['Academy trust membership', 'DfE', 'Company number on 100% of open trusts, the cleanest identifier join available in the sector.'],
     ['Companies House bulk and streams', 'Companies House', 'Company data, persons of significant control, charges and insolvency. Free.'],
     ['Insolvency notices', 'The Gazette', 'Free JSON interface, over three million notices, each carrying a structured company number.'],
-    ['Registered provider list', 'Regulator of Social Housing', 'Corporate form field routes each provider to the correct identifier authority — under half are Companies House entities.']
+    ['Registered provider list', 'Regulator of Social Housing', 'Corporate form field routes each provider to the correct identifier authority, under half are Companies House entities.']
   ],
 
   features: [
-    ['Council exposure map', 'For every council, which operators hold what share of local capacity — the analysis the new statutory criteria describe.'],
+    ['Council exposure map', 'For every council, which operators hold what share of local capacity, the analysis the new statutory criteria describe.'],
     ['Operator concentration profile', 'For every operator, how many councils depend on it and how tightly, distinguishing broad from concentrated footprints.'],
     ['Name resolution across variants', 'The specific failure that understates the largest special school group by 70%, corrected and measured.'],
     ['Dual registration handling', 'Care home records registered twice during ownership transfer inflate national bed counts by 6.4% if counted naively. Deduplicated, with the flag respected.'],
     ['Mixed-authority identifiers', 'Roughly 2.5% of published identifiers are not Companies House numbers at all but mutual society, royal charter or charity references. Routed to the correct register rather than failing silently.'],
-    ['Event-based distress signals', 'Insolvency notices, charge filings, strike-off action and overdue accounts — observable for every company regardless of size.'],
+    ['Event-based distress signals', 'Insolvency notices, charge filings, strike-off action and overdue accounts, observable for every company regardless of size.'],
     ['Statutory oversight pack', 'Concentration and market share computed to the criteria now written into law.']
   ],
 
@@ -163,8 +163,8 @@ export default [
   ],
 
   risks: [
-    ['Financial models do not work here', 'The standard corporate failure ratios depend on profit and loss data that small companies do not file — roughly two-thirds of the model’s power is unavailable. Published tests also show such models flagging around a quarter of all companies, of which the overwhelming majority never fail. Bellwether uses event signals and treats any score as triage, never as a prediction of failure.'],
-    ['Capacity is not commissioned volume', 'A bed in one council may be occupied by someone placed by another, and self-funded beds are not council exposure at all. Bellwether measures physical capacity by location and says so — the commissioning layer is not in open data.'],
+    ['Financial models do not work here', 'The standard corporate failure ratios depend on profit and loss data that small companies do not file, roughly two-thirds of the model’s power is unavailable. Published tests also show such models flagging around a quarter of all companies, of which the overwhelming majority never fail. Bellwether uses event signals and treats any score as triage, never as a prediction of failure.'],
+    ['Capacity is not commissioned volume', 'A bed in one council may be occupied by someone placed by another, and self-funded beds are not council exposure at all. Bellwether measures physical capacity by location and says so, the commissioning layer is not in open data.'],
     ['Property structures are invisible', 'Both historic care home collapses ran through the property and lease side, not the operating company. The regulator registers only the operator. Group structure must be reconstructed, and some of it cannot be.'],
     ['Naming a company as at risk', 'Publication could itself precipitate difficulty. Concentration is published; distress scoring stays in a restricted tier for oversight bodies.']
   ],
@@ -193,31 +193,31 @@ export default [
   problem: [
     'Certain expert bodies must be consulted on planning applications. They give advice, councils decide, and almost none of that advice is published as data.',
     'Active Travel England became a statutory consultee in 2023. In 2025-26 it <strong>responded to 2,045 consultations covering more than 521,000 homes</strong> and recommended improvements on applications comprising <strong>191,000 homes</strong>. It holds every one of these in a casework system. Of its 79 publications, exactly two are transparency releases and both concern funding. Even its council capability ratings are published as a PDF.',
-    'Its own independent reviewer recommended creating a framework to record outcomes — meaning the body was not systematically tracking what happened to its advice, let alone publishing it.',
-    'The Environment Agency shows the other failure mode. It <strong>does</strong> publish flood objections at application level — <strong>23,336 records across 426 authorities</strong>, including 633 where permission was granted against its advice, covering 347,425 homes. But the file carries <strong>no location of any kind</strong>, and for 7,011 records the Agency does not know what the council decided. Published and unmappable.',
+    'Its own independent reviewer recommended creating a framework to record outcomes, meaning the body was not systematically tracking what happened to its advice, let alone publishing it.',
+    'The Environment Agency shows the other failure mode. It <strong>does</strong> publish flood objections at application level, <strong>23,336 records across 426 authorities</strong>, including 633 where permission was granted against its advice, covering 347,425 homes. But the file carries <strong>no location of any kind</strong>, and for 7,011 records the Agency does not know what the council decided. Published and unmappable.',
     'Meanwhile government consulted through January 2026 on cutting statutory consultee involvement by around 40%. A reform premised on consultee burden, conducted with essentially no public data on consultee outcomes.'
   ],
 
   solution: [
     'Sightline builds the outcome layer for statutory consultee advice: what was advised, what was decided, and what was built.',
-    'It starts with the Environment Agency data because it is already published and needs only resolution — the objections become mappable, the unknown outcomes get recovered, and the compliance picture becomes checkable rather than asserted.',
+    'It starts with the Environment Agency data because it is already published and needs only resolution, the objections become mappable, the unknown outcomes get recovered, and the compliance picture becomes checkable rather than asserted.',
     'It then extends the same template to Active Travel England. The casework exists in a structured system; the ask is publication, not creation. A working demonstration on flood data is the strongest possible argument for it.',
-    'And it gives the consultee reform an evidence base. If the case for cutting consultee involvement is that it delays development without improving it, that is a testable claim — and nobody can currently test it.'
+    'And it gives the consultee reform an evidence base. If the case for cutting consultee involvement is that it delays development without improving it, that is a testable claim, and nobody can currently test it.'
   ],
 
   datasets: [
     ['Flood risk objections', 'Environment Agency', '23,336 records, 426 authorities, open licence. No spatial reference. Outcome unknown for 30%.'],
-    ['Water quality objections', 'Environment Agency', 'A second, smaller sheet in the same file with an objection reason field — largely untouched.'],
+    ['Water quality objections', 'Environment Agency', 'A second, smaller sheet in the same file with an objection reason field, largely untouched.'],
     ['Active Travel England casework', 'ATE', 'Over 2,000 responses a year covering 521,000 homes. Held in a structured system, published nowhere.'],
     ['Planning applications', 'MHCLG and authority portals', 'The decisions that consultee advice was given on.'],
-    ['Flood zones', 'Environment Agency', 'Open geospatial services with no key required — the layer objections need joining to.'],
+    ['Flood zones', 'Environment Agency', 'Open geospatial services with no key required, the layer objections need joining to.'],
     ['New-build energy certificates', 'MHCLG', 'Whether advised-against development was actually completed and occupied.']
   ],
 
   features: [
     ['Advice-to-outcome chain', 'Consultee advice resolved to a site, joined to the decision, and followed through to completion.'],
     ['Outcome recovery', 'The 7,011 cases where the Environment Agency does not know what the council decided.'],
-    ['Override analysis', 'Which authorities grant against expert advice, in what circumstances, and with what context — housing pressure, viability, defence status.'],
+    ['Override analysis', 'Which authorities grant against expert advice, in what circumstances, and with what context, housing pressure, viability, defence status.'],
     ['Reform evidence', 'Whether consultee involvement changes outcomes, which is the premise of the reform now under way.'],
     ['Publication template', 'A worked demonstration of what a consultee outcome dataset looks like, usable by any consultee body.'],
     ['Versioned archive', 'Each annual release preserved, since the source silently restates history and the reform may break the series entirely.'],
@@ -282,22 +282,22 @@ export default [
   problem: [
     'Building Regulations have required gigabit-ready infrastructure in new dwellings in England since December 2022, with a cost cap per dwelling and a connectivity plan required alongside the building notice. Scotland and Wales followed.',
     '<strong>There is no published compliance dataset.</strong> A regulation with a per-dwelling duty, a cost cap and a plan requirement, and no monitoring data at all.',
-    'The raw material to check it is free and unusually good. The broadband subsidy programme publishes property-level data — every record carrying a property identifier, a status flag, and the contracted supplier where one exists. A status of "White" means no gigabit infrastructure and none expected within three years. It refreshes every four months.',
-    'The regulator computes coverage per premises, using a licensed address product, and then <strong>publishes it aggregated to postcode</strong>. In mixed postcodes — common in rural areas and on new estates — knowing 83% of a postcode has gigabit tells you nothing about a specific house.',
+    'The raw material to check it is free and unusually good. The broadband subsidy programme publishes property-level data, every record carrying a property identifier, a status flag, and the contracted supplier where one exists. A status of "White" means no gigabit infrastructure and none expected within three years. It refreshes every four months.',
+    'The regulator computes coverage per premises, using a licensed address product, and then <strong>publishes it aggregated to postcode</strong>. In mixed postcodes, common in rural areas and on new estates, knowing 83% of a postcode has gigabit tells you nothing about a specific house.',
     'So the property-level truth exists on the subsidy side, the property-level truth is computed and discarded on the coverage side, and the compliance question nobody is asking is entirely property-shaped.'
   ],
 
   solution: [
     'Lastmile joins property-level gigabit status to newly completed homes, and answers the question the regulation implies but nobody monitors: are new homes actually being built connectable, and are they being connected?',
-    'The subsidy dataset supplies one side of the join for free, already keyed on property identifiers. The other side — which properties are new homes — comes from new-build energy certificates, which carry the same identifier and a field distinguishing new build from existing stock.',
+    'The subsidy dataset supplies one side of the join for free, already keyed on property identifiers. The other side, which properties are new homes, comes from new-build energy certificates, which carry the same identifier and a field distinguishing new build from existing stock.',
     'That produces a national compliance picture at property level: new homes in areas with no gigabit infrastructure, new homes in subsidy intervention areas, and new developments where connectivity was planned but not delivered.',
     'It also flags the inverse, which matters for public money: subsidised interventions targeting premises that new development has already made commercially viable.'
   ],
 
   datasets: [
     ['Open market review premises data', 'Building Digital UK', 'Property-level gigabit status with subsidy classification, contracted supplier and delivery date. Free, open licence, refreshed every four months. England and Wales.'],
-    ['Connected Nations', 'Ofcom', 'Coverage at postcode for fixed and 100-metre grid for mobile. Free and open — computed per premises, published aggregated.'],
-    ['Price paid transactions', 'HM Land Registry', 'Free, open, no account. Carries an old/new flag identifying newly built homes at address level — the new-build signal, without a sign-in.'],
+    ['Connected Nations', 'Ofcom', 'Coverage at postcode for fixed and 100-metre grid for mobile. Free and open, computed per premises, published aggregated.'],
+    ['Price paid transactions', 'HM Land Registry', 'Free, open, no account. Carries an old/new flag identifying newly built homes at address level, the new-build signal, without a sign-in.'],
     ['Open property identifiers', 'Ordnance Survey', 'The free identifier file, 41.6 million records. Carries no status field, so cannot distinguish a plot from a house.'],
     ['Linked identifiers', 'Ordnance Survey', 'The free crosswalk between property, street and topographic identifiers.'],
     ['Planning applications', 'MHCLG and authority portals', 'Development pipeline, for forward-looking connectivity planning.']
@@ -365,24 +365,24 @@ export default [
   name: 'Freehold',
   subtitle: 'Land ownership resolution',
   themes: ['money', 'central', 'housing'],
-  tagline: 'Free ownership data on one side, free geometry on the other, and a paid key between them. Included for completeness, but the ownership file needs a registered account and a restrictive licence — so it sits outside the no-registration set.',
-  status: 'Requires a registered account — outside the free-data set',
+  tagline: 'Free ownership data on one side, free geometry on the other, and a paid key between them. Included for completeness, but the ownership file needs a registered account and a restrictive licence, so it sits outside the no-registration set.',
+  status: 'Requires a registered account, outside the free-data set',
 
   problem: [
     'You can find out, for free, which companies own land in England and Wales. You can also download, for free, <strong>8,220,990 land parcel boundaries</strong> under an open licence. What you cannot do is connect the two.',
     'The ownership data is keyed on title numbers. The free boundaries are keyed on a different spatial identifier. The crosswalk between them is a paid product. Free data on both sides, paywall exactly in the middle.',
     'The government has committed to changing this. The Land Use Framework, published March 2026, states it will work with the registry <strong>"this year"</strong> to provide <strong>"free, spatial land ownership data for larger properties covering the vast majority of England and Wales, excluding almost all homeowners."</strong>',
-    'Two things make that commitment worth watching rather than waiting on. No size threshold is defined. And <strong>the registry’s own business plan does not mention the commitment at all</strong> — it commits instead to adding identifiers to more free datasets and to "initial design work" on more clearly identifying the parties recorded on the register.',
+    'Two things make that commitment worth watching rather than waiting on. No size threshold is defined. And <strong>the registry’s own business plan does not mention the commitment at all</strong>, it commits instead to adding identifiers to more free datasets and to "initial design work" on more clearly identifying the parties recorded on the register.',
     'That last phrase is the entity spine problem, stated by the registry itself, and still at design stage. Roughly <strong>10% of land in England remains unregistered</strong> despite compulsory registration since 1990.',
-    'And the register meant to reveal who owns property through offshore structures is barely enforced. Of roughly <strong>£23.5m in penalties ever issued</strong> for failing to register, <strong>£1.18m has been collected — about 5%</strong>. In one recent financial year the registrar levied <strong>no penalties at all</strong>; in the next it levied <strong>one</strong>, worth £70,000, while reversing nineteen. Civil sanction revenue has been <strong>negative for two consecutive years</strong> — more written off than levied.',
-    'Most telling of all: a written parliamentary answer confirms that <strong>no penalty has ever been issued for beneficial ownership non-compliance</strong>. Every one of the 445 penalties was for outright failure to register. Nothing for false, evasive or absent ownership statements — and independent analysis finds entities claiming to have <strong>no beneficial owner rose from 9% to 19%</strong>, with 181 of 201 registered professional trustees never having disclosed an individual owner at all.'
+    'And the register meant to reveal who owns property through offshore structures is barely enforced. Of roughly <strong>£23.5m in penalties ever issued</strong> for failing to register, <strong>£1.18m has been collected, about 5%</strong>. In one recent financial year the registrar levied <strong>no penalties at all</strong>; in the next it levied <strong>one</strong>, worth £70,000, while reversing nineteen. Civil sanction revenue has been <strong>negative for two consecutive years</strong>, more written off than levied.',
+    'Most telling of all: a written parliamentary answer confirms that <strong>no penalty has ever been issued for beneficial ownership non-compliance</strong>. Every one of the 445 penalties was for outright failure to register. Nothing for false, evasive or absent ownership statements, and independent analysis finds entities claiming to have <strong>no beneficial owner rose from 9% to 19%</strong>, with 181 of 201 registered professional trustees never having disclosed an individual owner at all.'
   ],
 
   solution: [
-    'Freehold builds the resolution layer between land, boundaries and organisations — the join that free data on both sides currently cannot make.',
+    'Freehold builds the resolution layer between land, boundaries and organisations, the join that free data on both sides currently cannot make.',
     'On the spatial side it resolves parcels to properties and to the identifiers that other datasets use, so land can be joined to development, flood risk, contributions and everything else in the platform.',
     'On the organisational side it resolves the parties named on ownership records to canonical organisations, connecting land to the corporate graph. That is what turns a list of owners into an answer to who actually controls what.',
-    'And it is positioned for the commitment landing. If free spatial ownership data is published during 2026, whoever already has a working resolution layer has a large head start. If it slips, the resolution layer is what makes the existing free data usable in the meantime — which is the stronger position either way.'
+    'And it is positioned for the commitment landing. If free spatial ownership data is published during 2026, whoever already has a working resolution layer has a large head start. If it slips, the resolution layer is what makes the existing free data usable in the meantime, which is the stronger position either way.'
   ],
 
   datasets: [
@@ -399,7 +399,7 @@ export default [
     ['Ownership-to-organisation resolution', 'Registered parties resolved to canonical companies, connecting land to the corporate graph.'],
     ['Landholding aggregation', 'Total holdings by organisation and by group, rather than title by title.'],
     ['Corporate and overseas exposure', 'Which land is held through companies, and where control sits.'],
-    ['Ownership-declaration anomaly detection', 'Entities declaring no beneficial owner, trustee structures that have never named an individual, and registrations whose declared ownership is inconsistent with the corporate graph — the category against which no penalty has ever been issued.'],
+    ['Ownership-declaration anomaly detection', 'Entities declaring no beneficial owner, trustee structures that have never named an individual, and registrations whose declared ownership is inconsistent with the corporate graph, the category against which no penalty has ever been issued.'],
     ['Development pipeline linkage', 'Ownership joined to permissions, contributions and completions across the platform.'],
     ['Unregistered land mapping', 'Where the roughly 10% of unregistered land sits, which is itself unmapped.'],
     ['Commitment tracking', 'Public monitoring of whether the free spatial ownership release actually arrives during 2026.']
@@ -462,23 +462,23 @@ export default [
 
   problem: [
     'England has <strong>141,629 recorded flood defence assets</strong>, published free and openly with full geometry. Anyone can download them today.',
-    'Two fields in that dataset describe a national failure. <strong>Asset owner reads "Unknown" on 104,439 of them — 73.7%.</strong> And <strong>current condition is blank on 106,179 — 75.0%</strong>, covering <strong>43,601 kilometres</strong> of defence.',
+    'Two fields in that dataset describe a national failure. <strong>Asset owner reads "Unknown" on 104,439 of them, 73.7%.</strong> And <strong>current condition is blank on 106,179, 75.0%</strong>, covering <strong>43,601 kilometres</strong> of defence.',
     'Where condition is recorded, the picture is worse than it first looks: of the 35,263 assets carrying both a current and a target grade, <strong>5,877 are below their target</strong>. But that 16.7% is computed on a quarter of the asset base. Nobody knows about the rest.',
-    'A third field compounds it. Whether an asset should be reflected in the national flood map — which underpins planning decisions and insurance pricing — reads <strong>"Not Yet Considered" on 53.4%</strong> of assets. A majority of England’s flood defences have never been assessed for whether they belong in the map that governs where houses get built.',
-    'The consequence is already documented. The National Audit Office found that for the lack of <strong>£34m in annual maintenance funding</strong>, more than <strong>200,000 properties</strong> were at increased flood risk — while the Agency <strong>underspent its capital programme by £310m</strong> over two years.'
+    'A third field compounds it. Whether an asset should be reflected in the national flood map, which underpins planning decisions and insurance pricing, reads <strong>"Not Yet Considered" on 53.4%</strong> of assets. A majority of England’s flood defences have never been assessed for whether they belong in the map that governs where houses get built.',
+    'The consequence is already documented. The National Audit Office found that for the lack of <strong>£34m in annual maintenance funding</strong>, more than <strong>200,000 properties</strong> were at increased flood risk, while the Agency <strong>underspent its capital programme by £310m</strong> over two years.'
   ],
 
   solution: [
-    'Bulwark resolves flood defence assets to the land they sit on and the organisations responsible for them — which is precisely the join the Agency cannot currently make.',
+    'Bulwark resolves flood defence assets to the land they sit on and the organisations responsible for them, which is precisely the join the Agency cannot currently make.',
     'The assets are geolocated lines. Land parcel boundaries are free and open. Property identifiers are free and open. Corporate ownership records exist. Nothing in that chain is paywalled at the point where Bulwark operates, and yet the ownership field sits empty on three-quarters of the estate.',
     'It then makes the condition gap visible rather than averaged away. A national figure computed on a quarter of assets is not a national figure, and reporting it as one obscures the problem. Bulwark publishes coverage alongside every statistic.',
-    'And it surfaces the operational signals already present in the data. Asset records carry inspection histories with next-inspection dates — some of them already in the past. Overdue inspection is computable from published data and reported by nobody.'
+    'And it surfaces the operational signals already present in the data. Asset records carry inspection histories with next-inspection dates, some of them already in the past. Overdue inspection is computable from published data and reported by nobody.'
   ],
 
   datasets: [
     ['Spatial flood defences', 'Environment Agency', '141,629 assets with polyline geometry and 37 fields including current and target condition, standard of protection, owner and inspection dates. Free, open, bulk.'],
     ['Asset management interface', 'Environment Agency', 'Per-asset inspection history, maintenance activities with planned versus actual dates, and condition over time.'],
-    ['Title boundaries', 'HM Land Registry via MHCLG', '8.2 million parcels under an open licence — the land the assets sit on.'],
+    ['Title boundaries', 'HM Land Registry via MHCLG', '8.2 million parcels under an open licence, the land the assets sit on.'],
     ['Open property identifiers', 'Ordnance Survey', 'Free identifier and coordinate file for resolving assets to properties.'],
     ['Corporate and overseas ownership', 'HM Land Registry', 'Who owns the land, once parcels are resolved. Free with registration, restrictive terms.'],
     ['National flood risk assessment', 'Environment Agency', 'What the defences protect, and what happens if they fail.'],
@@ -486,13 +486,13 @@ export default [
   ],
 
   features: [
-    ['Ownership resolution', 'Assets matched to parcels and parcels to owners — closing the 73.7% unknown-owner gap that the Agency itself reports.'],
+    ['Ownership resolution', 'Assets matched to parcels and parcels to owners, closing the 73.7% unknown-owner gap that the Agency itself reports.'],
     ['Condition coverage reporting', 'Every condition statistic published with its denominator, so a quarter-coverage figure is never presented as national.'],
     ['Overdue inspection detection', 'Next-inspection dates already in the past, computable from published data and currently reported by nobody.'],
     ['Flood map completeness', 'The 53.4% of assets never assessed for inclusion in the map that governs planning and insurance.'],
     ['Failure consequence modelling', 'What each poorly-conditioned or unowned asset protects, joined to properties at risk.'],
     ['Maintenance versus capital', 'Planned against actual maintenance activity, against the backdrop of a documented underspend.'],
-    ['Third-party asset register', 'The privately owned defences — nearly 18% of the estate — identified and attributable for the first time.']
+    ['Third-party asset register', 'The privately owned defences, nearly 18% of the estate, identified and attributable for the first time.']
   ],
 
   impact: [
@@ -524,7 +524,7 @@ export default [
   ],
 
   risks: [
-    ['Unknown may mean unowned', 'Some assets genuinely have no identifiable responsible party — a finding in itself, not a resolution failure. The two must be distinguished and reported separately.'],
+    ['Unknown may mean unowned', 'Some assets genuinely have no identifiable responsible party, a finding in itself, not a resolution failure. The two must be distinguished and reported separately.'],
     ['Attribution is consequential', 'Naming a private owner as responsible for a defence has legal weight. Confidence is published per match, and low-confidence attributions are never asserted.'],
     ['Condition data may be absent for good reason', 'Some assets may not warrant inspection. The product reports the gap and asks the question rather than assuming neglect.']
   ],
@@ -552,17 +552,17 @@ export default [
 
   problem: [
     'When a company holding public contracts fails, the consequences land on whoever depended on it. The failure of a major government contractor in 2018 remains the defining example, and the lesson drawn afterwards was that nobody had a consolidated view of exposure.',
-    'The raw material to build that view is free and better than expected. The official insolvency record publishes a <strong>JSON interface with no key required</strong>, carrying <strong>over three million notices</strong>. Critically, each notice carries a <strong>structured company number</strong> — a direct identifier join, with no name matching required.',
-    'On the other side sit the public procurement record, the care provider registers, the school trust register and the social housing register — millions of contractual and regulatory relationships between the state and companies.',
+    'The raw material to build that view is free and better than expected. The official insolvency record publishes a <strong>JSON interface with no key required</strong>, carrying <strong>over three million notices</strong>. Critically, each notice carries a <strong>structured company number</strong>, a direct identifier join, with no name matching required.',
+    'On the other side sit the public procurement record, the care provider registers, the school trust register and the social housing register, millions of contractual and regulatory relationships between the state and companies.',
     'Nobody joins them. So the question "which public contracts and regulated services are currently held by companies in insolvency proceedings" has no answer, despite both halves being free and one of them carrying a clean identifier.',
-    'And the standard alternative does not work. Predicting failure from filed accounts requires profit and loss data that small companies do not publish — a requirement that was <strong>paused in January 2026 and pushed to 2028, with an opt-out from publication attached</strong>. Roughly two-thirds of the standard model’s power is unavailable, and published testing shows such models flagging around a quarter of all companies, of which the overwhelming majority never fail.'
+    'And the standard alternative does not work. Predicting failure from filed accounts requires profit and loss data that small companies do not publish, a requirement that was <strong>paused in January 2026 and pushed to 2028, with an opt-out from publication attached</strong>. Roughly two-thirds of the standard model’s power is unavailable, and published testing shows such models flagging around a quarter of all companies, of which the overwhelming majority never fail.'
   ],
 
   solution: [
     'Watchman abandons prediction and does something more useful: it watches events, and it knows who depends on whom.',
-    'It ingests insolvency notices continuously, resolves each to an organisation through the entity spine, and checks that organisation against every public relationship the platform knows about — contracts, care registrations, school trusts, social housing, land holdings.',
+    'It ingests insolvency notices continuously, resolves each to an organisation through the entity spine, and checks that organisation against every public relationship the platform knows about, contracts, care registrations, school trusts, social housing, land holdings.',
     'The output is an exposure alert rather than a risk score. Not "this company might fail" but "this company has entered administration, and here are the seventeen contracts and four hundred care beds that depend on it."',
-    'It layers earlier signals underneath — charge filings, strike-off action, overdue accounts — all observable for every company regardless of size, and all events rather than inferences.',
+    'It layers earlier signals underneath, charge filings, strike-off action, overdue accounts, all observable for every company regardless of size, and all events rather than inferences.',
     'And it inverts for planning: for any council or department, which of its suppliers show distress signals, and what would be lost if each failed.'
   ],
 
@@ -579,7 +579,7 @@ export default [
   features: [
     ['Event ingestion', 'Insolvency notices processed continuously, resolved to organisations by identifier rather than by name.'],
     ['Exposure alerting', 'When an organisation enters proceedings, everything the public sector depends on it for, immediately.'],
-    ['Early signals', 'Charge filings, strike-off action and overdue accounts — observable for every company, including those filing minimal accounts.'],
+    ['Early signals', 'Charge filings, strike-off action and overdue accounts, observable for every company, including those filing minimal accounts.'],
     ['Buyer-side view', 'For any council or department, which suppliers show distress and what each failure would cost.'],
     ['Concentration risk', 'Where many public bodies depend on one organisation, or one group behind several apparent suppliers.'],
     ['Group awareness', 'Distress in a parent or sibling company that the contracting entity’s own record would not show.'],
@@ -589,7 +589,7 @@ export default [
   impact: [
     ['3m+', 'Insolvency notices available free, each carrying a company number'],
     ['0', 'Systems joining them to the register of public contracts'],
-    ['2028', 'Earliest date small company accounts might carry profit and loss — with an opt-out attached'],
+    ['2028', 'Earliest date small company accounts might carry profit and loss, with an opt-out attached'],
     ['~1 in 198', 'Annual company failure rate, against which any predictive model must justify itself']
   ],
 
@@ -640,13 +640,13 @@ export default [
   name: 'Baseline',
   subtitle: 'Sewage spills, adjusted for the weather',
   themes: ['climate', 'money', 'operations'],
-  tagline: 'Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall — and a new regulator is being built right now that will need to.',
+  tagline: 'Spills fell 35% in 2025. The Environment Agency says the year was dry. Nobody has separated the £22bn of investment from the rainfall, and a new regulator is being built right now that will need to.',
   status: 'Both halves of the join are open and keyless',
 
   problem: [
-    'Every storm overflow in England now has a monitor. The 2025 return covers <strong>14,302 overflows</strong>, and <strong>100% of them carry a grid reference</strong> — most to one-metre precision. That is an unusually complete national dataset, free and open.',
-    'It reported <strong>291,492 spills</strong> in 2025 against <strong>450,398 in 2024</strong> — a 35% fall, with duration down 48%. That is the headline the sector has been running on.',
-    'The Environment Agency’s own commentary concedes the problem with it. Its account of the year notes rainfall was <strong>"below average, with August recording just 62% of the UK\'s typical rainfall"</strong> and calls 2025 <strong>"a drier than average year"</strong>. It attributes the improvement to weather — and then publishes no weather-adjusted figure.',
+    'Every storm overflow in England now has a monitor. The 2025 return covers <strong>14,302 overflows</strong>, and <strong>100% of them carry a grid reference</strong>, most to one-metre precision. That is an unusually complete national dataset, free and open.',
+    'It reported <strong>291,492 spills</strong> in 2025 against <strong>450,398 in 2024</strong>, a 35% fall, with duration down 48%. That is the headline the sector has been running on.',
+    'The Environment Agency’s own commentary concedes the problem with it. Its account of the year notes rainfall was <strong>"below average, with August recording just 62% of the UK\'s typical rainfall"</strong> and calls 2025 <strong>"a drier than average year"</strong>. It attributes the improvement to weather, and then publishes no weather-adjusted figure.',
     'Nor does anyone else. The economic regulator normalises environmental performance by <strong>sewer length, not rainfall</strong>. The charities and campaign groups that map spills do not adjust them either. So <strong>£22.1bn of committed investment is being justified against a number nobody has separated from the weather.</strong>',
     'And the raw material to do it is sitting there. The Agency runs <strong>1,044 rainfall stations at 15-minute resolution</strong>, free and without a key, alongside the overflow data it publishes itself.'
   ],
@@ -654,31 +654,31 @@ export default [
   solution: [
     'Baseline computes what the sector cannot currently state: how much of the change in spill performance is investment, and how much is rain.',
     'It joins each overflow to its local rainfall record and models expected spill behaviour against actual rainfall, producing a normalised performance figure per overflow, per site, per company and per catchment. The headline stops being "spills fell 35%" and becomes "spills fell 35%, of which this much is weather and this much is not."',
-    'It also fixes an identity problem the Agency created and has not solved. The published data carries a field named <code>old_unique_id_pre_2024</code>, because <strong>the overflow identifier scheme changed in 2024</strong>. That single break is why almost nobody publishes per-overflow trends — multi-year analysis requires resolving the same physical asset across two identifier systems, which is exactly what the entity spine does.',
-    'And it captures what is being thrown away. The statutory near-real-time feeds publish only the <em>latest</em> event — a start time, an end time, and current status. There is no history and no archive. The law compels water companies to publish, not to retain. Anyone recording those feeds continuously builds an event-level spill history that cannot be reconstructed afterwards by anyone, at any price.'
+    'It also fixes an identity problem the Agency created and has not solved. The published data carries a field named <code>old_unique_id_pre_2024</code>, because <strong>the overflow identifier scheme changed in 2024</strong>. That single break is why almost nobody publishes per-overflow trends, multi-year analysis requires resolving the same physical asset across two identifier systems, which is exactly what the entity spine does.',
+    'And it captures what is being thrown away. The statutory near-real-time feeds publish only the <em>latest</em> event, a start time, an end time, and current status. There is no history and no archive. The law compels water companies to publish, not to retain. Anyone recording those feeds continuously builds an event-level spill history that cannot be reconstructed afterwards by anyone, at any price.'
   ],
 
   datasets: [
     ['Storm overflow annual return', 'Environment Agency', '14,302 overflows, 48 fields, grid reference on 100%. Free bulk download and open feature service, no key. Verified 72,168 records across years.'],
     ['Rainfall monitoring stations', 'Environment Agency', '1,044 stations at 15-minute resolution. Open interface, no key, no registration.'],
-    ['Rainfall daily archive', 'Environment Agency', 'One national file per day. Roughly fourteen months of retention — older data must be captured as it passes.'],
+    ['Rainfall daily archive', 'Environment Agency', 'One national file per day. Roughly fourteen months of retention, older data must be captured as it passes.'],
     ['Near-real-time overflow feeds', 'Water companies', 'Statutory since January 2025, published per company as open services. Current state and latest event only, with no history retained.'],
-    ['Water body classification', 'Environment Agency', 'Catchment geometry and ecological status, free and bulk downloadable — what the spills discharge into.'],
+    ['Water body classification', 'Environment Agency', 'Catchment geometry and ecological status, free and bulk downloadable, what the spills discharge into.'],
     ['Companies House', 'Companies House', 'Resolving operators and their group structures, for the ownership side of performance.']
   ],
 
   features: [
-    ['Rainfall-normalised performance', 'Spill behaviour adjusted for actual local rainfall, per overflow and per company — the metric the sector lacks.'],
+    ['Rainfall-normalised performance', 'Spill behaviour adjusted for actual local rainfall, per overflow and per company, the metric the sector lacks.'],
     ['Weather versus investment decomposition', 'How much of a reported improvement is attributable to spend, and how much to a dry year.'],
     ['Cross-year identity resolution', 'The same physical overflow tracked across the 2024 identifier break, which is why per-overflow trends are largely unpublished.'],
     ['Event history capture', 'Continuous recording of the near-real-time feeds, building a spill history that the statutory duty does not require anyone to retain.'],
-    ['Monitor reliability', 'Overflows whose monitors were offline for material parts of the year — a spill count from a monitor that was not watching is not a low spill count.'],
+    ['Monitor reliability', 'Overflows whose monitors were offline for material parts of the year, a spill count from a monitor that was not watching is not a low spill count.'],
     ['Catchment and bathing water impact', 'Spills joined to the waters they discharge into, and to designated bathing and shellfish waters.'],
     ['Regulatory reporting pack', 'Performance evidence in the form a new regulator would need to judge companies on day one.']
   ],
 
   impact: [
-    ['100%', 'Monitored overflows carrying a grid reference — most to one-metre precision'],
+    ['100%', 'Monitored overflows carrying a grid reference, most to one-metre precision'],
     ['35%', 'Reported fall in spills in a year the Agency itself calls drier than average'],
     ['£22.1bn', 'Committed investment justified against an unadjusted number'],
     ['0', 'Published rainfall-normalised spill metrics, by anyone']
@@ -689,7 +689,7 @@ export default [
       'Gives the incoming water regulator a defensible performance metric at the moment it is being stood up, when it has none.',
       'Lets investment be judged on effect rather than on a figure the Agency itself attributes to weather.',
       'Identifies overflows whose apparent improvement is a monitor outage rather than a reduction in spilling.',
-      'Provides an evidence base for enforcement that survives the obvious challenge — that a wet year would have looked different.'
+      'Provides an evidence base for enforcement that survives the obvious challenge, that a wet year would have looked different.'
     ],
     public: [
       'A spill figure that means something, rather than one that moves with the rain.',
@@ -699,14 +699,14 @@ export default [
   },
 
   phases: [
-    ['Capture and archive', '1 month', 'Begin recording the near-real-time feeds immediately — every day not recorded is permanently lost.'],
+    ['Capture and archive', '1 month', 'Begin recording the near-real-time feeds immediately, every day not recorded is permanently lost.'],
     ['Identity resolution', '3 months', 'Overflows resolved across the 2024 identifier break, producing the first per-overflow multi-year series.'],
     ['Normalisation model', '4 months', 'Rainfall-adjusted performance, with method published openly and back-tested against wet and dry years.'],
     ['Regulator engagement', '6 months', 'Delivered to the new regulator and the Agency as a candidate performance metric.']
   ],
 
   risks: [
-    ['Attribution is genuinely hard', 'Rainfall is not the only confounder — groundwater, catchment characteristics, sewer condition and population all matter. The model must publish its assumptions and its uncertainty, and be honest that it narrows the question rather than settling it.'],
+    ['Attribution is genuinely hard', 'Rainfall is not the only confounder, groundwater, catchment characteristics, sewer condition and population all matter. The model must publish its assumptions and its uncertainty, and be honest that it narrows the question rather than settling it.'],
     ['The regulator may build it', 'A new regulator with a statutory duty may develop its own metric. That would be the right national outcome, so the work should aim to inform the method rather than to be the only holder of it.'],
     ['Archive decay cuts both ways', 'The rainfall archive retains roughly fourteen months and the live feeds retain nothing. That is the moat, but it also means the historical baseline can never be improved retrospectively.']
   ],

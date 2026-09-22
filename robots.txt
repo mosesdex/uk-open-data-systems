@@ -1,4 +1,4 @@
-# UK GroundTruth — Dexter DCL
+# UK GroundTruth, Dexter DCL
 #
 # What ships is the app at /, the data it reads, and the system briefs it links
 # to. /mobile.html is a handoff to / and is noindex. What never ships is the engine in

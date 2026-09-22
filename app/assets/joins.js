@@ -1,6 +1,6 @@
 /* The heart of GroundTruth, per system: WHAT is recorded, the WHERE and WHO
    joins GroundTruth adds, and the before -> connect -> after -> possible story.
-   Text only, and true to what each system actually does — where a join does not
+   Text only, and true to what each system actually does, where a join does not
    exist (place-only or who-only systems, or Ledger where the source carries no
    location at all), that is stated plainly rather than invented. */
 const JOINS = {
@@ -11,13 +11,13 @@ const JOINS = {
     before: 'Rolls and capacity are published per school, but the planning-area geography that funding uses is published nowhere.',
     connect: 'Every school is joined to its district (and its trust) through the place spine.',
     after: 'Pupils and places compared district by district.',
-    possible: 'See which districts are full and which have spare room — instead of a single national average that hides both.',
+    possible: 'See which districts are full and which have spare room, instead of a single national average that hides both.',
   },
   sentinel: {
     what: 'Public contract awards: buyer, supplier name, value and procurement route.',
     where: null,
     who: 'Each supplier name is resolved to a Companies House number, then to the person controlling it.',
-    before: 'Awards carry supplier names, not identifiers — you cannot see who really owns a bidder.',
+    before: 'Awards carry supplier names, not identifiers, you cannot see who really owns a bidder.',
     connect: 'Supplier name is joined to its company number, then to its persons of significant control.',
     after: 'Awards grouped by their true owner, not their trading name.',
     possible: 'See one owner sitting behind several "competing" suppliers to the same buyer.',
@@ -28,7 +28,7 @@ const JOINS = {
     who: null,
     before: 'The Agency objects on flood grounds, then frequently never learns what the council decided.',
     connect: 'Each objection is joined to its decision outcome and year.',
-    after: 'The override rate — homes approved against advice — tracked over nine years.',
+    after: 'The override rate, homes approved against advice, tracked over nine years.',
     possible: 'See whether flood advice is being overridden, and whether the rate is rising or the reporting is just failing.',
   },
   plumbline: {
@@ -50,13 +50,13 @@ const JOINS = {
     possible: 'See which operators publish a schema but withhold every row of real capacity data.',
   },
   ledger: {
-    what: 'Developer contributions promised through planning — Section 106 and CIL.',
-    where: 'None. The source records no usable location — and that absence is the finding.',
+    what: 'Developer contributions promised through planning: Section 106 and CIL.',
+    where: 'None. The source records no usable location, and that absence is the finding.',
     who: null,
     before: 'Contributions are recorded as free text with no coordinates, so none can be mapped or chased.',
     connect: 'Amounts are grouped by status and purpose; location cannot be added because the source carries none.',
     after: 'Promised against delivered, by what the money was for.',
-    possible: 'See how much developer money is received versus actually spent — and that not one record can be placed on a map.',
+    possible: 'See how much developer money is received versus actually spent, and that not one record can be placed on a map.',
   },
   bellwether: {
     what: 'CQC-registered care locations and their bed counts.',
@@ -89,22 +89,22 @@ const JOINS = {
     what: 'Flood-defence assets and their inspection dates.',
     where: 'Each asset is placed in the district the register names.',
     who: 'Each asset carries a maintainer and, where recorded, an owner.',
-    before: 'The register has no owner field and scattered responsibility — a defence can be overdue with no clear owner.',
+    before: 'The register has no owner field and scattered responsibility, a defence can be overdue with no clear owner.',
     connect: 'Assets are joined to their authority and maintainer, and overdue inspections flagged.',
     after: 'Overdue inspections and owner-known rates, per district.',
     possible: 'See where flood defences are overdue and who, if anyone, is accountable.',
   },
   watchman: {
-    what: 'Company distress signals — strike-off and insolvency — against active public roles.',
+    what: 'Company distress signals, strike-off and insolvency, against active public roles.',
     where: null,
     who: 'Each company is joined by its number to any public duty it still holds.',
     before: 'Company distress and active public roles are never cross-referenced until after a failure.',
     connect: 'Company numbers are joined to distress signals and to any public role held.',
-    after: 'An early-warning list — currently empty, which is itself the result.',
+    after: 'An early-warning list, currently empty, which is itself the result.',
     possible: 'Catch a failing company still holding public duties before it collapses, not after.',
   },
   compass: {
-    what: 'Special educational needs — EHC plans and SEN support — counted per authority and year.',
+    what: 'Special educational needs: EHC plans and SEN support, counted per authority and year.',
     where: 'Each count is tied to its local authority.',
     who: null,
     before: 'Demand is rising far faster than the number of children, but the local picture is buried in national totals.',
@@ -116,7 +116,7 @@ const JOINS = {
     what: 'Storm-overflow sewage spills and how long each monitor was working.',
     where: 'Each outlet is placed by its own coordinates into a district.',
     who: 'Each outlet is tied to the water company that runs it.',
-    before: 'Raw spill counts flatter companies whose monitors were offline — a low number can mean a broken sensor.',
+    before: 'Raw spill counts flatter companies whose monitors were offline, a low number can mean a broken sensor.',
     connect: 'Spills are adjusted for monitor uptime and each outlet is placed on the map by its coordinates.',
     after: 'Uptime-adjusted spills by district and by company.',
     possible: 'See true spill levels rather than artefacts of sensor outages.',

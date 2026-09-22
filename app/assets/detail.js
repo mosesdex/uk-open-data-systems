@@ -4,7 +4,7 @@ const DETAIL = {
   catchment: {
     question: 'Are there school places where the children actually are?',
     why: 'Capital is allocated per pupil planning area, but that geography is published nowhere. A district can be full and half-empty at once, and the two cancel out in the published figures.',
-    method: 'Every open school is resolved to a district through the place spine, then pupils and capacity are summed and divided. Mainstream and specialist provision are counted separately, because alternative provision reports capacity on a different basis — blending them produced schools at 330% of capacity in an early build.',
+    method: 'Every open school is resolved to a district through the place spine, then pupils and capacity are summed and divided. Mainstream and specialist provision are counted separately, because alternative provision reports capacity on a different basis, blending them produced schools at 330% of capacity in an early build.',
     limits: [
       'Utilisation is computed only over schools that published both a capacity and a roll.',
       'Two-tier counties plan across several districts, so their figures do not attach to one.',
@@ -23,7 +23,7 @@ const DETAIL = {
   highwater: {
     question: 'How often is housing approved against flood advice?',
     why: 'The Environment Agency objects, then frequently never learns what the council decided.',
-    method: 'Objections are read from the Agency’s own published list and grouped by outcome and year. Override rates are computed over decided cases only — counting unknowns in the denominator would make the rate improve every time an outcome goes unrecorded.',
+    method: 'Objections are read from the Agency’s own published list and grouped by outcome and year. Override rates are computed over decided cases only, counting unknowns in the denominator would make the rate improve every time an outcome goes unrecorded.',
     limits: [
       'No row carries an address, postcode or coordinate, so nothing here can be mapped to a site.',
       'Thousands of outcomes were never recorded at all.',
@@ -43,7 +43,7 @@ const DETAIL = {
     why: 'Network operators publish capacity registers that a developer cannot compare or, in most cases, even download.',
     method: 'Each operator’s register is fetched anonymously and compared against what its own catalogue advertises.',
     limits: [
-      'The schemas are not the problem — the registers share most of their fields.',
+      'The schemas are not the problem, the registers share most of their fields.',
       'Most advertised records never reach the open route at all.',
     ],
   },
@@ -93,7 +93,7 @@ const DETAIL = {
   },
   watchman: {
     question: 'When a supplier fails, what does the public sector lose?',
-    why: 'Today this takes weeks. Both halves — insolvency notices and award notices — are already public.',
+    why: 'Today this takes weeks. Both halves, insolvency notices and award notices, are already public.',
     method: 'Insolvency notices are matched to a cumulative register of every supplier ever awarded a public contract, by company number where present and by scored name match otherwise.',
     limits: [
       'The register is the asset, not the fetch. At its current size the expected hit rate is a fraction of one per month.',
@@ -123,8 +123,8 @@ const DETAIL = {
 /* Render what a system actually found, from its own gold tables. */
 function renderFindings(id, d) {
   if (!d) return '<p class="card__s">This system has not been run yet.</p>';
-  const n = v => v == null ? '—' : Number(v).toLocaleString('en-GB');
-  const money = v => v == null ? '—' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
+  const n = v => v == null ? 'n/a' : Number(v).toLocaleString('en-GB');
+  const money = v => v == null ? 'n/a' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
                     : v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
   const big = (v, l, s) => `<div class="kpi" style="--accent:var(--uk-blue)">
       <div class="kpi__l">${l}</div><div class="kpi__v">${v}</div>
@@ -133,7 +133,7 @@ function renderFindings(id, d) {
       <table class="tbl"><thead><tr>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead>
       <tbody>${rows.map(r => `<tr>${cols.map(c => {
         const raw = r[c.key];
-        const val = fmt[c.key] ? fmt[c.key](raw) : (typeof raw === 'number' ? n(raw) : (raw ?? '—'));
+        const val = fmt[c.key] ? fmt[c.key](raw) : (typeof raw === 'number' ? n(raw) : (raw ?? 'n/a'));
         return `<td${c.mono ? ' class="mono"' : ''}>${val}</td>`;
       }).join('')}</tr>`).join('')}</tbody></table></div>`;
 
@@ -208,7 +208,7 @@ function renderFindings(id, d) {
       </div>
       ${w.length ? `<div class="note mt-4"><div class="note__title">Adjusting for the weather, not just the monitor</div>
         <p>Raw spill counts reward a dry year. Dividing each company's spills by the rainfall that
-        actually fell near its outlets separates what the network did from what the sky did — and it
+        actually fell near its outlets separates what the network did from what the sky did, and it
         reorders the table. A company spilling heavily in a dry region looks worse than one spilling
         the same amount where it rains twice as much.</p></div>
       <div class="card__s mt-4 mb-2">Spills per 100mm of local rainfall (weather-adjusted)</div>
@@ -226,7 +226,7 @@ function renderFindings(id, d) {
       const t=(d.systemic||[])[0];
       return `<div class="grid g2">
         ${t ? big(n(t.authorities), 'Authorities depend on one group',
-              `${(t.brand||'').replace('BRAND ','')} — ${n(t.beds)} beds`) : ''}
+              `${(t.brand||'').replace('BRAND ','')}: ${n(t.beds)} beds`) : ''}
         ${big(n((d.systemic||[]).length), 'Groups tracked', 'across every authority')}
       </div>
       <div class="card__s mt-4 mb-2">Groups spanning the most authorities</div>
@@ -244,7 +244,7 @@ function renderFindings(id, d) {
       <div class="card__s mt-4 mb-2">Override rate by year, decided cases only</div>
       ${table([{label:'Year',key:'year'},{label:'Objections',key:'objections',mono:1},
                {label:'Against advice',key:'granted_against',mono:1},
-               {label:'Rate',key:'override_rate_pct',mono:1}], d.trend, {override_rate_pct:v=>v==null?'—':v+'%'})}`;
+               {label:'Rate',key:'override_rate_pct',mono:1}], d.trend, {override_rate_pct:v=>v==null?'n/a':v+'%'})}`;
     }
     case 'lastmile': {
       const wg=d.worst_gap||[];
@@ -253,7 +253,7 @@ function renderFindings(id, d) {
         ${big(d.other_pct + '%', 'Gigabit everywhere else', `${n(d.new_build_premises)} new-build premises`)}
       </div>
       <div class="note mt-4"><div class="note__title">The national average hides the story</div>
-        <p>Across 503,171 recent new-build sales the national gap is just ${(d.new_build_pct-d.other_pct).toFixed(1)} points —
+        <p>Across 503,171 recent new-build sales the national gap is just ${(d.new_build_pct-d.other_pct).toFixed(1)} points,
         new homes are not systematically worse connected. But the problem is intensely local:
         some authorities run 25 points below their own average, others above it.</p></div>
       ${wg.length ? `<div class="card__s mt-4 mb-2">Where new-build postcodes lag most (500+ recent sales)</div>
@@ -280,7 +280,7 @@ function renderFindings(id, d) {
         name more than one supplier at all.</p></div>`; })()}
       ${fp.length ? `<div class="note mt-4"><div class="note__title">One owner, several suppliers, one buyer</div>
         <p>This is the collusion-adjacent signal that <em>is</em> possible in UK data. Award notices name
-        only the winner, not who bid — so shared control on a single contract almost never shows.
+        only the winner, not who bid, so shared control on a single contract almost never shows.
         But one person controlling several of a buyer’s suppliers over time needs no bidder list.
         A signal to look at, never a verdict.</p></div>
       <div class="card__s mt-4 mb-2">Beneficial owners controlling multiple suppliers to one buyer</div>
@@ -325,14 +325,14 @@ function renderFindings(id, d) {
         name: x.company_number
           ? `<a href="https://find-and-update.company-information.service.gov.uk/company/${encodeURIComponent(x.company_number)}" target="_blank" rel="noopener">${e(x.name)}</a>`
           : e(x.name),
-        company_number: e(x.company_number || '—'),
+        company_number: e(x.company_number || 'n/a'),
         company_status: e(x.company_status),
         role: e(x.role),
         activity: x.role === 'CQC care provider' ? `${n(x.activity)} care locations` : n(x.activity),
       }));
       return `<div class="grid g2">
         ${big(n((d.exposures||[]).length), 'Exposures in the current window', 'the register must accumulate first')}
-        ${big('—', 'Historic backfill', 'not yet fetched')}
+        ${big('n/a', 'Historic backfill', 'not yet fetched')}
       </div>
       <p class="card__s mt-3">Zero is the correct answer at this register size, not a failure.
       Matching a few weeks of insolvencies against a few weeks of awards is expected to find

@@ -12,7 +12,10 @@ const Platform = (() => {
       // conditional request can still serve a stale copy from disk cache even
       // with no-store set. Showing yesterday's figures as today's is the one
       // failure this interface must not have, so the URL is made unique.
-      const r = await fetch(`${path}?t=${Date.now()}`, {cache: 'no-store'});
+      // Revalidated, not re-downloaded. The server sends an ETag, so a repeat
+      // visit costs one 304 instead of the whole 844KB, and a publish changes
+      // the ETag, so a stale copy can never be served either.
+      const r = await fetch(path, {cache: 'no-cache'});
       if (!r.ok) throw new Error('HTTP ' + r.status);
       data = await r.json();
     } catch (e) {
@@ -167,7 +170,7 @@ const Platform = (() => {
       case 'bellwether': {
         const t = (d.systemic || [])[0];
         return t && {headline: n(t.authorities), label: 'authorities depend on one care group',
-          sub: `${t.brand.replace('BRAND ','')} — ${n(t.beds)} beds across ${t.companies} companies`};
+          sub: `${t.brand.replace('BRAND ','')}: ${n(t.beds)} beds across ${t.companies} companies`};
       }
       case 'sentinel': {
         const m = d.method || [];
@@ -182,7 +185,7 @@ const Platform = (() => {
         const r = d.reasons || [];
         const tot = r.reduce((a,x)=>a+Number(x.objections||0),0);
         return {headline: n(tot), label: 'water quality objections',
-          sub: 'none carry a recorded outcome — the field does not exist'};
+          sub: 'none carry a recorded outcome, the field does not exist'};
       }
       case 'watchman':
         return {headline: n((d.exposures || []).length), label: 'exposures found in the sample',
@@ -225,9 +228,9 @@ const Platform = (() => {
   /* Plain-English method per metric, so a figure on the map can be traced to
      how it was produced, not just to who published the input. */
   const METRIC_METHOD = {
-    coverage:  {system:null, method:'Counts how many of the thirteen systems produced a figure for each district. Districts with none are usually two-tier counties, where services are planned across several districts at once.'},
+    coverage:  {system:null, method:'Counts how many of the thirteen questions have an answer for each district. Districts with none are usually two-tier counties, where services are planned across several districts at once.'},
     catchment: {system:'catchment', method:'Sums pupils and capacity across every open mainstream school resolved to the district, then divides. Specialist provision is counted separately because it reports capacity on a different basis.'},
-    compass:   {system:'compass', method:'Fits a straight line to eleven years of published EHC plan counts for the authority and projects three years forward. Aggregate counts only — no record about any individual child is used.'},
+    compass:   {system:'compass', method:'Fits a straight line to eleven years of published EHC plan counts for the authority and projects three years forward. Aggregate counts only, no record about any individual child is used.'},
     plumbline: {system:'plumbline', method:'Divides major dwelling decisions reached within the statutory thirteen weeks without an agreed extension by all major dwelling decisions; those made under an extension have no published time band and count as outside. The published headline instead counts agreed extensions as on time.'},
     bulwark:   {system:'bulwark', method:'Counts flood defences whose own next-inspection date has already passed. Dates are published as DD/MM/YYYY and parsed strictly.'},
     lastmile:  {system:'lastmile', method:'Divides premises flagged gigabit-capable by all surveyed premises in the district. Joined on postcode, not property, because Price Paid carries no property reference.'},
@@ -332,8 +335,8 @@ const Platform = (() => {
     const p = placesRaw();
     if (!p || !p.byLad[code]) return null;
     const d = p.byLad[code];
-    const n = v => v == null ? '—' : Number(v).toLocaleString('en-GB');
-    const money = v => v == null ? '—' : (v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
+    const n = v => v == null ? 'n/a' : Number(v).toLocaleString('en-GB');
+    const money = v => v == null ? 'n/a' : (v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
     const items = [];
     // Care and SEND are published per upper-tier council. In a two-tier area
     // the district carries its county's figure; say so rather than imply it is
@@ -354,7 +357,7 @@ const Platform = (() => {
       items.push({system:'Compass', metric:(c.projected_change_pct>0?'+':'') + c.projected_change_pct + '%',
         label:'projected change in EHC plans',
         detail:`${c.pupils_per_year > 0 ? '+' : ''}${c.pupils_per_year}/year over ${c.years} years, ${n(c.projected_change_3yr)} more in three`,
-        caveat:'aggregate counts only — no individual record is used',
+        caveat:'aggregate counts only, no individual record is used',
         scope: scope(c),
         tone: c.projected_change_pct > 30 ? 'bad' : c.projected_change_pct > 10 ? 'warn' : 'ok'});
     }
@@ -396,7 +399,7 @@ const Platform = (() => {
     if (d.bellwether) {
       const c = d.bellwether;
       items.push({system:'Bellwether', metric: c.share_pct + '%', label:'of care beds with one group',
-        detail:`${(c.group_name||'').replace('BRAND ','')} — ${n(c.beds)} of ${n(c.la_beds)} beds`,
+        detail:`${(c.group_name||'').replace('BRAND ','')}: ${n(c.beds)} of ${n(c.la_beds)} beds`,
         caveat: c.branded ? 'grouped by the regulator’s brand field' : 'this provider is unbranded, so counted alone',
         scope: scope(c),
         tone: c.share_pct > 40 ? 'bad' : c.share_pct > 25 ? 'warn' : 'ok'});
@@ -463,7 +466,7 @@ const Platform = (() => {
         const n = v => Number(v || 0).toLocaleString('en-GB');
         const s = (v, one, many) => `${n(v)} ${Number(v) === 1 ? one : many}`;
         const parts = [];
-        if (r.outside_great_britain) parts.push(`${n(r.outside_great_britain)} are outside Great Britain — British schools overseas, offshore schools and service schools abroad`);
+        if (r.outside_great_britain) parts.push(`${n(r.outside_great_britain)} are outside Great Britain: British schools overseas, offshore schools and service schools abroad`);
         if (r.online_only) parts.push(`${n(r.online_only)} are online-only providers with no site`);
         if (r.in_wales) parts.push(`${n(r.in_wales)} are in Wales, outside this system’s England scope`);
         let text = `${s(nat.schools_unplaced, 'mainstream school is', 'mainstream schools are')} not placed in a district.`;
@@ -503,7 +506,7 @@ const Platform = (() => {
     const held = systemProvenance(id).filter(f => f.ok);
     if (!held.length) return null;
     const bulk = held.filter(f => !f.hashed);
-    const lead = 'Every source behind this system is open to an anonymous request — no account, key or fee.';
+    const lead = 'Every source behind this system is open to an anonymous request, no account, key or fee.';
     const names = bulk.map(f => _esc(f.name)).join('; ');
     const h = held.length - bulk.length;
     if (!bulk.length) return held.length === 1

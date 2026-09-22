@@ -26,7 +26,7 @@ export const SITE = {
   base: BASE,
   url: `${ORIGIN}${BASE}`,
   name: 'UK GroundTruth',
-  tagline: 'One platform, thirteen public data systems',
+  tagline: 'One connected record, thirteen questions answered',
   publisher: 'Dexter DCL',
   publisherShort: 'Dexter DCL',
   // The one contact route the site publishes. Corrections arrive here too, so
@@ -58,7 +58,7 @@ export const cardImage = (id) =>
 const TITLE_BUDGET = 62;
 
 export const composeTitle = (name, subtitle) => {
-  const full = subtitle ? `${name} — ${subtitle}` : name;
+  const full = subtitle ? `${name}: ${subtitle}` : name;
   const withBrand = `${full} | ${SITE.name}`;
   if (withBrand.length <= TITLE_BUDGET) return withBrand;
   return full.length <= 70 ? full : `${name} | ${SITE.name}`;
@@ -69,7 +69,7 @@ export const composeDescription = (text, max = 158) => {
   const flat = String(text).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   if (flat.length <= max) return flat;
   const cut = flat.slice(0, max);
-  return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:—-]$/, '') + '…';
+  return cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:-]$/, '') + '…';
 };
 
 // ---------------------------------------------------------------- JSON-LD
@@ -198,7 +198,7 @@ ${urls.map(u => `  <url>
  * domain; at a project subpath a crawler will not read it, which is documented
  * rather than silently accepted.
  */
-export const robots = () => `# ${SITE.name} — ${SITE.publisher}
+export const robots = () => `# ${SITE.name}, ${SITE.publisher}
 #
 # What ships is the app at /, the data it reads, and the system briefs it links
 # to. /mobile.html is a handoff to / and is noindex. What never ships is the engine in

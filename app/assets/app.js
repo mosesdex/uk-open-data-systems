@@ -1,8 +1,8 @@
 /* UK GroundTruth prototype runtime. No dependencies: charts, maps and counters
    are drawn directly as SVG so the whole thing runs from static files. */
 const GT = (() => {
-  const fmt = n => n == null ? '—' : n.toLocaleString('en-GB');
-  const pct = n => n == null ? '—' : n.toFixed(1) + '%';
+  const fmt = n => n == null ? 'n/a' : n.toLocaleString('en-GB');
+  const pct = n => n == null ? 'n/a' : n.toFixed(1) + '%';
   const money = n => n >= 1e9 ? '£' + (n/1e9).toFixed(2) + 'bn'
                   : n >= 1e6 ? '£' + (n/1e6).toFixed(1) + 'm'
                   : '£' + fmt(Math.round(n));
@@ -71,9 +71,18 @@ const GT = (() => {
   }
   const NO_DATA = 'var(--line)';
 
+  /* The district boundaries are 324KB of JSON and every map on the site draws
+     the same set, so fetch and parse them once per page and hand out that one
+     result. Keyed by path, because the console can point at another file. */
+  const GEO = new Map();
+  const geometry = path => {
+    if (!GEO.has(path)) GEO.set(path, fetch(path).then(r => r.json()).catch(e => { GEO.delete(path); throw e; }));
+    return GEO.get(path);
+  };
+
   async function choropleth(el, {values={}, label='', notes={}, fallbackSpread=false,
                                  ramp:rampKey='blue'}={}){
-    const gj = await fetch(el.dataset.geo || 'data/lad.geojson').then(r=>r.json());
+    const gj = await geometry(el.dataset.geo || 'data/lad.geojson');
     // project lon/lat -> screen, equirectangular scaled for UK latitudes
     let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
     const K = Math.cos(53 * Math.PI/180);
@@ -370,7 +379,7 @@ const GT = (() => {
          const held = rows.filter(r => r.provenance !== 'absent'), hashed = held.filter(r => r.sha256).length;
          const tail = ' A source that starts failing shows as failing rather than quietly going stale.';
          if (!held.length || hashed === held.length) return 'Each file is downloaded without credentials, its content hashed, and its HTTP status recorded.' + tail;
-         return `Each file fetched through the registry is downloaded without credentials, its content hashed and its HTTP status recorded — ${hashed} of the ${held.length} sources holding data. The other ${held.length - hashed} arrived by bulk import and carry no recorded hash.` + tail;
+         return `Each file fetched through the registry is downloaded without credentials, its content hashed and its HTTP status recorded: ${hashed} of the ${held.length} sources holding data. The other ${held.length - hashed} arrived by bulk import and carry no recorded hash.` + tail;
        })(),
        stat: p.collect ? `${gb(p.collect.downloaded_bytes)} across ${p.collect.runs} recorded fetches` : ''},
       {k:'process', ico:'\u{2699}', name:'Process',
@@ -382,12 +391,12 @@ const GT = (() => {
        detail:'Every figure ships with the share of records it was computed over, and every match carries a confidence. Nothing merges silently; anything ambiguous is reported, not guessed.',
        stat: p.validate ? `${p.validate.gold_tables} published tables, each carrying its own coverage` : ''},
       {k:'groundtruth', ico:'\u{25C9}', name:'UK GroundTruth',
-       one: p.groundtruth ? `${p.groundtruth.systems} systems` : 'thirteen systems',
-       detail:'The joined data answers thirteen questions nobody can currently answer — school places, flood defences, procurement ownership, and more.',
+       one: p.groundtruth ? `${p.groundtruth.systems} questions answered` : 'thirteen questions',
+       detail:'The joined data answers thirteen questions nobody can currently answer, school places, flood defences, procurement ownership, and more.',
        stat: p.groundtruth ? `${p.groundtruth.systems} systems, all on the same two joins` : ''},
       {k:'public', ico:'\u{1F310}', name:'Public',
        one: 'the number you see',
-       detail:'Published as open figures on this page. Nothing is estimated or modelled — every number is computed from the sources above and can be traced back to them.',
+       detail:'Published as open figures on this page. Nothing is estimated or modelled, every number is computed from the sources above and can be traced back to them.',
        stat: p.public && p.public.generated ? 'last computed '+String(p.public.generated).replace('T',' ').replace('+00:00',' UTC') : ''},
     ];
     // Per-system scoping: when opened from a system, every stage can be
@@ -427,16 +436,58 @@ const GT = (() => {
   /* ---- theme ---- */
   function theme(){
     const K='gt-theme';
-    const set=t=>{document.documentElement.dataset.theme=t;localStorage.setItem(K,t);};
-    const cur=localStorage.getItem(K); if(cur) set(cur);
+    // Storage throws in a private window; a theme is not worth an exception.
+    const read=()=>{try{return localStorage.getItem(K)}catch(e){return null}};
+    const write=t=>{try{localStorage.setItem(K,t)}catch(e){}};
+    const dark=matchMedia('(prefers-color-scheme: dark)');
+    const apply=t=>{document.documentElement.dataset.theme=t;};
+    const set=t=>{apply(t);write(t);};
+    const stored=read();
+    // With no stored choice, follow the device, and keep following it. Only a
+    // click on the toggle turns that into a preference of the reader's own.
+    apply(stored||(dark.matches?'dark':'light'));
+    dark.addEventListener('change',()=>{if(!read())apply(dark.matches?'dark':'light')});
     document.querySelectorAll('[data-theme-toggle]').forEach(b=>b.addEventListener('click',()=>
       set(document.documentElement.dataset.theme==='dark'?'light':'dark')));
   }
 
   /* ---- misc ---- */
+  /* The drawer is off-canvas below 980px, and there it must also leave the tab
+     order: a focusable link the reader cannot see is worse than no link, and a
+     screen reader should not offer a menu that looks closed. The class it
+     toggles is the one both stylesheets open on; they disagreed before, so the
+     menu button did nothing at all below 860px. */
   function sidebar(){
-    document.querySelectorAll('[data-side-toggle]').forEach(b=>b.addEventListener('click',()=>
-      document.querySelector('.side')?.classList.toggle('open')));
+    const side=document.querySelector('.side');
+    const toggles=[...document.querySelectorAll('[data-side-toggle]')];
+    if(!side||!toggles.length) return;
+    const offCanvas=matchMedia('(max-width:980px)');
+    const isOpen=()=>side.classList.contains('on');
+    const sync=()=>{
+      const hidden=offCanvas.matches&&!isOpen();
+      side.toggleAttribute('inert',hidden);
+      if(hidden) side.setAttribute('aria-hidden','true'); else side.removeAttribute('aria-hidden');
+      toggles.forEach(b=>b.setAttribute('aria-expanded',String(isOpen()&&offCanvas.matches)));
+    };
+    const close=refocus=>{side.classList.remove('on');sync();if(refocus)toggles[0].focus();};
+    toggles.forEach(b=>{
+      b.setAttribute('aria-controls','sideNav');
+      b.addEventListener('click',()=>{
+        side.classList.toggle('on');sync();
+        if(isOpen()) side.querySelector('a,button')?.focus();
+      });
+    });
+    addEventListener('keydown',e=>{if(e.key==='Escape'&&isOpen()&&offCanvas.matches)close(true);});
+    document.addEventListener('click',e=>{
+      if(!isOpen()||!offCanvas.matches)return;
+      if(side.contains(e.target)||e.target.closest('[data-side-toggle]'))return;
+      close(false);
+    });
+    // The router closes the drawer by dropping the class, so watch the class
+    // rather than every route: inert stays correct whoever closed it.
+    new MutationObserver(sync).observe(side,{attributes:true,attributeFilter:['class']});
+    offCanvas.addEventListener('change',sync);
+    sync();
   }
   function meters(root=document){
     const io=new IntersectionObserver(es=>es.forEach(e=>{

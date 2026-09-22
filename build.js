@@ -261,8 +261,8 @@ const GT = DELIVERABLE.map(id => sysById[id]);
 const OUTS = OUT.map(id => sysById[id]);
 
 const indexTrail = [{ name: 'UK GroundTruth', url: SEO.canonical('') }];
-const indexTitle = 'UK GroundTruth — one platform, thirteen public data systems';
-const indexDesc = 'UK GroundTruth resolves places and organisations across UK government data. Thirteen systems run on it, every one using data anyone can download without an account.';
+const indexTitle = 'UK GroundTruth, one connected record of UK public data';
+const indexDesc = 'UK GroundTruth resolves places and organisations across UK government data. Thirteen questions run on it, every one using data anyone can download without an account.';
 const index = `${head(indexTitle, indexDesc, 0, {
   path: '', card: 'index',
   ld: [SEO.organisation(), SEO.website(),
@@ -278,7 +278,7 @@ ${nav()}
 <h1 class="display hero__title mt-3">UK GroundTruth</h1>
 <p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. UK GroundTruth closes it.</p>
 <div class="hero__cta">
-<a class="btn btn--primary" href="#systems">The thirteen systems</a>
+<a class="btn btn--primary" href="#systems">The thirteen questions</a>
 <a class="btn btn--ghost" href="#chains">How they help each other</a>
 </div>
 </div>
@@ -328,7 +328,7 @@ ${nav()}
 <div class="grid grid--2 mt-4">
 <div class="card"><div class="card__num" style="color:var(--accent)">LINK ONE</div>
 <h3 class="card__title">Where</h3>
-<p class="card__desc mt-2">Turning a messy reference like <em>&ldquo;East Devon 21/0751/FUL&rdquo;</em> into a point on a map. Seven of the thirteen systems need this.</p></div>
+<p class="card__desc mt-2">Turning a messy reference like <em>&ldquo;East Devon 21/0751/FUL&rdquo;</em> into a point on a map. Seven of the thirteen questions need this.</p></div>
 <div class="card"><div class="card__num" style="color:var(--accent-2)">LINK TWO</div>
 <h3 class="card__title">Who</h3>
 <p class="card__desc mt-2">Turning a messy name like <em>&ldquo;SOFTCAT LTD - FCA&rdquo;</em> into one identified organisation. Five of the thirteen need this. One needs both.</p></div>
@@ -344,13 +344,13 @@ ${nav()}
 <section class="section section--alt" id="systems">
 <div class="wrap">
 <div class="eyebrow">The platform</div>
-<h2 class="mt-3">Thirteen systems</h2>
+<h2 class="mt-3">Thirteen questions</h2>
 <p class="lede mt-3">Each one addresses a gap the responsible department has documented itself. Every dataset they depend on was tested and returns data to an anonymous request &mdash; no account, no API key, no application, no approval.</p>
 <div class="filters mt-4">
 <button class="filter is-on" data-filter="all">All thirteen</button>
 ${Object.entries(THEMES).map(([k, v]) => `<button class="filter" data-filter="${k}">${v}</button>`).join('')}
 </div>
-<p class="small muted mb-3" data-filter-count>13 systems</p>
+<p class="small muted mb-3" data-filter-count>thirteen questions</p>
 <div class="grid">
 ${GT.map(s => `<a class="card" href="systems/${s.id}.html" data-themes="${s.themes.join(' ')}">
 <div class="card__num">${s.num}</div>
@@ -421,7 +421,7 @@ ${P.sequence.map((s, i) => `<div class="phase">
 <p><strong>Small supplier status is a scored advantage attached to a published target.</strong> Departments must set and publish three-year small business spend targets and report progress annually. They are collectively behind, and central government's small business share has fallen rather than risen.</p>
 <h3>What makes a proposition land</h3>
 <p>The counter-fraud programme is the template worth copying. Government published a loss estimate it owns, reported savings against it, credited data-matching explicitly, and translated the result into nurses and repaired roads. Every system here is framed the same way: against a published number the department already accepts, with recovered or avoided cost rather than capability uplift as the headline.</p>
-<p>Two further things now count as compliance arguments rather than sales points. Open standards and data portability are required by the technology code of practice, and the central digital team for local government has named supplier lock-in and inconsistent interfaces as the problem it exists to solve. And there is a durable advantage in depending on nothing: <strong>every source these thirteen systems use is fetchable without an account, so there is no registration to revoke and no licence to terminate.</strong></p>
+<p>Two further things now count as compliance arguments rather than sales points. Open standards and data portability are required by the technology code of practice, and the central digital team for local government has named supplier lock-in and inconsistent interfaces as the problem it exists to solve. And there is a durable advantage in depending on nothing: <strong>every source these thirteen questions use is fetchable without an account, so there is no registration to revoke and no licence to terminate.</strong></p>
 </div>
 </div>
 </section>
@@ -461,9 +461,9 @@ ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
 ${foot()}`;
 
 /* ---------------- Platform page ---------------- */
-const platformTitle = `${P.name} — the unified platform | ${SEO.SITE.publisherShort}`;
+const platformTitle = `${P.name}: the unified platform | ${SEO.SITE.publisherShort}`;
 const platformDesc = SEO.composeDescription(
-  'Thirteen public data systems on one platform, sharing a place spine and an entity spine. ' +
+  'One connected record of UK public data, answering thirteen questions, sharing a place spine and an entity spine. ' +
   'Two joins built once as public infrastructure, on data anyone can download without an account.');
 const platformTrail = [
   { name: 'UK GroundTruth', url: SEO.canonical('') },
@@ -623,7 +623,7 @@ ${foot()}`;
 
 /* ---------------- Write ---------------- */
 mkdirSync('systems', { recursive: true });
-const examplesTitle = 'Problems and solutions — all thirteen UK GroundTruth systems';
+const examplesTitle = 'Problems and solutions, all thirteen UK GroundTruth systems';
 const examplesDesc = SEO.composeDescription(
   'Two real situations for every one of the thirteen UK GroundTruth systems: what goes wrong today, and what the system does about it.');
 const examplesTrail = [
@@ -643,7 +643,7 @@ ${nav()}
 <a class="backlink" href="index.html">&larr; UK GroundTruth</a>
 <div class="eyebrow">Problems &amp; solutions</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Twenty-six situations</h1>
-<p class="lede" style="margin-top:.6rem">Two for each of the thirteen systems. On the left, what goes wrong today. On the right, what the system does about it.</p>
+<p class="lede" style="margin-top:.6rem">Two for each of the thirteen questions. On the left, what goes wrong today. On the right, what the system does about it.</p>
 <p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every situation below is real, and every one is caused by the same thing: a record exists, but nothing can be matched to it. No new data is collected anywhere on this page.</p>
 </div></header>
 
@@ -691,7 +691,7 @@ ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 </div>
 ${foot()}`;
 
-const researchTitle = 'Research findings — what is actually open in UK government data';
+const researchTitle = 'Research findings, what is actually open in UK government data';
 const researchDesc = SEO.composeDescription(
   'An access audit of 101 UK government endpoints. 69 returned data to an anonymous request. What that makes possible, and what it rules out.');
 const researchTrail = [
@@ -991,15 +991,15 @@ ${nav()}
 <div class="grid grid--2 mt-4">
 <div class="card"><h2 class="feat__t">Start here</h2>
 <ul class="prose small mt-2" style="max-width:none">
-<li><a href="index.html">UK GroundTruth — what it is and why</a></li>
+<li><a href="index.html">UK GroundTruth, what it is and why</a></li>
 <li><a href="platform.html">The architecture: two joins, one platform</a></li>
 <li><a href="research.html">Research: what is actually open in UK government data</a></li>
 <li><a href="examples.html">Problems and solutions, system by system</a></li>
 <li><a href="about.html">About and contact</a></li>
 </ul></div>
-<div class="card"><h2 class="feat__t">The thirteen systems</h2>
+<div class="card"><h2 class="feat__t">The thirteen questions</h2>
 <ul class="prose small mt-2" style="max-width:none">
-${GT.map(s => `<li><a href="systems/${s.id}.html">${s.num} &middot; ${s.name} — ${esc(s.subtitle)}</a></li>`).join('\n')}
+${GT.map(s => `<li><a href="systems/${s.id}.html">${s.num} &middot; ${s.name}: ${esc(s.subtitle)}</a></li>`).join('\n')}
 </ul></div>
 </div>
 </div>

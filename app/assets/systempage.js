@@ -5,13 +5,13 @@
    SYSVIEW; everything structural is shared. Nothing is invented: metrics and
    insights are computed from the platform's own gold tables. */
 const SystemPage = (() => {
-  const n = v => v == null ? '—' : Number(v).toLocaleString('en-GB');
-  const pct = v => v == null ? '—' : v + '%';
-  const money = v => v == null ? '—' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
+  const n = v => v == null ? 'n/a' : Number(v).toLocaleString('en-GB');
+  const pct = v => v == null ? 'n/a' : v + '%';
+  const money = v => v == null ? 'n/a' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
                     : v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
 
   // The layered sub-nav. Sections render only if they have content, and the
-  // nav lists only the ones that rendered — so an empty system never shows a
+  // nav lists only the ones that rendered, so an empty system never shows a
   // dead link.
   const SECTIONS = [
     ['overview',    'Overview'],
@@ -45,8 +45,8 @@ const SystemPage = (() => {
     const spineText = meta.spine === 'both'
         ? 'This system needs both joins: each record is placed on the map and matched to the organisation behind it.'
       : meta.spine === 'place'
-        ? 'Each record is resolved to a place — a property or a postcode, then the district it sits in.'
-        : 'Each record is resolved to one organisation — a company number or registered charity.';
+        ? 'Each record is resolved to a place, a property or a postcode, then the district it sits in.'
+        : 'Each record is resolved to one organisation, a company number or registered charity.';
     let headline = '';
     try {
       const sp = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[id];
@@ -64,7 +64,7 @@ const SystemPage = (() => {
       process: { one: spineOne, detail: spineText + ' This is the join government data is missing.', stat: null },
       validate:{ one: 'coverage attached',
         detail: (Platform.systemMethod(id) || info.method || 'Every figure carries the share of records it was computed over.'),
-        stat: 'Nothing modelled or estimated — every value is computed from the feeds above' },
+        stat: 'Nothing modelled or estimated, every value is computed from the feeds above' },
       groundtruth: { one: headline || meta.n, detail: `${info.question} ${info.why || ''}`.trim(),
         stat: headline ? `${meta.n} · ${headline}` : meta.n },
       public: { one: 'this page', detail: 'Published as open figures here. Every number can be traced back through the stages above.', stat: null },
@@ -107,13 +107,13 @@ const SystemPage = (() => {
     </div>`;
     present.add('overview');
 
-    // The missing join — GroundTruth's core differentiator, made visible.
+    // The missing join: GroundTruth's core differentiator, made visible.
     // WHAT is recorded, the WHERE/WHO joins added, and the before->after story.
     const j = (typeof JOINS !== 'undefined') ? JOINS[id] : null;
     if (j) {
       const w = (k, lab, cls) => `<div class="mj__w ${cls}">
         <span class="mj__wk">${lab}</span>
-        <p>${j[k] || 'No join — this dimension is not in the source.'}</p></div>`;
+        <p>${j[k] || 'No join, this dimension is not in the source.'}</p></div>`;
       const stage = (cls, lab, txt, i) => `<div class="mj__stage ${cls}" style="--i:${i}">
         <div class="mj__lab">${lab}</div><p>${txt}</p></div>`;
       S.join = `<div class="mj">
@@ -137,7 +137,7 @@ const SystemPage = (() => {
 
     // Key numbers
     const metrics = (view.metrics ? view.metrics(out) : []).filter(Boolean);
-    metrics.push({ label:'Data freshness', value: fr.state==='current'?'Current':fr.state==='stale'?'Awaiting update':'—',
+    metrics.push({ label:'Data freshness', value: fr.state==='current'?'Current':fr.state==='stale'?'Awaiting update':'n/a',
       sub: fresh ? `${fresh.name} · ${fr.label}` : 'source provenance pending' });
     if (metrics.length) {
       S.numbers = `<div class="sp-cards">${metrics.map(m => `<div class="sp-card">
@@ -160,7 +160,7 @@ const SystemPage = (() => {
       present.add('data');
     }
 
-    // Explore — interactive filters, only where the data supports them.
+    // Explore, interactive filters, only where the data supports them.
     // A location picker for systems with per-area rows; a year picker for
     // systems with a genuine back-series. Never shown when there is nothing to
     // filter, so the control can't imply data that isn't there.
@@ -187,7 +187,7 @@ const SystemPage = (() => {
       present.add('explore');
     }
 
-    // Over time — honest note when there is no series
+    // Over time, honest note when there is no series
     const trend = view.trends ? view.trends(out) : null;
     if (trend) {
       S.trends = (trend.cards ? `<div class="sp-cards sp-cards--3">${trend.cards.map(c => `<div class="sp-card">
@@ -242,7 +242,7 @@ const SystemPage = (() => {
         <div class="card__s" style="font-size:12px;margin-top:.1rem">${ev(o.label)}</div>
         <ol style="margin:.45rem 0 0;padding-left:1.1rem;font-size:12px;color:var(--ink-2);line-height:1.55">${(o.transformations || []).map(t => `<li>${ev(t)}</li>`).join('')}</ol>
         <div class="card__s mono" style="font-size:10.5px;margin-top:.4rem;color:var(--ink-3);word-break:break-word">${ev(o.dataset || o.source_id)}${o.publisher ? ' · ' + ev(o.publisher) : ''}${o.retrieved_at ? ' · retrieved ' + ev(String(o.retrieved_at).slice(0, 10)) : ' · no fetch record'}${o.sha256 ? ' · SHA-256 ' + ev(String(o.sha256).slice(0, 12)) + '…' : ''}</div>
-        ${cov || o.note ? `<div class="card__s" style="font-size:11.5px;margin-top:.3rem">${ev(cov)}${cov && o.note ? ' — ' : ''}${ev(o.note || '')}</div>` : ''}
+        ${cov || o.note ? `<div class="card__s" style="font-size:11.5px;margin-top:.3rem">${ev(cov)}${cov && o.note ? ', ' : ''}${ev(o.note || '')}</div>` : ''}
       </div>`;
     }).join('');
 
@@ -251,7 +251,7 @@ const SystemPage = (() => {
     S.method = `<div class="sp-method">
       <div class="sp-method__row"><div class="sp-method__k">How it is computed</div><p>${Platform.systemMethod(id) || info.method}</p></div>
       ${traced ? `<div class="sp-method__row"><div class="sp-method__k">The headline, traced</div><div style="min-width:0">${traced}</div></div>` : ''}
-      <div class="sp-method__row"><div class="sp-method__k">Collection</div><p>${Platform.collectionNote(id) || 'Every source behind this system is open to an anonymous request — no account, key or fee.'}</p></div>
+      <div class="sp-method__row"><div class="sp-method__k">Collection</div><p>${Platform.collectionNote(id) || 'Every source behind this system is open to an anonymous request, no account, key or fee.'}</p></div>
       <div class="sp-method__row"><div class="sp-method__k">Validation</div><p>Every figure carries the share of records it was computed over; ambiguous matches are reported, not guessed. Nothing is modelled or estimated.</p></div>
       <div class="sp-method__row"><div class="sp-method__k">Coverage</div><p>${view.coverage || 'England, latest published release of each source.'}${Platform.placeJoinNote(id) ? `<br><span style="display:inline-block;margin-top:.4rem">${Platform.placeJoinNote(id)}</span>` : ''}</p></div>
       ${defs.length ? `<div class="sp-method__row"><div class="sp-method__k">Definitions</div><dl class="sp-defs">${defs.map(d => `<dt>${d.t}</dt><dd>${d.d}</dd>`).join('')}</dl></div>` : ''}
@@ -264,7 +264,7 @@ const SystemPage = (() => {
         <div class="step"><div class="step__n">${i+1}</div>
         <p class="card__desc" style="flex:1;min-width:0;padding-top:.15rem">${l}</p></div>`).join('')}</div>`;
 
-    // Records (secondary — collapsed by default)
+    // Records (secondary, collapsed by default)
     S.records = `<details class="sp-rec"><summary class="sp-rec__sum">View the underlying figures</summary>
       <div class="sp-rec__body mt-3">${renderFindings(id, out)}</div></details>`;
     present.add('records');
@@ -297,7 +297,7 @@ const SystemPage = (() => {
         <div class="sp-hero__ico">${icon}</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">${domain.toUpperCase()} · ${spineLabel} · ${meta.st.toUpperCase()}</div>
-          <h1 class="sp-hero__h">${meta.n}</h1>
+          <h2 class="sp-hero__h">${meta.n}</h2>
           <p class="sp-hero__sub">${view.whatIs ? info.question : info.question}</p>
         </div>
         <div class="fresh fresh--${fr.state} sp-hero__fresh"><i></i>${fr.label}</div>
@@ -391,7 +391,7 @@ const SystemPage = (() => {
   }
 
   // The comparison matrix: all 13 systems on one screen, WHAT/WHERE/WHO plus a
-  // verified headline each — visual, not a plain table, and every row is a link.
+  // verified headline each, visual, not a plain table, and every row is a link.
   function compare() {
     const headline = id => {
       try {
@@ -425,8 +425,8 @@ const SystemPage = (() => {
         <div class="sp-hero__ico">▦</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">ALL THIRTEEN SYSTEMS</div>
-          <h1 class="sp-hero__h">What · Where · Who</h1>
-          <p class="sp-hero__sub">Every system records something (WHAT). GroundTruth adds the geographic join (WHERE) and the organisation join (WHO). Here is all thirteen at a glance — each row opens the full system.</p>
+          <h2 class="sp-hero__h">What · Where · Who</h2>
+          <p class="sp-hero__sub">Every published file records something (WHAT). GroundTruth adds the geographic join (WHERE) and the organisation join (WHO). Here are all thirteen questions at a glance; each row opens the full answer.</p>
         </div>
       </div>
       <div class="cmp">
@@ -445,7 +445,7 @@ const SystemPage = (() => {
 
   // ---- organisation knowledge graph (the WHO spine) ----
   const SYS_NAME = id => { const m = SYSTEMS.find(x => x.id === id); return m ? m.n : id; };
-  const orgMoney = v => v == null ? '—' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
+  const orgMoney = v => v == null ? 'n/a' : (v >= 1e9 ? '£' + (v/1e9).toFixed(2) + 'bn'
                    : v >= 1e6 ? '£' + (v/1e6).toFixed(1) + 'm' : '£' + n(Math.round(v)));
 
   function orgIndex() {
@@ -471,8 +471,8 @@ const SystemPage = (() => {
         <div class="sp-hero__ico">◉</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">THE WHO SPINE</div>
-          <h1 class="sp-hero__h">Organisations</h1>
-          <p class="sp-hero__sub">Every system resolves the organisations it names to one Companies House number. That shared identifier is the join — an organisation seen in more than one system is one entity from two angles. ${n(orgs.length)} shown, ${cross} appearing in more than one system.</p>
+          <h2 class="sp-hero__h">Organisations</h2>
+          <p class="sp-hero__sub">Every question resolves the organisations it names to one Companies House number. That shared identifier is the join: an organisation seen in more than one answer is one entity from two angles. ${n(orgs.length)} shown, ${cross} appearing in more than one.</p>
         </div>
       </div>
       <div class="sp-nav" style="gap:.6rem;padding:.7rem 0">
@@ -508,17 +508,17 @@ const SystemPage = (() => {
       `<a class="org-node org-node--sys org-sys--${s}" href="#system/${s}"><span class="org-node__k">SYSTEM</span>${SYS_NAME(s)} →</a>`
     ).join('');
     const careBlock = o.care ? `
-      <div class="org-sec"><h2 class="sp-sec__h">Care sector — where (Bellwether)</h2>
+      <div class="org-sec"><h2 class="sp-sec__h">Care sector, where (Bellwether)</h2>
         <div class="sp-cards sp-cards--3">
           <div class="sp-card"><div class="sp-card__l">Care beds</div><div class="sp-card__v">${n(o.care.beds)}</div><div class="sp-card__s">across ${n(o.care.locations)} locations</div></div>
           <div class="sp-card"><div class="sp-card__l">Local authorities</div><div class="sp-card__v">${n(o.care.authorities)}</div><div class="sp-card__s">councils it operates in</div></div>
-          <div class="sp-card"><div class="sp-card__l">Brand</div><div class="sp-card__v" style="font-size:18px">${(o.brand || '—').replace(/^BRAND /, '')}</div><div class="sp-card__s">as the regulator groups it</div></div>
+          <div class="sp-card"><div class="sp-card__l">Brand</div><div class="sp-card__v" style="font-size:18px">${(o.brand || 'n/a').replace(/^BRAND /, '')}</div><div class="sp-card__s">as the regulator groups it</div></div>
         </div>
         ${o.care.top_las && o.care.top_las.length ? `<div class="sp-h mt-4">Largest authorities by beds</div>
           <div class="org-bars">${o.care.top_las.map(l => `<div class="org-bar"><span>${l.name}</span><b>${n(l.beds)}</b></div>`).join('')}</div>` : ''}
       </div>` : '';
     const procBlock = o.proc ? `
-      <div class="org-sec"><h2 class="sp-sec__h">Public procurement — who (Sentinel)</h2>
+      <div class="org-sec"><h2 class="sp-sec__h">Public procurement, who (Sentinel)</h2>
         <div class="sp-cards sp-cards--3">
           <div class="sp-card"><div class="sp-card__l">Awards</div><div class="sp-card__v">${n(o.proc.awards)}</div><div class="sp-card__s">public contracts won</div></div>
           <div class="sp-card"><div class="sp-card__l">Total value</div><div class="sp-card__v">${orgMoney(o.proc.value)}</div><div class="sp-card__s">across ${n(o.proc.buyers)} buyer${o.proc.buyers === 1 ? '' : 's'}</div></div>
@@ -529,14 +529,14 @@ const SystemPage = (() => {
       </div>` : '';
     const crossNote = o.systems.length > 1 ? `<div class="note mt-3" style="border-left:3px solid var(--uk-red)">
         <div class="note__title">One organisation, ${o.systems.length} systems</div>
-        <p>${o.name} appears in ${o.systems.map(SYS_NAME).join(' and ')} — the same company number in both. Each government dataset saw only its own slice; the shared identifier is what joins them into one organisation.</p></div>` : '';
+        <p>${o.name} appears in ${o.systems.map(SYS_NAME).join(' and ')}: the same company number in both. Each government dataset saw only its own slice; the shared identifier is what joins them into one organisation.</p></div>` : '';
     root.innerHTML = `
       <header class="sp-top"><button class="sp-back" id="spBack">← All organisations</button></header>
       <div class="sp-hero">
         <div class="sp-hero__ico">◉</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">ORGANISATION · ${o.status ? o.status.toUpperCase() : 'STATUS UNKNOWN'}${o.town ? ' · ' + o.town.toUpperCase() : ''}</div>
-          <h1 class="sp-hero__h">${o.name}</h1>
+          <h2 class="sp-hero__h">${o.name}</h2>
           <p class="sp-hero__sub">Company ${o.id}${o.incorporated ? ' · incorporated ' + String(o.incorporated).slice(0, 10) : ''}. ${o.systems.map(SYS_NAME).join(' + ')}.</p>
         </div>
       </div>
@@ -573,7 +573,7 @@ const SystemPage = (() => {
           <input class="gs__input" id="gsInput" type="search" autocomplete="off"
             placeholder="Search organisations, places, systems…" aria-label="Search">
         </div>
-        <p class="gs__hint">One search across all thirteen systems. Every result shows which systems it appears in.</p>
+        <p class="gs__hint">One search across the whole record. Every result shows which questions it appears in.</p>
         <div class="gs__results" id="gsResults"></div>
       </div>`;
     root.querySelector('#spBack').addEventListener('click', close);
@@ -613,7 +613,7 @@ const SystemPage = (() => {
           <span class="gs__rsys">${o.systems.map(sysBadge).join('')}</span></a>`).join('')}</div>`;
       if (placeHits.length) html += `<div class="gs__grp"><div class="gs__gk">Places · ${placeHits.length}</div>${
         placeHits.map(p => `<button class="gs__r" data-place="${p.code}"><span class="gs__ri">▣</span>
-          <span class="gs__rt"><b>${p.name}</b><span>${p.systems} of 13 systems report here</span></span>
+          <span class="gs__rt"><b>${p.name}</b><span>${p.systems} of thirteen questions answered here</span></span>
           <span class="gs__rw">${p.systems}/13</span></button>`).join('')}</div>`;
       results.innerHTML = html;
       results.querySelectorAll('[data-place]').forEach(b => b.addEventListener('click', () => {
