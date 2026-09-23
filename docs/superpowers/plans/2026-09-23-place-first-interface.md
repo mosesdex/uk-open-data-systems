@@ -1324,7 +1324,24 @@ Find `.pad{` and replace its padding with a wider gutter and more vertical rhyth
 .pad{padding:2rem 1.6rem 4rem;max-width:72rem;margin:0 auto}
 ```
 
-- [ ] **Step 3: Check nothing collapsed**
+- [ ] **Step 3: Give table rows a usable target**
+
+Three tables now carry links in their rows, and at phone width those links
+measure as little as 17px tall, under the 44px minimum the rest of the interface
+holds to. Modify `app/assets/app.css` and add, beside the other table rules:
+
+```css
+/* A link in a table row is still a target: give it the row's full height rather
+   than the height of its text. */
+.tbl td a{display:block;min-height:44px;line-height:1.3;padding:.55rem .1rem;
+  display:flex;align-items:center}
+```
+
+Then check at 375px that no table row link measures under 44px in height, and
+that the rows have not become so tall that the tables stop being scannable. If
+they have, reduce the vertical padding rather than the minimum height.
+
+- [ ] **Step 4: Check nothing collapsed**
 
 Run: `python3 -m http.server 8765 --directory app`
 At 1440 and at 375, on `#/`, `#/places/E07000032`, `#/compare`, `#/unusual`, `#/about`:
@@ -1336,7 +1353,7 @@ At 1440 and at 375, on `#/`, `#/places/E07000032`, `#/compare`, `#/unusual`, `#/
 Run: `npm test && python3 tools/seo-check.py`
 Expected: pass, `0 errors, 0 warnings`.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add app/assets/app.css
