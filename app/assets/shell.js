@@ -1309,6 +1309,21 @@ const Shell = (() => {
     renderNav();
     renderTabbar();
 
+    // The skip link is the first tab stop on every page. Its href="#top" used
+    // to double as a URL fragment, and #top is one of the old anchor hashes
+    // the route table now sends to #/about, so activating it navigated the
+    // whole app away from the page a keyboard user was on. Intercepting the
+    // click and moving focus by hand, instead of letting the browser change
+    // location.hash, skips to the current page's main content (the <main
+    // id="top"> landmark every view renders inside) without touching the
+    // route at all.
+    const skip = $('.skip');
+    if (skip) skip.addEventListener('click', e => {
+      e.preventDefault();
+      const main = document.getElementById('top');
+      if (main) { main.focus(); main.scrollIntoView({ block: 'start' }); }
+    });
+
     // The top bar input opens the palette rather than a full-page takeover.
     const top = $('#topSearch');
     if (top) {
