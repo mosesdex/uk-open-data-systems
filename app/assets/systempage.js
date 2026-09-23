@@ -287,7 +287,7 @@ const SystemPage = (() => {
 
     root.innerHTML = `
       <header class="sp-top">
-        <button class="sp-back" id="spBack">← All systems</button>
+        <button class="sp-back" id="spBack">← All questions</button>
         <div class="sp-top__nav">
           <button class="sp-step" id="spPrev" title="Previous system">‹</button>
           <button class="sp-step" id="spNext" title="Next system">›</button>

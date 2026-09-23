@@ -1216,7 +1216,7 @@ const Shell = (() => {
         <div class="pal__box" role="dialog" aria-label="Search">
           <div class="pal__in"><span aria-hidden="true">⌕</span>
             <input type="search" autocomplete="off" spellcheck="false"
-                   placeholder="Search places, organisations, systems…" aria-label="Search">
+                   placeholder="Search places, organisations, questions…" aria-label="Search">
           </div>
           <div class="pal__list"></div>
           <div class="pal__hint"><span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
