@@ -216,6 +216,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    which folded the longest column onto six lines and made every row that
    tall; holding cells to one line lets the table (and so the row height)
    settle at its natural width instead, scrolling sideways rather than down. */
+/* overflow-x:auto also makes overflow-y:auto, so this is a scroll container on both axes, but harmless today since content never exceeds height. */
 #unusualBody{overflow-x:auto}
 #unusualBody td,#unusualBody th{white-space:nowrap}
 
@@ -810,6 +811,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    inline-flex/min-height treatment .chip already uses on the front door. */
 .answer__go{font-size:14px;color:var(--blue-600);text-decoration:none;
   display:inline-flex;align-items:center;min-height:44px;margin:-.4rem 0}
+[data-theme="dark"] .answer__go{color:var(--blue-300)}
 .answer__go:hover{text-decoration:underline}
 .place__none{font-size:14.5px;line-height:1.6;color:var(--ink-3);max-width:44rem;
   padding-top:1rem;border-top:1px solid var(--line)}

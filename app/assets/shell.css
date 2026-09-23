@@ -70,7 +70,7 @@ a.tile:hover{border-color:var(--blue-300);box-shadow:var(--shadow-2)}
 .fbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.85rem}
 .fchip{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:11px;
   border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
-  padding:.28rem .55rem;border-radius:99px;cursor:pointer;transition:all .12s;white-space:nowrap}
+  min-height:44px;padding:.5rem .55rem;border-radius:99px;cursor:pointer;transition:all .12s;white-space:nowrap}
 .fchip:hover{border-color:var(--blue-300);color:var(--ink)}
 .fchip.is-on{background:var(--blue-800);border-color:var(--blue-800);color:#fff}
 .fchip--clear{border-style:dashed;color:var(--ink-3)}
