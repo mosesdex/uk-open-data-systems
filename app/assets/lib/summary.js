@@ -14,7 +14,10 @@ const LINES = [
       ? Math.abs(p.plumbline.headline_pct - p.plumbline.statutory_pct) : null,
     say: (p, name) => `Of ${count(p.plumbline.dwelling_decisions)} major dwelling decisions in `
       + `${name}, ${pct(p.plumbline.statutory_pct)} were made inside the statutory 13 weeks without an `
-      + `agreed extension. The published measure for the same authority is ${pct(p.plumbline.headline_pct)}.`,
+      + `agreed extension. The published measure for the same authority is ${pct(p.plumbline.headline_pct)} `
+      + `of ${count(p.plumbline.major_decisions)} major decisions, a different, larger base. The gap is `
+      + `largely masked by extension agreements: an agreed extension is lawful, but is not counted as `
+      + `within 13 weeks by the statutory measure.`,
   },
   {
     id: 'catchment',

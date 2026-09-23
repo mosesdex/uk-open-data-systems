@@ -46,7 +46,10 @@ const QUESTIONS = [
     figure: p => p.statutory_pct,
     against: p => p.headline_pct,
     againstLabel: 'the published measure for the same authority',
-    caveat: p => `Counted over ${n(p.dwelling_decisions)} major dwelling decisions of ${n(p.major_decisions)} major decisions here.`,
+    caveat: p => `Counted over ${n(p.dwelling_decisions)} major dwelling decisions of ${n(p.major_decisions)} `
+      + `major decisions here, a different, smaller base than the published measure beside it. The gap between `
+      + `them is largely masked by extension agreements: an agreed extension is lawful, but is not counted as `
+      + `within 13 weeks by this statutory measure.`,
   },
   {
     id: 'catchment',
@@ -114,7 +117,9 @@ const QUESTIONS = [
     question: 'How many water quality objections were raised on planning applications here?',
     unit: null,
     figure: p => p.water_objections,
-    caveat: p => `Water quality objections carry no outcome field at all, so none of these can be followed to a decision. ${n(p.flood_objections)} flood objections were raised here.`,
+    caveat: p => join(
+      p.water_objections > 0 ? 'Water quality objections carry no outcome field at all, so none of these can be followed to a decision.' : null,
+      `${n(p.flood_objections)} flood objections were raised here.`),
   },
   {
     id: 'ledger',
