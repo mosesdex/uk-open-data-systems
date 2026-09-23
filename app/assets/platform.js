@@ -5,6 +5,32 @@
 const Platform = (() => {
   let data = null;
 
+  // The project rule is that no em dash or en dash reaches a shipped page.
+  // The engine (platform/groundtruth/sources.py) now writes clean source
+  // names, but the committed payload was published before that fix, and a
+  // handful of source names and one reason category, copied verbatim from a
+  // published register, still carry one. This is the one small shared
+  // helper that repairs it, applied once here rather than hunted down at
+  // every place a source name gets rendered: the label always reads as
+  // "thing: where it belongs", so a colon states the same relationship
+  // without leaving a dash in the text.
+  const cleanDash = s => typeof s === 'string' ? s.replace(/\s*[–—]\s*/g, ': ') : s;
+
+  // Only the fields known to carry a source's own published name, or text
+  // copied verbatim from one -- never prose written for this interface,
+  // which uses a dash on purpose and is never a "source name".
+  function cleanSourceNames(d) {
+    if (!d) return d;
+    (((d.sources || {}).status) || []).forEach(r => { if (r.name) r.name = cleanDash(r.name); });
+    (((d.admin || {}).sources) || []).forEach(r => { if (r.name) r.name = cleanDash(r.name); });
+    Object.values((d.evidence || {}).headlines || {}).forEach(list =>
+      (list || []).forEach(e => { if (e.dataset) e.dataset = cleanDash(e.dataset); }));
+    (((d.systems || {}).sightline || {}).reasons || []).forEach(r => {
+      if (r.reason) r.reason = cleanDash(r.reason);
+    });
+    return d;
+  }
+
   async function load(path = 'data/platform.json') {
     if (data) return data;
     try {
@@ -17,7 +43,7 @@ const Platform = (() => {
       // the ETag, so a stale copy can never be served either.
       const r = await fetch(path, {cache: 'no-cache'});
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      data = await r.json();
+      data = cleanSourceNames(await r.json());
     } catch (e) {
       data = {generated: null, systems: {}, spine: {}, sources: {}, built_systems: []};
       data.error = String(e.message || e);

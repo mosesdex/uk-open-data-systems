@@ -224,7 +224,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="planit_planning_wq",
-        name="PlanIt planning applications — water-quality corpus",
+        name="PlanIt planning applications: water-quality corpus",
         publisher="PlanIt (planit.org.uk)",
         url="https://www.planit.org.uk/api/applics/json?search=water+quality",
         fmt="json",
@@ -518,7 +518,7 @@ REGISTRY: tuple[Source, ...] = (
     # like any other source.
     Source(
         id="dno_ecr_ukpn",
-        name="Embedded capacity register — UK Power Networks",
+        name="Embedded capacity register: UK Power Networks",
         publisher="UK Power Networks",
         url=("https://ukpowernetworks.opendatasoft.com/api/explore/v2.1/catalog/"
              "datasets/ukpn-embedded-capacity-register-1-under-1mw/exports/csv"),
@@ -528,7 +528,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="dno_ecr_npg",
-        name="Embedded capacity register — Northern Powergrid",
+        name="Embedded capacity register: Northern Powergrid",
         publisher="Northern Powergrid",
         url=("https://northernpowergrid.opendatasoft.com/api/explore/v2.1/catalog/"
              "datasets/embedded-capacity-register/exports/csv"),
@@ -538,7 +538,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="dno_ecr_enwl",
-        name="Embedded capacity register — Electricity North West",
+        name="Embedded capacity register: Electricity North West",
         publisher="Electricity North West",
         url=("https://electricitynorthwest.opendatasoft.com/api/explore/v2.1/catalog/"
              "datasets/enwl-embedded-capacity-register-2-1mw-and-above/exports/csv"),
@@ -548,7 +548,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="dno_ecr_spen",
-        name="Embedded capacity register — SP Energy Networks",
+        name="Embedded capacity register: SP Energy Networks",
         publisher="SP Energy Networks",
         url=("https://spenergynetworks.opendatasoft.com/api/explore/v2.1/catalog/"
              "datasets/embedded-capacity-register/exports/csv"),
