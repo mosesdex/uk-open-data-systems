@@ -147,7 +147,7 @@
       <div class="card__b" id="methodGraph"></div>
     </section>
 
-    <div class="secmark rise" id="mark-05" style="margin-top:1.4rem"><div><div class="secmark__k">The evidence base</div><h2 class="secmark__t">Where every figure comes from</h2><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee, and the ones that failed, kept visible.</div></div></div>
+    <div class="secmark rise" id="mark-05" style="margin-top:1.4rem"><div><div class="secmark__k">The evidence base</div><h2 class="secmark__t">Where every figure comes from</h2><div class="secmark__s" id="srcTally">Published sources, each retrieved without an account, key or fee, and the ones that failed, kept visible.</div></div></div>
     <div class="grid g-1-2" style="margin-top:1rem">
       <section class="card rise">
         <div class="card__hd"><div class="card__t">Where the record draws from</div></div>
@@ -705,22 +705,33 @@ cannot tell you.</p>
   }));
   drawSystems();
 
-  const byKind = {};
-  FEEDS.forEach(f => byKind[f.kind] = (byKind[f.kind]||0)+1);
+  // The donut, the source tally sentence, the feed table and the "N of M"
+  // header line all read the same array once, so the three counts this page
+  // used to show (a hand-typed "Thirty", a donut built from a hardcoded
+  // FEEDS list in shared.js, and a payload-derived "43 of 45") cannot drift
+  // apart again: there is only one array now, and it comes from the payload.
+  const live = Platform.sourceSummary();
+  const srcRows = live.rows || [];
+
+  const tally = document.getElementById('srcTally');
+  if (tally) tally.textContent = srcRows.length
+    ? `${srcRows.length} published sources, each retrieved without an account, key or fee, `
+      + `and the ones that failed, kept visible.`
+    : 'No source inventory is available in this build.';
+
+  const byPublisher = {};
+  srcRows.forEach(r => { if (r.publisher) byPublisher[r.publisher] = (byPublisher[r.publisher]||0)+1; });
   const cols = ['var(--uk-blue)','var(--blue-500)','var(--uk-red)','var(--amber-600)','var(--green-600)','var(--blue-300)','#6B4FA8','#0E7C7B'];
-  const segs = Object.entries(byKind).sort((a,b)=>b[1]-a[1])
+  const segs = Object.entries(byPublisher).sort((a,b)=>b[1]-a[1])
     .map(([k,v],i)=>({n:k,v,c:cols[i%cols.length]}));
-  GT.donut(document.getElementById('donut1'), segs, {center:String(FEEDS.length)});
+  GT.donut(document.getElementById('donut1'), segs, {center:String(srcRows.length)});
   document.getElementById('donutKey').innerHTML = segs.map(s=>
     `<div class="row" style="justify-content:space-between;padding:.18rem 0">
       <span class="row" style="gap:.45rem"><i style="width:9px;height:9px;border-radius:3px;background:${s.c};display:inline-block"></i>
       <span style="font-size:12.5px">${s.n}</span></span>
       <span class="mono card__s" style="font-size:11.5px">${s.v}</span></div>`).join('');
 
-  const live = Platform.sourceSummary();
-  const useLive = live.rows.length > 0;
-  const list0 = useLive
-    ? live.rows.map(r => {
+  const list0 = srcRows.map(r => {
         // A source can hold usable data without a fetch record. Showing that as
         // "HTTP 0" reads as a failure when the data is present and in use.
         let label, ok;
@@ -731,17 +742,18 @@ cannot tell you.</p>
         else                              { label = 'not fetched'; ok = false; }
         return {n:r.name, org:r.publisher, kind:r.role.replace('_',' '),
                 freq:r.cadence, fmt:label, ok};
-      })
-    : FEEDS.map(f => ({...f, ok:true}));
+      });
   const rowsHtml = l => l.map(f=>`<tr><td>${f.n}</td><td>${f.org}</td>
     <td><span class="tag">${f.kind}</span></td><td class="mono" style="font-size:11.5px">${f.freq}</td>
     <td><span class="tag ${f.ok?'tag--ok':'tag--bad'}">${f.fmt}</span></td></tr>`).join('');
   document.getElementById('feedRows').innerHTML = rowsHtml(list0);
-  if (useLive) {
-    const hd = document.querySelector('#feeds .card__s');
+  const hd = document.querySelector('#feeds .card__s');
+  if (hd) {
     const usable = list0.filter(f => f.ok).length;
-    if (hd) hd.textContent = `${usable} of ${live.total} sources are supplying data. `
-      + `Status is what the fetcher recorded, not a claim about what should work.`;
+    hd.textContent = list0.length
+      ? `${usable} of ${live.total} sources are supplying data. `
+        + `Status is what the fetcher recorded, not a claim about what should work.`
+      : 'No source inventory is available in this build.';
   }
   document.getElementById('feedSearch').addEventListener('input', e => {
     const q = e.target.value.toLowerCase();
