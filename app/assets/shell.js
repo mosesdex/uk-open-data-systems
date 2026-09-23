@@ -527,7 +527,7 @@ const Shell = (() => {
           <td class="num"><span class="st st--${i.tone === 'bad' ? 'bad' : i.tone === 'warn' ? 'warn' : 'ok'}">${esc(i.metric)}</span></td>
         </tr>`).join('')}</tbody></table></div>
       ${rep.capacity ? capacityBlock(rep.capacity) : ''}
-      ${rep.silent ? emptyFact(`${rep.silent} systems have nothing to say here`,
+      ${rep.silent ? emptyFact(`${rep.silent} questions have nothing to say here`,
         'That is a fact about the published data, not a gap in the platform, either no data reaches this district, or the system is planned at a different geography.',
         '#/sources', 'See the sources') : ''}`;
     openPanel('Place · ' + code, rep.name, body);

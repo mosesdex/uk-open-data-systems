@@ -477,10 +477,10 @@ const SystemPage = (() => {
       </div>
       <div class="sp-nav" style="gap:.6rem;padding:.7rem 0">
         <input class="org-search" id="orgSearch" type="search" placeholder="Search organisations…" aria-label="Search organisations">
-        <label class="org-toggle"><input type="checkbox" id="orgCross"> In more than one system</label>
+        <label class="org-toggle"><input type="checkbox" id="orgCross"> In more than one question</label>
       </div>
       <div class="org-list" id="orgList">${orgs.map(row).join('')}</div>
-      <footer class="sp-foot card__s">Only organisations whose company number actually appears in a system are listed there. Every figure is computed from published records. Nothing is estimated.</footer>`;
+      <footer class="sp-foot card__s">Only organisations whose company number actually appears in a question are listed there. Every figure is computed from published records. Nothing is estimated.</footer>`;
     root.querySelector('#spBack').addEventListener('click', close);
     const list = root.querySelector('#orgList');
     const q = root.querySelector('#orgSearch');
@@ -586,7 +586,7 @@ const SystemPage = (() => {
     const render = term => {
       term = term.trim().toLowerCase();
       if (!term) {
-        results.innerHTML = `<div class="gs__empty">Try a company (“Barchester”), a district (“Leeds”), or a system (“flood”).</div>`;
+        results.innerHTML = `<div class="gs__empty">Try a company (“Barchester”), a district (“Leeds”), or a question (“flood”).</div>`;
         return;
       }
       const sysHits = SYSTEMS.filter(m => {

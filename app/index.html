@@ -212,7 +212,7 @@
   <section class="card rise" id="place" style="margin-top:1rem">
     <div class="card__hd">
       <div><div class="card__t">One place, the whole record</div>
-        <div class="card__s">Pick a district. Each system reports what it found there, with the coverage that figure rests on.</div></div>
+        <div class="card__s">Pick a district. Each question reports what it found there, with the coverage that figure rests on.</div></div>
       <div class="spacer"></div>
       <div class="srch" style="min-width:250px">
         <span class="card__s">⌕</span>
@@ -249,10 +249,10 @@
     <div class="card__b"><div class="grid g3" id="sysGrid">
 <!-- generated:static-content -->
 <section class="static-summary">
-<h2>The thirteen systems, and what each one found</h2>
+<h2>The thirteen questions, and what each one found</h2>
 <p>Every figure below is computed from a published government record and carries
-the coverage it rests on. 13 of 13 systems have measured
-output; 41 of 45 registered sources returned data to an
+the coverage it rests on. 13 of 13 questions have measured
+output; 43 of 45 registered sources returned data to an
 unauthenticated request on the last run. Computed 2026-09-11.</p>
 <ul>
 <li><a href="systems/catchment.html"><strong>Catchment</strong></a>
@@ -282,7 +282,7 @@ unauthenticated request on the last run. Computed 2026-09-11.</p>
 <li><a href="systems/baseline.html"><strong>Baseline</strong></a>
 : Sewage spills normalised for rainfall. <p class="card__s"><strong>300,406</strong> spills after adjusting for monitor uptime, 291,492 reported across 14,239 outlets</p></li>
 </ul>
-<p>Each system links to a brief setting out its sources, its method, and what it
+<p>Each question links to a brief setting out its sources, its method, and what it
 cannot tell you.</p>
 </section>
 <!-- /generated:static-content -->
@@ -603,7 +603,7 @@ cannot tell you.</p>
       </div>
       ${rep.capacity && typeof Shell !== 'undefined' && Shell.capacityBlock ? Shell.capacityBlock(rep.capacity) : ''}
       ${rep.silent ? `<p class="card__s" style="font-size:11px;margin-top:.6rem">
-        ${rep.silent} systems have nothing to say about this district, either no data reaches it,
+        ${rep.silent} questions have nothing to say about this district, either no data reaches it,
         or it is planned at a different geography.</p>` : ''}`;
   }
 
@@ -679,7 +679,7 @@ cannot tell you.</p>
         ${pvHTML}
         <div class="syscard__foot">
           <span class="fresh ${fr.state}"><i></i>${fr.label}</span>
-          <span class="syscard__explore">Explore system →</span>
+          <span class="syscard__explore">Explore question →</span>
         </div>
         ${(typeof JOINS!=='undefined'&&JOINS[s.id])?(()=>{const j=JOINS[s.id];const none='<span class=\"wwwr__none\">no join</span>';return `
         <div class="wwwr">

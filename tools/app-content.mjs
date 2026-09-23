@@ -61,20 +61,25 @@ function systemsBlock({ compact = false } = {}) {
 
   const built = Platform.builtSystems().length;
   const src = Platform.sourceSummary();
+  // "Returned data" means not blocked -- the same predicate the live #/about
+  // page uses (buildAbout in app/assets/shell.js), so this static copy and
+  // that rendered page can never show two different counts for the same
+  // question.
+  const srcReturned = (src.rows || []).filter((r) => !r.blocked).length;
   const generated = Platform.generated();
 
   return `${START}
 <section class="static-summary">
-<h2>The thirteen systems, and what each one found</h2>
+<h2>The thirteen questions, and what each one found</h2>
 <p>Every figure below is computed from a published government record and carries
-the coverage it rests on. ${built} of ${SYSTEMS.length} systems have measured
-output; ${src.ok} of ${src.total} registered sources returned data to an
+the coverage it rests on. ${built} of ${SYSTEMS.length} questions have measured
+output; ${srcReturned} of ${src.total} registered sources returned data to an
 unauthenticated request on the last run.${
     generated ? ` Computed ${esc(String(generated).slice(0, 10))}.` : ''}</p>
 <ul>
 ${rows}
 </ul>
-<p>Each system links to a brief setting out its sources, its method, and what it
+<p>Each question links to a brief setting out its sources, its method, and what it
 cannot tell you.</p>
 </section>
 ${END}`;
