@@ -632,17 +632,26 @@ Modify `app/assets/shell.css`. Change the drawer media query from `@media(max-wi
 
 - [ ] **Step 3: Keep the menu button at every width**
 
-Modify `app/assets/app.css`. Find the rule that hides the menu button on wide screens (search for `data-side-toggle` or `.iconbtn` inside a `min-width` query). If one exists, delete it. Then confirm `app/assets/app.js`'s `sidebar()` still inerts the drawer when closed by changing its media query:
+The drawer is off-canvas at every width now, so `sidebar()` should stop asking a
+media query whether it is. Modify `app/assets/app.js` line 464, which currently reads:
 
 ```js
-    const offCanvas = matchMedia('(max-width:100000px)');
+    const offCanvas=matchMedia('(max-width:980px)');
 ```
 
-Replace that line with a constant instead, since the drawer is now always off-canvas:
+Replace it with a constant of the same shape, so the rest of the function, which
+calls `offCanvas.matches` and `offCanvas.addEventListener('change', sync)`, needs
+no other change:
 
 ```js
+    // The drawer is off-canvas at every width now, so this no longer varies.
     const offCanvas = { matches: true, addEventListener() {} };
 ```
+
+Then check whether any rule hides the menu button on wide screens: run
+`grep -n "data-side-toggle" app/assets/*.css`. If a rule sets `display:none` on
+it inside a `min-width` query, delete that rule, since the button is now the only
+way to reach the drawer.
 
 - [ ] **Step 4: Cut the mobile bar to three**
 
