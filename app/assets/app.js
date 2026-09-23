@@ -452,16 +452,17 @@ const GT = (() => {
   }
 
   /* ---- misc ---- */
-  /* The drawer is off-canvas below 980px, and there it must also leave the tab
-     order: a focusable link the reader cannot see is worse than no link, and a
-     screen reader should not offer a menu that looks closed. The class it
-     toggles is the one both stylesheets open on; they disagreed before, so the
-     menu button did nothing at all below 860px. */
+  /* The drawer is off-canvas at every width now, and it must always leave the
+     tab order when closed: a focusable link the reader cannot see is worse
+     than no link, and a screen reader should not offer a menu that looks
+     closed. The class it toggles is the one both stylesheets open on; they
+     disagreed before, so the menu button did nothing at all below 860px. */
   function sidebar(){
     const side=document.querySelector('.side');
     const toggles=[...document.querySelectorAll('[data-side-toggle]')];
     if(!side||!toggles.length) return;
-    const offCanvas=matchMedia('(max-width:980px)');
+    // The drawer is off-canvas at every width now, so this no longer varies.
+    const offCanvas = { matches: true, addEventListener() {} };
     const isOpen=()=>side.classList.contains('on');
     const sync=()=>{
       const hidden=offCanvas.matches&&!isOpen();

@@ -176,13 +176,17 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]{color:var(
 a[href^="https://find-and-update.company-information.service.gov.uk"]::after{content:' \2197';font-size:.85em}
 a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{color:var(--blue-800)}
 
+/* The sidebar is a drawer at every width now: the front page does the work the
+   permanent sidebar used to, and a console rail is what made this read as an
+   internal tool. */
+.side{position:fixed;inset:0 auto 0 0;width:266px;z-index:70;transform:translateX(-100%);
+  transition:transform .18s var(--ease-out)}
+.side.on{transform:none;box-shadow:var(--shadow-3)}
+
 /* ---------- mobile: the shell collapses to a tab bar ---------- */
 .tabbar{display:none}
 @media(max-width:860px){
   .app{grid-template-columns:1fr}
-  .side{position:fixed;inset:0 auto 0 0;width:266px;z-index:70;transform:translateX(-100%);
-    transition:transform .18s var(--ease-out)}
-  .side.on{transform:none}
   .pad{padding:1rem .9rem 5.2rem}
   .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--surface);
     border-top:1px solid var(--line);padding:.3rem .2rem calc(.3rem + env(safe-area-inset-bottom))}

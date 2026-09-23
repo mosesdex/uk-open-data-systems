@@ -57,7 +57,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 [data-theme="dark"] .flagrule i:nth-child(2){background:#8894AE}
 
 /* ---------- app shell ---------- */
-.app{display:grid;grid-template-columns:246px 1fr;min-height:100vh}
+.app{display:grid;grid-template-columns:1fr;min-height:100vh}
 .app--wide{grid-template-columns:1fr}
 
 .side{background:var(--blue-900);color:#C9D4EE;display:flex;flex-direction:column;

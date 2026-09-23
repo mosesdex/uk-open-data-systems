@@ -20,7 +20,7 @@ const Shell = (() => {
   /* ---------------------------------------------------------------- nav ---- */
   const NAV_PUBLIC = [
     { group: 'Explore', items: [
-      { id: '',        icon: '◉', label: 'Overview' },
+      { id: '',        icon: '◉', label: 'Find your area' },
       { id: 'places',  icon: '▣', label: 'Places',        count: () => Platform.placeList().length },
       { id: 'systems', icon: '▦', label: 'What it answers', count: () => Platform.builtSystems().length },
       { id: 'orgs',    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
@@ -51,8 +51,10 @@ const Shell = (() => {
      Everything below is driven by this config instead. */
   const DEFAULTS = {
     nav: null, titles: null, views: null, legacy: null,
-    tabs: [['', '◉', 'Overview'], ['places', '▣', 'Places'],
-           ['systems', '▦', 'Systems'], ['sources', '⛁', 'Sources']],
+    // Three destinations, not the old four: the front page now carries the
+    // navigation, so the bottom bar only needs the way in, the way to see
+    // every district side by side, and the way to how this is built.
+    tabs: [['', '◉', 'Find'], ['compare', '⇄', 'Compare'], ['about', 'ⓘ', 'About']],
     crumb: 'UK GroundTruth',
     // Return [[groupName, items]] for the palette, or null to use the default.
     palette: null,
