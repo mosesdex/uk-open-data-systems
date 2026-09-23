@@ -664,9 +664,21 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink)}
 .org-search:focus{border-color:var(--blue-500);outline:none}
 .org-toggle{display:flex;align-items:center;gap:.4rem;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+/* A native checkbox ignores padding for its hit area -- only width/height
+   change the box a tap actually lands in -- so #orgCross is sized to the
+   44px floor directly, the same target every other control in this file
+   keeps. */
+.org-toggle input[type="checkbox"]{width:44px;height:44px;flex:none;margin:0;accent-color:var(--uk-blue);cursor:pointer}
 .org-list{display:grid;gap:.5rem;margin-top:1rem}
+/* .org-list is a grid, and a grid item's default min-width is auto, not 0:
+   the longest, unwrapped organisation name was setting the single implicit
+   column's track size to its own max-content width, so every row -- not
+   just that one -- rendered as wide as the longest name and pushed the
+   page past the viewport at 375px. min-width:0 here lets the track (and
+   this row) shrink to the column's real available width, the same way
+   .org-row__main below already shrinks to fit inside the row. */
 .org-row{display:flex;align-items:center;gap:1rem;padding:.75rem 1rem;border:1px solid var(--line);
-  border-radius:11px;background:var(--surface);transition:border-color .13s,background .13s}
+  border-radius:11px;background:var(--surface);transition:border-color .13s,background .13s;min-width:0}
 .org-row:hover{border-color:var(--uk-blue);background:var(--blue-050)}
 .org-row__main{flex:1 1 auto;min-width:0}
 .org-row__nm{display:block;font-size:14px;font-weight:650;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
