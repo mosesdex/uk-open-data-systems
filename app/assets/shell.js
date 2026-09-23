@@ -1006,7 +1006,7 @@ const Shell = (() => {
   /* One place, as a document: what it is, what stands out, then every question
      that has an answer for it, and plainly those that do not. */
   function buildPlacePage(code) {
-    const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place');
+    const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place'), lede = $('#mark-02');
     if (!host) return;
     const payload = Platform.payload ? Platform.payload() : null;
     const names = (payload && payload.places && payload.places.names) || {};
@@ -1016,13 +1016,14 @@ const Shell = (() => {
       // An unknown code degrades to the index rather than leaving a "no
       // such place" page up. Clear the stale markup along with hiding it,
       // so a later render that forgets to overwrite host.innerHTML cannot
-      // reveal the previous place. The legacy explorer (#place) follows
-      // the index here too: no single place is open, so it renders as it
-      // does for the index.
+      // reveal the previous place. The legacy explorer (#place), and its
+      // "Your area" heading (#mark-02), follow the index here too: no
+      // single place is open, so both render as they do for the index.
       host.hidden = true;
       host.innerHTML = '';
       if (index) index.hidden = false;
       if (legacy) legacy.hidden = false;
+      if (lede) lede.hidden = false;
       return;
     }
 
@@ -1113,8 +1114,11 @@ const Shell = (() => {
     // A specific place is open: the legacy explorer below (#place) would
     // otherwise still show whichever place its own map last selected --
     // Amber Valley by default -- presented as if it were this place. Hide
-    // it while a single place's document is on screen.
+    // it, and the "Your area" heading above it (#mark-02) that otherwise
+    // renders at the foot of this page for no reason, while a single
+    // place's document is on screen.
     if (legacy) legacy.hidden = true;
+    if (lede) lede.hidden = true;
   }
 
   function route() {
@@ -1153,8 +1157,14 @@ const Shell = (() => {
     // building a second table.
     if (head === 'compare') {
       show('places'); setChrome('compare');
-      const host = $('#placePage'), index = $('#placeIndex');
+      const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place'), lede = $('#mark-02');
       if (host) host.hidden = true;
+      // The legacy single-place explorer (#place) and the "Your area" heading
+      // above it (#mark-02) are both leftovers of the old single-page layout:
+      // #/compare exists to show the district table this route builds below,
+      // not a second, unrelated "pick a district" card and its own heading.
+      if (legacy) legacy.hidden = true;
+      if (lede) lede.hidden = true;
       safely(buildPlaces, '#viewPlaces');
       if ($('#placeIndex')) $('#placeIndex').hidden = false;
       scrollTop(); return;
@@ -1177,15 +1187,19 @@ const Shell = (() => {
 
     if (head === 'places') {
       show('places'); setChrome('places'); safely(buildPlaces, '#placeIndex'); scrollTop();
-      const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place');
+      const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place'), lede = $('#mark-02');
       if (seg[1]) { safely(() => buildPlacePage(seg[1])); }
       else {
-        // No code: this is the index, so the legacy explorer (#place)
-        // renders as it always has, same as buildPlacePage's own guard
-        // clause for an unknown code.
+        // No code: this is the index, so the legacy explorer (#place) and its
+        // "Your area" heading (#mark-02) render as they always have, same as
+        // buildPlacePage's own guard clause for an unknown code. Both are
+        // restored explicitly here because #/compare (above) and a specific
+        // place page (buildPlacePage) both hide them, and that hidden state
+        // would otherwise persist onto this index.
         if (host) host.hidden = true;
         if (index) index.hidden = false;
         if (legacy) legacy.hidden = false;
+        if (lede) lede.hidden = false;
       }
       return;
     }
