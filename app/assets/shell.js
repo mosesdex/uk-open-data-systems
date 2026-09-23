@@ -1062,28 +1062,26 @@ const Shell = (() => {
      disagree. Nothing is rounded here that the page did not already round. */
   function placeCsv(code, name, rows) {
     const cell = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    // Same source lookup and the same payload timestamp the on-screen answer
+    // blocks use (buildPlacePage above), so the file cannot claim a source or
+    // a date the page itself does not also show.
+    const payload = Platform.payload ? Platform.payload() : null;
+    const computedDate = payload && payload.generated ? String(payload.generated).slice(0, 10) : '';
     const head = ['place_code', 'place_name', 'question', 'question_name', 'figure', 'unit',
-                  'measured_against', 'against_label', 'caveat', 'method'];
+                  'measured_against', 'against_label', 'caveat', 'method', 'source', 'source_url',
+                  'figure_computed'];
     const lines = [head.join(',')];
     for (const a of rows) {
+      const src = sourceForQuestion(a.id);
       lines.push([code, name, a.id, a.name, a.figure, a.unit, a.against, a.againstLabel,
-                  a.caveat, a.method].map(cell).join(','));
+                  a.caveat, a.method, src ? src.text : 'no source resolved for this figure',
+                  src ? (src.url || '') : '', computedDate].map(cell).join(','));
     }
     return lines.join('\r\n') + '\r\n';
   }
 
   function downloadPlaceCsv(code, name, rows) {
-    const blob = new Blob([placeCsv(code, name, rows)], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${code}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    // Revoked on the next turn of the loop: Safari needs the object URL to
-    // outlive the click that consumes it.
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    downloadCsv(`${code}.csv`, placeCsv(code, name, rows));
   }
 
   /* One place, as a document: what it is, what stands out, then every question
@@ -1150,6 +1148,21 @@ const Shell = (() => {
     const method = id => pick(['#/questions/' + id, '#/systems/' + id], canRender) || ('#/systems/' + id);
     // A figure is a number or a string the module already formatted.
     const fig = v => typeof v === 'number' ? num(v) : String(v);
+    // The spec asks every answer block to carry the source and the date its
+    // figure was computed on, alongside the figure itself. sourceForQuestion
+    // is the same lookup the unusual page already uses, so a question that
+    // resolves there resolves the same way here. The payload's own generated
+    // timestamp, not a hand-typed date, gives the "computed on" date; when
+    // the source cannot be resolved, the block says so rather than staying
+    // silent about it.
+    const computedDate = payload && payload.generated ? String(payload.generated).slice(0, 10) : null;
+    const answerSource = a => {
+      const src = sourceForQuestion(a.id);
+      const srcHtml = src
+        ? (src.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.text)}</a>` : esc(src.text))
+        : 'no source resolved for this figure';
+      return `<p class="answer__src">Source: ${srcHtml}${computedDate ? `. Figure computed ${esc(computedDate)}.` : '.'}</p>`;
+    };
 
     const blocks = answers ? answers.map(a => `
           <article class="answer">
@@ -1160,6 +1173,7 @@ const Shell = (() => {
             ${a.against != null ? `<p class="answer__v">Measured against ${esc(num(a.against))}${
               esc(a.unit || '')}, ${esc(a.againstLabel || '')}.</p>` : ''}
             ${a.caveat ? `<p class="answer__c">${esc(a.caveat)}</p>` : ''}
+            ${answerSource(a)}
             <a class="answer__go" href="${method(a.id)}">How this is computed</a>
           </article>`).join('')
       : answered.map(s => `
