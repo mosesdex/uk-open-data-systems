@@ -82,6 +82,12 @@ test('#/method redirects once about can render', () => {
   assert.equal(canonicalHash('#/method', canRenderWithAbout), '#/about');
 });
 
+test('the 150 outreach emails linking #/systems/plumbline redirect to the question under the live router', () => {
+  // 150 sent emails link to this exact URL, so if this test fails
+  // the redirect must be fixed rather than the test updated.
+  assert.equal(canonicalHash('#/systems/plumbline', canRenderToday), '#/questions/plumbline');
+});
+
 test('every table mapping resolves to a route once the predicate allows it', () => {
   const canRenderAnything = () => true;
   for (const [hash, expected] of [...Object.entries(ANCHOR), ...Object.entries(SECTION)]) {
