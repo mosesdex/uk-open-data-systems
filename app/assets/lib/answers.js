@@ -185,3 +185,55 @@ export function placeAuthority(code, payload) {
   }
   return null;
 }
+
+/* Why a question has no answer here, said only as far as the payload backs
+   it up. allIds is every question id the app publishes, including the ones
+   this module never builds an answer for because no place ever carries them;
+   the caller (app/assets/shell.js) reads that list from app/assets/shared.js,
+   which is not reachable from a module.
+
+   A question is national when no place anywhere in byLad has ever carried an
+   object for it at all: discovered by scanning byLad itself, not a hand-picked
+   list, so a later build that adds a district figure for one of them is
+   picked up automatically. A question is the county's for this place only
+   when two facts the payload already states line up: this place's own
+   _capacity says its upper-tier figures are the county's (figure_for county,
+   the same field placeAuthority reads), and the question itself has been seen
+   carrying figure_for county somewhere in the payload, so a question that is
+   only ever published by district or LPA can never be called upper-tier on a
+   guess. Every other missing question is unanswered here with no cause
+   invented for it, which is where most absences actually belong: a question
+   published for many places and simply absent from this one is not evidence
+   of anything above the district. */
+export function placeAbsences(code, payload, allIds) {
+  const places = (payload && payload.places) || {};
+  const byLad = places.byLad || {};
+  const place = byLad[code];
+  if (!place) return null;
+
+  const shown = new Set(placeAnswers(code, payload).map(a => a.id));
+  const missing = (allIds || []).filter(id => !shown.has(id));
+
+  const everByPlace = new Set();
+  const everCounty = new Set();
+  Object.values(byLad).forEach(pl => {
+    if (!pl) return;
+    Object.keys(pl).forEach(k => {
+      if (k.charAt(0) === '_') return;
+      everByPlace.add(k);
+      if (pl[k] && pl[k].figure_for === 'county') everCounty.add(k);
+    });
+  });
+
+  const cap = place._capacity;
+  const isUpperTier = !!(cap && cap.figure_for === 'county');
+  const countyName = isUpperTier ? (((places.capacityTrend || {})[cap.authority] || {}).name || null) : null;
+
+  const national = [], upperTier = [], noFigure = [];
+  for (const id of missing) {
+    if (!everByPlace.has(id)) { national.push(id); continue; }
+    if (isUpperTier && countyName && everCounty.has(id)) { upperTier.push(id); continue; }
+    noFigure.push(id);
+  }
+  return { national, upperTier, noFigure, countyName };
+}

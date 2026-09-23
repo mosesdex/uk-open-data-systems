@@ -1041,21 +1041,21 @@ const Shell = (() => {
     // figure is null in the payload belongs with the absences, so the count and
     // the blocks below it can never disagree.
     const shown = answers ? new Set(answers.map(a => a.id)) : new Set(answered.map(s => s.id));
-    const missing = SYSTEMS.filter(s => !shown.has(s.id));
-    // A missing question is not always missing for the same reason. Some are
-    // published above the district (usually the county) and simply have
-    // nothing for this particular place; four -- sentinel, junction, watchman
-    // and baseline -- never carry a per-district object at all, anywhere in
-    // the payload, because they are only ever measured nationally. Read that
-    // distinction out of the payload itself, rather than naming the four by
-    // hand, so it stays correct if a later build adds district figures for
-    // one of them.
-    const everByDistrict = new Set();
-    Object.values(byLad).forEach(pl => Object.keys(pl || {}).forEach(k => {
-      if (k.charAt(0) !== '_') everByDistrict.add(k);
-    }));
-    const aboveDistrict = missing.filter(s => everByDistrict.has(s.id));
-    const nationalOnly = missing.filter(s => !everByDistrict.has(s.id));
+    // A missing question is not always missing for the same reason, and the
+    // reason given has to be one the payload actually states for THIS place,
+    // not one that merely happens to be true elsewhere. app/assets/lib/answers.js
+    // classifies every absence from the payload itself: national when no place
+    // anywhere ever carries the question at all, the county's when this
+    // place's own authority record says so and the question has been seen as
+    // a county figure somewhere, and otherwise simply unanswered here, with no
+    // cause invented. Until that module entry loads, the fallback below still
+    // names what is missing, it just never claims a reason it cannot support.
+    const absences = lib.placeAbsences ? lib.placeAbsences(code, payload, SYSTEMS.map(s => s.id)) : null;
+    const byId = id => SYSTEMS.find(s => s.id === id) || { n: id };
+    const national = absences ? absences.national.map(byId) : [];
+    const upperTier = absences ? absences.upperTier.map(byId) : [];
+    const noFigure = absences ? absences.noFigure.map(byId)
+      : SYSTEMS.filter(s => !shown.has(s.id));
 
     // The question view has no handler yet (a later task adds it), so this
     // degrades to #/systems/<id>, which renders today, and upgrades itself
@@ -1091,13 +1091,16 @@ const Shell = (() => {
       <p class="place__k">${shown.size} of ${SYSTEMS.length} questions answered here</p>
       ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
       <div class="answers">${blocks}</div>
-      ${aboveDistrict.length ? `<p class="place__none">No answer here for ${
-        aboveDistrict.map(s => esc(s.n)).join(', ')}. That is usually because the service is run above
-        the district, often by the county, and the figure is published at that level.</p>` : ''}
-      ${nationalOnly.length ? `<p class="place__none">${
-        nationalOnly.map(s => esc(s.n)).join(', ')} ${nationalOnly.length === 1 ? 'is' : 'are'} measured
+      ${national.length ? `<p class="place__none">${
+        national.map(s => esc(s.n)).join(', ')} ${national.length === 1 ? 'is' : 'are'} measured
         only at the national level, not broken down by place at all, so no district ever carries a
-        figure for ${nationalOnly.length === 1 ? 'it' : 'them'}.</p>` : ''}
+        figure for ${national.length === 1 ? 'it' : 'them'}.</p>` : ''}
+      ${upperTier.length ? `<p class="place__none">No answer here for ${
+        upperTier.map(s => esc(s.n)).join(', ')}. ${upperTier.length === 1 ? 'It is' : 'They are'}
+        published for ${esc(absences.countyName)} County Council, not for this district.</p>` : ''}
+      ${noFigure.length ? `<p class="place__none">No answer here for ${
+        noFigure.map(s => esc(s.n)).join(', ')}. The published record carries no figure for ${
+        noFigure.length === 1 ? 'it' : 'them'} at this place.</p>` : ''}
       ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
         id="placeCsv">Download these ${answers.length} figures as CSV</button></p>` : ''}`;
 

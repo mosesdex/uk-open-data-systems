@@ -1,11 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { placeAnswers, placeAuthority } from '../../app/assets/lib/answers.js';
+import { placeAnswers, placeAuthority, placeAbsences } from '../../app/assets/lib/answers.js';
 
 const PAYLOAD = JSON.parse(readFileSync(new URL('./fixtures/payload.json', import.meta.url)));
 const byLad = PAYLOAD.places.byLad;
 const CODES = Object.keys(byLad);
+
+// The real, published payload, not the four-place fixture above: whether a
+// question is genuinely national, genuinely the county's, or simply absent
+// for one place only shows up at real scale, across all 318 places and the
+// app's full 13-question list (four of which, sentinel, junction, watchman
+// and baseline, carry no per-place object anywhere and are not in the
+// fixture at all). Asserting the classification against invented fixture
+// numbers would prove nothing about what a reader actually sees.
+const REAL_PAYLOAD = JSON.parse(
+  readFileSync(new URL('../../app/data/platform.json', import.meta.url))
+);
+const REAL_CODES = Object.keys(REAL_PAYLOAD.places.byLad);
+// Mirrors app/assets/shared.js's SYSTEMS ids, which shell.js reads to build
+// this same list: not importable here, since shared.js is a classic script,
+// not a module.
+const ALL_IDS = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger',
+  'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass', 'baseline'];
 
 /* A figure is either a number or a preformatted string built from one, so the
    check below reduces both to the number and looks for it in the payload. */
@@ -172,4 +189,74 @@ test('the authority type comes from the payload, and is silent when it cannot', 
   assert.equal(byLad.W06000009._capacity, undefined);
   assert.equal(placeAuthority('W06000009', PAYLOAD), null);
   assert.equal(placeAuthority('E99999999', PAYLOAD), null);
+});
+
+test('a question never published per place is classified as national for every place', () => {
+  // sentinel, junction, watchman and baseline never carry a per-place object
+  // anywhere in the real payload: they are measured only nationally, so every
+  // one of the 318 places must call them national, and never upper-tier or
+  // merely unanswered here.
+  const neverPerPlace = ALL_IDS.filter(id =>
+    !REAL_CODES.some(code => REAL_PAYLOAD.places.byLad[code][id] !== undefined));
+  assert.deepEqual(neverPerPlace.sort(), ['baseline', 'junction', 'sentinel', 'watchman']);
+
+  for (const code of REAL_CODES) {
+    const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);
+    for (const id of neverPerPlace) {
+      assert.ok(a.national.includes(id), `${code}: ${id} should be classified national`);
+      assert.ok(!a.upperTier.includes(id), `${code}: ${id} must not be called upper-tier`);
+      assert.ok(!a.noFigure.includes(id), `${code}: ${id} must not be called merely unanswered`);
+    }
+  }
+});
+
+test('a question published for this place is not listed as absent at all', () => {
+  for (const code of REAL_CODES) {
+    const shownIds = new Set(placeAnswers(code, REAL_PAYLOAD).map(x => x.id));
+    const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);
+    for (const id of shownIds) {
+      assert.ok(!a.national.includes(id), `${code}/${id}: answered, so not national`);
+      assert.ok(!a.upperTier.includes(id), `${code}/${id}: answered, so not upper-tier`);
+      assert.ok(!a.noFigure.includes(id), `${code}/${id}: answered, so not unanswered`);
+    }
+  }
+});
+
+test('every absence lands in exactly one bucket, covering every missing question', () => {
+  for (const code of REAL_CODES) {
+    const shownIds = new Set(placeAnswers(code, REAL_PAYLOAD).map(x => x.id));
+    const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);
+    const missing = ALL_IDS.filter(id => !shownIds.has(id));
+    const buckets = [...a.national, ...a.upperTier, ...a.noFigure];
+    assert.deepEqual(buckets.slice().sort(), missing.slice().sort(), `${code}: buckets cover exactly what's missing`);
+    assert.equal(new Set(buckets).size, buckets.length, `${code}: no question is placed in two buckets`);
+  }
+});
+
+test('a single-tier authority never blames the county for its own missing questions', () => {
+  // Camden and Hartlepool are each their own upper tier (placeAuthority calls
+  // them "Single-tier authority... this council's own"), so nothing missing
+  // for them can honestly be called the county's. Every one of their missing
+  // questions is published for some other place in the fixture (Amber Valley
+  // carries all nine), so the absence here is real, just never above-district.
+  for (const code of ['E09000007', 'E06000001']) {
+    assert.match(placeAuthority(code, PAYLOAD), /^Single-tier authority\./);
+    const shownIds = new Set(placeAnswers(code, PAYLOAD).map(x => x.id));
+    const questionIds = ['plumbline', 'catchment', 'lastmile', 'compass', 'bellwether',
+      'bulwark', 'highwater', 'sightline', 'ledger'];
+    const missingQuestions = questionIds.filter(id => !shownIds.has(id));
+    assert.ok(missingQuestions.length > 0, `${code}: fixture should leave something missing to test`);
+
+    const a = placeAbsences(code, PAYLOAD, ALL_IDS);
+    assert.deepEqual(a.upperTier, [], `${code}: a single-tier authority has no upper-tier absence`);
+    assert.equal(a.countyName, null);
+    for (const id of missingQuestions) {
+      assert.ok(a.noFigure.includes(id), `${code}/${id}: published elsewhere, absent here, no cause invented`);
+    }
+  }
+});
+
+test('an unknown place has no absences rather than a guessed one', () => {
+  assert.equal(placeAbsences('E99999999', PAYLOAD, ALL_IDS), null);
+  assert.equal(placeAbsences('E07000032', null, ALL_IDS), null);
 });
