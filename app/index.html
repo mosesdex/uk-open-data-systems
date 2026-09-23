@@ -70,6 +70,47 @@
 
 <main class="pad" id="top">
 
+  <div class="view" data-view="home" id="viewHome" hidden>
+    <section class="find">
+      <h2 class="find__h">What does the public record say about your area?</h2>
+      <p class="find__s">Type a council or district name. Every figure on the page that follows is
+        computed from a published government file, and says which one.</p>
+      <div class="find__box">
+        <label class="visually-hidden" for="findPlace">Council or district name</label>
+        <input id="findPlace" type="search" autocomplete="off" spellcheck="false"
+               placeholder="Amber Valley, Camden, Manchester">
+        <div class="find__hits" id="findHits" role="listbox" aria-label="Matching places" hidden></div>
+        <p class="find__note" id="findNote" hidden></p>
+      </div>
+      <div class="find__eg" id="findEg"></div>
+      <p class="find__cred">45 sources from 22 publishers. Seventeen corrections published, each with
+        what was believed, what was true, and the test that now guards it.</p>
+    </section>
+
+    <nav class="doors" aria-label="Other ways in">
+      <a class="door" href="#/compare">
+        <span class="door__n" id="doorCompare">318</span>
+        <span class="door__t">Compare every district</span>
+        <span class="door__s">One table, sortable by any figure, exportable.</span>
+      </a>
+      <a class="door" href="#/unusual">
+        <span class="door__n" id="doorUnusual">50</span>
+        <span class="door__t">What looks unusual right now</span>
+        <span class="door__s">Where a place diverges most from the published figure, with the source.</span>
+      </a>
+      <a class="door" href="#/about">
+        <span class="door__n" id="doorAbout">45</span>
+        <span class="door__t">How this is built</span>
+        <span class="door__s">The two joins, every source, and what this cannot do.</span>
+      </a>
+    </nav>
+
+    <section class="qlist">
+      <h2 class="qlist__h">The thirteen questions</h2>
+      <div id="qlistBody"></div>
+    </section>
+  </div>
+
   <!-- One destination per view. The router shows exactly one; nothing takes
        the screen over any more, so the shell is never lost. -->
   <div class="view" data-view="overview" id="viewOverview" hidden>

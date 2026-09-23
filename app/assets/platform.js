@@ -28,6 +28,8 @@ const Platform = (() => {
   const sys = id => (data && data.systems && data.systems[id]) || null;
   const has = id => !!sys(id);
   const pipeline = () => (data && data.pipeline) || null;
+  // The lib modules under assets/lib take the whole payload, so it needs a door.
+  const payload = () => data;
   const organisations = () => (data && data.organisations) || [];
 
   /* Headline figures, each traced to the system that produced it. */
@@ -572,7 +574,7 @@ const Platform = (() => {
   const evidenceSummary = () => (data && data.evidence) || null;
   const evidence = id => ((evidenceSummary() || {}).headlines || {})[id] || [];
 
-  return {load, sys, has, pipeline, organisations, headlines, systemResult, sourceSummary, spineSummary,
+  return {load, payload, sys, has, pipeline, organisations, headlines, systemResult, sourceSummary, spineSummary,
           districtValues, districtLookup, chains, reuse, admin, adminSummary,
           placeCoverage, placeList, placeReport, placeResolution,
           mapMetrics, metricValues, metricSpec, metricProvenance,

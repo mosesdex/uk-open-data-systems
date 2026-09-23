@@ -37,7 +37,7 @@ const Shell = (() => {
   ];
 
   const TITLES_PUBLIC = {
-    '':        ['Explore', 'National picture'],
+    '':        ['Explore', 'Find your area'],
     places:    ['Explore · Places', 'Places'],
     systems:   ['Explore · What it answers', 'The thirteen questions'],
     orgs:      ['Explore · Organisations', 'Organisations'],
@@ -562,7 +562,7 @@ const Shell = (() => {
   }
 
   /* -------------------------------------------------------------- router --- */
-  const VIEWS_PUBLIC = ['overview', 'places', 'systems', 'sources', 'method', 'detail'];
+  const VIEWS_PUBLIC = ['home', 'overview', 'places', 'systems', 'sources', 'method', 'detail'];
 
   function show(view) {
     views().forEach(v => {
@@ -603,7 +603,7 @@ const Shell = (() => {
      deliberately stays on the root: these are fragments, not separate URLs, and
      a crawler is served the static pages instead. */
   const DOCS = {
-    '':        ['National picture', 'What the connected record holds right now, and what each of the thirteen questions answers.'],
+    '':        ['Find your area', 'Type a council or district name and see what the connected record holds for it: school places, planning speed, flood defences, care ownership and connectivity, each from a published government file.'],
     places:    ['Places', 'Every district, with school places, planning speed, flood defences, care ownership and connectivity read side by side.'],
     systems:   ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
     orgs:      ['Organisations', 'Companies and public bodies resolved to one identifier across procurement, care and ownership records.'],
@@ -653,6 +653,63 @@ const Shell = (() => {
   // to a single occurrence instead of spamming the console on each navigation.
   let warnedMissingLib = false;
 
+  /* The front page does one thing. Everything else on it is a signpost. */
+  function buildHome() {
+    const lib = window.GT_LIB || {};
+    const names = (Platform.payload && Platform.payload().places && Platform.payload().places.names) || {};
+    const input = $('#findPlace'), hits = $('#findHits'), note = $('#findNote');
+    if (!input || !hits) return;
+
+    const go = code => { location.hash = '#/places/' + code; };
+
+    const draw = () => {
+      const q = input.value;
+      const found = lib.matchPlaces ? lib.matchPlaces(q, names) : [];
+      hits.innerHTML = found.map(h =>
+        `<button class="find__hit" role="option" data-code="${esc(h.code)}">${esc(h.name)}</button>`).join('');
+      hits.hidden = !found.length;
+      const postcode = lib.looksLikePostcode && lib.looksLikePostcode(q) && !found.length;
+      if (note) {
+        note.textContent = postcode
+          ? 'Postcodes are not matched yet. Type the council or district name instead.'
+          : (q.trim() && !found.length ? 'No district of that name. Try the council that covers it.' : '');
+        note.hidden = !note.textContent;
+      }
+    };
+
+    input.oninput = draw;
+    input.onkeydown = e => {
+      if (e.key !== 'Enter') return;
+      const first = hits.querySelector('.find__hit');
+      if (first) go(first.dataset.code);
+    };
+    hits.onclick = e => {
+      const b = e.target.closest('.find__hit');
+      if (b) go(b.dataset.code);
+    };
+
+    // Three real examples, so the field is obviously usable.
+    const eg = $('#findEg');
+    if (eg) {
+      const examples = [['E07000032', 'Amber Valley'], ['E09000007', 'Camden'], ['E08000003', 'Manchester']]
+        .filter(([code]) => names[code]);
+      eg.innerHTML = examples.map(([code, name]) =>
+        `<a class="chip" href="#/places/${code}">${esc(name)}</a>`).join('');
+    }
+
+    const list = $('#qlistBody');
+    if (list) {
+      list.innerHTML = SYSTEMS.map(s =>
+        `<a class="qrow" href="#/questions/${esc(s.id)}">
+           <span class="qrow__n">${esc(s.n)}</span>
+           <span class="qrow__s">${esc(s.s || '')}</span>
+         </a>`).join('');
+    }
+
+    const compare = $('#doorCompare');
+    if (compare) compare.textContent = num(Object.keys(names).length);
+  }
+
   function route() {
     const raw = location.hash || '#/';
     // One table of every hash the app has published, tested in tests/js/routes.test.js.
@@ -679,8 +736,8 @@ const Shell = (() => {
       if (handled) return;
     }
 
-    if (head === '' ) {
-      show('overview'); setChrome(''); safely(buildOverview, '#viewOverview'); scrollTop(); return;
+    if (head === '') {
+      show('home'); setChrome(''); safely(buildHome, '#viewHome'); scrollTop(); return;
     }
 
     if (head === 'places') {

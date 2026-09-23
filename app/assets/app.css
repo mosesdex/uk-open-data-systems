@@ -732,3 +732,55 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .gs__rt span{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gs__rw{font-family:var(--mono);font-size:10px;color:var(--ink-3);flex:none}
 .gs__rsys{display:flex;gap:.3rem;flex:none}
+
+/* ---------- the front door ---------- */
+.find{max-width:44rem;margin:3.5rem auto 3rem;text-align:center}
+.find__h{font-size:clamp(26px,4.4vw,40px);line-height:1.15;letter-spacing:-.03em;font-weight:700;
+  margin:0 0 .7rem;text-wrap:balance}
+.find__s{font-size:17px;line-height:1.6;color:var(--ink-2);margin:0 auto 1.6rem;max-width:34rem}
+.find__box{position:relative;text-align:left}
+.find__box input{width:100%;min-height:56px;font-size:17px;padding:0 1rem;border-radius:12px;
+  border:1px solid var(--line-2,var(--line));background:var(--surface);color:var(--ink)}
+.find__box input:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
+.find__hits{position:absolute;left:0;right:0;top:calc(100% + .4rem);z-index:20;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);overflow:hidden}
+.find__hit{display:block;width:100%;text-align:left;min-height:44px;padding:.6rem 1rem;border:0;
+  background:none;font:inherit;font-size:16px;color:var(--ink);cursor:pointer}
+.find__hit:hover,.find__hit:focus-visible{background:var(--blue-050)}
+.find__note{margin:.6rem 0 0;font-size:14px;color:var(--ink-2)}
+.find__eg{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:1.1rem 0 0}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:0 .8rem;border-radius:999px;
+  border:1px solid var(--line);font-size:14px;color:var(--ink-2);text-decoration:none}
+.chip:hover{border-color:var(--blue-300);color:var(--blue-600)}
+.find__cred{margin:1.8rem auto 0;max-width:36rem;font-size:14px;line-height:1.6;color:var(--ink-3)}
+
+.doors{display:flex;flex-direction:column;gap:.6rem;max-width:52rem;margin:0 auto 3rem}
+.door{display:grid;grid-template-columns:5.5rem 1fr;align-items:baseline;gap:.2rem 1.2rem;
+  padding:1.1rem 1.3rem;border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  text-decoration:none;color:inherit}
+.door:hover{border-color:var(--blue-300)}
+.door__n{grid-row:span 2;font-family:var(--mono);font-size:26px;font-weight:600;color:var(--blue-600);
+  font-variant-numeric:tabular-nums}
+.door__t{font-size:17px;font-weight:600}
+.door__s{font-size:14.5px;color:var(--ink-2)}
+
+.qlist{max-width:52rem;margin:0 auto 4rem}
+.qlist__h{font-size:18px;font-weight:600;letter-spacing:-.01em;margin:0 0 .8rem;color:var(--ink-2)}
+.qrow{display:grid;grid-template-columns:11rem 1fr;gap:.2rem 1rem;padding:.75rem .2rem;
+  border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.qrow:hover .qrow__n{color:var(--blue-600)}
+.qrow__n{font-weight:600;font-size:15.5px}
+.qrow__s{font-size:14.5px;color:var(--ink-2)}
+@media (max-width:700px){
+  .find{margin-top:2rem}
+  .door{grid-template-columns:1fr;gap:.15rem}
+  .door__n{grid-row:auto}
+  .qrow{grid-template-columns:1fr}
+}
+
+/* Available to assistive technology, absent from the design. Duplicated from
+   mobile.css: app/index.html loads app.css and shell.css only, not mobile.css,
+   so the front page's field label needs its own copy of this rule to actually
+   be hidden rather than rendered as visible text above the input. */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
