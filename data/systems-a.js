@@ -21,7 +21,7 @@ export default [
   ],
 
   solution: [
-    'Sentinel ingests the full public procurement record: Find a Tender, Contracts Finder and the Central Digital Platform, and resolves suppliers to Companies House entities. Because roughly two-thirds of records carry no usable identifier, that resolution is the system’s hardest engineering problem rather than a given: identifier where present, probabilistic name and address matching where not, with match confidence published on every link and low-confidence links never silently merged. It then builds a national graph connecting suppliers to their directors, persons with significant control, registered addresses and corporate parents.',
+    'Sentinel ingests the full public procurement record: Find a Tender, Contracts Finder and the Central Digital Platform, and resolves suppliers to Companies House entities. Because roughly two-thirds of records carry no usable identifier, that resolution is Sentinel’s hardest engineering problem rather than a given: identifier where present, probabilistic name and address matching where not, with match confidence published on every link and low-confidence links never silently merged. It then builds a national graph connecting suppliers to their directors, persons with significant control, registered addresses and corporate parents.',
     'Against that graph it runs an indicator suite derived from established international practice, the EU’s Digital Whistleblower red-flag set, the World Bank’s procurement analytics, and Ukraine’s ProZorro/Dozorro monitoring model, scoring every award and every buyer for risk rather than accusing anyone of wrongdoing.',
     'Output is a triage queue for investigators, not a verdict. Each flag carries its evidence, its statistical basis and a plain-English explanation, so a commercial officer can dismiss it in thirty seconds or escalate it with a full audit trail.'
   ],
@@ -31,7 +31,7 @@ export default [
     ['Find a Tender Service', 'Cabinet Office', 'Statutory notices for above-threshold procurement across the UK public sector.'],
     ['Contracts Finder', 'Cabinet Office', 'Contract award notices, including below-threshold awards in England.'],
     ['Companies House API + bulk products', 'Companies House', 'Company records, officer appointments, PSC register, filing history, dissolution status. Free API under OGL v3.'],
-    ['Local authority spend over £500', '300+ councils', 'Transaction-level payments. Fragmented schemas, normalised by System 10.'],
+    ['Local authority spend over £500', '300+ councils', 'Transaction-level payments. Fragmented schemas, normalised by the shared spend layer.'],
     ['Charity Commission register', 'Charity Commission', 'Trustee networks, for public bodies contracting with the voluntary sector.']
   ],
 
@@ -75,7 +75,7 @@ export default [
   ],
 
   risks: [
-    ['False accusation', 'Shared directors are common and usually innocent. The system scores risk and never asserts wrongdoing; every output is a prompt for human review with its evidence attached.'],
+    ['False accusation', 'Shared directors are common and usually innocent. Sentinel scores risk and never asserts wrongdoing; every output is a prompt for human review with its evidence attached.'],
     ['Data quality upstream', 'Companies House data has known accuracy problems. Identity verification under ECCTA is improving this, and Sentinel reports data-quality defects back as a by-product.'],
     ['Gaming', 'Publishing the indicator logic teaches evasion. Core indicators are published for accountability; weightings and thresholds are held privately and rotated.'],
     ['The bid-level ceiling, stated plainly', 'Textbook cartel screening needs every bid including losing ones. Public data publishes awards, and independent analysis found the tenderer-count field is frequently recorded as zero. Sentinel can therefore detect single-bidder concentration, threshold splitting, rotation patterns and bidder relatedness, but not classical bid-rigging signatures. Going deeper requires buyer cooperation to supply their own tender records, which is a design assumption, not an afterthought. Any proposal claiming full cartel detection from open data alone is overselling.']
@@ -99,7 +99,7 @@ export default [
   name: 'Transit',
   subtitle: 'Local government reorganisation data continuity',
   themes: ['local', 'operations', 'money'],
-  tagline: 'The only system built for the single hardest deadline in UK local government: merging 134 councils into 38 by 1 April 2028 without losing the data that statutory services run on.',
+  tagline: 'Built for the single hardest deadline in UK local government: merging 134 councils into 38 by 1 April 2028 without losing the data that statutory services run on.',
   status: 'Vesting day 1 April 2028, fixed statutory deadline',
 
   problem: [
@@ -345,7 +345,7 @@ export default [
 
   risks: [
     ['Commercial sensitivity', 'Providers will object to price transparency. The counter is that this is public money already published under transparency rules; Threshold aggregates what is already open.'],
-    ['Data quality', 'Council spend data is inconsistently coded. Depends on the normalisation layer built for System 10.'],
+    ['Data quality', 'Council spend data is inconsistently coded. Depends on the shared normalisation layer.'],
     ['Perverse incentive', 'Published benchmarks can become a floor as well as a ceiling. Mitigated by publishing distributions rather than single reference prices.']
   ],
 

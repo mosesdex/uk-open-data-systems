@@ -69,8 +69,8 @@
 <hr class="hr">
 
 <section id="solution">
-<h2 class="eyebrow">The system</h2>
-<div class="prose mt-2"><p>Sentinel ingests the full public procurement record: Find a Tender, Contracts Finder and the Central Digital Platform, and resolves suppliers to Companies House entities. Because roughly two-thirds of records carry no usable identifier, that resolution is the system’s hardest engineering problem rather than a given: identifier where present, probabilistic name and address matching where not, with match confidence published on every link and low-confidence links never silently merged. It then builds a national graph connecting suppliers to their directors, persons with significant control, registered addresses and corporate parents.</p>
+<h2 class="eyebrow">The answer</h2>
+<div class="prose mt-2"><p>Sentinel ingests the full public procurement record: Find a Tender, Contracts Finder and the Central Digital Platform, and resolves suppliers to Companies House entities. Because roughly two-thirds of records carry no usable identifier, that resolution is Sentinel’s hardest engineering problem rather than a given: identifier where present, probabilistic name and address matching where not, with match confidence published on every link and low-confidence links never silently merged. It then builds a national graph connecting suppliers to their directors, persons with significant control, registered addresses and corporate parents.</p>
 <p>Against that graph it runs an indicator suite derived from established international practice, the EU’s Digital Whistleblower red-flag set, the World Bank’s procurement analytics, and Ukraine’s ProZorro/Dozorro monitoring model, scoring every award and every buyer for risk rather than accusing anyone of wrongdoing.</p>
 <p>Output is a triage queue for investigators, not a verdict. Each flag carries its evidence, its statistical basis and a plain-English explanation, so a commercial officer can dismiss it in thirty seconds or escalate it with a full audit trail.</p></div>
 </section>
@@ -79,7 +79,7 @@
 
 <section id="examples">
 <h2 class="eyebrow">Worked examples</h2>
-<h3 class="mt-2">Two situations this system answers</h3>
+<h3 class="mt-2">Two situations this answers</h3>
 <div class="grid grid--2 mt-4">
 <div class="card">
 <div class="card__num">EXAMPLE 1</div>
@@ -105,7 +105,7 @@
 <h3 class="mt-2">Every dataset below is open, or its access constraint is stated</h3>
 <div class="tablewrap mt-3">
 <table><thead><tr><th>Dataset</th><th>Publisher</th><th>What it provides</th></tr></thead>
-<tbody><tr><td><strong>Central Digital Platform</strong></td><td class="muted">Cabinet Office</td><td>Supplier registration, unique supplier identifiers, contract performance notices, payment performance. Mandatory below-threshold registration from 1 April 2026.</td></tr><tr><td><strong>Find a Tender Service</strong></td><td class="muted">Cabinet Office</td><td>Statutory notices for above-threshold procurement across the UK public sector.</td></tr><tr><td><strong>Contracts Finder</strong></td><td class="muted">Cabinet Office</td><td>Contract award notices, including below-threshold awards in England.</td></tr><tr><td><strong>Companies House API + bulk products</strong></td><td class="muted">Companies House</td><td>Company records, officer appointments, PSC register, filing history, dissolution status. Free API under OGL v3.</td></tr><tr><td><strong>Local authority spend over £500</strong></td><td class="muted">300+ councils</td><td>Transaction-level payments. Fragmented schemas, normalised by System 10.</td></tr><tr><td><strong>Charity Commission register</strong></td><td class="muted">Charity Commission</td><td>Trustee networks, for public bodies contracting with the voluntary sector.</td></tr></tbody></table>
+<tbody><tr><td><strong>Central Digital Platform</strong></td><td class="muted">Cabinet Office</td><td>Supplier registration, unique supplier identifiers, contract performance notices, payment performance. Mandatory below-threshold registration from 1 April 2026.</td></tr><tr><td><strong>Find a Tender Service</strong></td><td class="muted">Cabinet Office</td><td>Statutory notices for above-threshold procurement across the UK public sector.</td></tr><tr><td><strong>Contracts Finder</strong></td><td class="muted">Cabinet Office</td><td>Contract award notices, including below-threshold awards in England.</td></tr><tr><td><strong>Companies House API + bulk products</strong></td><td class="muted">Companies House</td><td>Company records, officer appointments, PSC register, filing history, dissolution status. Free API under OGL v3.</td></tr><tr><td><strong>Local authority spend over £500</strong></td><td class="muted">300+ councils</td><td>Transaction-level payments. Fragmented schemas, normalised by the shared spend layer.</td></tr><tr><td><strong>Charity Commission register</strong></td><td class="muted">Charity Commission</td><td>Trustee networks, for public bodies contracting with the voluntary sector.</td></tr></tbody></table>
 </div>
 </section>
 
@@ -140,7 +140,7 @@
 
 <section id="risks">
 <h2 class="eyebrow">Risks &amp; mitigations</h2>
-<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">False accusation</div><p class="card__desc">Shared directors are common and usually innocent. The system scores risk and never asserts wrongdoing; every output is a prompt for human review with its evidence attached.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Data quality upstream</div><p class="card__desc">Companies House data has known accuracy problems. Identity verification under ECCTA is improving this, and Sentinel reports data-quality defects back as a by-product.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Gaming</div><p class="card__desc">Publishing the indicator logic teaches evasion. Core indicators are published for accountability; weightings and thresholds are held privately and rotated.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The bid-level ceiling, stated plainly</div><p class="card__desc">Textbook cartel screening needs every bid including losing ones. Public data publishes awards, and independent analysis found the tenderer-count field is frequently recorded as zero. Sentinel can therefore detect single-bidder concentration, threshold splitting, rotation patterns and bidder relatedness, but not classical bid-rigging signatures. Going deeper requires buyer cooperation to supply their own tender records, which is a design assumption, not an afterthought. Any proposal claiming full cartel detection from open data alone is overselling.</p></div></div>
+<div class="grid mt-3"><div class="card"><div class="card__title" style="font-size:1rem;margin:0">False accusation</div><p class="card__desc">Shared directors are common and usually innocent. Sentinel scores risk and never asserts wrongdoing; every output is a prompt for human review with its evidence attached.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Data quality upstream</div><p class="card__desc">Companies House data has known accuracy problems. Identity verification under ECCTA is improving this, and Sentinel reports data-quality defects back as a by-product.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">Gaming</div><p class="card__desc">Publishing the indicator logic teaches evasion. Core indicators are published for accountability; weightings and thresholds are held privately and rotated.</p></div><div class="card"><div class="card__title" style="font-size:1rem;margin:0">The bid-level ceiling, stated plainly</div><p class="card__desc">Textbook cartel screening needs every bid including losing ones. Public data publishes awards, and independent analysis found the tenderer-count field is frequently recorded as zero. Sentinel can therefore detect single-bidder concentration, threshold splitting, rotation patterns and bidder relatedness, but not classical bid-rigging signatures. Going deeper requires buyer cooperation to supply their own tender records, which is a design assumption, not an afterthought. Any proposal claiming full cartel detection from open data alone is overselling.</p></div></div>
 </section>
 
 <hr class="hr">
@@ -161,7 +161,7 @@
 <aside class="sysLayout__aside">
 <div class="toc"><div class="toc__title">On this page</div>
 <a href="#problem">The problem</a>
-<a href="#solution">The system</a>
+<a href="#solution">The answer</a>
 <a href="#examples">Worked examples</a>
 <a href="#data">Data foundation</a>
 <a href="#features">Capabilities</a>
@@ -176,7 +176,7 @@
 <footer class="foot"><div class="wrap">
 <div class="foot__grid">
 <div>
-<h2>UK GroundTruth systems</h2>
+<h2>What UK GroundTruth answers</h2>
 <a href="../systems/catchment.html">07 &middot; Catchment</a>
 <a href="../systems/sentinel.html">01 &middot; Sentinel</a>
 <a href="../systems/highwater.html">06 &middot; Highwater</a>
@@ -186,7 +186,7 @@
 <a href="../systems/bellwether.html">12 &middot; Bellwether</a>
 </div>
 <div>
-<h2 class="visually-hidden">UK GroundTruth systems, continued</h2>
+<h2 class="visually-hidden">What UK GroundTruth answers, continued</h2>
 <a href="../systems/sightline.html">13 &middot; Sightline</a>
 <a href="../systems/lastmile.html">14 &middot; Lastmile</a>
 <a href="../systems/bulwark.html">16 &middot; Bulwark</a>

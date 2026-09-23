@@ -53,10 +53,10 @@ function systemsBlock({ compact = false } = {}) {
     const r = Platform.systemResult(s.id);
     const figure = r
       ? `<p class="card__s"><strong>${esc(r.headline)}</strong> ${esc(r.label)}${
-          r.sub ? ` &mdash; ${esc(r.sub)}` : ''}</p>`
+          r.sub ? `, ${esc(r.sub)}` : ''}</p>`
       : `<p class="card__s">No measured output yet.</p>`;
     return `<li><a href="${compact ? '../' : ''}systems/${esc(s.id)}.html"><strong>${esc(s.n)}</strong></a>
- &mdash; ${esc(s.s)}. ${figure}</li>`;
+: ${esc(s.s)}. ${figure}</li>`;
   }).join('\n');
 
   const built = Platform.builtSystems().length;

@@ -10,7 +10,7 @@ import EX from './data/examples.js';
 import RS from './data/research.js';
 import * as SEO from './data/seo.js';
 
-// The thirteen UK GroundTruth systems: every source fetchable anonymously, no account, no key, no application.
+// The thirteen UK GroundTruth questions: every source fetchable anonymously, no account, no key, no application.
 const DELIVERABLE = ['catchment', 'sentinel', 'highwater', 'plumbline', 'junction', 'ledger', 'bellwether', 'sightline', 'lastmile', 'bulwark', 'watchman', 'compass', 'baseline'];
 const sysById = Object.fromEntries([...A, ...B, ...C].map(s => [s.id, s]));
 
@@ -70,11 +70,11 @@ const foot = (depth = 0) => {
   return `<footer class="foot"><div class="wrap">
 <div class="foot__grid">
 <div>
-<h2>UK GroundTruth systems</h2>
+<h2>What UK GroundTruth answers</h2>
 ${DELIVERABLE.slice(0, 7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
-<h2 class="visually-hidden">UK GroundTruth systems, continued</h2>
+<h2 class="visually-hidden">What UK GroundTruth answers, continued</h2>
 ${DELIVERABLE.slice(7).map(id => sysById[id]).map(s => `<a href="${p}systems/${s.id}.html">${s.num} &middot; ${s.name}</a>`).join('\n')}
 </div>
 <div>
@@ -106,7 +106,7 @@ function detailPage(s, i) {
   const next = SYSTEMS[(i + 1) % SYSTEMS.length];
 
   const toc = [
-    ['problem', 'The problem'], ['solution', 'The system'], ['examples', 'Worked examples'], ['data', 'Data foundation'],
+    ['problem', 'The problem'], ['solution', 'The answer'], ['examples', 'Worked examples'], ['data', 'Data foundation'],
     ['features', 'Capabilities'], ['benefits', 'Benefits'], ['delivery', 'Delivery'],
     ['risks', 'Risks &amp; mitigations'], ['sources', 'Sources']
   ];
@@ -156,7 +156,7 @@ ${nav(1)}
 <hr class="hr">
 
 <section id="solution">
-<h2 class="eyebrow">The system</h2>
+<h2 class="eyebrow">The answer</h2>
 <div class="prose mt-2">${s.solution.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
 </section>
 
@@ -164,7 +164,7 @@ ${EX.bySystem[s.id] ? `<hr class="hr">
 
 <section id="examples">
 <h2 class="eyebrow">Worked examples</h2>
-<h3 class="mt-2">Two situations this system answers</h3>
+<h3 class="mt-2">Two situations this answers</h3>
 <div class="grid grid--2 mt-4">
 ${EX.bySystem[s.id].map((e, n) => `<div class="card">
 <div class="card__num">EXAMPLE ${n + 1}</div>
@@ -276,7 +276,7 @@ ${nav()}
 <div class="wrap">
 <div class="eyebrow">Dexter DCL</div>
 <h1 class="display hero__title mt-3">UK GroundTruth</h1>
-<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved &mdash; at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. UK GroundTruth closes it.</p>
+<p class="lede hero__lede">Government keeps good records of <em>what</em> happened. It very often fails to record <em>where</em> it happened, or <em>which organisation</em> was involved, at least not in a form a computer can match up.<br><br>That one gap makes thirteen genuinely useful things impossible. UK GroundTruth closes it.</p>
 <div class="hero__cta">
 <a class="btn btn--primary" href="#systems">The thirteen questions</a>
 <a class="btn btn--ghost" href="#chains">How they help each other</a>
@@ -305,15 +305,15 @@ ${nav()}
 <div class="feat mt-4">
 <div class="feat__item"><div class="feat__ico">1</div><div>
 <div class="feat__t">The flood people don&rsquo;t know where</div>
-<div class="feat__d">The Environment Agency has objected to <strong>23,336</strong> building plans on flood risk grounds. The list has no address, no postcode and no map point. It cannot map its own objections &mdash; and for <strong>7,011</strong> of them it never found out what the council decided.</div></div></div>
+<div class="feat__d">The Environment Agency has objected to <strong>23,336</strong> building plans on flood risk grounds. The list has no address, no postcode and no map point. It cannot map its own objections, and for <strong>7,011</strong> of them it never found out what the council decided.</div></div></div>
 
 <div class="feat__item"><div class="feat__ico">2</div><div>
 <div class="feat__t">A ministry can&rsquo;t say which sites</div>
-<div class="feat__d">Housebuilders owe councils <strong>£1,491,818,575</strong> for schools, roads and affordable homes. The government&rsquo;s own database records every penny &mdash; and not one location. The field for the property reference is filled in on <strong>0.0%</strong> of records. The address field, in the same records, is filled in on <strong>98.1%</strong>.</div></div></div>
+<div class="feat__d">Housebuilders owe councils <strong>£1,491,818,575</strong> for schools, roads and affordable homes. The government&rsquo;s own database records every penny, and not one location. The field for the property reference is filled in on <strong>0.0%</strong> of records. The address field, in the same records, is filled in on <strong>98.1%</strong>.</div></div></div>
 
 <div class="feat__item"><div class="feat__ico">3</div><div>
 <div class="feat__t">Councils get maps they can&rsquo;t read</div>
-<div class="feat__d">School places are planned across <strong>3,651</strong> local areas. The boundaries of those areas are published nowhere, so councils receive data for a geography they cannot draw &mdash; while <strong>£1.096bn</strong> of school building money is handed out on it.</div></div></div>
+<div class="feat__d">School places are planned across <strong>3,651</strong> local areas. The boundaries of those areas are published nowhere, so councils receive data for a geography they cannot draw, while <strong>£1.096bn</strong> of school building money is handed out on it.</div></div></div>
 
 <div class="feat__item"><div class="feat__ico">4</div><div>
 <div class="feat__t">Nobody knows who owns the flood defences</div>
@@ -322,7 +322,7 @@ ${nav()}
 
 <div class="note mt-4">
 <div class="note__title">Here is the point</div>
-<p style="margin:0">None of those is a missing dataset. The data exists and is free. Each one is a <strong>missing link</strong> &mdash; and there are only two kinds.</p>
+<p style="margin:0">None of those is a missing dataset. The data exists and is free. Each one is a <strong>missing link</strong>, and there are only two kinds.</p>
 </div>
 
 <div class="grid grid--2 mt-4">
@@ -335,7 +335,7 @@ ${nav()}
 </div>
 
 <div class="prose mt-4">
-<p>UK GroundTruth builds those two links once, and gives them away. It is not clever &mdash; it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
+<p>UK GroundTruth builds those two links once, and gives them away. It is not clever, it is the same job the postcode did. Postcodes added no new information; they just gave everyone one shared way of saying <em>here</em>, and that unlocked everything from mail sorting to insurance.</p>
 </div>
 <div class="flexrow mt-4"><a class="btn btn--ghost" href="platform.html">The technical detail &rarr;</a></div>
 </div>
@@ -345,7 +345,7 @@ ${nav()}
 <div class="wrap">
 <div class="eyebrow">The platform</div>
 <h2 class="mt-3">Thirteen questions</h2>
-<p class="lede mt-3">Each one addresses a gap the responsible department has documented itself. Every dataset they depend on was tested and returns data to an anonymous request &mdash; no account, no API key, no application, no approval.</p>
+<p class="lede mt-3">Each one addresses a gap the responsible department has documented itself. Every dataset they depend on was tested and returns data to an anonymous request, no account, no API key, no application, no approval.</p>
 <div class="filters mt-4">
 <button class="filter is-on" data-filter="all">All thirteen</button>
 ${Object.entries(THEMES).map(([k, v]) => `<button class="filter" data-filter="${k}">${v}</button>`).join('')}
@@ -393,7 +393,7 @@ ${CHAINS.reuse.items.map((r, i) => `<div class="feat__item"><div class="feat__ic
 <div class="eyebrow">The whole point</div>
 <h2 class="mt-3">${EX.overall.heading}</h2>
 <div class="prose mt-4" style="color:#B4BAC6">${EX.overall.body.map(p => `<p>${esc(p)}</p>`).join('\n')}</div>
-<p class="small mt-4" style="color:#8A91A0">There are twenty-six worked examples on the system pages &mdash; two each, every one a real situation somebody in government currently cannot get to the bottom of.</p>
+<p class="small mt-4" style="color:#8A91A0">There are twenty-six worked examples on the individual pages, two each, every one a real situation somebody in government currently cannot get to the bottom of.</p>
 </div>
 </section>
 
@@ -401,7 +401,7 @@ ${CHAINS.reuse.items.map((r, i) => `<div class="feat__item"><div class="feat__ic
 <div class="wrap wrap--narrow">
 <div class="eyebrow">Sequence</div>
 <h2 class="mt-3">What to build first</h2>
-<p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract &mdash; it wins one after it has visibly fixed something.</p>
+<p class="lede mt-3">The first move is unpaid on purpose. A company with no filed accounts does not win a departmental contract, it wins one after it has visibly fixed something.</p>
 <div class="phases mt-5">
 ${P.sequence.map((s, i) => `<div class="phase">
 <div class="phase__n">${i + 1}</div>
@@ -417,7 +417,7 @@ ${P.sequence.map((s, i) => `<div class="phase">
 <h2 class="mt-3">How government would buy it</h2>
 <div class="prose mt-4">
 <p><strong>Central digital spend controls ended on 1 April ${YEAR}.</strong> Departments are now accountable for applying the functional standards themselves, and assurance applies only above their own delegated authority limits. A pilot is a departmental decision rather than a central one.</p>
-<p><strong>Framework entry reopens.</strong> The current digital outcomes framework was let as an open framework under the Procurement Act, with reopening cycles &mdash; so missing a window is no longer fatal. Product-shaped systems route through the cloud framework; delivery-shaped ones through digital outcomes; unproven research through the small business research initiative, where the department funds development and the supplier retains the intellectual property.</p>
+<p><strong>Framework entry reopens.</strong> The current digital outcomes framework was let as an open framework under the Procurement Act, with reopening cycles, so missing a window is no longer fatal. Product-shaped systems route through the cloud framework; delivery-shaped ones through digital outcomes; unproven research through the small business research initiative, where the department funds development and the supplier retains the intellectual property.</p>
 <p><strong>Small supplier status is a scored advantage attached to a published target.</strong> Departments must set and publish three-year small business spend targets and report progress annually. They are collectively behind, and central government's small business share has fallen rather than risen.</p>
 <h3>What makes a proposition land</h3>
 <p>The counter-fraud programme is the template worth copying. Government published a loss estimate it owns, reported savings against it, credited data-matching explicitly, and translated the result into nurses and repaired roads. Every system here is framed the same way: against a published number the department already accepts, with recovered or avoided cost rather than capability uplift as the headline.</p>
@@ -430,7 +430,7 @@ ${P.sequence.map((s, i) => `<div class="phase">
 <div class="wrap">
 <div class="eyebrow">Out of scope</div>
 <h2 class="mt-3">Five we left out, and why</h2>
-<p class="lede mt-3">Researched, written up, and excluded &mdash; for three different reasons. They stay published because a rejected idea with a stated reason is worth more than a quiet deletion.</p>
+<p class="lede mt-3">Researched, written up, and excluded, for three different reasons. They stay published because a rejected idea with a stated reason is worth more than a quiet deletion.</p>
 <div class="grid mt-4">
 ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
 <div class="card__num">${s.num}</div>
@@ -441,7 +441,7 @@ ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
 </div>
 <div class="note note--warn mt-4">
 <div class="note__title">Why each is out</div>
-<p style="margin:0"><strong>Transit and Threshold</strong> handle live social care records and placements for homeless children. They need a UK-resident, security-cleared operations tier. Year two, not never &mdash; and the largest money in the portfolio sits behind them. <strong>Freehold</strong> depends on ownership data that redirects to a sign-in under a licence with audit rights and a 48-hour delete clause. <strong>Waypoint and Hearth</strong> were killed by the research itself: government had already shipped a free replacement for one, and the other targets a market that is legally blocked and commercially served.</p>
+<p style="margin:0"><strong>Transit and Threshold</strong> handle live social care records and placements for homeless children. They need a UK-resident, security-cleared operations tier. Year two, not never, and the largest money in the portfolio sits behind them. <strong>Freehold</strong> depends on ownership data that redirects to a sign-in under a licence with audit rights and a 48-hour delete clause. <strong>Waypoint and Hearth</strong> were killed by the research itself: government had already shipped a free replacement for one, and the other targets a market that is legally blocked and commercially served.</p>
 </div>
 </div>
 </section>
@@ -450,7 +450,7 @@ ${OUTS.map(s => `<a class="card" href="systems/${s.id}.html">
 <div class="wrap wrap--narrow" style="text-align:center">
 <div class="eyebrow" style="justify-content:center">Method</div>
 <h2 class="mt-3">Fifteen published claims were corrected.</h2>
-<p class="lede mt-3" style="margin-inline:auto;color:#B4BAC6">Research overturned our own findings repeatedly &mdash; a premise that was already solved, a market that was legally blocked, a linkage key that does not exist in the published data, a trend that vanished once the rate behind it was computed, and one figure derived and then presented as though a document had said it. Roughly half of what sounded solid needed correction once someone checked the primary source. Every system brief carries its sources for that reason.</p>
+<p class="lede mt-3" style="margin-inline:auto;color:#B4BAC6">Research overturned our own findings repeatedly, a premise that was already solved, a market that was legally blocked, a linkage key that does not exist in the published data, a trend that vanished once the rate behind it was computed, and one figure derived and then presented as though a document had said it. Roughly half of what sounded solid needed correction once someone checked the primary source. Every system brief carries its sources for that reason.</p>
 <div class="hero__cta" style="justify-content:center">
 <a class="btn btn--primary" style="background:var(--paper);color:var(--ink)" href="systems/${GT[0].id}.html">Start with ${GT[0].name}</a>
 <a class="btn btn--ghost" style="border-color:#3A414F;color:var(--paper)" href="platform.html">The architecture</a>
@@ -553,8 +553,8 @@ ${P.matrix.rows.map(r => {
   const s = sysById[r[0].toLowerCase()];
   return `<tr>
 <td><a href="systems/${s.id}.html" style="color:var(--accent);text-decoration:none;font-weight:600">${s.num} &middot; ${r[0]}</a></td>
-<td>${r[1] ? '<span class="tag tag--accent">Place</span>' : '<span class="muted">&mdash;</span>'}</td>
-<td>${r[2] ? '<span class="tag tag--cool">Entity</span>' : '<span class="muted">&mdash;</span>'}</td>
+<td>${r[1] ? '<span class="tag tag--accent">Place</span>' : '<span class="muted">, </span>'}</td>
+<td>${r[2] ? '<span class="tag tag--cool">Entity</span>' : '<span class="muted">, </span>'}</td>
 <td>${r[3]}</td>
 </tr>`;
 }).join('\n')}
@@ -623,9 +623,9 @@ ${foot()}`;
 
 /* ---------------- Write ---------------- */
 mkdirSync('systems', { recursive: true });
-const examplesTitle = 'Problems and solutions, all thirteen UK GroundTruth systems';
+const examplesTitle = 'Problems and solutions, all thirteen UK GroundTruth questions';
 const examplesDesc = SEO.composeDescription(
-  'Two real situations for every one of the thirteen UK GroundTruth systems: what goes wrong today, and what the system does about it.');
+  'Two real situations for every one of the thirteen UK GroundTruth questions: what goes wrong today, and what the record does about it.');
 const examplesTrail = [
   { name: 'UK GroundTruth', url: SEO.canonical('') },
   { name: 'Problems and solutions', url: SEO.canonical('examples.html') },
@@ -643,13 +643,13 @@ ${nav()}
 <a class="backlink" href="index.html">&larr; UK GroundTruth</a>
 <div class="eyebrow">Problems &amp; solutions</div>
 <h1 class="display" style="font-size:clamp(2.2rem,5vw,3.6rem);margin-top:1rem">Twenty-six situations</h1>
-<p class="lede" style="margin-top:.6rem">Two for each of the thirteen questions. On the left, what goes wrong today. On the right, what the system does about it.</p>
+<p class="lede" style="margin-top:.6rem">Two for each of the thirteen questions. On the left, what goes wrong today. On the right, what the record does about it.</p>
 <p class="prose" style="margin-top:1.4rem;font-size:1.05rem">Every situation below is real, and every one is caused by the same thing: a record exists, but nothing can be matched to it. No new data is collected anywhere on this page.</p>
 </div></header>
 
 <div class="wrap section">
 
-<div class="eyebrow">Jump to a system</div>
+<div class="eyebrow">Jump to a question</div>
 <div class="grid grid--3 mt-3">
 ${GT.map((s, i) => `<a class="card" href="#${s.id}" style="padding:1rem 1.15rem">
 <div class="card__num">${String(i + 1).padStart(2, '0')}</div>
@@ -721,9 +721,9 @@ ${RS.headline.map(([n, l]) => `<div class="impact__cell"><div class="impact__n">
 </div>
 
 <div class="note mt-5">
-<div class="note__title">The system runs on your own machine</div>
-<p>This site explains UK GroundTruth. It does not run it. The working system &mdash; the public,
-admin and mobile interfaces, reading figures computed from the live sources &mdash; is
+<div class="note__title">The record is built on your own machine</div>
+<p>This site explains UK GroundTruth. It does not run it. The working build, the public,
+admin and mobile interfaces, reading figures computed from the live sources, is
 deliberately not published: it is built and served locally, so the operator holds the data
 and can reproduce every number without depending on anyone else hosting it.</p>
 <pre class="mono" style="background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:1rem;overflow-x:auto;margin-top:1rem;font-size:.85rem">git clone https://github.com/mosesdex/uk-open-data-systems
@@ -824,9 +824,9 @@ ${RS.rules.items.map(([t, d], i) => `<div class="card mt-2"><div class="card__b"
 <div class="grid grid--2 mt-4">
 <a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/RESEARCH.md">
 <div class="card__b"><div class="feat__t">Full research document</div>
-<p class="card__desc mt-1" style="flex:none">Every system: sources, logic, data in and out, architecture, automation, security.</p></div></a>
+<p class="card__desc mt-1" style="flex:none">Every question: sources, logic, data in and out, architecture, automation, security.</p></div></a>
 <a class="card" href="https://github.com/mosesdex/uk-open-data-systems/blob/main/platform/HANDOVER.md">
-<div class="card__b"><div class="feat__t">Run the system yourself</div>
+<div class="card__b"><div class="feat__t">Run it yourself</div>
 <p class="card__desc mt-1" style="flex:none">What a full run produces, the rules the code enforces, and the traps worth knowing.</p></div></a>
 <a class="card" href="https://github.com/mosesdex/uk-open-data-systems/tree/main/research">
 <div class="card__b"><div class="feat__t">Raw probe results</div>
@@ -882,7 +882,7 @@ government endorsement, and nobody has commissioned it.</p>
 <div class="grid grid--2">
 <div class="card"><div class="card__b">
 <h2 class="feat__t">Contact</h2>
-<p class="prose small mt-2" style="max-width:none">One address, for everything &mdash; questions,
+<p class="prose small mt-2" style="max-width:none">One address, for everything, questions,
 corrections, and anything about how a figure was reached.</p>
 <p class="mt-3"><a class="btn btn--ghost" href="mailto:${SEO.SITE.email}">${SEO.SITE.email}</a></p>
 </div></div>
@@ -903,14 +903,14 @@ total. Nothing is modelled, estimated, or filled in by hand. On the last run,
 <strong>${SRC_OK} of ${SRC.length}</strong> registered sources returned data to a request carrying no
 account, key or fee, and <strong>${BUILT} of ${DELIVERABLE.length}</strong> systems had measured output.</p>
 
-<p class="prose mt-3">The engine that does the work &mdash; the fetchers, the source registry and the
-database &mdash; is not published on this domain. It runs on the operator's own machine, so the
+<p class="prose mt-3">The engine that does the work, the fetchers, the source registry and the
+database, is not published on this domain. It runs on the operator's own machine, so the
 figures can be reproduced without depending on anyone else hosting them. What this site serves is the
 interface and the result.</p>
 
 <h2 class="mt-5">What it cannot tell you</h2>
 <p class="prose mt-2">${SRC_BLOCKED} of the ${SRC.length} registered sources did not return data to an
-unauthenticated request on the last run &mdash; some need a subscription key, some answer with a
+unauthenticated request on the last run, some need a subscription key, some answer with a
 sign-in page. They are listed on the front page under <a href="index.html#honesty">What this cannot
 do</a> rather than quietly dropped, because a platform that only shows what worked is not reporting
 coverage, it is reporting its own successes.</p>
@@ -919,14 +919,13 @@ coverage, it is reporting its own successes.</p>
 <p class="prose mt-2">No page here carries an author's name or a publication date, and none is asserted
 in the site's structured data either. That is deliberate rather than an omission: the figures are not
 anybody's opinion, and the authority behind each one is the government source named beside it, not the
-person who wrote the page. Where a judgement has been made &mdash; what to count, what to exclude
-&mdash; the method is set out on the page that makes it.</p>
+person who wrote the page. Where a judgement has been made, what to count, what to exclude, the method is set out on the page that makes it.</p>
 
 <h2 class="mt-5">Data and licensing</h2>
 <p class="prose mt-2">The underlying records are public sector information licensed under the
 <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/" rel="license">Open
-Government Licence v3.0</a>. The research behind the platform &mdash; an access audit of UK government
-endpoints &mdash; is published in full at <a href="research.html">What is actually open</a>, and the
+Government Licence v3.0</a>. The research behind the platform, an access audit of UK government
+endpoints, is published in full at <a href="research.html">What is actually open</a>, and the
 architecture at <a href="platform.html">Two joins, one platform</a>.</p>
 
 </div>
@@ -943,7 +942,7 @@ SYSTEMS.forEach(s => console.log(`  systems/${s.id}.html  ${s.num} ${s.name}`));
 
 /* ---------------- Search-engine files ---------------- */
 // Generated, never hand-maintained: a sitemap that has to be edited by hand is
-// a sitemap that goes stale the first time a system is added.
+// a sitemap that goes stale the first time a question is added.
 
 // lastmod comes from the content module that produced the page, not from the
 // build clock. Stamping every page with today's date on every build tells a
@@ -981,7 +980,7 @@ writeFileSync('robots.txt', SEO.robots());
 // GitHub Pages serves 404.html for anything it cannot find. It is noindex --
 // an indexed error page competes with real content and looks like a soft 404 --
 // but it links onwards so a crawler that lands there still reaches the site.
-const notFound = `${head('Page not found | UK GroundTruth', 'That page does not exist. The thirteen UK GroundTruth systems, the research and the architecture are all linked below.', 0,
+const notFound = `${head('Page not found | UK GroundTruth', 'That page does not exist. The thirteen UK GroundTruth questions, the research and the architecture are all linked below.', 0,
   { path: '404.html', card: 'index', robots: 'noindex, follow' })}
 ${nav()}
 <div class="wrap section">
@@ -994,7 +993,7 @@ ${nav()}
 <li><a href="index.html">UK GroundTruth, what it is and why</a></li>
 <li><a href="platform.html">The architecture: two joins, one platform</a></li>
 <li><a href="research.html">Research: what is actually open in UK government data</a></li>
-<li><a href="examples.html">Problems and solutions, system by system</a></li>
+<li><a href="examples.html">Problems and solutions, question by question</a></li>
 <li><a href="about.html">About and contact</a></li>
 </ul></div>
 <div class="card"><h2 class="feat__t">The thirteen questions</h2>

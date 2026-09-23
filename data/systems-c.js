@@ -588,7 +588,7 @@ export default [
 
   impact: [
     ['3m+', 'Insolvency notices available free, each carrying a company number'],
-    ['0', 'Systems joining them to the register of public contracts'],
+    ['0', 'Anything joining them to the register of public contracts'],
     ['2028', 'Earliest date small company accounts might carry profit and loss, with an opt-out attached'],
     ['~1 in 198', 'Annual company failure rate, against which any predictive model must justify itself']
   ],

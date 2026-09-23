@@ -1,10 +1,10 @@
-// Two worked examples per UK GroundTruth system, plus the overarching case.
+// Two worked examples per UK GroundTruth question, plus the overarching case.
 export default {
 
   overall: {
     heading: 'One problem, thirteen times',
     body: [
-      'Read the twenty-six examples on the system pages and the same sentence turns up in all of them: <em>the record exists, but it cannot be matched to anything else.</em>',
+      'Read the twenty-six examples on the individual pages and the same sentence turns up in all of them: <em>the record exists, but it cannot be matched to anything else.</em>',
       'The Environment Agency knows it objected to an application. It does not know where. A ministry knows a developer owes £1.49bn. It cannot say for which sites. A council knows a company runs its care homes. It cannot see the other eleven councils that depend on the same company. A regulator knows spills fell 35%. It cannot say how much of that was rain.',
       'None of these is a missing dataset. Every one is a <strong>missing link</strong>, and there are only two kinds. Work out <em>where</em>. Work out <em>who</em>.',
       'That is why this is one platform and not thirteen separate products. The flood work, the contracts work and the care work are each fairly simple once the data lines up. Getting it to line up is the hard bit, and it is the <em>same</em> hard bit every time.',

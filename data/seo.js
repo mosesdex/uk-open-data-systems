@@ -1,7 +1,7 @@
 // SEO configuration and builders. Consumed by build.js.
 //
 // Everything search engines see is derived here rather than written into each
-// page, so a new system page cannot ship without a canonical URL, a social card
+// page, so a new question page cannot ship without a canonical URL, a social card
 // and structured data. The site is static and generated, so "dynamic metadata"
 // means metadata composed at build time from the same content objects the page
 // itself is built from -- there is no second copy to drift.
@@ -12,7 +12,7 @@
 //     has no search box, so no SearchAction; no reviews, so no Review; no
 //     products, so no Product. Marking up things that are not there is the
 //     structured-data equivalent of a false join.
-//   * The operational system in app/ is never referenced. It is localhost-only
+//   * The operational build in app/ is never referenced. It is localhost-only
 //     by design, so it appears in no sitemap, no canonical and no link.
 
 // Served from its own apex domain, so the site sits at the origin root. That
@@ -49,7 +49,7 @@ export const canonical = (path = '') => {
   return `${SITE.url}/${clean}`;
 };
 
-/** Social card image for a page. Per-system where one exists, else the default. */
+/** Social card image for a page. Per-question where one exists, else the default. */
 export const cardImage = (id) =>
   `${SITE.url}/assets/social/${id && id !== 'index' ? id : 'default'}.png`;
 
@@ -200,7 +200,7 @@ ${urls.map(u => `  <url>
  */
 export const robots = () => `# ${SITE.name}, ${SITE.publisher}
 #
-# What ships is the app at /, the data it reads, and the system briefs it links
+# What ships is the app at /, the data it reads, and the briefs it links
 # to. /mobile.html is a handoff to / and is noindex. What never ships is the engine in
 # platform/ -- the fetchers, the source registry and the database -- and the
 # operator console, which the publish workflow removes and then fails the build

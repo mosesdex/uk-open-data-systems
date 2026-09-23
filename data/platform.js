@@ -2,7 +2,7 @@
 export default {
   name: 'UK GroundTruth',
   tagline: 'Thirteen products. Two joins. One platform. No registration anywhere.',
-  standfirst: 'Every system Dexter DCL can deliver today runs on data anyone can download without an account, and fails at the same two joins, resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the thirteen products stop being thirteen builds.',
+  standfirst: 'Every question Dexter DCL can answer today runs on data anyone can download without an account, and fails at the same two joins, resolving <em>places</em> and resolving <em>organisations</em>. Build those once as public infrastructure and the thirteen products stop being thirteen builds.',
 
   thesis: [
     'The eighteen proposals in this portfolio were developed independently. Researching their implementation revealed something none of them showed on its own: they break in the same two places.',
@@ -47,7 +47,7 @@ export default {
   ],
 
   matrix: {
-    head: ['System', 'Place spine', 'Entity spine', 'What it needs that nothing else provides'],
+    head: ['Question', 'Place spine', 'Entity spine', 'What it needs that nothing else provides'],
     rows: [
       ['Catchment', true, false, 'Planning area geography and small-area demand'],
       ['Highwater', true, false, 'Objection records resolved to sites and flood zones'],

@@ -1,7 +1,7 @@
 // How the thirteen questions help each other. Consumed by build.js.
 export default {
   intro: [
-    'Sharing the same plumbing is not the interesting part. The interesting part is that one piece of news, or one reference number, sets off several systems at once.',
+    'Sharing the same plumbing is not the interesting part. The interesting part is that one piece of news, or one reference number, sets off several of the questions at once.',
     'Each example below starts with a single fact arriving. None of them needs new data, every step uses something anyone can already download for free.'
   ],
 
@@ -30,7 +30,7 @@ export default {
         ['Catchment', 'Adds the new homes to the school places forecast for that neighbourhood.'],
         ['Lastmile', 'Checks whether the homes will actually have decent broadband.']
       ],
-      outcome: 'Six systems, one reference number. Today those six questions are handled by different bodies, at different scales, and mostly not at all.'
+      outcome: 'Six questions, one reference number. Today those six questions are handled by different bodies, at different scales, and mostly not at all.'
     },
     {
       trigger: 'Nobody knows who owns a flood defence',
@@ -59,12 +59,12 @@ export default {
   ],
 
   reuse: {
-    intro: 'It also works in reverse. Whatever gets built for one system makes the next one cheaper.',
+    intro: 'It also works in reverse. Whatever gets built for one question makes the next one cheaper.',
     items: [
       ['Turning planning references into map points', 'Built for Ledger. Reused straight away by Highwater, Sightline, Plumbline and Catchment. Five systems, one hard problem solved once.'],
       ['Working out who owns which company', 'Built for Sentinel. Reused by Bellwether and Watchman. The ownership register is a free daily download, so the third and fourth users cost almost nothing.'],
-      ['Saying how much of the country is covered', 'Every system says plainly what share of England it actually represents. Built once as a habit, applied everywhere, and it is what makes a statistician trust the numbers.'],
-      ['Saying how sure we are', 'No system claims a match it cannot prove. The same machinery serves all thirteen, and it is what holds up when a named company objects.']
+      ['Saying how much of the country is covered', 'Every question says plainly what share of England it actually represents. Built once as a habit, applied everywhere, and it is what makes a statistician trust the numbers.'],
+      ['Saying how sure we are', 'No answer claims a match it cannot prove. The same machinery serves all thirteen, and it is what holds up when a named company objects.']
     ]
   }
 };
