@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { unusualRows } from '../../app/assets/lib/unusual.js';
+import { unusualRows, unusualTotal } from '../../app/assets/lib/unusual.js';
 
 const PAYLOAD = JSON.parse(readFileSync(new URL('./fixtures/payload.json', import.meta.url)));
 
@@ -28,4 +28,12 @@ test('the limit is honoured', () => {
 test('a place missing a question contributes no row for it', () => {
   const rows = unusualRows(PAYLOAD).filter(r => r.code === 'E06000001');
   assert.deepEqual(rows.map(r => r.question), ['catchment']);
+});
+
+test('the total counts every diverging pair, not just the capped display list', () => {
+  // The fixture has 4 places and 3 comparators; not every place carries every
+  // question, so the total is the count of qualifying pairs, not 4 * 3.
+  const total = unusualTotal(PAYLOAD);
+  assert.equal(total, unusualRows(PAYLOAD, total).length);
+  assert.ok(total > unusualRows(PAYLOAD, 1).length, 'the total is not itself capped');
 });

@@ -24,7 +24,10 @@ const COMPARATORS = [
   },
 ];
 
-export function unusualRows(payload, limit = 50) {
+// Every place/question pair with both a figure and a comparator, unranked
+// and unlimited. unusualRows and unusualTotal both build from this, so the
+// count shown for "how many diverge" can never drift from what is ranked.
+function allRows(payload) {
   const places = (payload && payload.places) || {};
   const names = places.names || {};
   const byLad = places.byLad || {};
@@ -42,5 +45,16 @@ export function unusualRows(payload, limit = 50) {
                   againstLabel: c.againstLabel, gap: Math.abs(against - figure) });
     }
   }
-  return rows.sort((a, b) => b.gap - a.gap).slice(0, limit);
+  return rows;
+}
+
+// The true count of diverging place/question pairs, with no display limit
+// applied. This is what a door or header figure should show: the page below
+// lists only the widest of these, and says so.
+export function unusualTotal(payload) {
+  return allRows(payload).length;
+}
+
+export function unusualRows(payload, limit = 50) {
+  return allRows(payload).sort((a, b) => b.gap - a.gap).slice(0, limit);
 }

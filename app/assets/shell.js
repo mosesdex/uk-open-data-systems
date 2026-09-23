@@ -893,7 +893,7 @@ const Shell = (() => {
     // can never sit on the front page.
     const lib2 = window.GT_LIB || {};
     const unusual = $('#doorUnusual');
-    if (unusual) unusual.textContent = lib2.unusualRows ? num(lib2.unusualRows(Platform.payload()).length) : '';
+    if (unusual) unusual.textContent = lib2.unusualTotal ? num(lib2.unusualTotal(Platform.payload())) : '';
     const about = $('#doorAbout');
     const srcs = (Platform.sourceSummary() || {}).rows || [];
     if (about) about.textContent = srcs.length ? num(srcs.length) : '';
