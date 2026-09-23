@@ -210,8 +210,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tbl td:first-child{color:var(--ink);font-weight:550}
 /* A link in a table row is still a target: give it the row's full height rather
    than the height of its text. */
-.tbl td a{display:block;min-height:44px;line-height:1.3;padding:.55rem .1rem;
-  display:flex;align-items:center}
+.tbl td a{display:flex;align-items:center;min-height:44px;line-height:1.3;padding:.55rem .1rem}
 
 /* The "unusual" table has five columns and no wrapper of its own, so at phone
    width it pushed the whole page wider than the viewport instead of scrolling

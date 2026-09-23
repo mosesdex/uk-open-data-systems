@@ -1242,8 +1242,13 @@ const Shell = (() => {
     if (head === 'method')  { show('method');  setChrome('method');  safely(buildMethod, '#methodSpine'); scrollTop(); return; }
     if (head === 'search')  { show('detail');  setChrome('search'); safely(SystemPage.search, '#syspage'); scrollTop(); return; }
 
-    // Unknown route: say so, and offer the way back.
+    // Unknown route: say so, and offer the way back. setChrome('') falls back
+    // to the home page's own title ("Find your area"), which is wrong here --
+    // nothing above finds an area -- so the one h1 this page has (.top__title)
+    // is corrected straight after, to name what the page actually is.
     show('detail'); setChrome('');
+    const topTitle = $('.top__title');
+    if (topTitle) topTitle.textContent = 'No such view';
     const root = $('#syspage');
     if (root) root.innerHTML = `<div class="sp-top"><a class="sp-back" href="#/">&larr; Overview</a></div>
       <div class="state" style="margin-top:2rem"><div class="state__t">No such view</div>
