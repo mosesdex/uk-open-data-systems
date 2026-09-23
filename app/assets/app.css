@@ -71,7 +71,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .side__scroll{overflow-y:auto;flex:1;padding:.4rem .6rem 1rem;scrollbar-width:thin}
 .side__group{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:#6F82B0;padding:1rem .55rem .4rem}
-.navi{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:9px;
+.navi{display:flex;align-items:center;gap:.6rem;min-height:44px;padding:.5rem .6rem;border-radius:9px;
   color:#C9D4EE;font-size:13.5px;transition:background .16s var(--ease),color .16s var(--ease);position:relative}
 .navi:hover{background:rgba(255,255,255,.07);color:#fff}
 .navi.is-on{background:rgba(53,99,201,.3);color:#fff;font-weight:550}
@@ -83,7 +83,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 /* Jump-to-a-system list: each row carries the system's icon, domain and live
    headline, so the sidebar is a scannable index rather than a list of names. */
-.navx{display:flex;align-items:center;gap:.6rem;padding:.42rem .55rem;border-radius:9px;
+.navx{display:flex;align-items:center;gap:.6rem;min-height:44px;padding:.42rem .55rem;border-radius:9px;
   color:#C9D4EE;position:relative;transition:background .16s var(--ease),color .16s var(--ease)}
 .navx:hover{background:rgba(255,255,255,.07);color:#fff}
 .navx:hover .navx__ico{transform:scale(1.08)}
@@ -262,7 +262,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .srch{display:flex;align-items:center;gap:.5rem;background:var(--surface);border:1px solid var(--line);
   border-radius:9px;padding:.42rem .7rem;min-width:230px;transition:all .2s var(--ease)}
 .srch:focus-within{border-color:var(--blue-500);box-shadow:0 0 0 3px var(--blue-050)}
-.srch input{border:0;background:none;outline:0;font-size:13px;width:100%;color:var(--ink)}
+/* 16px is the threshold below which iOS Safari zooms the page on focus, and
+   44px is the smallest target both platforms accept -- the same reasoning
+   .topsearch input below already states, applied to this input. */
+.srch input{border:0;background:none;outline:0;font-size:16px;min-height:44px;width:100%;color:var(--ink)}
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .8rem;border-radius:8px;
   font-size:12.5px;font-weight:550;background:var(--uk-blue);color:#fff;
   transition:all .2s var(--ease);border:1px solid transparent;min-height:44px}
@@ -480,11 +483,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .syspage{max-width:1180px;margin:0;padding:0 0 2rem}
 .sp-top{position:sticky;top:52px;z-index:5;display:flex;align-items:center;justify-content:space-between;
   padding:.7rem 0;background:var(--bg);border-bottom:1px solid var(--line)}
-.sp-back{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;
+.sp-back{display:inline-flex;align-items:center;min-height:44px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);border-radius:8px;
   padding:.42rem .8rem;font-size:13px;font-weight:550;cursor:pointer;transition:background .14s,border-color .14s}
 .sp-back:hover{border-color:var(--ink-3);background:var(--blue-050)}
 .sp-top__nav{display:flex;gap:.4rem}
-.sp-step{width:34px;height:34px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+.sp-step{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
   border-radius:8px;font-size:17px;line-height:1;cursor:pointer;transition:background .14s,border-color .14s}
 .sp-step:hover{border-color:var(--ink-3);background:var(--blue-050);color:var(--ink)}
 
@@ -499,7 +503,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .sp-nav{position:sticky;top:57px;z-index:4;display:flex;gap:.3rem;overflow-x:auto;padding:.5rem 0;
   background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
 .sp-nav::-webkit-scrollbar{display:none}
-.sp-nav__i{flex:0 0 auto;padding:.35rem .7rem;border-radius:20px;font-size:12.5px;color:var(--ink-3);
+.sp-nav__i{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:.35rem .7rem;border-radius:20px;font-size:12.5px;color:var(--ink-3);
   white-space:nowrap;transition:background .14s,color .14s}
 .sp-nav__i:hover{background:var(--blue-050);color:var(--ink)}
 .sp-nav__i.is-on{background:var(--uk-blue);color:#fff;font-weight:550}
@@ -755,7 +760,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   padding:.85rem 1.1rem;background:var(--surface);box-shadow:var(--shadow-1)}
 .gs__box:focus-within{border-color:var(--uk-blue);box-shadow:inset 0 0 0 1px var(--uk-blue)}
 .gs__ico{font-size:22px;color:var(--ink-3)}
-.gs__input{flex:1;border:0;background:none;font:inherit;font-size:18px;color:var(--ink);outline:none}
+.gs__input{flex:1;border:0;background:none;font:inherit;font-size:18px;min-height:44px;color:var(--ink);outline:none}
 .gs__hint{font-size:12px;color:var(--ink-3);margin:.6rem 0 1.2rem}
 .gs__empty{padding:2rem 0;text-align:center;color:var(--ink-3);font-size:14px}
 .gs__grp{margin-bottom:1.4rem}
