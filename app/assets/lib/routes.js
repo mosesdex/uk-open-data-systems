@@ -47,6 +47,23 @@ function resolve(hash) {
   return null;
 }
 
+// firstServable picks a destination out of an ordered list of candidates (or
+// a single candidate, for callers with only one), returning the first whose
+// head canRender approves, or null when none qualify. It is the same idea
+// canonicalHash applies to URLs, pulled out as a small pure helper so any
+// other caller with a list of candidate destinations and no route to
+// redirect through -- such as the tab bar renderer in shell.js, picking
+// which link to render -- can reuse the identical picking logic instead of
+// re-implementing it.
+export function firstServable(candidates, canRender = () => true) {
+  const list = Array.isArray(candidates) ? candidates : [candidates];
+  for (const candidate of list) {
+    const head = String(candidate).slice(2).split('/')[0];
+    if (canRender(head)) return candidate;
+  }
+  return null;
+}
+
 // canRender tells canonicalHash what the app can actually serve right now.
 // A redirect to a route with no handler is worse than leaving the URL
 // alone: the old hash at least rendered something, while a destination
@@ -61,17 +78,15 @@ export function canonicalHash(raw, canRender = () => true) {
   const candidates = resolve(hash);
   if (candidates === null) return null;
 
-  for (const candidate of candidates) {
-    const head = candidate.slice(2).split('/')[0];
-    if (canRender(head)) {
-      // The winning candidate can be the raw hash itself (e.g. a renamed
-      // route degrading back to its own current form): that is not a
-      // redirect, it is already canonical, so say so with null.
-      return candidate === hash ? null : candidate;
-    }
+  const winner = firstServable(candidates, canRender);
+  if (winner === null) {
+    // Nothing in the candidate list can render today; leave the URL alone
+    // rather than send it somewhere that dead-ends.
+    return null;
   }
 
-  // Nothing in the candidate list can render today; leave the URL alone
-  // rather than send it somewhere that dead-ends.
-  return null;
+  // The winning candidate can be the raw hash itself (e.g. a renamed route
+  // degrading back to its own current form): that is not a redirect, it is
+  // already canonical, so say so with null.
+  return winner === hash ? null : winner;
 }

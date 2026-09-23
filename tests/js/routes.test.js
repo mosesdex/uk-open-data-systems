@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { canonicalHash, ANCHOR, SECTION, ROUTER_HEADS } from '../../app/assets/lib/routes.js';
+import { canonicalHash, firstServable, ANCHOR, SECTION, ROUTER_HEADS } from '../../app/assets/lib/routes.js';
 
 // ROUTER_HEADS, exported by routes.js, is the authoritative list of heads
 // route() in app/assets/shell.js actually dispatches today. The test below
@@ -187,5 +187,68 @@ test('no hash in any table can fail to terminate', () => {
     const { settled, hops, exceeded } = resolveFixedPoint(hash, canRenderAnything);
     assert.ok(!exceeded,
       `${hash} did not terminate within the 10-hop cap (took ${hops} hop(s), stuck at ${settled})`);
+  }
+});
+
+// firstServable is canonicalHash's picking logic pulled out as a small pure
+// helper, for callers with an ordered list of candidate destinations and no
+// route to redirect through -- such as renderTabbar in app/assets/shell.js,
+// picking which of a tab's candidate hrefs to render.
+test('firstServable picks the first candidate the router can render today', () => {
+  assert.equal(firstServable(['#/compare', '#/places'], canRenderToday), '#/places');
+  assert.equal(firstServable(['#/about', '#/method'], canRenderToday), '#/method');
+});
+
+test('firstServable upgrades once the better candidate can render', () => {
+  const canRenderWithCompareAndAbout = (head) => canRenderToday(head) || head === 'compare' || head === 'about';
+  assert.equal(firstServable(['#/compare', '#/places'], canRenderWithCompareAndAbout), '#/compare');
+  assert.equal(firstServable(['#/about', '#/method'], canRenderWithCompareAndAbout), '#/about');
+});
+
+test('firstServable accepts a single string as well as a list', () => {
+  assert.equal(firstServable('#/', canRenderToday), '#/');
+});
+
+test('firstServable returns null when no candidate can render', () => {
+  assert.equal(firstServable(['#/nowhere'], canRenderToday), null);
+});
+
+test('every candidate list in DEFAULTS.tabs resolves to a route under today\'s ROUTER_HEADS', () => {
+  // Read DEFAULTS.tabs out of shell.js as text, the same way the ROUTER_HEADS
+  // and FALLBACK_HEADS tests above read route() and FALLBACK_HEADS, so this
+  // fails if someone adds a bottom-bar tab whose candidates all point
+  // nowhere the router can render today.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const shellPath = path.join(here, '../../app/assets/shell.js');
+  const src = fs.readFileSync(shellPath, 'utf8');
+
+  const tabsMatch = /tabs:\s*\[/.exec(src);
+  assert.ok(tabsMatch, 'could not find DEFAULTS.tabs in shell.js');
+
+  // Walk bracket depth from the opening "[" to its match, rather than a
+  // single regex, since each tab item nests its own candidate-href array
+  // inside the outer tabs array.
+  let depth = 0, end = -1;
+  for (let i = tabsMatch.index + tabsMatch[0].length - 1; i < src.length; i++) {
+    if (src[i] === '[') depth++;
+    else if (src[i] === ']') { depth--; if (depth === 0) { end = i; break; } }
+  }
+  assert.ok(end > -1, 'could not find the end of DEFAULTS.tabs in shell.js');
+  const tabsSrc = src.slice(tabsMatch.index, end + 1);
+
+  // Each tab item's own candidate-href array has no brackets nested inside
+  // it, so a bracket pair containing no further brackets is exactly one
+  // tab's candidate list (the item wrapper and the outer tabs array both
+  // contain nested brackets, so this does not match them).
+  const candidateLists = (tabsSrc.match(/\[[^[\]]*\]/g) || [])
+    .map(list => [...list.matchAll(/'([^']*)'/g)].map(m => m[1]))
+    .filter(list => list.length);
+
+  assert.ok(candidateLists.length >= 3,
+    `expected at least 3 tab candidate lists in DEFAULTS.tabs, found ${candidateLists.length}`);
+  for (const candidates of candidateLists) {
+    const winner = firstServable(candidates, canRenderToday);
+    assert.ok(winner,
+      `tab candidates ${JSON.stringify(candidates)} have no route ROUTER_HEADS can render today`);
   }
 });

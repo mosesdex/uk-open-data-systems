@@ -54,7 +54,16 @@ const Shell = (() => {
     // Three destinations, not the old four: the front page now carries the
     // navigation, so the bottom bar only needs the way in, the way to see
     // every district side by side, and the way to how this is built.
-    tabs: [['', '◉', 'Find'], ['compare', '⇄', 'Compare'], ['about', 'ⓘ', 'About']],
+    // Each item's first element is an ORDERED LIST of candidate hrefs, best
+    // first, the same idea app/assets/lib/routes.js applies to URLs:
+    // renderTabbar picks the first candidate whose route can actually render
+    // today, so a tab degrades to a working link instead of dead-ending, and
+    // upgrades itself once a later task adds the better route's handler.
+    tabs: [
+      [['#/'], '◉', 'Find'],
+      [['#/compare', '#/places'], '⇄', 'Compare'],
+      [['#/about', '#/method'], 'ⓘ', 'About'],
+    ],
     crumb: 'UK GroundTruth',
     // Return [[groupName, items]] for the palette, or null to use the default.
     palette: null,
@@ -107,13 +116,34 @@ const Shell = (() => {
     }).join('');
   }
 
+  // Each tab's first element is either a plain route id (a string, as the
+  // admin console's own CFG.tabs still passes -- see admin.js) or an ordered
+  // list of candidate hrefs (as DEFAULTS.tabs now passes for the public
+  // shell). The two shapes need different handling: a string is always
+  // rendered as "#/<id>", unconditionally, exactly as before; an array is
+  // resolved through firstServable/ROUTER_HEADS the way route() resolves a
+  // URL, and the tab is omitted entirely when nothing in it can render yet.
   function renderTabbar() {
     if ($('.tabbar')) return;
     const bar = document.createElement('nav');
     bar.className = 'tabbar';
     bar.setAttribute('aria-label', 'Sections');
-    bar.innerHTML = (CFG.tabs || DEFAULTS.tabs).map(([id, ic, l]) =>
-      `<a data-tab="${id}" href="#/${id}"><i aria-hidden="true">${ic}</i><span>${l}</span></a>`).join('');
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    bar.innerHTML = (CFG.tabs || DEFAULTS.tabs).map(([spec, ic, l]) => {
+      let href, key;
+      if (Array.isArray(spec)) {
+        href = pick(spec, canRender);
+        if (!href) return '';
+        key = href.slice(2).split('/')[0];
+      } else {
+        key = spec;
+        href = `#/${spec}`;
+      }
+      return `<a data-tab="${key}" href="${href}"><i aria-hidden="true">${ic}</i><span>${l}</span></a>`;
+    }).join('');
     document.body.appendChild(bar);
   }
 
@@ -650,6 +680,18 @@ const Shell = (() => {
   // has not loaded and window.GT_LIB.ROUTER_HEADS is unavailable; keep it
   // matching route()'s branches so the degraded behaviour still makes sense.
   const FALLBACK_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
+
+  // Mirrors firstServable in app/assets/lib/routes.js; only a fallback for
+  // the same (should not happen) case as FALLBACK_HEADS above, used by
+  // renderTabbar when window.GT_LIB.firstServable is unavailable.
+  function fallbackFirstServable(candidates, canRender) {
+    const list = Array.isArray(candidates) ? candidates : [candidates];
+    for (const candidate of list) {
+      const head = String(candidate).slice(2).split('/')[0];
+      if (canRender(head)) return candidate;
+    }
+    return null;
+  }
 
   // route() runs on every hash change, so this flag keeps the warning below
   // to a single occurrence instead of spamming the console on each navigation.
