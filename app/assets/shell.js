@@ -754,6 +754,41 @@ const Shell = (() => {
     if (compare) compare.textContent = num(Object.keys(names).length);
   }
 
+  /* One place, as a document: what it is, what stands out, then every question
+     that has an answer for it, and plainly those that do not. */
+  function buildPlacePage(code) {
+    const host = $('#placePage'), index = $('#placeIndex');
+    if (!host) return;
+    const payload = Platform.payload ? Platform.payload() : null;
+    const names = (payload && payload.places && payload.places.names) || {};
+    const byLad = (payload && payload.places && payload.places.byLad) || {};
+    const name = names[code], place = byLad[code];
+    if (!name || !place) { host.hidden = true; if (index) index.hidden = false; return; }
+
+    const lib = window.GT_LIB || {};
+    const summary = lib.placeSummary ? lib.placeSummary(code, payload) : [];
+    const answered = SYSTEMS.filter(s => place[s.id]);
+    const missing = SYSTEMS.filter(s => !place[s.id]);
+
+    host.innerHTML = `
+      <h2 class="place__h">${esc(name)}</h2>
+      <p class="place__k">${answered.length} of ${SYSTEMS.length} questions answered here</p>
+      ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
+      <div class="answers">
+        ${answered.map(s => `
+          <article class="answer">
+            <h3 class="answer__q">${esc(s.n)}</h3>
+            <p class="answer__s">${esc(s.s || '')}</p>
+            <a class="answer__go" href="#/questions/${esc(s.id)}">How this is computed</a>
+          </article>`).join('')}
+      </div>
+      ${missing.length ? `<p class="place__none">No answer here for ${
+        missing.map(s => esc(s.n)).join(', ')}. That is usually because the service is run by the
+        county rather than the district, and the figure is published at that level.</p>` : ''}`;
+    host.hidden = false;
+    if (index) index.hidden = true;
+  }
+
   function route() {
     const raw = location.hash || '#/';
     // One table of every hash the app has published, tested in tests/js/routes.test.js.
@@ -786,7 +821,9 @@ const Shell = (() => {
 
     if (head === 'places') {
       show('places'); setChrome('places'); safely(buildPlaces, '#placeIndex'); scrollTop();
-      if (seg[1]) safely(() => openPlace(seg[1]));
+      const host = $('#placePage'), index = $('#placeIndex');
+      if (seg[1]) { safely(() => buildPlacePage(seg[1])); }
+      else { if (host) host.hidden = true; if (index) index.hidden = false; }
       return;
     }
 
