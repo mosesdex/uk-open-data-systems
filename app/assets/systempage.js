@@ -355,7 +355,12 @@ const SystemPage = (() => {
     }
 
     // ---- interactions ----
-    $('#spBack').addEventListener('click', close);
+    // The shell owns the router (boot() below is never called with its own
+    // router on), so this button has to navigate rather than call close():
+    // close() only strips a CSS class and never touches the hash, which
+    // used to leave the URL on this page with nothing rendered to show for
+    // it. "All questions" means the questions index.
+    $('#spBack').addEventListener('click', () => { location.hash = '#/questions'; });
     const ids = SYSTEMS.map(x => x.id); const i = ids.indexOf(id);
     $('#spPrev').addEventListener('click', () => go(ids[(i - 1 + ids.length) % ids.length]));
     $('#spNext').addEventListener('click', () => go(ids[(i + 1) % ids.length]));
@@ -437,7 +442,10 @@ const SystemPage = (() => {
         ${rows}
       </div>
       <footer class="sp-foot card__s">Every figure is computed from published records on one machine. Nothing is estimated.</footer>`;
-    root.querySelector('#spBack').addEventListener('click', close);
+    // "Home" means the site's home page, not merely hiding this overlay
+    // (close() never touched the hash, which left the URL here with
+    // nothing rendered to show for it).
+    root.querySelector('#spBack').addEventListener('click', () => { location.hash = '#/'; });
     host.classList.add('on');
     document.body.style.overflow = 'hidden';
     root.scrollTop = 0;
@@ -481,7 +489,8 @@ const SystemPage = (() => {
       </div>
       <div class="org-list" id="orgList">${orgs.map(row).join('')}</div>
       <footer class="sp-foot card__s">Only organisations whose company number actually appears in a question are listed there. Every figure is computed from published records. Nothing is estimated.</footer>`;
-    root.querySelector('#spBack').addEventListener('click', close);
+    // "Home" means the site's home page, not merely hiding this overlay.
+    root.querySelector('#spBack').addEventListener('click', () => { location.hash = '#/'; });
     const list = root.querySelector('#orgList');
     const q = root.querySelector('#orgSearch');
     const cx = root.querySelector('#orgCross');
@@ -576,7 +585,9 @@ const SystemPage = (() => {
         <p class="gs__hint">One search across the whole record. Every result shows which questions it appears in.</p>
         <div class="gs__results" id="gsResults"></div>
       </div>`;
-    root.querySelector('#spBack').addEventListener('click', close);
+    // "Close" returns to the home page rather than merely hiding this
+    // overlay, which left the URL on #/search with nothing rendered.
+    root.querySelector('#spBack').addEventListener('click', () => { location.hash = '#/'; });
     const input = root.querySelector('#gsInput');
     const results = root.querySelector('#gsResults');
     const orgs = Platform.organisations();
