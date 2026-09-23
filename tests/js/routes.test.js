@@ -12,6 +12,26 @@ import { canonicalHash, ANCHOR, SECTION, ROUTER_HEADS } from '../../app/assets/l
 // is what keeps these tests meaning what they say.
 const canRenderToday = (head) => ROUTER_HEADS.has(head);
 
+// The router (route() in app/assets/shell.js) does not stop at one hop: it
+// re-invokes canonicalHash on its own redirect target, so a mapping can
+// cascade (e.g. #compare -> #/systems -> #/) before it settles. Asserting
+// only the first hop is the same blind spot that let two earlier
+// regressions through, so tests that care where a hash actually ends up
+// should walk it the way the router does, via this helper, rather than
+// calling canonicalHash once. The hard stop at maxHops turns a mapping
+// that was miswired into a cycle into a test failure instead of a hang.
+function resolveFixedPoint(hash, canRender = canRenderToday, maxHops = 10) {
+  let current = hash;
+  let hops = 0;
+  for (let i = 0; i < maxHops; i++) {
+    const next = canonicalHash(current, canRender);
+    if (next === null) return { settled: current, hops };
+    current = next;
+    hops++;
+  }
+  return { settled: current, hops, exceeded: true };
+}
+
 test('canonical routes are left alone', () => {
   for (const hash of ['#/', '#/places', '#/places/E07000032', '#/compare', '#/unusual', '#/about']) {
     assert.equal(canonicalHash(hash), null, `${hash} should already be canonical`);
@@ -81,48 +101,91 @@ test('ROUTER_HEADS matches every head route() in shell.js actually dispatches', 
   const shellPath = path.join(here, '../../app/assets/shell.js');
   const src = fs.readFileSync(shellPath, 'utf8');
 
-  const routeStart = src.indexOf('function route() {');
-  assert.ok(routeStart !== -1, 'could not find function route() in shell.js');
-  const routeEnd = src.indexOf('function safely(fn, targetSel) {', routeStart);
-  assert.ok(routeEnd !== -1, 'could not find the end of route() in shell.js');
+  // Tolerate optional whitespace between a function's name and its brace
+  // (e.g. "function route () {") so a harmless reformat doesn't break this
+  // test along with whatever it's meant to guard.
+  const routeMatch = /function\s+route\s*\(\s*\)\s*\{/.exec(src);
+  assert.ok(routeMatch, 'could not find function route() in shell.js');
+  const routeStart = routeMatch.index;
+  const safelyMatch = /function\s+safely\s*\(\s*fn\s*,\s*targetSel\s*\)\s*\{/.exec(src.slice(routeStart));
+  assert.ok(safelyMatch, 'could not find the end of route() in shell.js');
+  const routeEnd = routeStart + safelyMatch.index;
   const routeSrc = src.slice(routeStart, routeEnd);
 
   const dispatched = new Set();
-  const pattern = /head === '([^']*)'/g;
+  // Accept either quote style around the head literal, matched by the same
+  // quote character (not '/" mixed), rather than assuming single quotes.
+  const pattern = /head === (['"])([^'"]*)\1/g;
   let m;
-  while ((m = pattern.exec(routeSrc)) !== null) dispatched.add(m[1]);
+  while ((m = pattern.exec(routeSrc)) !== null) dispatched.add(m[2]);
 
   assert.deepEqual(dispatched, ROUTER_HEADS,
     `heads route() dispatches (${JSON.stringify([...dispatched].sort())}) must match ` +
     `ROUTER_HEADS (${JSON.stringify([...ROUTER_HEADS].sort())})`);
 });
 
-test('every legacy fragment redirects somewhere real, or already renders itself', () => {
+test('FALLBACK_HEADS in shell.js matches ROUTER_HEADS', () => {
+  // FALLBACK_HEADS is shell.js's own hand-copied literal of the heads route()
+  // dispatches, used only when window.GT_LIB has not loaded. Nothing else
+  // keeps it in step with ROUTER_HEADS, so this reads shell.js as text, the
+  // same way the test above checks route() itself, and checks the two sets
+  // match.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const shellPath = path.join(here, '../../app/assets/shell.js');
+  const src = fs.readFileSync(shellPath, 'utf8');
+
+  const fallbackMatch = /FALLBACK_HEADS\s*=\s*new Set\(\s*\[([^\]]*)\]\s*\)/.exec(src);
+  assert.ok(fallbackMatch, 'could not find FALLBACK_HEADS in shell.js');
+
+  const fallback = new Set();
+  // Same tolerant quote matching as the route() parse above.
+  const itemPattern = /(['"])([^'"]*)\1/g;
+  let fm;
+  while ((fm = itemPattern.exec(fallbackMatch[1])) !== null) fallback.add(fm[2]);
+
+  assert.deepEqual(fallback, ROUTER_HEADS,
+    `FALLBACK_HEADS in shell.js (${JSON.stringify([...fallback].sort())}) must match ` +
+    `ROUTER_HEADS (${JSON.stringify([...ROUTER_HEADS].sort())})`);
+});
+
+test('every legacy fragment settles on a route the router can render', () => {
   // Regression for the "guard suppresses the redirect and the raw fragment
-  // is not dispatchable either" hole: with the real ROUTER_HEADS predicate,
-  // none of these thirteen published fragments should hit the "No such
-  // view" fallback.
-  const canRenderReal = (head) => ROUTER_HEADS.has(head);
+  // is not dispatchable either" hole, and for the cascade the router
+  // performs on its own redirect target (e.g. #compare -> #/systems -> #/,
+  // two hops before it renders). Earlier versions of this test only checked
+  // the first hop, which is exactly the blind spot that let that cascade
+  // through unnoticed; this resolves each published fragment the way the
+  // router does, all the way to where it actually settles.
   const fragments = [
     '#top', '#hero', '#spines', '#chains', '#compare', '#feeds', '#honesty',
     '#place', '#systems', '#kpis', '#org/12345678', '#search', '#system/plumbline',
   ];
 
-  const failures = [];
   for (const fragment of fragments) {
-    const result = canonicalHash(fragment, canRenderReal);
-    if (result === null) {
-      const ownHead = fragment.replace(/^#\/?/, '').split('/')[0];
-      if (!ROUTER_HEADS.has(ownHead)) {
-        failures.push(`${fragment} -> null, but its own head "${ownHead}" is not in ROUTER_HEADS`);
-      }
-    } else {
-      const head = result.slice(2).split('/')[0];
-      if (!ROUTER_HEADS.has(head)) {
-        failures.push(`${fragment} -> ${result}, whose head "${head}" is not in ROUTER_HEADS`);
-      }
-    }
-  }
+    const { settled, hops, exceeded } = resolveFixedPoint(fragment, canRenderToday);
 
-  assert.deepEqual(failures, [], `dead-ending fragments:\n${failures.join('\n')}`);
+    assert.ok(!exceeded,
+      `${fragment} did not settle within the 10-hop cap (took ${hops} hop(s), stuck at ${settled})`);
+
+    const head = settled.replace(/^#\/?/, '').split('/')[0];
+    assert.ok(ROUTER_HEADS.has(head),
+      `${fragment} settles on ${settled} after ${hops} hop(s), whose head "${head}" is not in ROUTER_HEADS`);
+  }
+});
+
+test('no hash in any table can fail to terminate', () => {
+  // Independent of what ROUTER_HEADS allows today, the resolve() tables
+  // themselves must never cycle. A predicate that accepts every head forces
+  // canonicalHash to always take the first candidate, which is the
+  // structural worst case for finding a cycle in the tables: it walks every
+  // key exactly as written, not filtered down to what currently renders.
+  const canRenderAnything = () => true;
+  const regexExamples = ['#/systems/plumbline', '#system/plumbline', '#org/12345678'];
+  const allHashes = [...Object.keys(ANCHOR), ...Object.keys(SECTION), ...regexExamples];
+
+  for (const hash of allHashes) {
+    const { settled, hops, exceeded } = resolveFixedPoint(hash, canRenderAnything);
+    assert.ok(!exceeded,
+      `${hash} did not terminate within the 10-hop cap (took ${hops} hop(s), stuck at ${settled})`);
+  }
 });
