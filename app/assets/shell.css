@@ -43,10 +43,20 @@ a.tile:hover{border-color:var(--blue-300);box-shadow:var(--shadow-2)}
 .dt th{position:sticky;top:0;z-index:2;text-align:left;background:var(--surface-2);
   font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
   padding:.55rem .8rem;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
-.dt th[data-sort]{cursor:pointer}
-.dt th[data-sort]:hover{color:var(--ink)}
-.dt th .caret{opacity:.35;margin-left:.25rem}
+.dt th.th-sortable{padding:0}
+.dt th button.th-sort{all:unset;box-sizing:border-box;display:flex;align-items:center;width:100%;
+  min-height:44px;padding:.55rem .8rem;gap:.3rem;cursor:pointer;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:inherit}
+.dt th.num button.th-sort{justify-content:flex-end}
+.dt th button.th-sort:hover{color:var(--ink)}
+.dt th button.th-sort:focus-visible{outline:2px solid var(--blue-500);outline-offset:-2px}
+.dt th .caret{opacity:.35}
 .dt th.is-sorted .caret{opacity:1;color:var(--blue-600)}
+/* Same treatment the sibling controls already use in dark mode (.tabbar
+   a.is-on, .cmpcta, .door__n): --blue-600 reads at 2.06:1 on the dark
+   surface behind this header row, so the active caret lifts to --blue-300,
+   same as those. */
+[data-theme="dark"] .dt th.is-sorted .caret{color:var(--blue-300)}
 .dt td{padding:.5rem .8rem;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
 .dt tbody tr:last-child td{border-bottom:0}
 .dt tbody tr{transition:background .1s}

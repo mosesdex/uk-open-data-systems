@@ -329,6 +329,15 @@ const Platform = (() => {
     if (!p) return [];
     return Object.entries(p.byLad).map(([code, v]) => ({
       code, name: p.names[code] || code, systems: (v._systems || []).length,
+      // The same distinction app/assets/lib/answers.js's placeAuthority reads
+      // off _capacity, reduced to a filterable value: a district whose own
+      // _capacity record is marked figure_for "district" is single-tier; one
+      // marked "county" is a district in a two-tier area, served by its
+      // county council; a place with no _capacity record at all says so
+      // rather than guessing.
+      tier: v._capacity
+        ? (v._capacity.figure_for === 'district' ? 'single' : 'two-tier')
+        : null,
     })).sort((a, b) => a.name.localeCompare(b.name));
   }
 

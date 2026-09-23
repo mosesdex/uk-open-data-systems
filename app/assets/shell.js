@@ -290,7 +290,10 @@ const Shell = (() => {
   }
 
   /* -------------------------------------------------------------- places --- */
-  let placeFilter = { q: '', min: 0 };
+  let placeFilter = { q: '', min: 0, tier: 'all' };
+  // Persisted across re-renders the same way placeFilter is, so clicking a
+  // column keeps its state through the filter chips' own re-render.
+  let placeSort = { key: 'name', dir: 'asc' };
 
   function buildPlaces() {
     const host = $('#viewPlaces');
@@ -302,42 +305,122 @@ const Shell = (() => {
     renderPlaceIndex();
   }
 
-  function renderPlaceIndex() {
-    const box = $('#placeIndex');
-    if (!box) return;
+  // One district's row, as this table renders it and as its export carries
+  // it: the same fields, in the same order, computed once, so the CSV and
+  // the screen cannot disagree about which places are shown or their order.
+  const TIER_LABEL = { single: 'Single-tier authority', 'two-tier': 'Two-tier (district)', };
+  const coverageBand = p => p.systems >= 9 ? 'broad' : p.systems >= 5 ? 'partial' : 'thin';
+
+  function placeIndexRows() {
     const all = Platform.placeList();
     const rows = all.filter(p =>
       (!placeFilter.q || p.name.toLowerCase().includes(placeFilter.q.toLowerCase())) &&
-      p.systems >= placeFilter.min);
+      p.systems >= placeFilter.min &&
+      (placeFilter.tier === 'all' || p.tier === placeFilter.tier));
+    const key = placeSort.key, mul = placeSort.dir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => {
+      const av = a[key], bv = b[key];
+      if (typeof av === 'string' || typeof bv === 'string') {
+        return String(av || '').localeCompare(String(bv || '')) * mul;
+      }
+      return ((av == null ? -Infinity : av) - (bv == null ? -Infinity : bv)) * mul;
+    });
+    return { all, rows };
+  }
+
+  // Named after what it contains, and built from exactly the rows the table
+  // just rendered -- same filter, same sort, same fields -- so the file
+  // downloaded can never say something the screen does not.
+  function placeIndexCsv(rows) {
+    const cell = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    const head = ['place_code', 'place_name', 'questions_answered', 'questions_total',
+                  'coverage_band', 'authority_tier'];
+    const lines = [head.join(',')];
+    for (const p of rows) {
+      lines.push([p.code, p.name, p.systems, SYSTEMS.length, coverageBand(p),
+                  p.tier ? TIER_LABEL[p.tier] : 'not stated in the payload'].map(cell).join(','));
+    }
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function downloadCsv(filename, text) {
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Revoked on the next turn of the loop: Safari needs the object URL to
+    // outlive the click that consumes it.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  // aria-sort and the visible caret both come off the same state, so a
+  // screen reader and a sighted reader are never told two different things
+  // about which column is active.
+  function sortHeader(key, label, extraClass) {
+    const active = placeSort.key === key;
+    const ariaSort = active ? (placeSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+    const caret = active ? (placeSort.dir === 'asc' ? '▲' : '▼') : '↕';
+    return `<th class="th-sortable ${extraClass || ''}${active ? ' is-sorted' : ''}" aria-sort="${ariaSort}">
+      <button type="button" class="th-sort" data-sort="${key}">${esc(label)}<span class="caret" aria-hidden="true">${caret}</span></button></th>`;
+  }
+
+  function renderPlaceIndex() {
+    const box = $('#placeIndex');
+    if (!box) return;
+    const { all, rows } = placeIndexRows();
 
     box.innerHTML = `
       <div class="vhead"><div>
         <div class="vhead__t" style="font-size:17px">Every district</div>
-        <div class="vhead__s">Each row opens everything the record holds for that place.</div></div></div>
+        <div class="vhead__s">Each row opens everything the record holds for that place. Click a column to sort by it; click again to reverse.</div></div></div>
       <div class="fbar">
         <button class="fchip${placeFilter.min === 0 ? ' is-on' : ''}" data-min="0">All districts</button>
         <button class="fchip${placeFilter.min === 5 ? ' is-on' : ''}" data-min="5">5+ questions</button>
         <button class="fchip${placeFilter.min === 9 ? ' is-on' : ''}" data-min="9">9+ questions</button>
+        <button class="fchip${placeFilter.tier === 'all' ? ' is-on' : ''}" data-tier="all">All tiers</button>
+        <button class="fchip${placeFilter.tier === 'single' ? ' is-on' : ''}" data-tier="single">Single-tier</button>
+        <button class="fchip${placeFilter.tier === 'two-tier' ? ' is-on' : ''}" data-tier="two-tier">Two-tier</button>
         ${placeFilter.q ? `<button class="fchip is-on" data-clearq>“${esc(placeFilter.q)}” &times;</button>` : ''}
         <span class="fbar__n">${num(rows.length)} of ${num(all.length)}</span>
       </div>
       ${rows.length ? `<div class="dt-wrap"><table class="dt dt--compact">
-        <thead><tr><th data-sort="name">District</th><th class="num" data-sort="systems">Questions answered</th>
+        <thead><tr>${sortHeader('name', 'District')}${sortHeader('systems', 'Questions answered', 'num')}
           <th style="width:1%">Coverage</th></tr></thead>
         <tbody>${rows.map(p => `<tr>
           <td><a class="dtlink" href="#/places/${esc(p.code)}"><b>${esc(p.name)}</b></a></td>
           <td class="num">${p.systems} of 13</td>
           <td><span class="st st--${p.systems >= 9 ? 'ok' : p.systems >= 5 ? 'warn' : 'none'}">${
-            p.systems >= 9 ? 'broad' : p.systems >= 5 ? 'partial' : 'thin'}</span></td>
-        </tr>`).join('')}</tbody></table></div>` : emptyFilter('districts')}`;
+            coverageBand(p)}</span></td>
+        </tr>`).join('')}</tbody></table></div>` : emptyFilter('districts')}
+      ${rows.length ? `<p class="place__take"><button type="button" class="chip"
+        id="placeIndexCsv">Download these ${num(rows.length)} districts as CSV</button></p>` : ''}`;
 
     box.querySelectorAll('[data-min]').forEach(b => b.onclick = () => {
       placeFilter.min = Number(b.dataset.min); renderPlaceIndex();
     });
+    box.querySelectorAll('[data-tier]').forEach(b => b.onclick = () => {
+      placeFilter.tier = b.dataset.tier; renderPlaceIndex();
+    });
     const cq = box.querySelector('[data-clearq]');
     if (cq) cq.onclick = () => { placeFilter.q = ''; renderPlaceIndex(); };
     const cf = box.querySelector('[data-clear-filters]');
-    if (cf) cf.onclick = () => { placeFilter = { q: '', min: 0 }; renderPlaceIndex(); };
+    if (cf) cf.onclick = () => { placeFilter = { q: '', min: 0, tier: 'all' }; renderPlaceIndex(); };
+    // Each header is a real <button>, so Enter and Space already sort it
+    // without any extra key handling; a click and a keyboard activation are
+    // the same DOM event.
+    box.querySelectorAll('button.th-sort').forEach(btn => btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      if (placeSort.key === key) placeSort.dir = placeSort.dir === 'asc' ? 'desc' : 'asc';
+      else placeSort = { key, dir: 'asc' };
+      renderPlaceIndex();
+    }));
+    const csvBtn = box.querySelector('#placeIndexCsv');
+    if (csvBtn) csvBtn.addEventListener('click', () =>
+      downloadCsv('districts-compared.csv', placeIndexCsv(rows)));
     // The district name is now a real link to its place page (#/places/<code>):
     // reachable by keyboard, gives a shareable URL, and opens the redesign's
     // own place page instead of the legacy panel openPlace() used to open.
