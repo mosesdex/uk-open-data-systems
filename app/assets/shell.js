@@ -44,6 +44,9 @@ const Shell = (() => {
     sources:   ['Evidence · Sources', 'Where every figure comes from'],
     method:    ['Evidence · Method', 'How GroundTruth works'],
     search:    ['Search', 'Search'],
+    compare:   ['Explore · Compare', 'Compare every district'],
+    unusual:   ['Explore · Unusual', 'What looks unusual right now'],
+    about:     ['Evidence · How this is built', 'How this is built'],
   };
 
   /* One shell, two consoles. The public app and the admin console are the same
@@ -593,8 +596,67 @@ const Shell = (() => {
     host.dataset.built = '1';
   }
 
+  /* ---------------------------------------------------------- unusual/about --- */
+  function buildUnusual() {
+    const host = $('#unusualBody'); if (!host) return;
+    const lib = window.GT_LIB || {};
+    const rows = lib.unusualRows ? lib.unusualRows(Platform.payload()) : [];
+    const label = id => (SYSTEMS.find(s => s.id === id) || {}).n || id;
+    host.innerHTML = `<table class="tbl"><thead><tr>
+        <th>Place</th><th>Question</th><th class="num">Its figure</th>
+        <th class="num">Measured against</th><th class="num">Gap</th></tr></thead><tbody>
+      ${rows.map(r => `<tr>
+        <td><a href="#/places/${esc(r.code)}">${esc(r.name)}</a></td>
+        <td>${esc(label(r.question))}</td>
+        <td class="num mono">${r.figure.toFixed(1)}%</td>
+        <td class="num mono">${r.against.toFixed(1)}%<span class="answer__s"> ${esc(r.againstLabel)}</span></td>
+        <td class="num mono">${r.gap.toFixed(1)}</td></tr>`).join('')}
+      </tbody></table>`;
+  }
+
+  /* The inventory used to greet every visitor. It belongs here, next to the
+     method and the corrections, where it is evidence rather than a welcome. */
+  function buildAbout() {
+    const host = $('#aboutBody'); if (!host) return;
+    const payload = Platform.payload ? Platform.payload() : null;
+    if (!payload) return;
+    const sources = Platform.sourceSummary() || {};
+    const corrections = Platform.corrections() || {};
+    const entries = corrections.entries || [];
+    const built = (Platform.builtSystems() || []).length;
+
+    host.innerHTML = `
+      <p class="place__sum">Two joins are added to data anyone can download: where a reference becomes
+        a property, a postcode and then one of ${num(Object.keys((payload.places||{}).names||{}).length)}
+        districts, and who, where name variants become one company number.</p>
+      <div class="tiles">
+        ${tile(built + ' of ' + SYSTEMS.length, 'questions with a measured answer')}
+        ${tile(num((sources.rows||[]).filter(r => !r.blocked).length) + ' of ' + num((sources.rows||[]).length), 'sources returning data')}
+        ${tile(num(entries.length), 'corrections published, each with the test that guards it')}
+      </div>
+      <h3 class="qlist__h" style="margin-top:2rem">Corrections</h3>
+      <div class="answers">
+        ${entries.map(c => `
+          <article class="answer">
+            <h4 class="answer__q">${esc(String(c.id || 'Correction').replace(/-/g, ' '))}</h4>
+            <p class="answer__s">${esc(c.believed || '')}</p>
+            <p class="answer__s">${esc(c.actually || '')}</p>
+          </article>`).join('')}
+      </div>`;
+  }
+
+  // A small helper so the three figures above read as one object.
+  function tile(value, label) {
+    return `<div class="tile"><div class="tile__v mono">${esc(value)}</div>
+            <div class="tile__l">${esc(label)}</div></div>`;
+  }
+
   /* -------------------------------------------------------------- router --- */
-  const VIEWS_PUBLIC = ['home', 'overview', 'places', 'systems', 'sources', 'method', 'detail'];
+  // 'unusual' and 'about' have their own <div data-view> in app/index.html
+  // (compare has none: it reuses 'places'), so both must be listed here or
+  // show('unusual')/show('about') would hide every view, including their own,
+  // and the destination would render as a blank page.
+  const VIEWS_PUBLIC = ['home', 'overview', 'places', 'systems', 'sources', 'method', 'detail', 'unusual', 'about'];
 
   function show(view) {
     views().forEach(v => {
@@ -642,6 +704,13 @@ const Shell = (() => {
     sources:   ['Sources', 'Every source the record reads, when it was last fetched, and what failed.'],
     method:    ['Method', 'The two joins, what each figure assumes, and every correction published so far.'],
     search:    ['Search', 'Search organisations, places and the thirteen questions.'],
+    compare:   ['Compare every district', 'Every district the connected record covers, with the figures each question answers for it, sortable and exportable.'],
+    unusual:   ['What looks unusual', 'Where a place sits furthest from the figure it is published against, with both numbers and the source for each.'],
+    about:     ['How this is built', 'The two joins, every source the record reads, the corrections published so far, and what this cannot do.'],
+    // Same content as 'systems': #/questions/<id> renders the identical view
+    // (see the questions branch in route()), so it needs the same fallback
+    // copy here for the rare direct visit to the bare #/questions with no id.
+    questions: ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
   };
 
   let docName = '';
@@ -655,7 +724,10 @@ const Shell = (() => {
         if (pl) { name = pl.name;
           desc = `What the connected record says about ${pl.name}: school places, planning speed, flood `
                + `defences, care ownership and connectivity, each computed from a published file.`; }
-      } else if (head === 'systems' && seg[1]) {
+      } else if ((head === 'systems' || head === 'questions') && seg[1]) {
+        // #/questions/<id> renders the identical page as #/systems/<id> (see
+        // the questions branch in route()), so it earns the same specific
+        // title and description rather than falling back to the home page's.
         const sy = SYSTEMS.find(x => x.id === seg[1]);
         if (sy) { name = sy.n; desc = `${sy.n}: ${sy.s || 'one of the thirteen questions the connected record answers'}.`; }
       } else if (head === 'orgs' && seg[1]) {
@@ -679,7 +751,8 @@ const Shell = (() => {
   // only a fallback for the (should not happen) case where the module entry
   // has not loaded and window.GT_LIB.ROUTER_HEADS is unavailable; keep it
   // matching route()'s branches so the degraded behaviour still makes sense.
-  const FALLBACK_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
+  const FALLBACK_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search',
+    'compare', 'unusual', 'about', 'questions']);
 
   // Mirrors firstServable in app/assets/lib/routes.js; only a fallback for
   // the same (should not happen) case as FALLBACK_HEADS above, used by
@@ -781,6 +854,18 @@ const Shell = (() => {
 
     const compare = $('#doorCompare');
     if (compare) compare.textContent = num(Object.keys(names).length);
+
+    // Both of these were hardcoded placeholders (50, 45) until the routes
+    // behind them existed. Now each is computed here, the same way
+    // #doorCompare above is, and always overwritten -- including to blank
+    // when the real figure is not available -- so a stale or invented number
+    // can never sit on the front page.
+    const lib2 = window.GT_LIB || {};
+    const unusual = $('#doorUnusual');
+    if (unusual) unusual.textContent = lib2.unusualRows ? num(lib2.unusualRows(Platform.payload()).length) : '';
+    const about = $('#doorAbout');
+    const srcs = (Platform.sourceSummary() || {}).rows || [];
+    if (about) about.textContent = srcs.length ? num(srcs.length) : '';
   }
 
   /* One place, as a document: what it is, what stands out, then every question
@@ -876,6 +961,25 @@ const Shell = (() => {
       show('home'); setChrome(''); safely(buildHome, '#viewHome'); scrollTop(); return;
     }
 
+    // Compare is the district index that already exists, given its own door.
+    // buildPlaces() creates #placeIndex inside #viewPlaces and returns early if
+    // it is already there, so the compare route shows that view rather than
+    // building a second table.
+    if (head === 'compare') {
+      show('places'); setChrome('compare');
+      const host = $('#placePage'), index = $('#placeIndex');
+      if (host) host.hidden = true;
+      safely(buildPlaces, '#viewPlaces');
+      if ($('#placeIndex')) $('#placeIndex').hidden = false;
+      scrollTop(); return;
+    }
+    if (head === 'unusual') {
+      show('unusual'); setChrome('unusual'); safely(buildUnusual, '#unusualBody'); scrollTop(); return;
+    }
+    if (head === 'about') {
+      show('about'); setChrome('about'); safely(buildAbout, '#aboutBody'); scrollTop(); return;
+    }
+
     if (head === 'places') {
       show('places'); setChrome('places'); safely(buildPlaces, '#placeIndex'); scrollTop();
       const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place');
@@ -892,6 +996,21 @@ const Shell = (() => {
     }
 
     if (head === 'systems') {
+      if (seg[1] && SYSTEMS.some(s => s.id === seg[1])) {
+        show('detail'); setChrome('systems');
+        safely(() => { SystemPage.render(seg[1]); SysTabs.install(seg[1], seg[2] || 'summary'); }, '#syspage');
+        scrollTop();
+        return;
+      }
+      show('systems'); setChrome('systems'); scrollTop();
+      return;
+    }
+
+    // Every question link now points at #/questions/<id> (150 outreach emails
+    // still point at #/systems/<id>, which keeps working via the branch
+    // above). This mirrors that branch exactly, including its tab handling,
+    // rather than redirecting, so both URLs render the same page today.
+    if (head === 'questions') {
       if (seg[1] && SYSTEMS.some(s => s.id === seg[1])) {
         show('detail'); setChrome('systems');
         safely(() => { SystemPage.render(seg[1]); SysTabs.install(seg[1], seg[2] || 'summary'); }, '#syspage');

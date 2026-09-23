@@ -5,6 +5,7 @@
 import { canonicalHash, ROUTER_HEADS, firstServable } from './routes.js';
 import { matchPlaces, looksLikePostcode } from './places.js';
 import { placeSummary } from './summary.js';
+import { unusualRows } from './unusual.js';
 
 window.GT_LIB = Object.assign(window.GT_LIB || {},
-  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, looksLikePostcode, placeSummary });
+  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, looksLikePostcode, placeSummary, unusualRows });

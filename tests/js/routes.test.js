@@ -61,20 +61,20 @@ test('an empty or unknown hash is canonical', () => {
   assert.equal(canonicalHash('#/nonsense'), null);
 });
 
-test('#/systems/plumbline is left alone while questions has no handler', () => {
-  // Regression: today's router cannot render "questions" yet, so redirecting
-  // there would swap a working URL for "No such view". The 150 outreach
-  // emails that link here must keep rendering something.
-  assert.equal(canonicalHash('#/systems/plumbline', canRenderToday), null);
-});
-
+// Task 7 gave "questions" and "about" real handlers, so ROUTER_HEADS now
+// contains both and canRenderToday renders them like everything else. The
+// two paired regressions that used to live here ("...is left alone while
+// questions/about has no handler") asserted the opposite -- that the router
+// could NOT yet render them -- so their premise is gone and so are they;
+// "canonical routes are left alone" above already covers today's steady
+// state, including #/questions/plumbline and #/about themselves. What is
+// still worth guarding is that the redirect keeps working under a predicate
+// that allows only the exact head being tested, independent of whatever
+// else ROUTER_HEADS happens to contain, which is what the two tests below
+// still do.
 test('#/systems/plumbline redirects once questions can render', () => {
   const canRenderWithQuestions = (head) => canRenderToday(head) || head === 'questions';
   assert.equal(canonicalHash('#/systems/plumbline', canRenderWithQuestions), '#/questions/plumbline');
-});
-
-test('#/method is left alone while about has no handler', () => {
-  assert.equal(canonicalHash('#/method', canRenderToday), null);
 });
 
 test('#/method redirects once about can render', () => {
@@ -193,16 +193,16 @@ test('no hash in any table can fail to terminate', () => {
 // firstServable is canonicalHash's picking logic pulled out as a small pure
 // helper, for callers with an ordered list of candidate destinations and no
 // route to redirect through -- such as renderTabbar in app/assets/shell.js,
-// picking which of a tab's candidate hrefs to render.
+// picking which of a tab's candidate hrefs to render. Task 7 gave "compare"
+// and "about" real handlers, so the first two lists below now resolve to
+// their own first entry under today's ROUTER_HEADS; the third case keeps a
+// head nothing will ever route to as the rejected candidate, so the actual
+// picking logic (skip what the predicate rejects, take the first accepted)
+// is still exercised rather than the assertion becoming vacuous.
 test('firstServable picks the first candidate the router can render today', () => {
-  assert.equal(firstServable(['#/compare', '#/places'], canRenderToday), '#/places');
-  assert.equal(firstServable(['#/about', '#/method'], canRenderToday), '#/method');
-});
-
-test('firstServable upgrades once the better candidate can render', () => {
-  const canRenderWithCompareAndAbout = (head) => canRenderToday(head) || head === 'compare' || head === 'about';
-  assert.equal(firstServable(['#/compare', '#/places'], canRenderWithCompareAndAbout), '#/compare');
-  assert.equal(firstServable(['#/about', '#/method'], canRenderWithCompareAndAbout), '#/about');
+  assert.equal(firstServable(['#/compare', '#/places'], canRenderToday), '#/compare');
+  assert.equal(firstServable(['#/about', '#/method'], canRenderToday), '#/about');
+  assert.equal(firstServable(['#/nonsense', '#/places'], canRenderToday), '#/places');
 });
 
 test('firstServable accepts a single string as well as a list', () => {

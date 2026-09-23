@@ -29,7 +29,8 @@ export const ANCHOR = {
 // The heads route() in app/assets/shell.js actually dispatches today. This
 // is the authoritative copy: shell.js and the test suite both read it
 // instead of keeping their own hand-copied list in step.
-export const ROUTER_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
+export const ROUTER_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search',
+  'compare', 'unusual', 'about', 'questions']);
 
 function resolve(hash) {
   if (Object.prototype.hasOwnProperty.call(ANCHOR, hash)) return ANCHOR[hash];

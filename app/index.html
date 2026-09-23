@@ -94,12 +94,12 @@
         <span class="door__s">One table, sortable by any figure, exportable.</span>
       </a>
       <a class="door" id="doorUnusualLink" href="#/unusual">
-        <span class="door__n" id="doorUnusual">50</span>
+        <span class="door__n" id="doorUnusual"></span>
         <span class="door__t">What looks unusual right now</span>
         <span class="door__s">Where a place diverges most from the published figure, with the source.</span>
       </a>
       <a class="door" id="doorAboutLink" href="#/about">
-        <span class="door__n" id="doorAbout">45</span>
+        <span class="door__n" id="doorAbout"></span>
         <span class="door__t">How this is built</span>
         <span class="door__s">The two joins, every source, and what this cannot do.</span>
       </a>
@@ -109,6 +109,18 @@
       <h2 class="qlist__h">The thirteen questions</h2>
       <div id="qlistBody"></div>
     </section>
+  </div>
+
+  <div class="view" data-view="unusual" id="viewUnusual" hidden>
+    <h2 class="place__h">What looks unusual right now</h2>
+    <p class="find__s" style="text-align:left;margin-left:0">Where a place sits furthest from the figure
+      it is published against. Both numbers are shown, so the gap can be checked before it is quoted.</p>
+    <div id="unusualBody"></div>
+  </div>
+
+  <div class="view" data-view="about" id="viewAbout" hidden>
+    <h2 class="place__h">How this is built</h2>
+    <div id="aboutBody"></div>
   </div>
 
   <!-- One destination per view. The router shows exactly one; nothing takes
