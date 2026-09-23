@@ -207,6 +207,7 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
     gap:.15rem;padding:.4rem .2rem;min-height:44px;
     font-size:12px;color:var(--ink-3);border-radius:9px}
   .tabbar a.is-on{color:var(--blue-700);background:var(--blue-050)}
+  [data-theme="dark"] .tabbar a.is-on{color:var(--blue-300)}
   .tabbar i{font-style:normal;font-size:15px;line-height:1}
   .dpanel{width:100%;border-left:0}
   .vhead__t{font-size:19px}
