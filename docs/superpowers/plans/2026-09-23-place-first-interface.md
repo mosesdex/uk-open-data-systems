@@ -34,7 +34,17 @@ Adds the JavaScript test cycle the repo does not have yet, and makes every old U
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `canonicalHash(raw: string) => string | null` from `app/assets/lib/routes.js`, returning the hash a raw hash should be replaced with, or `null` when it is already canonical. `window.GT_LIB` object created by `app/assets/lib/entry.js`.
+- Produces: `canonicalHash(raw: string, canRender?: (head: string) => boolean) => string | null` from
+  `app/assets/lib/routes.js`. It returns the hash a raw hash should be replaced
+  with, or `null` when the hash is already canonical **or when the app cannot yet
+  render the target**. `window.GT_LIB` object created by `app/assets/lib/entry.js`.
+
+**Why the second argument exists.** The redirect targets arrive over several
+tasks: `#/questions/<id>` and `#/about` do not exist until Task 7. A redirect to
+a route with no handler is worse than no redirect, and three of the five campaign
+URLs would dead-end for the length of the redesign. So the table states the
+destination and the router states what it can render today; a mapping switches on
+by itself when its handler lands.
 
 - [ ] **Step 1: Write the failing test**
 
