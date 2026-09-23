@@ -18,21 +18,25 @@ const Shell = (() => {
   const num = v => v == null || Number.isNaN(Number(v)) ? 'n/a' : Number(v).toLocaleString('en-GB');
 
   /* ---------------------------------------------------------------- nav ---- */
+  // The drawer used to list six destinations by a hardcoded id ("#/" + id),
+  // three of which (systems, sources, method) had been retired and now only
+  // redirect elsewhere -- so "What it answers" landed on the home page and
+  // "Sources"/"Method" both landed on the same "About" entry already below
+  // them. This lists the structure the site now has instead: the front page,
+  // compare, unusual, about and organisations, each with an ORDERED LIST of
+  // candidate hrefs in `candidates` -- the same firstServable idea
+  // app/assets/lib/routes.js applies to URLs and renderTabbar already applies
+  // to the bottom bar -- so renderNav() picks a route that actually renders
+  // today instead of a hardcoded href that might redirect. A count is kept
+  // only where it names a real, useful quantity (districts, organisations);
+  // "About" and "What looks unusual" are not collections and carry none.
   const NAV_PUBLIC = [
     { group: 'Explore', items: [
-      { id: '',        icon: '◉', label: 'Find your area' },
-      { id: 'places',  icon: '▣', label: 'Places',        count: () => Platform.placeList().length },
-      { id: 'systems', icon: '▦', label: 'What it answers', count: () => Platform.builtSystems().length },
-      { id: 'orgs',    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
-    ]},
-    { group: 'Evidence', items: [
-      // The count here is the number of sources that would not answer an
-      // anonymous request. It is red because that is the product's own
-      // headline caveat, and it belongs in front of people permanently.
-      // It was total minus ok, which also counted the seven sources that hold
-      // data with no fetch record -- the conflation already fixed in the tiles.
-      { id: 'sources', icon: '⛁', label: 'Sources', count: () => (Platform.sourceSummary().rows || []).filter(r => r.blocked).length, alert: true },
-      { id: 'method',  icon: '❋', label: 'Method' },
+      { id: '',        candidates: ['#/'],       icon: '◉', label: 'Find your area' },
+      { id: 'compare', candidates: ['#/compare'], icon: '⇄', label: 'Compare every district', count: () => Platform.placeList().length },
+      { id: 'unusual', candidates: ['#/unusual'], icon: '◆', label: 'What looks unusual' },
+      { id: 'about',   candidates: ['#/about'],   icon: 'ⓘ', label: 'How this is built' },
+      { id: 'orgs',    candidates: ['#/orgs'],    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
     ]},
   ];
 
@@ -83,13 +87,23 @@ const Shell = (() => {
   function renderNav() {
     const box = $('.side__scroll');
     if (!box) return;
+    // Same degrade-and-upgrade pattern as renderTabbar below: pick the first
+    // candidate href ROUTER_HEADS can render today, and drop an item entirely
+    // rather than emit a link nothing can serve.
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
     box.innerHTML = nav().map(g => `
       <div class="side__group">${esc(g.group)}</div>
       ${g.items.map(it => {
+        const href = pick(it.candidates || [`#/${it.id}`], canRender);
+        if (!href) return '';
+        const key = href.slice(2).split('/')[0];
         let c = null;
         try { c = it.count ? it.count() : null; } catch (e) { c = null; }
         const badge = c ? `<span class="navi__ct${it.alert ? ' navi__ct--alert' : ''}">${num(c)}</span>` : '';
-        return `<a class="navi" data-nav="${it.id}" href="#/${it.id}">
+        return `<a class="navi" data-nav="${key}" href="${href}">
           <i class="navi__dot" aria-hidden="true"></i>${esc(it.label)}${badge}</a>`;
       }).join('')}
     `).join('') + (CFG.systemList === false ? '' : `
@@ -101,6 +115,14 @@ const Shell = (() => {
      keeping up. Each one is a destination now, so it is a link and nothing
      needs to watch the scroll position. */
   function systemNav() {
+    // #/systems/<id> is a renamed route (app/assets/lib/routes.js) that now
+    // redirects to #/questions/<id>: linking straight at the renamed route
+    // would put a redirecting link in the drawer, so this picks the first
+    // candidate that can render today, same as buildHome()'s question list.
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
     return SYSTEMS.map(s => {
       const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[s.id];
       const ico = (spec && spec.icon) || '•';
@@ -110,7 +132,8 @@ const Shell = (() => {
         const r = Platform.systemResult(s.id);
         if (r && r.headline) fig = r.headline;
       } catch (e) { fig = ''; }
-      return `<a class="navx" data-sysnav="${esc(s.id)}" href="#/systems/${esc(s.id)}">
+      const href = pick(['#/questions/' + s.id, '#/systems/' + s.id], canRender) || ('#/systems/' + s.id);
+      return `<a class="navx" data-sysnav="${esc(s.id)}" href="${href}">
         <span class="navx__ico" aria-hidden="true">${ico}</span>
         <span class="navx__tx"><span class="navx__nm">${esc(s.n)}</span>${
           dom ? `<span class="navx__dm">${esc(dom)}</span>` : ''}</span>
