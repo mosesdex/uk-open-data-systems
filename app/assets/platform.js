@@ -11,10 +11,29 @@ const Platform = (() => {
   // handful of source names and one reason category, copied verbatim from a
   // published register, still carry one. This is the one small shared
   // helper that repairs it, applied once here rather than hunted down at
-  // every place a source name gets rendered: the label always reads as
-  // "thing: where it belongs", so a colon states the same relationship
-  // without leaving a dash in the text.
-  const cleanDash = s => typeof s === 'string' ? s.replace(/\s*[–—]\s*/g, ': ') : s;
+  // every place a source name gets rendered. Double hyphens are converted
+  // to colons for qualifiers (short trailing descriptors like "property to street")
+  // and commas for explanations (longer clauses that expand or justify).
+  // En/em dashes are always converted to colons, as the label always reads as
+  // "thing: where it belongs", so a colon states the relationship without dashes.
+  const cleanDash = s => {
+    if (typeof s !== 'string') return s;
+    // Handle en dash and em dash -> colon
+    s = s.replace(/\s*[–—]\s*/g, ': ');
+    // Handle double hyphen: colon for short qualifiers, comma for explanations
+    // A qualifier is <= 4 words (simple descriptors) or <= 35 chars without
+    // complex structure; longer or multi-clause text gets a comma.
+    s = s.replace(/ -- /g, (match, offset, full) => {
+      const after = full.substring(offset + 4); // text after " -- "
+      const wordCount = after.split(/\s+/).length;
+      const hasComplexStructure = /[.;:]/.test(after.substring(0, Math.min(50, after.length)));
+      // Use colon for short qualifiers (1-4 words, no complex punctuation)
+      if (wordCount <= 4 && !hasComplexStructure) return ': ';
+      // Use comma for explanations or longer text
+      return ', ';
+    });
+    return s;
+  };
 
   // Only the fields known to carry a source's own published name, or text
   // copied verbatim from one -- never prose written for this interface,
@@ -27,6 +46,16 @@ const Platform = (() => {
       (list || []).forEach(e => { if (e.dataset) e.dataset = cleanDash(e.dataset); }));
     (((d.systems || {}).sightline || {}).reasons || []).forEach(r => {
       if (r.reason) r.reason = cleanDash(r.reason);
+    });
+    // Clean contradictions and corrections text
+    ((d.contradictions || {}).results || []).forEach(r => {
+      if (r.note) r.note = cleanDash(r.note);
+      if (r.quantity) r.quantity = cleanDash(r.quantity);
+      if (r.check) r.check = cleanDash(r.check);
+    });
+    ((d.corrections || {}).entries || []).forEach(c => {
+      if (c.believed) c.believed = cleanDash(c.believed);
+      if (c.actually) c.actually = cleanDash(c.actually);
     });
     return d;
   }

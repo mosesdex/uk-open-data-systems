@@ -77,7 +77,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="os_lids_uprn_usrn",
-        name="OS Linked Identifiers -- property to street",
+        name="OS Linked Identifiers: property to street",
         publisher="Ordnance Survey",
         url=OS_DOWNLOADS.format(p="LIDS", f="CSV"),
         fmt="zip-csv",
@@ -97,7 +97,7 @@ REGISTRY: tuple[Source, ...] = (
     ),
     Source(
         id="os_lids_uprn_toid",
-        name="OS Linked Identifiers -- property to building",
+        name="OS Linked Identifiers: property to building",
         publisher="Ordnance Survey",
         url=OS_DOWNLOADS.format(p="LIDS", f="CSV"),
         fmt="zip-csv",
@@ -109,7 +109,7 @@ REGISTRY: tuple[Source, ...] = (
         os_product="LIDS",
         os_file_pattern="BLPU-UPRN-TopographicArea-TOID",
         systems=("bulwark", "ledger", "lastmile"),
-        notes="Property reference to topographic identifier -- the building footprint join.",
+        notes="Property reference to topographic identifier: the building footprint join.",
     ),
     Source(
         id="os_open_usrn",
@@ -183,7 +183,7 @@ REGISTRY: tuple[Source, ...] = (
     # ---------------- domain ----------------
     Source(
         id="gias_establishments",
-        name="Get Information About Schools -- all establishments",
+        name="Get Information About Schools: all establishments",
         publisher="Department for Education",
         url=(
             "https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/"
@@ -651,7 +651,7 @@ REGISTRY: tuple[Source, ...] = (
         cadence="daily",
         expect_content=("application/json",),
         blocked=(
-            "HTTP 401 -- requires a subscription key. Superseded for Groundtruth's "
+            "HTTP 401, requires a subscription key. Superseded for Groundtruth's "
             "purposes by cqc_hsca_locations, which is published openly and carries "
             "more: company numbers, bed counts and brand."
         ),
