@@ -700,6 +700,12 @@ const Shell = (() => {
   /* The front page does one thing. Everything else on it is a signpost. */
   function buildHome() {
     const lib = window.GT_LIB || {};
+    // Shared with the door wiring below and the question list further down:
+    // same firstServable/ROUTER_HEADS pattern renderTabbar uses, with the
+    // same fallback for when the module entry has not loaded.
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
     const names = (Platform.payload && Platform.payload().places && Platform.payload().places.names) || {};
     const input = $('#findPlace'), hits = $('#findHits'), note = $('#findNote');
     if (!input || !hits) return;
@@ -746,9 +752,6 @@ const Shell = (() => {
       // The question view has no handler yet (a later task adds it), so this
       // degrades to #/systems/<id>, which renders today, and upgrades itself
       // once that handler lands -- same firstServable pattern as renderTabbar.
-      const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
-      const pick = lib.firstServable || fallbackFirstServable;
-      const canRender = head => heads.has(head);
       list.innerHTML = SYSTEMS.map(s => {
         const qid = esc(s.id);
         const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
@@ -759,6 +762,23 @@ const Shell = (() => {
       }).join('');
     }
 
+    // The three doors in app/index.html carry a static href as a sensible
+    // default (#/compare, #/unusual, #/about) -- none of those heads has a
+    // route() handler yet, so left alone they would dead-end on "No such
+    // view" on the very first screen. Overwrite each one here with
+    // firstServable, preferring the eventual destination and falling back
+    // to a head route() can already serve today; it upgrades itself once a
+    // later task adds the missing handler, the same pattern used for the
+    // question list above. tests/js/routes.test.js checks app/index.html's
+    // static hrefs by confirming each door id below is looked up and its
+    // href resolved through pick (aliased from firstServable) right here.
+    const doorCompareLink = $('#doorCompareLink');
+    if (doorCompareLink) doorCompareLink.href = pick(['#/compare', '#/places'], canRender) || '#/places';
+    const doorUnusualLink = $('#doorUnusualLink');
+    if (doorUnusualLink) doorUnusualLink.href = pick(['#/unusual', '#/places'], canRender) || '#/places';
+    const doorAboutLink = $('#doorAboutLink');
+    if (doorAboutLink) doorAboutLink.href = pick(['#/about', '#/method'], canRender) || '#/method';
+
     const compare = $('#doorCompare');
     if (compare) compare.textContent = num(Object.keys(names).length);
   }
@@ -766,13 +786,25 @@ const Shell = (() => {
   /* One place, as a document: what it is, what stands out, then every question
      that has an answer for it, and plainly those that do not. */
   function buildPlacePage(code) {
-    const host = $('#placePage'), index = $('#placeIndex');
+    const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place');
     if (!host) return;
     const payload = Platform.payload ? Platform.payload() : null;
     const names = (payload && payload.places && payload.places.names) || {};
     const byLad = (payload && payload.places && payload.places.byLad) || {};
     const name = names[code], place = byLad[code];
-    if (!name || !place) { host.hidden = true; if (index) index.hidden = false; return; }
+    if (!name || !place) {
+      // An unknown code degrades to the index rather than leaving a "no
+      // such place" page up. Clear the stale markup along with hiding it,
+      // so a later render that forgets to overwrite host.innerHTML cannot
+      // reveal the previous place. The legacy explorer (#place) follows
+      // the index here too: no single place is open, so it renders as it
+      // does for the index.
+      host.hidden = true;
+      host.innerHTML = '';
+      if (index) index.hidden = false;
+      if (legacy) legacy.hidden = false;
+      return;
+    }
 
     const lib = window.GT_LIB || {};
     const summary = lib.placeSummary ? lib.placeSummary(code, payload) : [];
@@ -807,6 +839,11 @@ const Shell = (() => {
         county rather than the district, and the figure is published at that level.</p>` : ''}`;
     host.hidden = false;
     if (index) index.hidden = true;
+    // A specific place is open: the legacy explorer below (#place) would
+    // otherwise still show whichever place its own map last selected --
+    // Amber Valley by default -- presented as if it were this place. Hide
+    // it while a single place's document is on screen.
+    if (legacy) legacy.hidden = true;
   }
 
   function route() {
@@ -841,9 +878,16 @@ const Shell = (() => {
 
     if (head === 'places') {
       show('places'); setChrome('places'); safely(buildPlaces, '#placeIndex'); scrollTop();
-      const host = $('#placePage'), index = $('#placeIndex');
+      const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place');
       if (seg[1]) { safely(() => buildPlacePage(seg[1])); }
-      else { if (host) host.hidden = true; if (index) index.hidden = false; }
+      else {
+        // No code: this is the index, so the legacy explorer (#place)
+        // renders as it always has, same as buildPlacePage's own guard
+        // clause for an unknown code.
+        if (host) host.hidden = true;
+        if (index) index.hidden = false;
+        if (legacy) legacy.hidden = false;
+      }
       return;
     }
 

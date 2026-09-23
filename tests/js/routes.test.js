@@ -253,35 +253,71 @@ test('every candidate list in DEFAULTS.tabs resolves to a route under today\'s R
   }
 });
 
-test('every hardcoded #/ link in shell.js resolves to a head ROUTER_HEADS can serve', () => {
-  // This is the structural guard for a defect that has recurred three times
-  // in this project: a link pointing at a route head with no handler in
-  // route() yet, which dead-ends on "No such view" instead of degrading to
+test('every hardcoded #/ link in shell.js and app/index.html resolves to a head ROUTER_HEADS can serve', () => {
+  // This is the structural guard for a defect that has recurred in this
+  // project: a link pointing at a route head with no handler in route()
+  // yet, which dead-ends on "No such view" instead of degrading to
   // something that renders today. The cure the project already has is
   // firstServable(candidates, canRender), which walks an ordered list of
   // candidate destinations and picks the first one the router can serve,
   // upgrading itself once a later task adds the missing handler.
   //
-  // This test reads shell.js as text, finds every href="#/..." literal --
+  // One occurrence of this defect lived outside shell.js entirely: the
+  // front page's three doors in app/index.html point straight at
+  // #/compare, #/unusual and #/about, none of which route() served at the
+  // time. A test that reads only shell.js cannot see a defect sitting in
+  // markup, so this test reads both files with the same rule.
+  //
+  // This test reads each file as text, finds every href="#/..." literal --
   // including ones built with template literals, such as
   // href="#/places/${code}" -- and reduces each to its head, the first path
   // segment after #/. A segment that is entirely a template expression
   // (e.g. the "${it.id}" in href="#/${it.id}") has no value known statically,
   // so it is treated as a wildcard rather than a literal head and is not
-  // checked. Every literal head found must either already be in
-  // ROUTER_HEADS, or be resolved through a firstServable(...) call on that
-  // same line (the degrade-and-upgrade pattern renderTabbar and buildHome
-  // both use) -- so a raw link straight to an unservable head fails here,
-  // rather than only being caught by hand at review time.
+  // checked. Every literal head found must already be in ROUTER_HEADS, or
+  // be provably resolved at render time:
+  //
+  //  - in shell.js, by a firstServable(...) call on that same line (the
+  //    degrade-and-upgrade pattern renderTabbar and buildHome both use);
+  //  - in app/index.html, whose static markup cannot call firstServable
+  //    itself, by carrying an id that buildHome() in shell.js looks up
+  //    (via $(...) or getElementById) and, within a few lines of that
+  //    lookup, resolves through firstServable/pick -- i.e. real, working
+  //    code that overwrites the static default at render time, not a
+  //    coincidental id or comment placed only to satisfy this test.
+  //
+  // A raw link straight to an unservable head with no such evidence fails
+  // here, rather than only being caught by hand at review time.
   const here = path.dirname(fileURLToPath(import.meta.url));
   const shellPath = path.join(here, '../../app/assets/shell.js');
-  const src = fs.readFileSync(shellPath, 'utf8');
+  const indexPath = path.join(here, '../../app/index.html');
+  const shellSrc = fs.readFileSync(shellPath, 'utf8');
+  const indexSrc = fs.readFileSync(indexPath, 'utf8');
 
-  const lineNumberAt = (index) => src.slice(0, index).split('\n').length;
-  const lineTextAt = (index) => {
-    const start = src.lastIndexOf('\n', index) + 1;
-    const end = src.indexOf('\n', index);
-    return src.slice(start, end === -1 ? src.length : end).trim();
+  // buildHome() is where app/index.html's static door links get overwritten
+  // at render time. Extract its body the same way the ROUTER_HEADS test
+  // above extracts route()'s -- start at the function's own opening brace,
+  // end at the next function's -- so the id-coverage check below only
+  // credits a real call inside buildHome, not a coincidental match
+  // anywhere else in the file.
+  const buildHomeMatch = /function\s+buildHome\s*\(\s*\)\s*\{/.exec(shellSrc);
+  assert.ok(buildHomeMatch, 'could not find function buildHome() in shell.js');
+  const buildHomeStart = buildHomeMatch.index;
+  const buildPlacePageMatch = /function\s+buildPlacePage\s*\(/.exec(shellSrc.slice(buildHomeStart));
+  assert.ok(buildPlacePageMatch, 'could not find the end of buildHome() in shell.js');
+  const buildHomeLines = shellSrc.slice(buildHomeStart, buildHomeStart + buildPlacePageMatch.index).split('\n');
+
+  // True when buildHome() looks up this exact id (by $('#id') or
+  // getElementById('id')) and, within the next couple of lines, resolves
+  // its href through firstServable (aliased locally as "pick").
+  const idResolvedInBuildHome = (id) => {
+    const lookup = new RegExp(`\\$\\(\\s*['"]#${id}['"]\\s*\\)|getElementById\\(\\s*['"]${id}['"]\\s*\\)`);
+    for (let i = 0; i < buildHomeLines.length; i++) {
+      if (!lookup.test(buildHomeLines[i])) continue;
+      const nearby = buildHomeLines.slice(i, i + 3).join('\n');
+      if (/\b(firstServable|pick)\(/.test(nearby)) return true;
+    }
+    return false;
   };
 
   // The captured group excludes newlines and quotes, so a match can never
@@ -289,25 +325,44 @@ test('every hardcoded #/ link in shell.js resolves to a head ROUTER_HEADS can se
   const linkPattern = /href="(#\/[^"\n]*)"/g;
   const isWildcardSegment = (segment) => /^\$\{[^}]*\}$/.test(segment);
 
+  const lineNumberAt = (src, index) => src.slice(0, index).split('\n').length;
+  const lineTextAt = (src, index) => {
+    const start = src.lastIndexOf('\n', index) + 1;
+    const end = src.indexOf('\n', index);
+    return src.slice(start, end === -1 ? src.length : end).trim();
+  };
+
   const failures = [];
-  let m;
-  while ((m = linkPattern.exec(src)) !== null) {
-    const linkText = m[0];
-    const target = m[1];
-    const afterHash = target.replace(/^#\//, '');
-    const head = afterHash.split('/')[0] || '';
 
-    if (isWildcardSegment(head)) continue; // value not known statically, cannot be checked
-    if (ROUTER_HEADS.has(head)) continue;
+  const scan = (label, src, isCovered) => {
+    linkPattern.lastIndex = 0;
+    let m;
+    while ((m = linkPattern.exec(src)) !== null) {
+      const linkText = m[0];
+      const target = m[1];
+      const afterHash = target.replace(/^#\//, '');
+      const head = afterHash.split('/')[0] || '';
 
-    const line = lineTextAt(m.index);
-    if (line.includes('firstServable(')) continue; // resolved dynamically on this line
+      if (isWildcardSegment(head)) continue; // value not known statically, cannot be checked
+      if (ROUTER_HEADS.has(head)) continue;
 
-    failures.push(`line ${lineNumberAt(m.index)}: ${linkText} -- head "${head}" is not in ` +
-      `ROUTER_HEADS and is not resolved through firstServable on that line`);
-  }
+      const line = lineTextAt(src, m.index);
+      if (isCovered(line)) continue;
+
+      failures.push(`${label}:${lineNumberAt(src, m.index)}: ${linkText} -- head "${head}" is not in ` +
+        `ROUTER_HEADS and is not provably resolved at render time`);
+    }
+  };
+
+  scan('app/assets/shell.js', shellSrc,
+    (line) => line.includes('firstServable(')); // resolved dynamically on this line
+
+  scan('app/index.html', indexSrc, (line) => {
+    const idMatch = /\bid="([\w-]+)"/.exec(line);
+    return !!idMatch && idResolvedInBuildHome(idMatch[1]);
+  });
 
   assert.deepEqual(failures, [],
-    `found hardcoded link(s) in shell.js pointing at a route head route() cannot serve:\n` +
+    `found hardcoded link(s) pointing at a route head route() cannot serve:\n` +
     failures.join('\n'));
 });
