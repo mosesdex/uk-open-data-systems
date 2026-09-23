@@ -12,7 +12,7 @@ const LINES = [
     id: 'plumbline',
     gap: (p) => (p.plumbline && p.plumbline.statutory_pct != null && p.plumbline.headline_pct != null)
       ? Math.abs(p.plumbline.headline_pct - p.plumbline.statutory_pct) : null,
-    say: (p, name) => `Of ${count(p.plumbline.dwelling_decisions)} major housing decisions in `
+    say: (p, name) => `Of ${count(p.plumbline.dwelling_decisions)} major dwelling decisions in `
       + `${name}, ${pct(p.plumbline.statutory_pct)} were made inside the statutory 13 weeks without an `
       + `agreed extension. The published measure for the same authority is ${pct(p.plumbline.headline_pct)}.`,
   },
@@ -31,7 +31,7 @@ const LINES = [
       && n.lastmile.other_pct != null)
       ? Math.abs(p.lastmile.gigabit_pct - n.lastmile.other_pct) : null,
     say: (p, name, n) => `${pct(p.lastmile.gigabit_pct)} of ${count(p.lastmile.premises)} premises in `
-      + `${name} are gigabit-ready, against ${pct(n.lastmile.other_pct)} nationally.`,
+      + `${name} are gigabit-ready, against ${pct(n.lastmile.other_pct)} outside new-build postcodes nationally.`,
   },
 ];
 

@@ -20,7 +20,7 @@ const COMPARATORS = [
     id: 'lastmile',
     figure: p => p.lastmile && p.lastmile.gigabit_pct,
     against: (p, n) => n.lastmile && n.lastmile.other_pct,
-    againstLabel: 'the national share',
+    againstLabel: 'the national share outside new-build postcodes',
   },
 ];
 

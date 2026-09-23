@@ -30,6 +30,16 @@ test('a place missing a question contributes no row for it', () => {
   assert.deepEqual(rows.map(r => r.question), ['catchment']);
 });
 
+test('the lastmile comparator names the population it actually covers', () => {
+  // lastmile.other_pct is coverage among premises outside new-build
+  // postcodes (platform/groundtruth/systems/lastmile.py), compared here
+  // against a place's all-premises figure, a different population, so the
+  // label must say "outside new-build postcodes" rather than a flat
+  // "the national share".
+  const row = unusualRows(PAYLOAD).find(r => r.question === 'lastmile');
+  assert.match(row.againstLabel, /outside new-build postcodes/);
+});
+
 test('the total counts every diverging pair, not just the capped display list', () => {
   // The fixture has 4 places and 3 comparators; not every place carries every
   // question, so the total is the count of qualifying pairs, not 4 * 3.

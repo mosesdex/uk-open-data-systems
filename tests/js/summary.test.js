@@ -39,3 +39,21 @@ test('no em dash reaches the copy', () => {
     assert.doesNotMatch(line, /—|–/, `dash in: ${line}`);
   }
 });
+
+test('plumbline decisions are called dwelling decisions, not housing decisions', () => {
+  // dwelling_decisions is a narrower field than major_decisions; the field's
+  // own name, and the project's plumbline-headline-left-out-extensions
+  // correction, both say "major dwelling decisions".
+  const line = placeSummary('E07000032', PAYLOAD).find(l => l.includes('13 weeks'));
+  assert.match(line, /major dwelling decisions/);
+  assert.doesNotMatch(line, /major housing decisions/);
+});
+
+test('the lastmile comparator states the population it actually covers', () => {
+  // lastmile.other_pct is coverage among premises outside new-build
+  // postcodes (platform/groundtruth/systems/lastmile.py), compared here
+  // against the place's all-premises figure, a different population. The
+  // sentence must say so rather than call it a flat national figure.
+  const line = placeSummary('E07000032', PAYLOAD).find(l => l.includes('gigabit-ready'));
+  assert.match(line, /outside new-build postcodes/);
+});
