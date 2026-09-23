@@ -159,6 +159,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tag{display:inline-flex;align-items:center;gap:.3rem;font-family:var(--mono);font-size:10px;
   letter-spacing:.05em;padding:.16rem .45rem;border-radius:5px;background:var(--blue-050);
   color:var(--blue-700);border:1px solid var(--blue-100);white-space:nowrap}
+/* The default (unmodified) tag keeps --blue-700, which was never adjusted for
+   dark: 1.45:1 on the dark blue-050 chip. The three status modifiers below
+   already use tokens that were adjusted (green-600/amber-600/red-600), so
+   this is scoped to exclude them rather than risk the modifier's later,
+   equal-specificity rule losing to this one. */
+[data-theme="dark"] .tag:not(.tag--ok):not(.tag--warn):not(.tag--bad){color:var(--blue-300)}
 .tag--ok{background:var(--green-050);color:var(--green-600);border-color:transparent}
 .tag--warn{background:var(--amber-050);color:var(--amber-600);border-color:transparent}
 .tag--bad{background:var(--red-050);color:var(--red-600);border-color:transparent}
@@ -393,6 +399,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .wwwr__k{font-family:var(--mono);font-size:9px;letter-spacing:.09em;color:var(--ink-3);padding-top:.12rem}
 .wwwr__r--where .wwwr__k{color:var(--uk-blue)}
 .wwwr__r--who .wwwr__k{color:var(--uk-red)}
+[data-theme="dark"] .wwwr__r--where .wwwr__k{color:var(--blue-300)}
+[data-theme="dark"] .wwwr__r--who .wwwr__k{color:var(--red-300)}
 .wwwr__none{color:var(--ink-3);font-family:var(--mono);font-size:10px;opacity:.7}
 @media(prefers-reduced-motion:reduce){.wwwr{transition:none}}
 .syscard:hover{box-shadow:var(--shadow-2);transform:translateY(-2px);border-color:var(--blue-300)}
@@ -408,6 +416,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .syscard__trend{font-family:var(--mono);font-size:11px;font-weight:600;padding:.05rem .3rem;border-radius:4px}
 .syscard__trend.up{color:var(--uk-red);background:var(--red-050)}
 .syscard__trend.down{color:var(--green-600);background:var(--green-050)}
+[data-theme="dark"] .syscard__trend.up{color:var(--red-300)}
 .syscard__lab{padding:0 1rem;font-size:12px;color:var(--ink-2)}
 .syscard__ctx{padding:.15rem 1rem 0;font-size:10.5px;color:var(--ink-3)}
 .syscard__pv{padding:.7rem 1rem .2rem;margin-top:auto}
@@ -504,6 +513,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 .sp-lede{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
 .sp-lede__k{font-size:12px;font-weight:650;color:var(--uk-blue);margin-bottom:.4rem}
+[data-theme="dark"] .sp-lede__k{color:var(--blue-300)}
 .sp-lede__i p{font-size:14px;line-height:1.55;color:var(--ink-2)}
 
 .sp-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem}
@@ -596,6 +606,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .mj__wk{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink-3);font-weight:600}
 .mj__w--where .mj__wk{color:var(--uk-blue)}
 .mj__w--who .mj__wk{color:var(--uk-red)}
+[data-theme="dark"] .mj__w--where .mj__wk{color:var(--blue-300)}
+[data-theme="dark"] .mj__w--who .mj__wk{color:var(--red-300)}
 .mj__w p{font-size:13px;line-height:1.45;color:var(--ink);margin-top:.35rem}
 .mj__flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:stretch;gap:.5rem}
 .mj__stage{border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem;background:var(--surface);
@@ -608,6 +620,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .mj__stage--possible{border-color:var(--uk-red);box-shadow:inset 0 0 0 1px var(--red-050)}
 .mj__lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.4rem}
 .mj__stage--possible .mj__lab{color:var(--uk-red)}
+[data-theme="dark"] .mj__stage--possible .mj__lab{color:var(--red-300)}
 .mj__stage p{font-size:12.5px;line-height:1.45;color:var(--ink-2)}
 .mj__stage--possible p{color:var(--ink);font-weight:500}
 .mj__arrow{align-self:center;color:var(--ink-3);font-size:18px;opacity:0;transform:translateY(10px);
@@ -657,6 +670,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .cmpcta{display:inline-flex;align-items:center;gap:.45rem;font-size:13px;font-weight:600;
   color:var(--uk-blue);border:1px solid var(--blue-300);border-radius:9px;padding:.45rem .85rem;
   background:var(--blue-050);transition:background .14s,border-color .14s}
+[data-theme="dark"] .cmpcta{color:var(--blue-300)}
 .cmpcta:hover{background:var(--blue-100);border-color:var(--uk-blue)}
 
 /* ---- organisation knowledge graph (#org) ---- */
@@ -688,6 +702,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .org-sys{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;padding:.15rem .45rem;border-radius:20px;white-space:nowrap}
 .org-sys--bellwether{background:var(--red-050);color:var(--uk-red)}
 .org-sys--sentinel{background:var(--blue-050);color:var(--uk-blue)}
+[data-theme="dark"] .org-sys--bellwether{color:var(--red-300)}
+[data-theme="dark"] .org-sys--sentinel{color:var(--blue-300)}
 /* profile graph */
 .org-graph{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.7rem;align-items:center}
 .org-col{display:grid;gap:.5rem;align-content:start}

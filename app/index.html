@@ -566,7 +566,12 @@ cannot tell you.</p>
     list.map(p => `<option value="${p.name}">`).join('');
 
   const panel = document.getElementById('placePanel');
-  const toneColour = t => t === 'bad' ? 'var(--hot)' : t === 'warn' ? 'var(--warm, #9A6300)' : 'var(--cool)';
+  // 'warn' used to fall back to a literal #9A6300 (var(--warm) is never
+  // defined), the same colour in both themes: 3.64:1 on the dark theme's
+  // card background. var(--amber-600) is the token this file already
+  // lightens for dark mode everywhere else a warning reads amber, and its
+  // light-theme value is that same #9A6300, so this changes nothing there.
+  const toneColour = t => t === 'bad' ? 'var(--hot)' : t === 'warn' ? 'var(--amber-600)' : 'var(--cool)';
 
   function showPlace(code) {
     const rep = Platform.placeReport(code);
@@ -745,7 +750,7 @@ cannot tell you.</p>
   });
 
   document.getElementById('blockedFeed').innerHTML = BLOCKED.map(b=>`<div class="fitem">
-    <div class="fitem__i" style="background:var(--red-050);color:var(--uk-red)">${b.code}</div>
+    <div class="fitem__i" style="background:var(--red-050);color:var(--red-600)">${b.code}</div>
     <div><div class="fitem__t">${b.n}</div><div class="fitem__d">${b.why}</div>
     <div class="fitem__m"><span>${b.org}</span><span>HTTP ${b.code}</span></div></div></div>`).join('');
 
