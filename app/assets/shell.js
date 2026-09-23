@@ -641,10 +641,13 @@ const Shell = (() => {
     meta('meta[name="twitter:description"]', desc);
   }
 
-  // The heads route() below actually dispatches, read off its own if-branches.
-  // Later tasks add to this set as they add handlers; canonicalHash uses it to
-  // decide whether a redirect target can be rendered at all.
-  const HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
+  // ROUTER_HEADS in app/assets/lib/routes.js is the authoritative list of
+  // heads route() below actually dispatches, read off its own if-branches
+  // and enforced against them in tests/js/routes.test.js. This local set is
+  // only a fallback for the (should not happen) case where the module entry
+  // has not loaded and window.GT_LIB.ROUTER_HEADS is unavailable; keep it
+  // matching route()'s branches so the degraded behaviour still makes sense.
+  const FALLBACK_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
 
   // route() runs on every hash change, so this flag keeps the warning below
   // to a single occurrence instead of spamming the console on each navigation.
@@ -655,7 +658,8 @@ const Shell = (() => {
     // One table of every hash the app has published, tested in tests/js/routes.test.js.
     let canonical = null;
     if (window.GT_LIB && window.GT_LIB.canonicalHash) {
-      canonical = window.GT_LIB.canonicalHash(raw, (head) => HEADS.has(head));
+      const heads = window.GT_LIB.ROUTER_HEADS || FALLBACK_HEADS;
+      canonical = window.GT_LIB.canonicalHash(raw, (head) => heads.has(head));
     } else if (!warnedMissingLib) {
       warnedMissingLib = true;
       console.warn('[shell] route aliasing is unavailable because the module entry has not loaded');
