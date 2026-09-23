@@ -641,11 +641,25 @@ const Shell = (() => {
     meta('meta[name="twitter:description"]', desc);
   }
 
+  // The heads route() below actually dispatches, read off its own if-branches.
+  // Later tasks add to this set as they add handlers; canonicalHash uses it to
+  // decide whether a redirect target can be rendered at all.
+  const HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search']);
+
+  // route() runs on every hash change, so this flag keeps the warning below
+  // to a single occurrence instead of spamming the console on each navigation.
+  let warnedMissingLib = false;
+
   function route() {
     const raw = location.hash || '#/';
     // One table of every hash the app has published, tested in tests/js/routes.test.js.
-    const canonical = (window.GT_LIB && window.GT_LIB.canonicalHash)
-      ? window.GT_LIB.canonicalHash(raw) : null;
+    let canonical = null;
+    if (window.GT_LIB && window.GT_LIB.canonicalHash) {
+      canonical = window.GT_LIB.canonicalHash(raw, (head) => HEADS.has(head));
+    } else if (!warnedMissingLib) {
+      warnedMissingLib = true;
+      console.warn('[shell] route aliasing is unavailable because the module entry has not loaded');
+    }
     if (canonical) { location.replace(canonical); return; }
 
     const path = raw.replace(/^#\/?/, '').split('?')[0];
