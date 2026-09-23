@@ -897,6 +897,21 @@ const Shell = (() => {
     const about = $('#doorAbout');
     const srcs = (Platform.sourceSummary() || {}).rows || [];
     if (about) about.textContent = srcs.length ? num(srcs.length) : '';
+
+    // The front page's only provenance claim, computed from the same payload
+    // rather than left as hand-typed text. Each clause is dropped on its own
+    // when its number cannot be derived, so a stale figure never survives.
+    const cred = $('#findCred');
+    if (cred) {
+      const publishers = new Set(srcs.map(r => r.publisher).filter(Boolean));
+      const correctionsTotal = ((Platform.corrections() || {}).summary || {}).total
+        ?? (((Platform.corrections() || {}).entries || []).length || null);
+      const parts = [];
+      if (srcs.length && publishers.size) parts.push(`${num(srcs.length)} sources from ${num(publishers.size)} publishers.`);
+      if (correctionsTotal) parts.push(`${num(correctionsTotal)} corrections published, each with `
+        + `what was believed, what was true, and the test that now guards it.`);
+      cred.textContent = parts.join(' ');
+    }
   }
 
   /* The place's own figures as a file, written from the rows the page renders
