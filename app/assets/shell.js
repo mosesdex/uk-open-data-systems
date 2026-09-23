@@ -643,12 +643,10 @@ const Shell = (() => {
 
   function route() {
     const raw = location.hash || '#/';
-    const L = legacy();
-    if (L[raw]) { location.replace(L[raw]); return; }
-    const legacySys = raw.match(/^#system\/([a-z0-9_-]+)$/i);
-    if (legacySys) { location.replace('#/systems/' + legacySys[1]); return; }
-    const legacyOrg = raw.match(/^#org\/(.+)$/);
-    if (legacyOrg) { location.replace('#/orgs/' + legacyOrg[1]); return; }
+    // One table of every hash the app has published, tested in tests/js/routes.test.js.
+    const canonical = (window.GT_LIB && window.GT_LIB.canonicalHash)
+      ? window.GT_LIB.canonicalHash(raw) : null;
+    if (canonical) { location.replace(canonical); return; }
 
     const path = raw.replace(/^#\/?/, '').split('?')[0];
     const seg = path.split('/').filter(Boolean);
