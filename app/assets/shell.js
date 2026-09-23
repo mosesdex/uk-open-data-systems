@@ -316,16 +316,16 @@ const Shell = (() => {
         <div class="vhead__s">Each row opens everything the record holds for that place.</div></div></div>
       <div class="fbar">
         <button class="fchip${placeFilter.min === 0 ? ' is-on' : ''}" data-min="0">All districts</button>
-        <button class="fchip${placeFilter.min === 5 ? ' is-on' : ''}" data-min="5">5+ systems</button>
-        <button class="fchip${placeFilter.min === 9 ? ' is-on' : ''}" data-min="9">9+ systems</button>
+        <button class="fchip${placeFilter.min === 5 ? ' is-on' : ''}" data-min="5">5+ questions</button>
+        <button class="fchip${placeFilter.min === 9 ? ' is-on' : ''}" data-min="9">9+ questions</button>
         ${placeFilter.q ? `<button class="fchip is-on" data-clearq>“${esc(placeFilter.q)}” &times;</button>` : ''}
         <span class="fbar__n">${num(rows.length)} of ${num(all.length)}</span>
       </div>
       ${rows.length ? `<div class="dt-wrap"><table class="dt dt--compact">
-        <thead><tr><th data-sort="name">District</th><th class="num" data-sort="systems">Systems reporting</th>
+        <thead><tr><th data-sort="name">District</th><th class="num" data-sort="systems">Questions answered</th>
           <th style="width:1%">Coverage</th></tr></thead>
-        <tbody>${rows.map(p => `<tr data-place="${esc(p.code)}">
-          <td><b>${esc(p.name)}</b></td>
+        <tbody>${rows.map(p => `<tr>
+          <td><a class="dtlink" href="#/places/${esc(p.code)}"><b>${esc(p.name)}</b></a></td>
           <td class="num">${p.systems} of 13</td>
           <td><span class="st st--${p.systems >= 9 ? 'ok' : p.systems >= 5 ? 'warn' : 'none'}">${
             p.systems >= 9 ? 'broad' : p.systems >= 5 ? 'partial' : 'thin'}</span></td>
@@ -338,7 +338,10 @@ const Shell = (() => {
     if (cq) cq.onclick = () => { placeFilter.q = ''; renderPlaceIndex(); };
     const cf = box.querySelector('[data-clear-filters]');
     if (cf) cf.onclick = () => { placeFilter = { q: '', min: 0 }; renderPlaceIndex(); };
-    box.querySelectorAll('[data-place]').forEach(tr => tr.onclick = () => openPlace(tr.dataset.place));
+    // The district name is now a real link to its place page (#/places/<code>):
+    // reachable by keyboard, gives a shareable URL, and opens the redesign's
+    // own place page instead of the legacy panel openPlace() used to open.
+    // No row-level click handler is attached any more.
   }
 
   /* -------------------------------------------------- detail panel + prov --- */
