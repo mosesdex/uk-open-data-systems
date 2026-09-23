@@ -25,7 +25,8 @@ test('every sentence names a figure the payload holds', () => {
 test('a place with one question gets one sentence, not padding', () => {
   const lines = placeSummary('E06000001', PAYLOAD);
   assert.equal(lines.length, 1);
-  assert.match(lines[0], /91\.7%/);
+  // Hartlepool's own published utilisation, as app/data/platform.json carries it.
+  assert.match(lines[0], /88\.5%/);
 });
 
 test('an unknown place produces nothing rather than guessing', () => {

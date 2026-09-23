@@ -868,6 +868,35 @@ const Shell = (() => {
     if (about) about.textContent = srcs.length ? num(srcs.length) : '';
   }
 
+  /* The place's own figures as a file, written from the rows the page renders
+     rather than from a second pass over the payload, so the two can never
+     disagree. Nothing is rounded here that the page did not already round. */
+  function placeCsv(code, name, rows) {
+    const cell = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    const head = ['place_code', 'place_name', 'question', 'question_name', 'figure', 'unit',
+                  'measured_against', 'against_label', 'caveat', 'method'];
+    const lines = [head.join(',')];
+    for (const a of rows) {
+      lines.push([code, name, a.id, a.name, a.figure, a.unit, a.against, a.againstLabel,
+                  a.caveat, a.method].map(cell).join(','));
+    }
+    return lines.join('\r\n') + '\r\n';
+  }
+
+  function downloadPlaceCsv(code, name, rows) {
+    const blob = new Blob([placeCsv(code, name, rows)], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${code}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Revoked on the next turn of the loop: Safari needs the object URL to
+    // outlive the click that consumes it.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
   /* One place, as a document: what it is, what stands out, then every question
      that has an answer for it, and plainly those that do not. */
   function buildPlacePage(code) {
@@ -893,8 +922,20 @@ const Shell = (() => {
 
     const lib = window.GT_LIB || {};
     const summary = lib.placeSummary ? lib.placeSummary(code, payload) : [];
+    // Each block carries this place's own figures, from the tested module in
+    // app/assets/lib/answers.js. Until that module entry loads, the fallback
+    // below is the page as it was: the question and a link, with no figure
+    // pretending to be local.
+    const answers = lib.placeAnswers ? lib.placeAnswers(code, payload) : null;
+    // What kind of authority this is, since a county figure shown on a district
+    // has to say so. Null where the payload cannot tell, and nothing is guessed.
+    const authority = lib.placeAuthority ? lib.placeAuthority(code, payload) : null;
     const answered = SYSTEMS.filter(s => place[s.id]);
-    const missing = SYSTEMS.filter(s => !place[s.id]);
+    // An answer is a question with a figure, not merely a block: a block whose
+    // figure is null in the payload belongs with the absences, so the count and
+    // the blocks below it can never disagree.
+    const shown = answers ? new Set(answers.map(a => a.id)) : new Set(answered.map(s => s.id));
+    const missing = SYSTEMS.filter(s => !shown.has(s.id));
 
     // The question view has no handler yet (a later task adds it), so this
     // degrades to #/systems/<id>, which renders today, and upgrades itself
@@ -902,26 +943,44 @@ const Shell = (() => {
     const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
     const pick = lib.firstServable || fallbackFirstServable;
     const canRender = head => heads.has(head);
+    const method = id => pick(['#/questions/' + id, '#/systems/' + id], canRender) || ('#/systems/' + id);
+    // A figure is a number or a string the module already formatted.
+    const fig = v => typeof v === 'number' ? num(v) : String(v);
 
-    host.innerHTML = `
-      <h2 class="place__h">${esc(name)}</h2>
-      <p class="place__k">${answered.length} of ${SYSTEMS.length} questions answered here</p>
-      ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
-      <div class="answers">
-        ${answered.map(s => {
-          const qid = esc(s.id);
-          const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
-          return `
+    const blocks = answers ? answers.map(a => `
+          <article class="answer">
+            <p class="answer__n">${esc(a.name)}</p>
+            <h3 class="answer__q">${esc(a.question)}</h3>
+            <p class="answer__f"><span class="answer__fv">${esc(fig(a.figure))}</span>${
+              a.unit ? `<span class="answer__fu">${esc(a.unit)}</span>` : ''}</p>
+            ${a.against != null ? `<p class="answer__v">Measured against ${esc(num(a.against))}${
+              esc(a.unit || '')}, ${esc(a.againstLabel || '')}.</p>` : ''}
+            ${a.caveat ? `<p class="answer__c">${esc(a.caveat)}</p>` : ''}
+            <a class="answer__go" href="${method(a.id)}">How this is computed</a>
+          </article>`).join('')
+      : answered.map(s => `
           <article class="answer">
             <h3 class="answer__q">${esc(s.n)}</h3>
             <p class="answer__s">${esc(s.s || '')}</p>
-            <a class="answer__go" href="${href}">How this is computed</a>
-          </article>`;
-        }).join('')}
-      </div>
+            <a class="answer__go" href="${method(s.id)}">How this is computed</a>
+          </article>`).join('');
+
+    host.innerHTML = `
+      <h2 class="place__h">${esc(name)}</h2>
+      ${authority ? `<p class="place__t">${esc(authority)}</p>` : ''}
+      <p class="place__k">${shown.size} of ${SYSTEMS.length} questions answered here</p>
+      ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
+      <div class="answers">${blocks}</div>
       ${missing.length ? `<p class="place__none">No answer here for ${
         missing.map(s => esc(s.n)).join(', ')}. That is usually because the service is run by the
-        county rather than the district, and the figure is published at that level.</p>` : ''}`;
+        county rather than the district, and the figure is published at that level.</p>` : ''}
+      ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
+        id="placeCsv">Download these ${answers.length} figures as CSV</button></p>` : ''}`;
+
+    // The file is written from the same rows the blocks above are, so the page
+    // and the download cannot disagree about a single figure.
+    const csvBtn = $('#placeCsv');
+    if (csvBtn) csvBtn.addEventListener('click', () => downloadPlaceCsv(code, name, answers));
     host.hidden = false;
     if (index) index.hidden = true;
     // A specific place is open: the legacy explorer below (#place) would

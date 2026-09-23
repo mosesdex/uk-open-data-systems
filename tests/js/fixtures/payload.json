@@ -1,23 +1,259 @@
 {
-  "places": {
-    "names": { "E07000032": "Amber Valley", "E06000001": "Hartlepool" },
-    "byLad": {
-      "E07000032": {
-        "plumbline": { "lpa": "Amber Valley", "major_decisions": 85.0, "headline_pct": 97.6,
-                       "dwelling_decisions": 46.0, "statutory_pct": 8.7 },
-        "catchment": { "lad_name": "Amber Valley", "schools": 68, "capacity": 19488,
-                       "pupils": 17734, "utilisation_pct": 91.0 },
-        "lastmile": { "lad_name": "Amber Valley", "premises": 130067, "gigabit_pct": 81.8 }
-      },
-      "E06000001": {
-        "catchment": { "lad_name": "Hartlepool", "schools": 40, "capacity": 12000,
-                       "pupils": 11000, "utilisation_pct": 91.7 }
-      }
-    }
+ "places": {
+  "names": {
+   "E07000032": "Amber Valley",
+   "E06000001": "Hartlepool",
+   "E09000007": "Camden",
+   "W06000009": "Pembrokeshire"
   },
-  "systems": {
-    "plumbline": { "headline_pct": 90.4, "statutory_pct": 15.9 },
-    "catchment": { "national": { "utilisation_pct": 89.5 } },
-    "lastmile": { "new_build_pct": 83.3, "other_pct": 83.5 }
+  "capacityTrend": {
+   "E10000007": {
+    "name": "Derbyshire"
+   },
+   "E09000007": {
+    "name": "Camden"
+   },
+   "E06000001": {
+    "name": "Hartlepool"
+   }
+  },
+  "byLad": {
+   "E07000032": {
+    "plumbline": {
+     "lpa": "Amber Valley",
+     "major_decisions": 85,
+     "headline_pct": 97.6,
+     "dwelling_decisions": 46,
+     "statutory_pct": 8.7
+    },
+    "catchment": {
+     "lad_code": "E07000032",
+     "lad_name": "Amber Valley",
+     "schools": 68,
+     "schools_measured": 65,
+     "capacity": 19488,
+     "pupils": 17734,
+     "utilisation_pct": 91,
+     "measured_pct": 95.6,
+     "entity_resolved_pct": 41.2
+    },
+    "lastmile": {
+     "lad_name": "Amber Valley",
+     "lad_code": "E07000032",
+     "premises": 130067,
+     "gigabit_now": 106371,
+     "gigabit_pct": 81.8,
+     "new_build_sales": 1660,
+     "gigabit_pct_new_build": 77.4
+    },
+    "compass": {
+     "authority_name": "Derbyshire",
+     "figure_for": "county",
+     "years": 11,
+     "last_year": 2025,
+     "mean_pupils": 3893,
+     "pupils_per_year": 293.2,
+     "projected_change_3yr": 880,
+     "projected_change_pct": 22.6
+    },
+    "bellwether": {
+     "authority_name": "Derbyshire",
+     "figure_for": "county",
+     "group_name": "Ashmere Derbyshire Limited",
+     "branded": false,
+     "locations": 7,
+     "beds": 291,
+     "la_beds": 7614,
+     "share_pct": 3.8,
+     "groups": 157
+    },
+    "bulwark": {
+     "local_authority": "Amber Valley",
+     "assets": 170,
+     "maintainer_known": 170,
+     "owner_known": 170,
+     "graded": 45,
+     "mean_condition": 2.56,
+     "graded_pct": 26.5,
+     "inspection_overdue": 1
+    },
+    "highwater": {
+     "lpa": "Amber Valley Borough Council",
+     "objections": 52,
+     "granted_against": 2,
+     "outcome_unknown": 8,
+     "residential_units": 1954,
+     "homes_against": 18,
+     "override_rate_pct": 4.5
+    },
+    "sightline": {
+     "lpa": "Amber Valley Borough Council",
+     "flood_objections": 52,
+     "flood_outcome_unknown": 8,
+     "water_objections": 0
+    },
+    "ledger": {
+     "authority": "Amber Valley Borough Council",
+     "contributions": 63,
+     "with_amount": 45,
+     "total_amount": 5099873,
+     "amount_coverage_pct": 71.4,
+     "with_location": 0
+    },
+    "_capacity": {
+     "authority": "E10000007",
+     "figure_for": "county"
+    },
+    "_systems": [
+     "bellwether",
+     "bulwark",
+     "catchment",
+     "compass",
+     "highwater",
+     "lastmile",
+     "ledger",
+     "plumbline",
+     "sightline"
+    ]
+   },
+   "E09000007": {
+    "catchment": {
+     "lad_code": "E09000007",
+     "lad_name": "Camden",
+     "schools": 90,
+     "schools_measured": 77,
+     "capacity": 33872,
+     "pupils": 28133,
+     "utilisation_pct": 83.1,
+     "measured_pct": 85.6,
+     "entity_resolved_pct": 4.4
+    },
+    "lastmile": {
+     "lad_name": "Camden",
+     "lad_code": "E09000007",
+     "premises": 235159,
+     "gigabit_now": 179281,
+     "gigabit_pct": 76.2,
+     "new_build_sales": 1104,
+     "gigabit_pct_new_build": 61.7
+    },
+    "compass": {
+     "authority_name": "Camden",
+     "figure_for": "district",
+     "years": 11,
+     "last_year": 2025,
+     "mean_pupils": 1133,
+     "pupils_per_year": 30.1,
+     "projected_change_3yr": 90,
+     "projected_change_pct": 8
+    },
+    "bellwether": {
+     "authority_name": "Camden",
+     "figure_for": "district",
+     "group_name": "BRAND Shaw Healthcare",
+     "branded": true,
+     "locations": 2,
+     "beds": 120,
+     "la_beds": 510,
+     "share_pct": 23.5,
+     "groups": 9
+    },
+    "_capacity": {
+     "authority": "E09000007",
+     "figure_for": "district"
+    }
+   },
+   "E06000001": {
+    "catchment": {
+     "lad_code": "E06000001",
+     "lad_name": "Hartlepool",
+     "schools": 36,
+     "schools_measured": 35,
+     "capacity": 16189,
+     "pupils": 14326,
+     "utilisation_pct": 88.5,
+     "measured_pct": 97.2,
+     "entity_resolved_pct": 83.3
+    },
+    "compass": {
+     "authority_name": "Hartlepool",
+     "figure_for": "district",
+     "years": 11,
+     "last_year": 2025,
+     "mean_pupils": 513,
+     "pupils_per_year": 41.5,
+     "projected_change_3yr": 124,
+     "projected_change_pct": 24.3
+    },
+    "bellwether": {
+     "authority_name": "Hartlepool",
+     "figure_for": "district",
+     "group_name": "BRAND Welltower",
+     "branded": true,
+     "locations": 3,
+     "beds": 198,
+     "la_beds": 1007,
+     "share_pct": 19.7,
+     "groups": 22
+    },
+    "bulwark": {
+     "local_authority": "Hartlepool",
+     "assets": 63,
+     "maintainer_known": 62,
+     "owner_known": 19,
+     "graded": 20,
+     "mean_condition": 3.05,
+     "graded_pct": 31.7,
+     "inspection_overdue": 1
+    },
+    "sightline": {
+     "lpa": "Hartlepool Borough Council",
+     "flood_objections": 16,
+     "flood_outcome_unknown": 3,
+     "water_objections": 0
+    },
+    "_capacity": {
+     "authority": "E06000001",
+     "figure_for": "district"
+    }
+   },
+   "W06000009": {
+    "catchment": {
+     "lad_code": "W06000009",
+     "lad_name": "Pembrokeshire",
+     "schools": 70,
+     "schools_measured": 0,
+     "capacity": null,
+     "pupils": null,
+     "utilisation_pct": null,
+     "measured_pct": 0,
+     "entity_resolved_pct": 0
+    },
+    "lastmile": {
+     "lad_name": "Pembrokeshire",
+     "lad_code": "W06000009",
+     "premises": 97156,
+     "gigabit_now": 59334,
+     "gigabit_pct": 61.1,
+     "new_build_sales": 614,
+     "gigabit_pct_new_build": 47.2
+    }
+   }
   }
+ },
+ "systems": {
+  "plumbline": {
+   "headline_pct": 90.4,
+   "statutory_pct": 15.9
+  },
+  "catchment": {
+   "national": {
+    "utilisation_pct": 89.5
+   }
+  },
+  "lastmile": {
+   "new_build_pct": 83.3,
+   "other_pct": 83.5
+  }
+ }
 }
