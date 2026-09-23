@@ -743,11 +743,20 @@ const Shell = (() => {
 
     const list = $('#qlistBody');
     if (list) {
-      list.innerHTML = SYSTEMS.map(s =>
-        `<a class="qrow" href="#/questions/${esc(s.id)}">
+      // The question view has no handler yet (a later task adds it), so this
+      // degrades to #/systems/<id>, which renders today, and upgrades itself
+      // once that handler lands -- same firstServable pattern as renderTabbar.
+      const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+      const pick = lib.firstServable || fallbackFirstServable;
+      const canRender = head => heads.has(head);
+      list.innerHTML = SYSTEMS.map(s => {
+        const qid = esc(s.id);
+        const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
+        return `<a class="qrow" href="${href}">
            <span class="qrow__n">${esc(s.n)}</span>
            <span class="qrow__s">${esc(s.s || '')}</span>
-         </a>`).join('');
+         </a>`;
+      }).join('');
     }
 
     const compare = $('#doorCompare');
@@ -770,17 +779,28 @@ const Shell = (() => {
     const answered = SYSTEMS.filter(s => place[s.id]);
     const missing = SYSTEMS.filter(s => !place[s.id]);
 
+    // The question view has no handler yet (a later task adds it), so this
+    // degrades to #/systems/<id>, which renders today, and upgrades itself
+    // once that handler lands -- same firstServable pattern as renderTabbar.
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+
     host.innerHTML = `
       <h2 class="place__h">${esc(name)}</h2>
       <p class="place__k">${answered.length} of ${SYSTEMS.length} questions answered here</p>
       ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
       <div class="answers">
-        ${answered.map(s => `
+        ${answered.map(s => {
+          const qid = esc(s.id);
+          const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
+          return `
           <article class="answer">
             <h3 class="answer__q">${esc(s.n)}</h3>
             <p class="answer__s">${esc(s.s || '')}</p>
-            <a class="answer__go" href="#/questions/${esc(s.id)}">How this is computed</a>
-          </article>`).join('')}
+            <a class="answer__go" href="${href}">How this is computed</a>
+          </article>`;
+        }).join('')}
       </div>
       ${missing.length ? `<p class="place__none">No answer here for ${
         missing.map(s => esc(s.n)).join(', ')}. That is usually because the service is run by the

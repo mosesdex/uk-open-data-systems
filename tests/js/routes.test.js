@@ -252,3 +252,62 @@ test('every candidate list in DEFAULTS.tabs resolves to a route under today\'s R
       `tab candidates ${JSON.stringify(candidates)} have no route ROUTER_HEADS can render today`);
   }
 });
+
+test('every hardcoded #/ link in shell.js resolves to a head ROUTER_HEADS can serve', () => {
+  // This is the structural guard for a defect that has recurred three times
+  // in this project: a link pointing at a route head with no handler in
+  // route() yet, which dead-ends on "No such view" instead of degrading to
+  // something that renders today. The cure the project already has is
+  // firstServable(candidates, canRender), which walks an ordered list of
+  // candidate destinations and picks the first one the router can serve,
+  // upgrading itself once a later task adds the missing handler.
+  //
+  // This test reads shell.js as text, finds every href="#/..." literal --
+  // including ones built with template literals, such as
+  // href="#/places/${code}" -- and reduces each to its head, the first path
+  // segment after #/. A segment that is entirely a template expression
+  // (e.g. the "${it.id}" in href="#/${it.id}") has no value known statically,
+  // so it is treated as a wildcard rather than a literal head and is not
+  // checked. Every literal head found must either already be in
+  // ROUTER_HEADS, or be resolved through a firstServable(...) call on that
+  // same line (the degrade-and-upgrade pattern renderTabbar and buildHome
+  // both use) -- so a raw link straight to an unservable head fails here,
+  // rather than only being caught by hand at review time.
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const shellPath = path.join(here, '../../app/assets/shell.js');
+  const src = fs.readFileSync(shellPath, 'utf8');
+
+  const lineNumberAt = (index) => src.slice(0, index).split('\n').length;
+  const lineTextAt = (index) => {
+    const start = src.lastIndexOf('\n', index) + 1;
+    const end = src.indexOf('\n', index);
+    return src.slice(start, end === -1 ? src.length : end).trim();
+  };
+
+  // The captured group excludes newlines and quotes, so a match can never
+  // straddle more than the one line its href="..." attribute is written on.
+  const linkPattern = /href="(#\/[^"\n]*)"/g;
+  const isWildcardSegment = (segment) => /^\$\{[^}]*\}$/.test(segment);
+
+  const failures = [];
+  let m;
+  while ((m = linkPattern.exec(src)) !== null) {
+    const linkText = m[0];
+    const target = m[1];
+    const afterHash = target.replace(/^#\//, '');
+    const head = afterHash.split('/')[0] || '';
+
+    if (isWildcardSegment(head)) continue; // value not known statically, cannot be checked
+    if (ROUTER_HEADS.has(head)) continue;
+
+    const line = lineTextAt(m.index);
+    if (line.includes('firstServable(')) continue; // resolved dynamically on this line
+
+    failures.push(`line ${lineNumberAt(m.index)}: ${linkText} -- head "${head}" is not in ` +
+      `ROUTER_HEADS and is not resolved through firstServable on that line`);
+  }
+
+  assert.deepEqual(failures, [],
+    `found hardcoded link(s) in shell.js pointing at a route head route() cannot serve:\n` +
+    failures.join('\n'));
+});
