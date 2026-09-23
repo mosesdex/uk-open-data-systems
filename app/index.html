@@ -118,9 +118,74 @@
     <div id="unusualBody"></div>
   </div>
 
+  <!-- #/sources and #/method both redirect here (app/assets/lib/routes.js),
+       and the containers below are the actual homes of buildMethod()'s and
+       buildSources()'s output (app/assets/shell.js) -- moved out of the old,
+       now-unreachable #viewMethod and #viewSources views rather than
+       duplicated, so nothing on this page repeats. route()'s 'about' branch
+       calls buildMethod(), buildSources() and buildAbout() into these
+       sections in this order: the two joins and how a record is placed;
+       the sources, including the contradictions the platform finds in its
+       own output; the corrections and the platform inventory (buildAbout);
+       and last the limits -- what cannot be answered end to end, and what
+       fails an anonymous request. -->
   <div class="view" data-view="about" id="viewAbout" hidden>
     <h2 class="place__h">How this is built</h2>
+
+    <h3 class="qlist__h" style="margin-top:1rem">The two joins, and how a record finds its place</h3>
+    <section class="card" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">How a record finds its place</div>
+        <div class="card__s">The place spine’s tiers, best first, each with what it has been tested against and what it cannot tell you.</div></div></div>
+      <div class="card__b" id="methodSpine"></div>
+    </section>
+
+    <section class="card" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">What the joins connect</div>
+        <div class="card__s">Every relationship type the platform declares, counted in the data rather than asserted.</div></div></div>
+      <div class="card__b" id="methodGraph"></div>
+    </section>
+
+    <div class="secmark rise" id="mark-05" style="margin-top:1.4rem"><div><div class="secmark__k">The evidence base</div><h2 class="secmark__t">Where every figure comes from</h2><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee, and the ones that failed, kept visible.</div></div></div>
+    <div class="grid g-1-2" style="margin-top:1rem">
+      <section class="card rise">
+        <div class="card__hd"><div class="card__t">Where the record draws from</div></div>
+        <div class="card__b">
+          <div class="row" style="justify-content:center"><div id="donut1"></div></div>
+          <div id="donutKey" style="margin-top:.9rem"></div>
+        </div>
+      </section>
+      <section class="card rise" id="feeds">
+        <div class="card__hd"><div><div class="card__t">Open data sources</div>
+          <div class="card__s">Every row returned HTTP 200 to an unauthenticated request on 17 August 2026</div></div>
+          <div class="spacer"></div>
+          <div class="srch"><span class="card__s">⌕</span><input id="feedSearch" placeholder="Filter sources…" aria-label="Filter sources"></div></div>
+        <div class="card__b card__b--flush" style="max-height:420px;overflow:auto">
+          <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Format</th></tr></thead>
+          <tbody id="feedRows"></tbody></table>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" id="crosschecks" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">Where the platform checks itself</div>
+        <div class="card__s">Every quantity it holds twice, by two routes, compared. Disagreements are shown, not resolved.</div></div></div>
+      <div class="card__b" id="sourcesChecks"></div>
+    </section>
+
     <div id="aboutBody"></div>
+
+    <div class="secmark rise" id="mark-06" style="margin-top:1.4rem"><div><div class="secmark__k">Honesty</div><h2 class="secmark__t">What this cannot do</h2><div class="secmark__s">The limits are part of the product. A tool a civil servant can defend states plainly what it cannot answer.</div></div></div>
+    <section class="card rise" id="honesty" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">What this cannot do</div>
+        <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
+      <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
+    </section>
+
+    <section class="card" id="gaps" style="margin-top:1rem">
+      <div class="card__hd"><div><div class="card__t">Where the evidence runs out</div>
+        <div class="card__s">The questions the platform tries to answer end to end, walked link by link against its own tables. Each missing link says whose it is to supply.</div></div></div>
+      <div class="card__b" id="methodGaps"></div>
+    </section>
   </div>
 
   <!-- One destination per view. The router shows exactly one; nothing takes
@@ -224,41 +289,14 @@ cannot tell you.</p>
 
   </div>
 
+  <!-- This view is never routed to: #/sources redirects to #/about
+       (app/assets/lib/routes.js), which now carries this view's own content
+       -- the donut, the Open data sources table and the cross-checks table
+       (id="donut1"/"donutKey"/"feedRows"/"sourcesChecks") -- moved into
+       #viewAbout above so nothing here duplicates what that page shows.
+       These two paragraphs stay here unchanged; they were already only
+       reachable through the same redirect. -->
   <div class="view" data-view="sources" id="viewSources" hidden>
-  <div class="secmark rise" id="mark-05"><div><div class="secmark__k">The evidence base</div><h2 class="secmark__t">Where every figure comes from</h2><div class="secmark__s">Thirty published sources, each retrieved without an account, key or fee, and the ones that failed, kept visible.</div></div></div>
-  <div class="grid g-1-2" style="margin-top:1rem">
-    <section class="card rise">
-      <div class="card__hd"><div class="card__t">Where the record draws from</div></div>
-      <div class="card__b">
-        <div class="row" style="justify-content:center"><div id="donut1"></div></div>
-        <div id="donutKey" style="margin-top:.9rem"></div>
-      </div>
-    </section>
-    <section class="card rise" id="feeds">
-      <div class="card__hd"><div><div class="card__t">Open data sources</div>
-        <div class="card__s">Every row returned HTTP 200 to an unauthenticated request on 17 August 2026</div></div>
-        <div class="spacer"></div>
-        <div class="srch"><span class="card__s">⌕</span><input id="feedSearch" placeholder="Filter sources…" aria-label="Filter sources"></div></div>
-      <div class="card__b card__b--flush" style="max-height:420px;overflow:auto">
-        <table class="tbl"><thead><tr><th>Source</th><th>Publisher</th><th>Role</th><th>Refresh</th><th>Format</th></tr></thead>
-        <tbody id="feedRows"></tbody></table>
-      </div>
-    </section>
-  </div>
-
-  <div class="secmark rise" id="mark-06"><div><div class="secmark__k">Honesty</div><h2 class="secmark__t">What this cannot do</h2><div class="secmark__s">The limits are part of the product. A tool a civil servant can defend states plainly what it cannot answer.</div></div></div>
-  <section class="card rise" id="honesty" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">What this cannot do</div>
-      <div class="card__s">Sources that failed an unauthenticated request, kept visible rather than hidden</div></div></div>
-    <div class="card__b card__b--flush"><div class="feed" id="blockedFeed"></div></div>
-  </section>
-
-  <section class="card" id="crosschecks" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">Where the platform checks itself</div>
-      <div class="card__s">Every quantity it holds twice, by two routes, compared. Disagreements are shown, not resolved.</div></div></div>
-    <div class="card__b" id="sourcesChecks"></div>
-  </section>
-
   <p class="card__s" style="margin-top:1.6rem;max-width:78ch" id="footNote">
     Prototype. Every figure on this page is computed on this machine from published sources, each
     retrieved without an account, key or fee. Nothing is modelled, estimated or filled in by hand.
@@ -347,23 +385,14 @@ cannot tell you.</p>
     <div class="card__b"><div class="stack" id="chainList"></div></div>
   </section>
 
-  <section class="card" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">How a record finds its place</div>
-      <div class="card__s">The place spine’s tiers, best first, each with what it has been tested against and what it cannot tell you.</div></div></div>
-    <div class="card__b" id="methodSpine"></div>
-  </section>
-
-  <section class="card" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">What the joins connect</div>
-      <div class="card__s">Every relationship type the platform declares, counted in the data rather than asserted.</div></div></div>
-    <div class="card__b" id="methodGraph"></div>
-  </section>
-
-  <section class="card" id="gaps" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">Where the evidence runs out</div>
-      <div class="card__s">The questions the platform tries to answer end to end, walked link by link against its own tables. Each missing link says whose it is to supply.</div></div></div>
-    <div class="card__b" id="methodGaps"></div>
-  </section>
+  <!-- This view is never routed to: #/method redirects to #/about
+       (app/assets/lib/routes.js), which now carries the two joins section
+       (id="methodSpine"/"methodGraph") and the limits section
+       (id="methodGaps"), moved into #viewAbout so nothing here duplicates
+       what that page shows. #methodCorrections stays here, unused: its
+       content is the same corrections buildAbout() already renders on
+       #/about, so leaving the id here rather than moving it is what keeps
+       that page from showing corrections twice. -->
   <section class="card" id="corrections" style="margin-top:1rem">
     <div class="card__hd"><div><div class="card__t">What this platform got wrong</div>
       <div class="card__s">Corrections to its own claims: what it believed, what was true, how it was caught, and the test that stops it recurring.</div></div></div>

@@ -648,7 +648,21 @@ const Shell = (() => {
     const entries = corrections.entries || [];
     const built = (Platform.builtSystems() || []).length;
 
+    // Corrections first, then the inventory tiles: the merge into #/about
+    // orders corrections ahead of the platform inventory, so this renders in
+    // that order rather than the inventory-first order the standalone about
+    // page used before sources and method were folded in.
     host.innerHTML = `
+      <h3 class="qlist__h">Corrections</h3>
+      <div class="answers">
+        ${entries.length ? entries.map(c => `
+          <article class="answer">
+            <h4 class="answer__q">${esc(String(c.id || 'Correction').replace(/-/g, ' '))}</h4>
+            <p class="answer__s">${esc(c.believed || '')}</p>
+            <p class="answer__s">${esc(c.actually || '')}</p>
+          </article>`).join('') : '<div class="state"><div class="state__t">No corrections recorded</div></div>'}
+      </div>
+      <h3 class="qlist__h" style="margin-top:2rem">The platform, in numbers</h3>
       <p class="place__sum">Two joins are added to data anyone can download: where a reference becomes
         a property, a postcode and then one of ${num(Object.keys((payload.places||{}).names||{}).length)}
         districts, and who, where name variants become one company number.</p>
@@ -656,15 +670,6 @@ const Shell = (() => {
         ${tile(built + ' of ' + SYSTEMS.length, 'questions with a measured answer')}
         ${tile(num((sources.rows||[]).filter(r => !r.blocked).length) + ' of ' + num((sources.rows||[]).length), 'sources returning data')}
         ${tile(num(entries.length), 'corrections published, each with the test that guards it')}
-      </div>
-      <h3 class="qlist__h" style="margin-top:2rem">Corrections</h3>
-      <div class="answers">
-        ${entries.map(c => `
-          <article class="answer">
-            <h4 class="answer__q">${esc(String(c.id || 'Correction').replace(/-/g, ' '))}</h4>
-            <p class="answer__s">${esc(c.believed || '')}</p>
-            <p class="answer__s">${esc(c.actually || '')}</p>
-          </article>`).join('')}
       </div>`;
   }
 
@@ -1059,7 +1064,16 @@ const Shell = (() => {
       show('unusual'); setChrome('unusual'); safely(buildUnusual, '#unusualBody'); scrollTop(); return;
     }
     if (head === 'about') {
-      show('about'); setChrome('about'); safely(buildAbout, '#aboutBody'); scrollTop(); return;
+      // #/sources and #/method both redirect here (app/assets/lib/routes.js),
+      // so this is the only place their content can still be reached. The
+      // merge calls the same renderers those routes used, each into the
+      // section of the about view now holding their old containers, rather
+      // than rebuilding what they already produce.
+      show('about'); setChrome('about');
+      safely(buildMethod, '#methodSpine');
+      safely(buildSources, '#sourcesChecks');
+      safely(buildAbout, '#aboutBody');
+      scrollTop(); return;
     }
 
     if (head === 'places') {
