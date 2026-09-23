@@ -91,7 +91,7 @@
       <a class="door" id="doorCompareLink" href="#/compare">
         <span class="door__n" id="doorCompare">318</span>
         <span class="door__t">Compare every district</span>
-        <span class="door__s">One table, sortable by any figure, exportable.</span>
+        <span class="door__s">One table of every district, sortable by name or by questions answered, exportable.</span>
       </a>
       <a class="door" id="doorUnusualLink" href="#/unusual">
         <span class="door__n" id="doorUnusual"></span>
@@ -208,8 +208,16 @@
 
   <div class="view" data-view="places" id="viewPlaces" hidden>
   <div id="placePage" hidden></div>
-  <div class="secmark rise" id="mark-02"><div><div class="secmark__k">Your area</div><h2 class="secmark__t">One place, the whole record</h2><div class="secmark__s">Pick a district. Every question is answered for it, with the coverage each figure rests on.</div></div></div>
-  <section class="card rise" id="place" style="margin-top:1rem">
+  <!-- #mark-02, the "Your area" heading this legacy explorer used to sit
+       under, was removed: it duplicated "One place, the whole record" from
+       the card below with a false subtitle ("Every question is answered
+       for it", when this is the district index, not one place), and
+       shell.js now keeps this whole card hidden on every route (#/places
+       shows the district index below instead; see route()'s 'places'
+       branch). Kept in the DOM, not deleted, because
+       app/assets/systempage.js still calls window.__gtShowPlace(), defined
+       below, when a cross-system search result names a place. -->
+  <section class="card rise" id="place" style="margin-top:1rem" hidden>
     <div class="card__hd">
       <div><div class="card__t">One place, the whole record</div>
         <div class="card__s">Pick a district. Each question reports what it found there, with the coverage that figure rests on.</div></div>

@@ -878,7 +878,7 @@ const Shell = (() => {
     sources:   ['Sources', 'Every source the record reads, when it was last fetched, and what failed.'],
     method:    ['Method', 'The two joins, what each figure assumes, and every correction published so far.'],
     search:    ['Search', 'Search organisations, places and the thirteen questions.'],
-    compare:   ['Compare every district', 'Every district the connected record covers, with the figures each question answers for it, sortable and exportable.'],
+    compare:   ['Compare every district', 'Every district the connected record covers, with how many of the thirteen questions are answered for it, sortable by name or by that count, and exportable.'],
     unusual:   ['What looks unusual', 'Where a place sits furthest from the figure it is published against, with both numbers and the source for each.'],
     about:     ['How this is built', 'The two joins, every source the record reads, the corrections published so far, and what this cannot do.'],
     // Same content as 'systems': #/questions/<id> renders the identical view
@@ -1094,21 +1094,27 @@ const Shell = (() => {
     const byLad = (payload && payload.places && payload.places.byLad) || {};
     const name = names[code], place = byLad[code];
     if (!name || !place) {
-      // An unknown code degrades to the index rather than leaving a "no
-      // such place" page up. Clear the stale markup along with hiding it,
-      // so a later render that forgets to overwrite host.innerHTML cannot
-      // reveal the previous place. The legacy explorer (#place), and its
-      // "Your area" heading (#mark-02), follow the index here too: no
-      // single place is open, so both render as they do for the index.
-      host.hidden = true;
-      host.innerHTML = '';
-      if (index) index.hidden = false;
-      if (legacy) legacy.hidden = false;
-      if (lede) lede.hidden = false;
+      // An unknown code used to degrade silently to the index, with the
+      // legacy explorer (#place) showing whichever place its own map had
+      // last selected, presented as if it were this one. That is worse
+      // than saying nothing: it looks like an answer. Say plainly that no
+      // such place exists instead, and point back to the real index.
+      if (index) index.hidden = true;
+      if (legacy) legacy.hidden = true;
+      if (lede) lede.hidden = true;
+      host.hidden = false;
+      host.innerHTML = `<div class="state state--bad"><div class="state__t">No such place</div>
+        <p class="state__p"><span class="mono">${esc(code)}</span> does not match any district this
+        record covers. <a href="#/places">See every district</a>.</p></div>`;
       return;
     }
 
     const lib = window.GT_LIB || {};
+    // ONS GSS codes are prefixed by nation: every one of the 22 Welsh
+    // unitary authorities in this payload carries a W06...  code. Checked
+    // against the real payload: exactly those 22 places, never an English
+    // one, are missing a figure for the England-only questions.
+    const isWales = /^W/.test(code);
     const summary = lib.placeSummary ? lib.placeSummary(code, payload) : [];
     // Each block carries this place's own figures, from the tested module in
     // app/assets/lib/answers.js. Until that module entry loads, the fallback
@@ -1139,13 +1145,17 @@ const Shell = (() => {
     const noFigure = absences ? absences.noFigure.map(byId)
       : SYSTEMS.filter(s => !shown.has(s.id));
 
-    // The question view has no handler yet (a later task adds it), so this
-    // degrades to #/systems/<id>, which renders today, and upgrades itself
-    // once that handler lands -- same firstServable pattern as renderTabbar.
+    // "How this is computed" belongs on the question's method tab, not its
+    // summary tab: #/questions/<id>/method exists and SysTabs reads the
+    // third path segment to select it. Degrades to #/systems/<id>/method
+    // the same way the bare link used to, and upgrades itself once a
+    // candidate earlier in the list can render, the same firstServable
+    // pattern as renderTabbar.
     const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
     const pick = lib.firstServable || fallbackFirstServable;
     const canRender = head => heads.has(head);
-    const method = id => pick(['#/questions/' + id, '#/systems/' + id], canRender) || ('#/systems/' + id);
+    const method = id => pick(['#/questions/' + id + '/method', '#/systems/' + id + '/method'], canRender)
+      || ('#/systems/' + id + '/method');
     // A figure is a number or a string the module already formatted.
     const fig = v => typeof v === 'number' ? num(v) : String(v);
     // The spec asks every answer block to carry the source and the date its
@@ -1197,10 +1207,14 @@ const Shell = (() => {
         upperTier.map(s => esc(s.n)).join(', ')}. ${upperTier.length === 1 ? 'It is' : 'They are'}
         published for ${esc(absences.countyName)} County Council, not for this district.</p>` : ''}
       ${noFigure.length ? `<p class="place__none">No answer here for ${
-        noFigure.map(s => esc(s.n)).join(', ')}. The published record carries no figure for ${
-        noFigure.length === 1 ? 'it' : 'them'} at this place.</p>` : ''}
+        noFigure.map(s => esc(s.n)).join(', ')}. ${isWales
+          ? `${noFigure.length === 1 ? 'It is' : 'They are'} published for Wales too, but this
+             platform's sources are England only, so ${noFigure.length === 1 ? 'it is' : 'they are'}
+             not covered here.`
+          : `The published record carries no figure for ${noFigure.length === 1 ? 'it' : 'them'} at this place.`
+        }</p>` : ''}
       ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
-        id="placeCsv">Download these ${answers.length} figures as CSV</button></p>` : ''}`;
+        id="placeCsv">Download these ${answers.length} figure${answers.length === 1 ? '' : 's'} as CSV</button></p>` : ''}`;
 
     // The file is written from the same rows the blocks above are, so the page
     // and the download cannot disagree about a single figure.
@@ -1287,16 +1301,16 @@ const Shell = (() => {
       const host = $('#placePage'), index = $('#placeIndex'), legacy = $('#place'), lede = $('#mark-02');
       if (seg[1]) { safely(() => buildPlacePage(seg[1])); }
       else {
-        // No code: this is the index, so the legacy explorer (#place) and its
-        // "Your area" heading (#mark-02) render as they always have, same as
-        // buildPlacePage's own guard clause for an unknown code. Both are
-        // restored explicitly here because #/compare (above) and a specific
-        // place page (buildPlacePage) both hide them, and that hidden state
-        // would otherwise persist onto this index.
+        // No code: this is the district index. It used to also restore the
+        // legacy explorer (#place) and its "Your area" heading (#mark-02)
+        // above the index it built, the superseded dashboard this route
+        // must not show any more. Both stay hidden here, the same as
+        // #/compare and a specific place page already keep them, so
+        // #placeIndex is the only thing this route renders.
         if (host) host.hidden = true;
         if (index) index.hidden = false;
-        if (legacy) legacy.hidden = false;
-        if (lede) lede.hidden = false;
+        if (legacy) legacy.hidden = true;
+        if (lede) lede.hidden = true;
       }
       return;
     }
