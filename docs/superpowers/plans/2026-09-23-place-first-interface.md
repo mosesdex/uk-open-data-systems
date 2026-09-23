@@ -663,7 +663,17 @@ Then check whether any rule hides the menu button on wide screens: run
 it inside a `min-width` query, delete that rule, since the button is now the only
 way to reach the drawer.
 
-- [ ] **Step 4: Cut the mobile bar to three**
+- [ ] **Step 4: Correct the stale nav label**
+
+The front page is no longer an overview. Modify `app/assets/shell.js` in
+`NAV_PUBLIC`, changing the first item's label so the navigation agrees with the
+page title the router now sets:
+
+```js
+      { id: '',        icon: '◉', label: 'Find your area' },
+```
+
+- [ ] **Step 5: Cut the mobile bar to three**
 
 Modify `app/assets/shell.js`. In `renderTabbar`, replace the item list it renders with exactly three destinations:
 
@@ -675,7 +685,7 @@ Modify `app/assets/shell.js`. In `renderTabbar`, replace the item list it render
     ];
 ```
 
-- [ ] **Step 5: Verify**
+- [ ] **Step 6: Verify**
 
 Run: `python3 -m http.server 8765 --directory app`
 At 1440: no sidebar column, the menu button opens the drawer, Escape closes it, focus returns to the button.
@@ -683,7 +693,7 @@ At 375: the bottom bar shows three items, each at least 44px tall.
 Run: `npm test && python3 tools/seo-check.py`
 Expected: pass, `0 errors`.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add app/assets/app.css app/assets/shell.css app/assets/app.js app/assets/shell.js
@@ -1251,7 +1261,29 @@ Run: `python3 -c "import json;d=json.load(open('app/data/platform.json'));print(
 Expected: a list of keys. Use those exact keys in the two `answer__s` lines and
 drop any that do not exist.
 
-- [ ] **Step 8: Verify and commit**
+- [ ] **Step 8: Replace the placeholder door figures**
+
+The front page ships two hardcoded numbers, 50 on the unusual door and 45 on the
+about door, which read as computed figures and are not. On a site whose whole
+claim is that every figure comes from a published file, that cannot stand once
+the real numbers are available. Modify `buildHome()` in `app/assets/shell.js`,
+adding this after the line that sets `#doorCompare`:
+
+```js
+    // Both of these were placeholders until the routes behind them existed.
+    const lib2 = window.GT_LIB || {};
+    const unusual = $('#doorUnusual');
+    if (unusual && lib2.unusualRows) unusual.textContent = num(lib2.unusualRows(Platform.payload()).length);
+    const about = $('#doorAbout');
+    const srcs = (Platform.sourceSummary() || {}).rows || [];
+    if (about && srcs.length) about.textContent = num(srcs.length);
+```
+
+Then confirm in the browser that the two doors show figures matching the pages
+they open: the unusual door's number equals the row count on `#/unusual`, and the
+about door's number equals the number of sources listed on `#/about`.
+
+- [ ] **Step 9: Verify and commit**
 
 Run: `npm test && python3 tools/seo-check.py`, then visit `#/compare`, `#/unusual`, `#/about` at both widths.
 
