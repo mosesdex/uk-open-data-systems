@@ -1,0 +1,23 @@
+{
+  "places": {
+    "names": { "E07000032": "Amber Valley", "E06000001": "Hartlepool" },
+    "byLad": {
+      "E07000032": {
+        "plumbline": { "lpa": "Amber Valley", "major_decisions": 85.0, "headline_pct": 97.6,
+                       "dwelling_decisions": 46.0, "statutory_pct": 8.7 },
+        "catchment": { "lad_name": "Amber Valley", "schools": 68, "capacity": 19488,
+                       "pupils": 17734, "utilisation_pct": 91.0 },
+        "lastmile": { "lad_name": "Amber Valley", "premises": 130067, "gigabit_pct": 81.8 }
+      },
+      "E06000001": {
+        "catchment": { "lad_name": "Hartlepool", "schools": 40, "capacity": 12000,
+                       "pupils": 11000, "utilisation_pct": 91.7 }
+      }
+    }
+  },
+  "systems": {
+    "plumbline": { "headline_pct": 90.4, "statutory_pct": 15.9 },
+    "catchment": { "national": { "utilisation_pct": 89.5 } },
+    "lastmile": { "new_build_pct": 83.3, "other_pct": 83.5 }
+  }
+}

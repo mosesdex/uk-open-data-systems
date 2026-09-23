@@ -4,6 +4,7 @@
    the router finds it by the time any route is handled. */
 import { canonicalHash, ROUTER_HEADS, firstServable } from './routes.js';
 import { matchPlaces, looksLikePostcode } from './places.js';
+import { placeSummary } from './summary.js';
 
 window.GT_LIB = Object.assign(window.GT_LIB || {},
-  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, looksLikePostcode });
+  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, looksLikePostcode, placeSummary });
