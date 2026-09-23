@@ -623,21 +623,81 @@ const Shell = (() => {
   }
 
   /* ---------------------------------------------------------- unusual/about --- */
+  // The source behind one row's question. evidence.headlines carries the
+  // most specific, per-figure provenance the platform records (the actual
+  // dataset a system's headline was derived from); Platform.metricProvenance
+  // is the fallback, since every question here is also a map metric id and
+  // so always has a registered source list, even where evidence is thin.
+  function sourceForQuestion(q) {
+    const ev = (Platform.evidence ? Platform.evidence(q) : [])[0];
+    if (ev && ev.publisher && ev.dataset) {
+      return { text: `${ev.publisher}, ${ev.dataset}`, url: ev.source_url || null };
+    }
+    const prov = Platform.metricProvenance ? Platform.metricProvenance(q) : null;
+    const list = (prov && prov.sources) || [];
+    const src = list.find(s => s.ok) || list[0];
+    if (src) return { text: `${src.publisher}, ${src.name}`, url: null };
+    return null;
+  }
+
   function buildUnusual() {
     const host = $('#unusualBody'); if (!host) return;
     const lib = window.GT_LIB || {};
     const rows = lib.unusualRows ? lib.unusualRows(Platform.payload()) : [];
     const label = id => (SYSTEMS.find(s => s.id === id) || {}).n || id;
-    host.innerHTML = `<table class="tbl"><thead><tr>
+    const sourceCell = q => {
+      const src = sourceForQuestion(q);
+      if (!src) return '<span class="card__s">no source resolved for this figure</span>';
+      const text = esc(src.text);
+      return src.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener">${text}</a>` : text;
+    };
+
+    const table = `<table class="tbl"><thead><tr>
         <th>Place</th><th>Question</th><th class="num">Its figure</th>
-        <th class="num">Measured against</th><th class="num">Gap</th></tr></thead><tbody>
+        <th class="num">Measured against</th><th class="num">Gap</th><th>Source</th></tr></thead><tbody>
       ${rows.map(r => `<tr>
         <td><a href="#/places/${esc(r.code)}">${esc(r.name)}</a></td>
         <td>${esc(label(r.question))}</td>
         <td class="num mono">${r.figure.toFixed(1)}%</td>
         <td class="num mono">${r.against.toFixed(1)}%<span class="answer__s"> ${esc(r.againstLabel)}</span></td>
-        <td class="num mono">${r.gap.toFixed(1)}</td></tr>`).join('')}
+        <td class="num mono">${r.gap.toFixed(1)}</td>
+        <td style="font-size:11.5px;white-space:normal;min-width:220px">${sourceCell(r.question)}</td></tr>`).join('')}
       </tbody></table>`;
+
+    // The spec places the four recorded contradictions and the seventeen
+    // corrections beneath this table, so a reporter checking one figure can
+    // also see where the platform disagrees with itself and what it has
+    // already had to fix in public.
+    const contra = Platform.contradictions() || {};
+    const disagreeing = (contra.results || []).filter(r => r.run && r.disagreed > 0);
+    const contraHtml = `
+      <h3 class="qlist__h" style="margin-top:2rem">Where the platform checks itself</h3>
+      <p class="card__s">${num(disagreeing.length)} of ${num(contra.checks || 0)} cross-checks found a disagreement.
+        A disagreement is reported, never resolved: the platform has no standing to say which record is right.</p>
+      ${disagreeing.length ? `<div class="dt-wrap"><table class="dt">
+        <thead><tr><th>Quantity</th><th class="num">Compared</th><th class="num">Disagree</th></tr></thead>
+        <tbody>${disagreeing.map(r => `<tr><td><b>${esc(r.quantity || r.check)}</b><br>
+          <span style="color:var(--ink-3);font-size:11.5px">${esc(r.note || '')}</span></td>
+          <td class="num">${num(r.compared)}</td>
+          <td class="num"><span class="st st--warn">${num(r.disagreed)}</span></td></tr>`).join('')}</tbody>
+      </table></div>` : ''}`;
+
+    const corrections = Platform.corrections() || {};
+    const entries = corrections.entries || [];
+    const correctionsHtml = `
+      <h3 class="qlist__h" style="margin-top:2rem">Corrections</h3>
+      <p class="card__s">${num(entries.length)} corrections published, each with what was believed,
+        what was true, and the test that now guards it.</p>
+      <div class="answers">
+        ${entries.length ? entries.map(c => `
+          <article class="answer">
+            <h4 class="answer__q">${esc(String(c.id || 'Correction').replace(/-/g, ' '))}</h4>
+            <p class="answer__s">${esc(c.believed || '')}</p>
+            <p class="answer__s">${esc(c.actually || '')}</p>
+          </article>`).join('') : '<div class="state"><div class="state__t">No corrections recorded</div></div>'}
+      </div>`;
+
+    host.innerHTML = table + contraHtml + correctionsHtml;
   }
 
   /* The inventory used to greet every visitor. It belongs here, next to the
