@@ -260,3 +260,17 @@ test('an unknown place has no absences rather than a guessed one', () => {
   assert.equal(placeAbsences('E99999999', PAYLOAD, ALL_IDS), null);
   assert.equal(placeAbsences('E07000032', null, ALL_IDS), null);
 });
+
+test('the lastmile comparator names the population it actually covers', () => {
+  // lastmile.other_pct is coverage among premises outside new-build
+  // postcodes (platform/groundtruth/systems/lastmile.py), compared here
+  // against the place's all-premises gigabit figure, a different
+  // population, so the label must say so rather than call it a flat
+  // "the national share". app/assets/lib/summary.js and unusual.js already
+  // carry this correction; this is the same fix for this module's own copy,
+  // which prints on the place page and in the CSV that page exports.
+  const a = placeAnswers('E07000032', PAYLOAD).find(x => x.id === 'lastmile');
+  assert.equal(a.against, 83.5);                  // systems.lastmile.other_pct
+  assert.match(a.againstLabel, /outside new-build postcodes/);
+  assert.doesNotMatch(a.againstLabel, /^the national share$/);
+});

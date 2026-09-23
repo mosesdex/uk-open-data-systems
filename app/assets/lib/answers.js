@@ -65,7 +65,7 @@ const QUESTIONS = [
     unit: '%',
     figure: p => p.gigabit_pct,
     against: (p, s) => s.lastmile && s.lastmile.other_pct,
-    againstLabel: 'the national share',
+    againstLabel: 'the national share outside new-build postcodes',
     caveat: p => `Joined on postcode, not property, over ${n(p.premises)} premises.`,
   },
   {
