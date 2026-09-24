@@ -78,8 +78,7 @@ wrong. In the built database:
 **Nothing new has to be built to resolve a postcode to a district.** What is
 missing is an export: a small index the browser can read.
 
-- 2,863 distinct outcodes; 2,223 touch England.
-
+Code-Point Open holds 2,863 distinct outcodes, of which 2,223 touch England.
 Two candidate index granularities, measured:
 
 | Index | Keys | Ambiguous keys | Accuracy of a dominant-district rule | Raw JSON |
@@ -95,15 +94,17 @@ lookup that usually works and one that is wrong for one reader in thirteen.
 candidate districts, and the interface asks which one, rather than guessing and
 being quietly wrong 3.55% of the time.
 
-### Contracts Finder, for Sentinel
+### Correction 2: Baseline is already placed, and simply not published
 
-Each release carries `parties[].address.postalCode` for the buyer, and
-`tender.items.deliveryAddresses[].postalCode` for where the work happens. The
-delivery address is the better join and is preferred where present.
+`gold.baseline_district` exists in the database today and holds **290 districts**
+with `outlets`, `adjusted_spills` and `reported_spills`. The outlet grid
+references are already parsed and resolved.
 
-**Honest limit:** the corpus holds 2,065 releases. Spread over 318 districts
-that is about six per district, so most districts will carry a small count.
-The page says the count, so a reader can judge it.
+The reason no place page shows it is `places.py`: its `SOURCES` map, which
+`place_view()` iterates to build `byLad`, has no `baseline` entry. The figure
+has been computed on every run and thrown away at the last step.
+
+Baseline is therefore a wiring change, not a data-engineering one.
 
 ### Correction 3: Junction and Sentinel need real work, and different work
 
@@ -119,19 +120,12 @@ silver loader before it can be placed.
 supplier, company number, method and value, and **no location column**. The
 postcode exists in the raw file, at `parties[].address.postalCode` and
 `tender.items.deliveryAddresses[].postalCode`, and is dropped by the loader.
-Sentinel needs the loader widened, then the existing `resolve_postcode()`.
+Sentinel needs the loader widened, then the existing `resolve_postcode()`. The
+delivery address is the better join and is preferred where present.
 
-### Correction 2: Baseline is already placed, and simply not published
-
-`gold.baseline_district` exists in the database today and holds **290 districts**
-with `outlets`, `adjusted_spills` and `reported_spills`. The outlet grid
-references are already parsed and resolved.
-
-The reason no place page shows it is `places.py`: its `SOURCES` map, which
-`place_view()` iterates to build `byLad`, has no `baseline` entry. The figure
-has been computed on every run and thrown away at the last step.
-
-Baseline is therefore a wiring change, not a data-engineering one.
+**Honest limit:** the corpus holds 2,065 releases. Spread over 318 districts
+that is about six per district, so most districts will carry a small count. The
+page shows the count, so a reader can judge it.
 
 ### Geography above the district
 
