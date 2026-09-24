@@ -1473,12 +1473,11 @@ In `platform/groundtruth/sources.py`, add two `Source` entries immediately after
 Fetch both and confirm they land:
 
 ```bash
-cd platform && .venv/bin/python -m groundtruth.cli fetch --only ons_lad_region &&   .venv/bin/python -m groundtruth.cli fetch --only ons_lad_cauth && cd ..
+cd platform && .venv/bin/python -m groundtruth.cli fetch ons_lad_region ons_lad_cauth && cd ..
 ```
 
-Read `platform/groundtruth/cli.py` first to get the real subcommand and flag
-names; the line above is the shape, not necessarily the exact spelling. Expect
-296 and 72 features respectively.
+The fetch subcommand takes source ids as positional arguments, not a flag.
+Expect 296 and 72 features respectively.
 
 - [ ] **Step 2: Write the failing test for membership**
 
