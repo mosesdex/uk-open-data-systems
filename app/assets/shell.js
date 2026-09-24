@@ -1364,6 +1364,11 @@ const Shell = (() => {
               a.unit ? `<span class="answer__fu">${esc(a.unit)}</span>` : ''}</p>
             ${a.against != null ? `<p class="answer__v">Measured against ${esc(num(a.against))}${
               esc(a.unit || '')}, ${esc(a.againstLabel || '')}.</p>` : ''}
+            ${(() => {
+              const r = lib.rankFor && lib.rankFor(code, a.id, Platform.payload());
+              const s = r && lib.rankSentence && lib.rankSentence(r);
+              return s ? `<p class="answer__r">${esc(s)}</p>` : '';
+            })()}
             ${a.caveat ? `<p class="answer__c">${esc(a.caveat)}</p>` : ''}
             ${answerSource(a)}
             <a class="answer__go" href="${method(a.id)}">How this is computed</a>

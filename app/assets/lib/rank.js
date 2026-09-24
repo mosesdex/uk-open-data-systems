@@ -1,0 +1,92 @@
+/* Where one district sits among the others, for one question.
+
+   A figure on its own is not a finding. "89.5% of school places in use" tells
+   a reader nothing until they know whether that is unusual. This ranks a
+   district against every other district that holds a figure for the same
+   question, and states that denominator, because a rank out of 318 when only
+   257 districts carry the figure is a false claim about the other 61.
+
+   The figure is read through placeAnswers, not re-derived here, so there is
+   one definition of what each question's figure is and no second chance to
+   disagree with the page it annotates.
+
+   Polarity is declared per question rather than assumed. Being high is bad for
+   spills and for school place pressure, good for gigabit coverage, and neither
+   for a projected change in plan numbers. A question with no honest polarity
+   is ranked and left unjudged. */
+
+import { placeAnswers } from './answers.js';
+
+const POLARITY = {
+  plumbline: 'high-is-better',
+  catchment: 'high-is-worse',
+  lastmile: 'high-is-better',
+  baseline: 'high-is-worse',
+  bulwark: 'high-is-better',
+  highwater: 'high-is-worse',
+  sightline: 'high-is-worse',
+  bellwether: 'high-is-worse',
+  ledger: 'high-is-better',
+  compass: 'none',
+};
+
+const ORDINAL = n => {
+  const r100 = n % 100, r10 = n % 10;
+  if (r100 >= 11 && r100 <= 13) return n + 'th';
+  return n + (r10 === 1 ? 'st' : r10 === 2 ? 'nd' : r10 === 3 ? 'rd' : 'th');
+};
+
+/* Every district's figure for one question.
+
+   A place page calls rankFor once per answer, and each call would otherwise
+   walk all 318 districts through placeAnswers: thirteen answers on one page is
+   over four thousand traversals of the payload. The distribution for a whole
+   payload is built once, on the first question that needs it, and reused.
+
+   Keyed by the payload object itself, so a payload revalidated in place is
+   recomputed rather than answered from a stale distribution. */
+const CACHE = new WeakMap();
+
+function figures(questionId, payload) {
+  if (!payload || typeof payload !== 'object') return new Map();
+  let byQuestion = CACHE.get(payload);
+  if (!byQuestion) { byQuestion = new Map(); CACHE.set(payload, byQuestion); }
+  const cached = byQuestion.get(questionId);
+  if (cached) return cached;
+
+  const byLad = (payload.places && payload.places.byLad) || {};
+  const out = new Map();
+  for (const code of Object.keys(byLad)) {
+    const hit = placeAnswers(code, payload).find(a => a.id === questionId);
+    if (hit && Number.isFinite(Number(hit.figure))) out.set(code, Number(hit.figure));
+  }
+  byQuestion.set(questionId, out);
+  return out;
+}
+
+export function rankFor(code, questionId, payload) {
+  const all = figures(questionId, payload);
+  const mine = all.get(code);
+  if (mine == null) return null;
+
+  // Descending, so rank 1 is the largest figure. Ties share a rank: the count
+  // of districts strictly above this one, plus one.
+  let above = 0;
+  for (const v of all.values()) if (v > mine) above += 1;
+  const rank = above + 1;
+  const of = all.size;
+
+  return {
+    rank,
+    of,
+    figure: mine,
+    percentile: of > 1 ? Math.round(100 * (of - rank) / (of - 1)) : null,
+    polarity: POLARITY[questionId] || 'none',
+  };
+}
+
+export function rankSentence(r) {
+  // One district is not a ranking, and saying "1st of 1" implies a contest.
+  if (!r || r.of < 2) return null;
+  return `${ORDINAL(r.rank)} of ${r.of} districts with a figure for this question.`;
+}
