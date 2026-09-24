@@ -482,6 +482,13 @@ test('a sector the index does not carry returns nothing', () => {
   assert.deepEqual(sectorDistricts('ZZ99 9ZZ', INDEX), []);
 });
 
+test('a sector outside England still resolves, so the caller can say where', () => {
+  // The index carries Wales and Scotland on purpose. This module reports what
+  // the index holds; deciding that England only is covered is the caller's job.
+  const wales = { sectors: { CF101: ['W06000015'] } };
+  assert.deepEqual(sectorDistricts('CF10 1AA', wales), ['W06000015']);
+});
+
 test('a missing index returns nothing rather than throwing', () => {
   assert.deepEqual(sectorDistricts('SW1A 1AA', null), []);
   assert.deepEqual(sectorDistricts('SW1A 1AA', {}), []);
@@ -526,7 +533,7 @@ export function sectorDistricts(raw, index) {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `node --test tests/js/postcode.test.js`
-Expected: 6 passed.
+Expected: 7 passed.
 
 - [ ] **Step 5: Bridge it to the shell**
 
@@ -569,14 +576,28 @@ In `app/assets/shell.js`, inside `buildHome()`, replace the `draw` function and 
       hits.hidden = !codes.length;
     };
 
+    // The index carries Wales and Scotland as well as England: 9,113 English
+    // sectors, 592 Welsh, 1,136 Scottish. That is deliberate. This platform's
+    // sources are England only, and a Welsh reader who types a real postcode is
+    // owed that sentence, not "not in the index", which would be false.
+    const COUNTRY = { W: 'Wales', S: 'Scotland', N: 'Northern Ireland' };
+
     const resolvePostcode = q => {
       loadIndex().then(idx => {
         // The field may have moved on while the index was loading.
         if (input.value !== q) return;
-        const codes = (lib.sectorDistricts ? lib.sectorDistricts(q, idx) : [])
-          .filter(code => names[code]);
-        if (!codes.length) {
+        const all = lib.sectorDistricts ? lib.sectorDistricts(q, idx) : [];
+        if (!all.length) {
           say('That postcode is not in the index. Try the council or district name.');
+          return;
+        }
+        const codes = all.filter(code => names[code]);
+        if (!codes.length) {
+          // The sector resolved, to somewhere this platform does not cover.
+          const where = COUNTRY[String(all[0])[0]];
+          say(where
+            ? `That postcode is in ${where}. Every source this platform reads is England only, so there is nothing to show for it yet.`
+            : 'That postcode resolves to a district this platform does not carry.');
           return;
         }
         if (codes.length === 1) { go(codes[0]); return; }
@@ -608,7 +629,14 @@ In `app/assets/lib/places.js`, replace the third paragraph of the header comment
 
 - [ ] **Step 8: Verify in the browser**
 
-Start the preview, then at `#/` type `SW1A 1AA` and confirm it lands on a place page, and type a postcode in an ambiguous sector and confirm it offers candidates rather than choosing. Check the console is clean.
+Start the preview, then at `#/` check all four branches:
+
+- `SW1A 1AA` is an ambiguous sector (`E09000033`, `E09000032`) and must offer both, not choose.
+- `GU21 6AA` is unambiguous (`E07000217`) and must go straight to Amber Valley's equivalent, the Woking place page.
+- `CF10 1AA` is Cardiff and must say the postcode is in Wales and that the sources are England only.
+- `ZZ99 9ZZ` is in no sector and must say it is not in the index.
+
+Check the console is clean in every case.
 
 - [ ] **Step 9: Run the gates and commit**
 
