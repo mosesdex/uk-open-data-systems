@@ -274,3 +274,25 @@ test('the lastmile comparator names the population it actually covers', () => {
   assert.match(a.againstLabel, /outside new-build postcodes/);
   assert.doesNotMatch(a.againstLabel, /^the national share$/);
 });
+
+// baseline carries no block in the shared fixture above (it is one of the
+// four questions never published per place there, asserted earlier in this
+// file), so its own answer and its singular/plural wording are checked here
+// against a small payload built for the purpose, not the shared fixture.
+const BASELINE_PAYLOAD = {
+  systems: {},
+  places: { byLad: { E07000032: { baseline: { outlets: 14, adjusted_spills: 812.5, reported_spills: 790 } } } },
+};
+
+test('baseline answers with its adjusted figure, against the reported one', () => {
+  const a = placeAnswers('E07000032', BASELINE_PAYLOAD).find(x => x.id === 'baseline');
+  assert.equal(a.figure, 812.5);
+  assert.equal(a.against, 790);
+  assert.match(a.caveat, /14 monitored storm overflows/);
+});
+
+test('a district with one outlet is not described in the plural', () => {
+  const one = { systems: {}, places: { byLad: { X: { baseline: { outlets: 1, adjusted_spills: 3, reported_spills: 3 } } } } };
+  const a = placeAnswers('X', one).find(x => x.id === 'baseline');
+  assert.match(a.caveat, /1 monitored storm overflow /);
+});

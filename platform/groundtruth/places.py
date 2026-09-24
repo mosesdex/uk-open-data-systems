@@ -202,6 +202,18 @@ TIERED = {
                    "where": "provision = 'Education, health and care plan'"},
 }
 
+# Systems whose gold table already carries lad_code, because a postcode or a
+# grid reference put it there rather than an authority name. SOURCES matches on
+# a spelled authority name and TIERED handles upper-tier publication; neither
+# fits a table that was placed by the spine itself, which is why Baseline was
+# computed on every run and then dropped at this step.
+#
+# The value is the column holding the district code. Everything else on the row
+# is published as the question's figures.
+PLACED = {
+    "baseline": "lad_code",
+}
+
 
 def _table_exists(con, qualified: str) -> bool:
     schema, table = qualified.split(".")
@@ -219,6 +231,10 @@ def place_view(con: duckdb.DuckDBPyConnection) -> dict:
         return {"places": {}, "resolution": {}, "districts": 0}
 
     index = build_index(con)
+    # Every district the platform knows about, used below to report what share
+    # of them a placed system actually reached, and to refuse a code the
+    # boundaries do not carry.
+    index_codes = {c for (c,) in con.execute("SELECT lad_code FROM silver.lad").fetchall()}
     places: dict[str, dict] = {}
     resolution: dict[str, dict] = {}
 
@@ -266,6 +282,29 @@ def place_view(con: duckdb.DuckDBPyConnection) -> dict:
             for k in ("lad_code", "lad_name", "authority_code", "la_code", "la_name",
                       "local_authority", "provision", "first_year"):
                 r.pop(k, None)
+
+    for system, key in PLACED.items():
+        table = f"gold.{system}_district"
+        if not _table_exists(con, table):
+            continue
+        cur = con.execute(f"SELECT * FROM {table} WHERE {key} IS NOT NULL")
+        cols = [d[0] for d in cur.description]
+        rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+        placed = {r[key] for r in rows}
+        for r in rows:
+            code = r[key]
+            if code not in index_codes:
+                continue
+            # The join column is how the row got here; it says nothing the key
+            # of the dictionary does not already say.
+            places.setdefault(code, {})[system] = {k: v for k, v in r.items() if k != key}
+        resolution[system] = {
+            "names": len(index_codes),
+            "matched": len(placed & index_codes),
+            "rate": round(100 * len(placed & index_codes) / len(index_codes), 1)
+                    if index_codes else 0.0,
+            "unmatched": sorted(placed - index_codes)[:12],
+        }
 
     # School capacity is returned per education authority, so a two-tier
     # district's series is its county's. Held once per authority; each district

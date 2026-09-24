@@ -72,6 +72,19 @@ const QUESTIONS = [
     caveat: p => `Joined on postcode, not property, over ${n(p.premises)} premises.`,
   },
   {
+    id: 'baseline',
+    name: 'Baseline',
+    question: 'How many sewage spills were recorded here, after adjusting for how long each monitor was working?',
+    unit: null,
+    figure: p => p.adjusted_spills,
+    against: p => p.reported_spills,
+    againstLabel: 'the number the water companies reported',
+    caveat: p => `Counted across ${n(p.outlets)} monitored storm overflow${p.outlets === 1 ? '' : 's'} `
+      + `placed in this district by their grid reference. The outlet is where the discharge happens, `
+      + `not where the sewage came from, and a district with no monitored outlet is not a district `
+      + `with no spills.`,
+  },
+  {
     id: 'compass',
     name: 'Compass',
     question: 'What is the projected three year change in education, health and care plans?',
