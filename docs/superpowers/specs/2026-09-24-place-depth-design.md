@@ -33,8 +33,10 @@ Four changes, sharing one new spine.
 | 5 | Rank, percentile and direction on every figure | app |
 | 6 | Place-level answers for Baseline, Sentinel and Junction | engine |
 
-The shared spine is **a postcode-to-district index built from Code-Point Open**,
-which the pipeline already downloads and currently uses for nothing.
+The shared spine already exists and was simply never exported. Checking the
+built database rather than the source registry corrected three things this
+spec originally got wrong; the corrections are recorded below because they
+shrink the work substantially.
 
 ## Not in scope
 
@@ -59,10 +61,23 @@ which the pipeline already downloads and currently uses for nothing.
 
 Everything below was checked against the files on disk, not assumed.
 
-### Code-Point Open (already downloaded, 14.5 MB, feeding nothing)
+### Correction 1: the postcode spine is already built
 
-- **1,747,986 postcodes** carry `Admin_district_code`, and also
-  `Admin_ward_code`, `Admin_county_code`, eastings and northings.
+The source registry lists Code-Point Open as feeding no question, which is what
+prompted the claim that it was idle. The registry's own `systems` column is
+wrong. In the built database:
+
+- **`silver.place_postcode` holds 1,749,109 rows** with `postcode_key`,
+  `easting`, `northing`, `lad_code`, `ward_code` and `positional_quality`.
+- `platform/groundtruth/place.py` already exposes `resolve_postcode()`,
+  `resolve_coordinate()` and `resolve_uprn()`, each returning a district and a
+  confidence, with the resolution tier always reported.
+- `platform/groundtruth/geo.py` already exposes `ngr_to_bng()`, which is
+  exactly what Baseline's outlet grid references need.
+
+**Nothing new has to be built to resolve a postcode to a district.** What is
+missing is an export: a small index the browser can read.
+
 - 2,863 distinct outcodes; 2,223 touch England.
 
 Two candidate index granularities, measured:
@@ -90,19 +105,33 @@ delivery address is the better join and is preferred where present.
 that is about six per district, so most districts will carry a small count.
 The page says the count, so a reader can judge it.
 
-### DNO embedded capacity registers, for Junction
+### Correction 3: Junction and Sentinel need real work, and different work
 
-The registers carry `postcode`, `town_city`, `county`, eastings and northings,
-and `longitude`/`latitude` per connection. This is the cleanest of the three: a
-direct coordinate, no inference.
+**Junction.** `gold.junction_register` holds 4 rows. It is a table about the
+four distribution operators' publishing behaviour, not about connections, which
+is why Junction's headline is "1 of 4 operators serve data openly". The
+connection rows are on disk (`dno_ecr_ukpn.csv` and its three siblings, carrying
+`postcode`, `town_city`, `county`, eastings, northings, `longitude` and
+`latitude`) but are **not loaded into the database at all**. Junction needs a
+silver loader before it can be placed.
 
-### EDM storm overflow annual return, for Baseline
+**Sentinel.** `silver.procurement_award` holds 2,203 awards with buyer,
+supplier, company number, method and value, and **no location column**. The
+postcode exists in the raw file, at `parties[].address.postalCode` and
+`tender.items.deliveryAddresses[].postalCode`, and is dropped by the loader.
+Sentinel needs the loader widened, then the existing `resolve_postcode()`.
 
-Each outlet carries **`Outlet Discharge NGR`**, a National Grid Reference such
-as `SP6419046470`. Converted to eastings and northings and tested against
-`ons_lad_boundaries.geojson`, which is already downloaded, this places every
-outlet. This is the strongest of the three: about 14,239 outlets across 11
-water and sewerage companies, so most districts carry real counts.
+### Correction 2: Baseline is already placed, and simply not published
+
+`gold.baseline_district` exists in the database today and holds **290 districts**
+with `outlets`, `adjusted_spills` and `reported_spills`. The outlet grid
+references are already parsed and resolved.
+
+The reason no place page shows it is `places.py`: its `SOURCES` map, which
+`place_view()` iterates to build `byLad`, has no `baseline` entry. The figure
+has been computed on every run and thrown away at the last step.
+
+Baseline is therefore a wiring change, not a data-engineering one.
 
 ### Geography above the district
 
@@ -187,10 +216,18 @@ facts and are never rendered the same way.
 
 ## Architecture
 
-The engine in `platform/` gains one new module, the postcode spine, which every
-one of the three new place joins uses. It is built once per run into the
-DuckDB database and exported twice: as the per-question `byLad` blocks inside
-`platform.json`, and as the standalone sector index the browser fetches.
+The engine reuses `place.py`'s existing resolvers rather than adding a spine.
+Three separate gaps are closed:
+
+1. `places.py` gains a third category beside `SOURCES` (matched by authority
+   name) and `TIERED` (published per upper-tier authority): **`PLACED`**, for
+   gold tables that already carry `lad_code` because a postcode or coordinate
+   put it there. Baseline joins it immediately; Junction and Sentinel join it
+   once their tables exist.
+2. A silver loader for the distribution operators' capacity registers, and a
+   widened procurement loader that keeps the buyer and delivery postcodes.
+3. A new export step writing the sector index as its own file beside
+   `platform.json`.
 
 Nothing about the payload's existing shape changes. `places.byLad` gains three
 more question keys; the app reads them through `placeAnswers()` exactly as it
@@ -229,20 +266,29 @@ search, and a ranking module beside `summary.js` and `unusual.js`.
   page.
 - **Sentinel looking authoritative on six records.** Mitigated by showing the
   record count beside every figure it produces.
+- **A registry that misreports what feeds what.** Code-Point Open was recorded
+  as feeding nothing while being the backbone of every placed figure. The
+  `systems` column is documentation, and it was wrong; the same column is what
+  produced the "9 idle sources" count. Worth correcting separately, and worth
+  distrusting until then.
 - **Payload growth.** The three new `byLad` blocks add to an 864 KB file. If it
   passes about 1.2 MB, the place blocks split into a per-place fetch. Measured
   before merge, not assumed.
 
 ## Order of work
 
-1. The postcode spine in the engine, and the sector index it exports.
-2. Postcode lookup in the search field (change 2).
-3. Rank, percentile and direction (change 5), which needs no engine work and
-   can land in parallel with 1 and 2.
-4. Baseline, then Junction, then Sentinel (change 6), in that order, because
-   Baseline has the most records and proves the join hardest.
-5. Region and combined authority pages (change 1), last, because a whole-area
-   figure is only worth showing once the questions behind it are placed.
+1. **Baseline into `byLad`**, through the new `PLACED` category in `places.py`.
+   Smallest change with the largest immediate effect: 290 districts gain an
+   answer they have silently had all along.
+2. **The sector index export**, from `silver.place_postcode`.
+3. **Postcode lookup in the search field** (change 2), which consumes it.
+4. **Rank, percentile and direction** (change 5). No engine work, so it can
+   land in parallel with 1 to 3.
+5. **Junction**: load the capacity registers into silver, place them, publish.
+6. **Sentinel**: widen the procurement loader to keep postcodes, place, publish.
+7. **Region and combined authority pages** (change 1), last, because a
+   whole-area figure is only worth showing once the questions behind it are
+   placed.
 
 Steps 1 to 3 already answer the complaint that started this. Steps 4 and 5 are
 what make a place page worth returning to.
