@@ -58,7 +58,10 @@ function figures(questionId, payload) {
   const out = new Map();
   for (const code of Object.keys(byLad)) {
     const hit = placeAnswers(code, payload).find(a => a.id === questionId);
-    if (hit && Number.isFinite(Number(hit.figure))) out.set(code, Number(hit.figure));
+    // value, not figure: a question's figure may be a display string (ledger's
+    // formatted currency), and value is what placeAnswers already computed as
+    // its numeric equivalent, so nothing here has to parse it back out.
+    if (hit && Number.isFinite(Number(hit.value))) out.set(code, Number(hit.value));
   }
   byQuestion.set(questionId, out);
   return out;

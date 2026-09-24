@@ -10,9 +10,11 @@ const CODES = Object.keys(byLad);
 // The real, published payload, not the four-place fixture above: whether a
 // question is genuinely national, genuinely the county's, or simply absent
 // for one place only shows up at real scale, across all 318 places and the
-// app's full 13-question list (four of which, sentinel, junction, watchman
-// and baseline, carry no per-place object anywhere and are not in the
-// fixture at all). Asserting the classification against invented fixture
+// app's full 13-question list. sentinel, junction and watchman carry no
+// per-place object anywhere in the real payload; baseline is absent from the
+// small fixture above too, but is now placed per district in the real one
+// (see the test below, which reads that from the payload rather than
+// assuming it). Asserting the classification against invented fixture
 // numbers would prove nothing about what a reader actually sees.
 const REAL_PAYLOAD = JSON.parse(
   readFileSync(new URL('../../app/data/platform.json', import.meta.url))
@@ -173,6 +175,25 @@ test('the sharpest known figures come through exactly as published', () => {
   assert.equal(ledger.againstLabel, null);
 });
 
+test('ledger carries its formatted figure and the raw number that backs it, side by side', () => {
+  // figure is what the place page renders; value is what a module ranking
+  // districts (app/assets/lib/rank.js) compares. Ledger is the one question
+  // whose figure is a display string, not a number, so this is the only
+  // case where the two genuinely differ.
+  const ledger = placeAnswers('E07000032', PAYLOAD).find(a => a.id === 'ledger');
+  assert.equal(ledger.figure, '£5,099,873');
+  assert.equal(typeof ledger.figure, 'string');
+  assert.equal(ledger.value, 5099873);
+  assert.equal(typeof ledger.value, 'number');
+  assert.equal(byLad.E07000032.ledger.total_amount, 5099873);
+
+  // lastmile's figure is already a number, so value carries the same number,
+  // not a second, independently derived one.
+  const lastmile = placeAnswers('E07000032', PAYLOAD).find(a => a.id === 'lastmile');
+  assert.equal(typeof lastmile.figure, 'number');
+  assert.equal(lastmile.value, lastmile.figure);
+});
+
 test('the authority type comes from the payload, and is silent when it cannot', () => {
   // A district whose capacity figure belongs to its county council.
   assert.equal(byLad.E07000032._capacity.figure_for, 'county');
@@ -192,13 +213,16 @@ test('the authority type comes from the payload, and is silent when it cannot', 
 });
 
 test('a question never published per place is classified as national for every place', () => {
-  // sentinel, junction, watchman and baseline never carry a per-place object
-  // anywhere in the real payload: they are measured only nationally, so every
-  // one of the 318 places must call them national, and never upper-tier or
-  // merely unanswered here.
+  // sentinel, junction and watchman never carry a per-place object anywhere
+  // in the real payload: they are measured only nationally, so every one of
+  // the 318 places must call them national, and never upper-tier or merely
+  // unanswered here. baseline used to belong on this list too, but the
+  // shipped payload now places it per district (see places.py's PLACED
+  // block), so the set this test checks is read from the payload itself,
+  // never hardcoded, and only the resulting membership is asserted below.
   const neverPerPlace = ALL_IDS.filter(id =>
     !REAL_CODES.some(code => REAL_PAYLOAD.places.byLad[code][id] !== undefined));
-  assert.deepEqual(neverPerPlace.sort(), ['baseline', 'junction', 'sentinel', 'watchman']);
+  assert.deepEqual(neverPerPlace.sort(), ['junction', 'sentinel', 'watchman']);
 
   for (const code of REAL_CODES) {
     const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);

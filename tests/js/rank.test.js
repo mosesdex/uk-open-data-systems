@@ -62,6 +62,38 @@ test('a rank of one district says so rather than claiming a ranking', () => {
   assert.equal(rankSentence(rankFor('A', 'lastmile', only)), null);
 });
 
+// Ledger's figure is a formatted currency string ("£8,749,650"), not a
+// number: reading a.figure here, as rank.js originally did, sends every
+// district's Number("£...") to NaN and empties the distribution, so ledger
+// never ranked anywhere. answers.js now carries a separate numeric `value`
+// for exactly this case, and rank.js reads that instead. This is the test
+// that would have caught the original defect.
+test('ledger is ranked, using the raw amount behind its formatted figure', () => {
+  const ledgerPayload = {
+    systems: {},
+    places: { byLad: {
+      A: { ledger: { total_amount: 300, amount_coverage_pct: 90, contributions: 5, with_location: 2 } },
+      B: { ledger: { total_amount: 100, amount_coverage_pct: 90, contributions: 5, with_location: 2 } },
+      C: { ledger: { total_amount: 200, amount_coverage_pct: 90, contributions: 5, with_location: 2 } },
+    } },
+  };
+
+  const top = rankFor('A', 'ledger', ledgerPayload);
+  assert.ok(top, 'ledger produces a rank at all');
+  assert.equal(top.rank, 1);
+  assert.equal(top.of, 3);
+
+  const middle = rankFor('C', 'ledger', ledgerPayload);
+  assert.equal(middle.rank, 2);
+  assert.equal(middle.of, 3);
+
+  const bottom = rankFor('B', 'ledger', ledgerPayload);
+  assert.equal(bottom.rank, 3);
+  assert.equal(bottom.of, 3);
+
+  assert.match(rankSentence(top), /1st of 3 districts/);
+});
+
 // The brief's ORDINAL guard (r100 >= 11 && r100 <= 13) exists specifically to
 // keep the teens from reading as "11st, 12nd, 13rd". These ranks are only
 // reachable through rankSentence, so the wording is exercised the same way a

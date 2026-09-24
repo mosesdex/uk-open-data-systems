@@ -36,7 +36,16 @@ const join = (...parts) => parts.filter(Boolean).join(' ') || null;
 
 /* One entry per question, in the order the place page reads best: the two
    questions that carry a stated comparator first, then the rest. `figure`
-   reads the place's own object, `against` may also read the national block. */
+   reads the place's own object, `against` may also read the national block.
+
+   `value` is optional and only needed when `figure` is not itself a number.
+   Every question but ledger leaves it unset, because their figures already
+   are numbers and placeAnswers falls back to figure for those. It exists so
+   a module comparing districts (app/assets/lib/rank.js) always has something
+   numeric to compare, without parsing a display string back into a number:
+   that parsing is what broke ledger's rank in the first place, and a second
+   question formatted for display in future would break the same way if
+   ranking had to keep guessing how to undo the formatting. */
 const QUESTIONS = [
   {
     id: 'plumbline',
@@ -140,6 +149,9 @@ const QUESTIONS = [
     question: 'How much was secured in developer contributions?',
     unit: null,
     figure: p => isNum(p.total_amount) ? money(p.total_amount) : null,
+    // figure is the formatted "£8,749,650" the page renders, not a number, so
+    // ranking needs the raw amount separately: see the note above QUESTIONS.
+    value: p => p.total_amount,
     caveat: p => `An amount is stated on ${p.amount_coverage_pct}% of ${n(p.contributions)} contributions, and ${p.with_location === 0 ? 'none of them carries a location' : `${n(p.with_location)} of them carry a location`}.`,
   },
 ];
@@ -170,6 +182,8 @@ export function placeAnswers(code, payload) {
       name: q.name,
       question: q.question,
       figure,
+      // Comparable across districts even when figure is a display string.
+      value: q.value ? Number(q.value(p, systems)) : (typeof figure === 'number' ? figure : null),
       unit: q.unit || null,
       against: hasAgainst ? Number(raw) : null,
       againstLabel: hasAgainst ? q.againstLabel : null,
