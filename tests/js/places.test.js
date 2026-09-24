@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { matchPlaces, looksLikePostcode } from '../../app/assets/lib/places.js';
+import { matchPlaces } from '../../app/assets/lib/places.js';
 
 const NAMES = {
   E07000032: 'Amber Valley',
@@ -38,13 +38,4 @@ test('an unknown place returns nothing', () => {
 
 test('the limit is honoured', () => {
   assert.equal(matchPlaces('a', NAMES, 2).length, 2);
-});
-
-test('a postcode is recognised so the field can say what it needs', () => {
-  for (const pc of ['DE5 3TZ', 'de53tz', 'SW1A 1AA', 'M1 1AE']) {
-    assert.equal(looksLikePostcode(pc), true, `${pc} should look like a postcode`);
-  }
-  for (const not of ['Camden', 'Amber Valley', '', 'E07000032']) {
-    assert.equal(looksLikePostcode(not), false, `${not} should not`);
-  }
 });

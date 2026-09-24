@@ -1035,30 +1035,54 @@ const Shell = (() => {
     const input = $('#findPlace'), hits = $('#findHits'), note = $('#findNote');
     if (!input || !hits) return;
 
-    const go = code => { location.hash = '#/places/' + code; };
+    // #viewHome is the static container route() toggles with `hidden` (see
+    // show() above); buildHome only ever runs right after show('home') makes
+    // it visible, so capturing it once here is safe. A postcode lookup is
+    // asynchronous -- the reader can navigate to #/about or anywhere else
+    // while the index is still loading or a candidate list is still waiting
+    // to be chosen -- and #findPlace itself is never cleared on navigation,
+    // so its stale value cannot be trusted to prove the reader is still
+    // here. Checking whether the page itself is still on screen is the only
+    // guard that actually catches "the reader went somewhere else".
+    const viewHome = $('#viewHome');
+    const onHomeView = () => !!viewHome && !viewHome.hidden;
+
+    const go = code => { if (onHomeView()) location.hash = '#/places/' + code; };
 
     // The sector index is about 200 KB and only a postcode needs it, so it is
     // fetched on first use rather than on page load. One in-flight request at
-    // a time; every later call reuses the resolved value.
+    // a time; every later call reuses the resolved value -- but only once
+    // that value is a real index. A failed fetch (network drop, a non-OK
+    // response, bad JSON) must not be memoised, or the first bad request of
+    // the session disables postcode search for everyone who types one after
+    // it: clearing pcPending on failure lets the next keystroke try again.
     let pcIndex = null, pcPending = null;
     const loadIndex = () => {
       if (pcIndex) return Promise.resolve(pcIndex);
       if (!pcPending) {
         pcPending = fetch('data/postcodes.json')
           .then(r => (r.ok ? r.json() : null))
-          .then(j => { pcIndex = j; return j; })
-          .catch(() => null);
+          .catch(() => null)
+          .then(j => {
+            if (j) { pcIndex = j; } else { pcPending = null; }
+            return j;
+          });
       }
       return pcPending;
     };
 
+    // Both of these write into the page the reader asked for -- a note or a
+    // candidate list left behind in a view that has since been hidden is as
+    // wrong as navigating the reader away without asking, so both no-op once
+    // #viewHome is no longer the one on screen.
     const say = text => {
-      if (!note) return;
+      if (!note || !onHomeView()) return;
       note.textContent = text || '';
       note.hidden = !text;
     };
 
     const showCandidates = codes => {
+      if (!onHomeView()) return;
       hits.innerHTML = codes.map(code =>
         `<button class="find__hit" role="option" data-code="${esc(code)}">${
           esc(names[code] || code)}</button>`).join('');
@@ -1082,8 +1106,19 @@ const Shell = (() => {
           say('That postcode is not in the index. Try the council or district name.');
           return;
         }
-        const codes = all.filter(code => names[code]);
-        if (!codes.length) {
+        // districtChoice decides ambiguity from the raw sector, before any
+        // country filtering -- a sector spanning two districts where only
+        // one is covered (five of them, all on the England/Scotland border:
+        // TD124, TD151, TD58, TD90, DG165) is exactly as ambiguous as one
+        // where both are covered. Filtering first and checking `.length===1`
+        // on what survives, as this used to do, made that cross-border case
+        // look unambiguous and silently sent the reader to the covered side
+        // -- the one thing an ambiguous sector must never do.
+        const choice = lib.districtChoice
+          ? lib.districtChoice(all, names)
+          : { ambiguous: all.length > 1, covered: all.filter(c => names[c]), missing: all.filter(c => !names[c]) };
+        const { ambiguous, covered, missing } = choice;
+        if (!covered.length) {
           // The sector resolved, to somewhere this platform does not cover.
           const where = COUNTRY[String(all[0])[0]];
           say(where
@@ -1091,9 +1126,22 @@ const Shell = (() => {
             : 'That postcode resolves to a district this platform does not carry.');
           return;
         }
-        if (codes.length === 1) { go(codes[0]); return; }
-        showCandidates(codes);
-        say('That postcode sector spans more than one district. Which one?');
+        if (!ambiguous) { go(covered[0]); return; }
+        showCandidates(covered);
+        if (missing.length) {
+          // At least one of the raw sector's districts is not covered --
+          // true of the cross-border sectors above, where showCandidates
+          // above renders the single covered district as the one choice on
+          // offer. Naming the missing side is only honest because COUNTRY
+          // is derived from the code's own first letter, the same source
+          // the fully-uncovered branch above already trusts.
+          const where = COUNTRY[String(missing[0])[0]];
+          say(where
+            ? `That postcode sector also covers a district in ${where}, which this platform does not carry yet. Which of these is yours?`
+            : 'That postcode sector spans more than one district, including one this platform does not carry.');
+        } else {
+          say('That postcode sector spans more than one district. Which one?');
+        }
       });
     };
 

@@ -4,12 +4,6 @@
    A typed postcode is resolved by postcode.js against a sector index served
    separately, so this module stays the name index and nothing more. */
 
-const POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
-
-export function looksLikePostcode(query) {
-  return POSTCODE.test(String(query || '').trim());
-}
-
 export function matchPlaces(query, names, limit = 8) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return [];
