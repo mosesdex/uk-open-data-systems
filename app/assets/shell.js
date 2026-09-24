@@ -1037,19 +1037,73 @@ const Shell = (() => {
 
     const go = code => { location.hash = '#/places/' + code; };
 
+    // The sector index is about 200 KB and only a postcode needs it, so it is
+    // fetched on first use rather than on page load. One in-flight request at
+    // a time; every later call reuses the resolved value.
+    let pcIndex = null, pcPending = null;
+    const loadIndex = () => {
+      if (pcIndex) return Promise.resolve(pcIndex);
+      if (!pcPending) {
+        pcPending = fetch('data/postcodes.json')
+          .then(r => (r.ok ? r.json() : null))
+          .then(j => { pcIndex = j; return j; })
+          .catch(() => null);
+      }
+      return pcPending;
+    };
+
+    const say = text => {
+      if (!note) return;
+      note.textContent = text || '';
+      note.hidden = !text;
+    };
+
+    const showCandidates = codes => {
+      hits.innerHTML = codes.map(code =>
+        `<button class="find__hit" role="option" data-code="${esc(code)}">${
+          esc(names[code] || code)}</button>`).join('');
+      hits.hidden = !codes.length;
+    };
+
+    // The index carries Wales and Scotland as well as England: 9,113 English
+    // sectors, 592 Welsh, 1,136 Scottish. That is deliberate. This platform's
+    // sources are England only, and a Welsh reader who types a real postcode is
+    // owed that sentence, not "not in the index", which would be false.
+    const COUNTRY = { W: 'Wales', S: 'Scotland', N: 'Northern Ireland' };
+
+    const resolvePostcode = q => {
+      loadIndex().then(idx => {
+        // The field may have moved on while the index was loading.
+        if (input.value !== q) return;
+        const all = lib.sectorDistricts ? lib.sectorDistricts(q, idx) : [];
+        if (!all.length) {
+          say('That postcode is not in the index. Try the council or district name.');
+          return;
+        }
+        const codes = all.filter(code => names[code]);
+        if (!codes.length) {
+          // The sector resolved, to somewhere this platform does not cover.
+          const where = COUNTRY[String(all[0])[0]];
+          say(where
+            ? `That postcode is in ${where}. Every source this platform reads is England only, so there is nothing to show for it yet.`
+            : 'That postcode resolves to a district this platform does not carry.');
+          return;
+        }
+        if (codes.length === 1) { go(codes[0]); return; }
+        showCandidates(codes);
+        say('That postcode sector spans more than one district. Which one?');
+      });
+    };
+
     const draw = () => {
       const q = input.value;
       const found = lib.matchPlaces ? lib.matchPlaces(q, names) : [];
       hits.innerHTML = found.map(h =>
         `<button class="find__hit" role="option" data-code="${esc(h.code)}">${esc(h.name)}</button>`).join('');
       hits.hidden = !found.length;
-      const postcode = lib.looksLikePostcode && lib.looksLikePostcode(q) && !found.length;
-      if (note) {
-        note.textContent = postcode
-          ? 'Postcodes are not matched yet. Type the council or district name instead.'
-          : (q.trim() && !found.length ? 'No district of that name. Try the council that covers it.' : '');
-        note.hidden = !note.textContent;
-      }
+      if (found.length) { say(''); return; }
+      if (lib.sectorKey && lib.sectorKey(q)) { say('Looking that postcode up.'); resolvePostcode(q); return; }
+      say(q.trim() ? 'No district of that name. Try the council that covers it.' : '');
     };
 
     input.oninput = draw;
