@@ -1332,32 +1332,155 @@ git commit -m "Keep the procurement postcodes the loader dropped, and place the 
 
 ### Task 7: Region and combined authority pages
 
-The last task, because a whole-area figure is only worth showing once the questions behind it are placed.
+The last task, and the one that answers the complaint that started this work:
+searching London returns City of London, a district of 8,000 people.
 
 **Files:**
-- Modify: `platform/groundtruth/sources.py`, `platform/groundtruth/publish.py`
+- Modify: `platform/groundtruth/sources.py`, `platform/groundtruth/publish.py`, `platform/groundtruth/load.py`
 - Create: `platform/groundtruth/areas.py`
 - Create: `app/assets/lib/areas.js`
 - Modify: `app/assets/lib/entry.js`, `app/assets/lib/routes.js`, `app/assets/shell.js`, `app/index.html`, `app/assets/app.css`
 - Test: `platform/tests/test_areas.py` (create), `tests/js/areas.test.js` (create)
 
 **Interfaces:**
-- Consumes: two ONS lookups registered in `sources.py`, district to region and district to combined authority, both from the ONS Open Geography Portal, both open and both small.
-- Produces: `payload.areas`, shaped
-  `{"E12000007": {"name": "London", "kind": "region", "districts": ["E09000001", ...]}}`,
-  and a route `#/areas/<code>`.
+- Consumes: two ONS ArcGIS lookups, both verified live and both matching the
+  May 2024 vintage of the existing `ons_lad_county` source.
+- Produces: `silver.lad_area(lad_code, area_code, area_name, kind)`, and
+  `payload.areas` shaped
+  `{"E12000007": {"name": "London", "kind": "region", "districts": [...], "figures": {...}}}`,
+  reachable at `#/areas/<code>`.
+
+#### The two lookups, already probed
+
+Both return exactly the fields needed. Do not go looking for others.
+
+| Purpose | ArcGIS service | Fields | Rows |
+|---|---|---|---|
+| District to region | `LAD24_RGN24_EN_LU` | `LAD24CD, LAD24NM, RGN24CD, RGN24NM` | 296 |
+| District to combined authority | `LAD24_CAUTH24_EN_LU` | `LAD24CD, LAD24NM, CAUTH24CD, CAUTH24NM` | 72 |
+
+URL pattern, the same one `ons_lad_county` uses:
+
+```
+https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/<SERVICE>/FeatureServer/0/query?where=1%3D1&outFields=*&f=json
+```
+
+The 296 region rows are exactly the 296 English districts in `places.names`;
+the 22 Welsh districts are in neither lookup, because both are English
+geographies. **A Welsh district belongs to no area, and that is correct.**
+
+Region membership, verified: London 33, South East 64, East of England 45,
+North West 35, East Midlands 35, West Midlands 30, South West 27, Yorkshire
+and The Humber 15, North East 12.
+
+Combined authority membership, verified: East Midlands 17, Greater Manchester
+10, West Midlands 7, North East 7, Liverpool City Region 6, Cambridgeshire and
+Peterborough 6, West Yorkshire 5, Tees Valley 5, South Yorkshire 4, West of
+England 3, York and North Yorkshire 2.
+
+#### Names collide, and the collision is not an error
+
+**West Midlands, East Midlands and North East are each both a region and a
+combined authority, covering different districts.** West Midlands the region
+has 30 districts; West Midlands the combined authority has 7. Neither is wrong
+and neither can be dropped.
+
+So: every area carries its `kind`, every page states it, and a search for a
+colliding name **offers both**, labelled. Silently preferring one would tell a
+reader about 7 districts when they asked about 30, or the reverse.
+
+#### How a whole-area figure is combined
+
+This is the part that can most easily produce a confident lie, so the rule is
+declared per question and the page states which rule was used.
+
+**Every percentage is recomputed from the summed numerator and denominator, not
+averaged across districts.** An average of percentages weights a district of
+8,000 people the same as one of 300,000.
+
+| Question | Rule | Recomputed from |
+|---|---|---|
+| `catchment` | recomputed percentage | `sum(pupils) / sum(capacity)`, and `sum(schools_measured) / sum(schools)` for the coverage |
+| `lastmile` | recomputed percentage | `sum(gigabit_now) / sum(premises)` |
+| `highwater` | recomputed percentage | `sum(granted_against) / sum(objections)`, with `sum(outcome_unknown)` and `sum(homes_against)` carried |
+| `bulwark` | recomputed percentage | `sum(graded) / sum(assets)`, with `sum(inspection_overdue)` carried |
+| `ledger` | recomputed percentage | `sum(with_amount) / sum(contributions)`, with `sum(total_amount)` and `sum(with_location)` carried |
+| `baseline` | sum | `sum(outlets)`, `sum(adjusted_spills)`, `sum(reported_spills)` |
+| `sightline` | sum | `sum(flood_objections)`, `sum(flood_outcome_unknown)`, `sum(water_objections)` |
+| `plumbline` | weighted mean, because the numerator is not published | `statutory_pct` weighted by `dwelling_decisions`; `headline_pct` weighted by `major_decisions` |
+| `compass` | deduplicate, then weighted mean | published per upper-tier authority, so combine over **distinct `authority_name`**, weighting `projected_change_pct` by `mean_pupils` |
+| `sentinel` | recomputed percentage | `sum(closed_awards) / sum(awards)`, with `sum(total_value)` carried |
+| `junction` | sum | `sum(connections)`, `sum(connected_mw)`, `sum(accepted_mw)` |
+| `bellwether` | **refuse** | see below |
+
+**Why Compass deduplicates.** It is a `TIERED` question: a county's figure is
+copied onto each of its districts, and `figure_for` says so. Summing or
+averaging across districts would count Derbyshire's figure eight times. Combine
+over distinct `authority_name` instead.
+
+**Why Bellwether refuses.** Its figure is the largest care group's share of one
+authority's beds, and the largest group differs between authorities. Adding
+Barchester's share in one county to HC One's share in another produces a number
+that describes nothing. The area page says the question is published per
+authority and cannot be combined, and links to the districts, which can.
+
+That refusal is the point. A question that cannot honestly be combined says so.
 
 - [ ] **Step 1: Register the two lookups**
 
-In `platform/groundtruth/sources.py`, add two entries beside the existing `ons_lad_county` one, following its exact shape, for the district-to-region and district-to-combined-authority lookups. Fetch them and confirm both return 200 and parse:
+In `platform/groundtruth/sources.py`, add two `Source` entries immediately after
+`ons_lad_county` (line 722), copying its shape exactly:
 
-```bash
-cd platform && .venv/bin/python -m groundtruth.cli fetch --only ons_lad_region ons_lad_cauth
+```python
+    Source(
+        id="ons_lad_region",
+        name="ONS local authority district to region lookup (May 2024)",
+        publisher="Office for National Statistics",
+        url=("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+             "LAD24_RGN24_EN_LU/FeatureServer/0/query?where=1%3D1&outFields=*&f=json"),
+        fmt="json", role="place_spine", licence="OGL v3", cadence="annual",
+        expect_content=("application/json", "text/plain"),
+        systems=(),
+        notes=(
+            "Which region each English district sits in. Without it the word most "
+            "people type, London, matches only City of London, a district of about "
+            "8,000 residents, because no district is named London. Regions are an "
+            "English geography, so the 22 Welsh districts appear in neither this nor "
+            "the combined authority lookup, which is correct rather than a gap. Same "
+            "May 2024 vintage as the boundaries the map is drawn from."
+        ),
+    ),
+    Source(
+        id="ons_lad_cauth",
+        name="ONS local authority district to combined authority lookup (May 2024)",
+        publisher="Office for National Statistics",
+        url=("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+             "LAD24_CAUTH24_EN_LU/FeatureServer/0/query?where=1%3D1&outFields=*&f=json"),
+        fmt="json", role="place_spine", licence="OGL v3", cadence="annual",
+        expect_content=("application/json", "text/plain"),
+        systems=(),
+        notes=(
+            "Which combined authority each district sits in, where there is one. "
+            "Greater Manchester and West Midlands are what a reader types and neither "
+            "is a district. Only 72 of the 296 English districts belong to one, so "
+            "this does not replace the region lookup. Note that West Midlands, East "
+            "Midlands and North East are each both a region and a combined authority, "
+            "covering different districts, so an area carries which kind it is."
+        ),
+    ),
 ```
 
-Use whatever the CLI's real fetch subcommand is; read `platform/groundtruth/cli.py` first.
+Fetch both and confirm they land:
 
-- [ ] **Step 2: Write the failing test for area membership**
+```bash
+cd platform && .venv/bin/python -m groundtruth.cli fetch --only ons_lad_region &&   .venv/bin/python -m groundtruth.cli fetch --only ons_lad_cauth && cd ..
+```
+
+Read `platform/groundtruth/cli.py` first to get the real subcommand and flag
+names; the line above is the shape, not necessarily the exact spelling. Expect
+296 and 72 features respectively.
+
+- [ ] **Step 2: Write the failing test for membership**
 
 Create `platform/tests/test_areas.py`:
 
@@ -1374,7 +1497,8 @@ def con():
     con.execute("CREATE SCHEMA silver; CREATE SCHEMA gold")
     con.execute("CREATE TABLE silver.lad (lad_code VARCHAR, lad_name VARCHAR)")
     con.executemany("INSERT INTO silver.lad VALUES (?, ?)", [
-        ("E09000007", "Camden"), ("E09000033", "Westminster"), ("E08000003", "Manchester"),
+        ("E09000007", "Camden"), ("E09000033", "Westminster"),
+        ("E08000003", "Manchester"), ("W06000009", "Pembrokeshire"),
     ])
     con.execute("CREATE TABLE silver.lad_area (lad_code VARCHAR, area_code VARCHAR, "
                 "area_name VARCHAR, kind VARCHAR)")
@@ -1383,6 +1507,13 @@ def con():
         ("E09000033", "E12000007", "London", "region"),
         ("E08000003", "E12000002", "North West", "region"),
         ("E08000003", "E47000001", "Greater Manchester", "combined authority"),
+    ])
+    con.execute("""CREATE TABLE gold.lastmile_authority
+                   (lad_code VARCHAR, premises INTEGER, gigabit_now INTEGER,
+                    gigabit_pct DOUBLE)""")
+    con.executemany("INSERT INTO gold.lastmile_authority VALUES (?, ?, ?, ?)", [
+        ("E09000007", 100, 90, 90.0),
+        ("E09000033", 900, 450, 50.0),
     ])
     return con
 
@@ -1404,39 +1535,194 @@ def test_the_kind_is_carried_so_a_page_can_say_what_it_is_showing(con):
     assert out["E47000001"]["kind"] == "combined authority"
 
 
-def test_an_area_with_no_districts_is_not_published(con):
-    con.execute("INSERT INTO silver.lad_area VALUES ('E99999999', 'E12000099', 'Nowhere', 'region')")
+def test_a_welsh_district_belongs_to_no_area(con):
     out = A.build(con)
-    # its only district is not in silver.lad, so the area has nothing to show
+    assert not any("W06000009" in a["districts"] for a in out.values())
+
+
+def test_an_area_whose_districts_are_unknown_is_not_published(con):
+    con.execute("INSERT INTO silver.lad_area VALUES "
+                "('E99999999', 'E12000099', 'Nowhere', 'region')")
+    out = A.build(con)
     assert "E12000099" not in out
+
+
+def test_a_percentage_is_recomputed_from_the_summed_parts(con):
+    # 540 of 1000 premises, not the mean of 90% and 50%, which would be 70%.
+    out = A.build(con)
+    fig = out["E12000007"]["figures"]["lastmile"]
+    assert fig["gigabit_pct"] == 54.0
+    assert fig["premises"] == 1000
+    assert fig["rule"] == "recomputed"
+
+
+def test_bellwether_is_refused_rather_than_combined(con):
+    con.execute("""CREATE TABLE gold.bellwether_district
+                   (lad_code VARCHAR, share_pct DOUBLE, la_beds INTEGER,
+                    group_name VARCHAR, authority_name VARCHAR)""")
+    con.executemany("INSERT INTO gold.bellwether_district VALUES (?, ?, ?, ?, ?)", [
+        ("E09000007", 40.0, 100, "GROUP A", "Camden"),
+        ("E09000033", 60.0, 200, "GROUP B", "Westminster"),
+    ])
+    out = A.build(con)
+    fig = out["E12000007"]["figures"].get("bellwether")
+    assert fig is not None, "the refusal must be published, not omitted"
+    assert fig["rule"] == "not combinable"
+    assert "share_pct" not in fig
 ```
 
-- [ ] **Step 3: Run it to verify it fails, then write `areas.py`**
+- [ ] **Step 3: Run it to verify it fails**
 
 Run: `cd platform && .venv/bin/python -m pytest tests/test_areas.py -v`
-Expected: FAIL, no module `groundtruth.areas`.
+Expected: FAIL, `ModuleNotFoundError: No module named 'groundtruth.areas'`.
 
-Write `platform/groundtruth/areas.py` so the four tests pass. It reads `silver.lad_area`, keeps only districts present in `silver.lad`, sorts each district list, and drops any area left with none.
+- [ ] **Step 4: Load the two lookups into `silver.lad_area`**
 
-- [ ] **Step 4: Publish it**
+Add a loader following the pattern `platform/groundtruth/load.py` already uses
+for `ons_lad_county`. Read that function first and mirror it. It must produce
+one row per district per area, with `kind` set to `"region"` or
+`"combined authority"`, and must tolerate either lookup being absent.
 
-In `publish.py`, add `out["areas"] = A.build(con)` beside the existing `out["places"]`.
+- [ ] **Step 5: Write `areas.py`**
 
-- [ ] **Step 5: Write the failing test for the app side**
+Create `platform/groundtruth/areas.py` implementing `build(con) -> dict`.
 
-Create `tests/js/areas.test.js` covering: `matchAreas(query, areas)` puts an exact area name first, an area outranks a district whose name merely contains the query, and an unknown query returns nothing. Write the tests before the module, run them, watch them fail.
+Structure it as a declared rule table plus one generic combiner, not a chain of
+per-question special cases. The rule table is the content of the table above in
+this task. Each entry declares one of four rules:
 
-- [ ] **Step 6: Write `app/assets/lib/areas.js` and add the route**
+- `"recomputed"`: a percentage, with the numerator field, the denominator field
+  and the output field named
+- `"sum"`: a list of fields to add
+- `"weighted"`: a percentage field and the field that weights it, used only
+  where the numerator is not published
+- `"dedupe-weighted"`: as `"weighted"`, but combining over distinct
+  `authority_name` first, for questions published per upper-tier authority
+- `"not combinable"`: publish the refusal and no figure
 
-Add `areas` to `ROUTER_HEADS` in `app/assets/lib/routes.js` in the same commit as the `route()` branch that handles it, never before. Add the view container to `app/index.html` and `buildAreaPage(code)` to `shell.js`.
+Every figure dictionary carries its `rule`, so the page can state how the
+number was reached. An area whose districts carry no row for a question gets no
+entry for it, exactly as a place page does.
 
-The page shows the area's name and kind, its districts as a list linking to each place page, and for each question a whole-area figure. **A percentage across districts is a weighted mean, and the page says which quantity weighted it.** A question that cannot be honestly combined says so instead of showing a number.
+Make the seven tests pass. Do not add rules for questions not in the table.
 
-- [ ] **Step 7: Verify the search**
+- [ ] **Step 6: Publish it**
 
-`London`, `Greater Manchester` and `West Midlands` each reach an area page. `Camden` still reaches its district page. `City of London` still reaches its own district page and is not shadowed by London.
+In `platform/groundtruth/publish.py`, add beside the existing `out["places"]`:
 
-- [ ] **Step 8: Run every gate and commit**
+```python
+    # Region and combined authority membership, and the whole-area figures the
+    # rules in areas.py say can honestly be combined. A question that cannot is
+    # published as a refusal rather than left out, so the page can say why.
+    from . import areas as AR
+    out["areas"] = AR.build(con) if _exists(con, "silver", "lad_area") else {}
+```
+
+- [ ] **Step 7: Write the failing test for the app side**
+
+Create `tests/js/areas.test.js`:
+
+```javascript
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { matchAreas, areaDistricts } from '../../app/assets/lib/areas.js';
+
+const AREAS = {
+  E12000007: { name: 'London', kind: 'region', districts: ['E09000001', 'E09000007'] },
+  E12000005: { name: 'West Midlands', kind: 'region', districts: new Array(30).fill('X') },
+  E47000007: { name: 'West Midlands', kind: 'combined authority', districts: new Array(7).fill('X') },
+};
+
+test('an exact area name matches', () => {
+  const hits = matchAreas('London', AREAS);
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0].code, 'E12000007');
+  assert.equal(hits[0].kind, 'region');
+});
+
+test('a colliding name offers both, so neither is silently preferred', () => {
+  const hits = matchAreas('West Midlands', AREAS);
+  assert.equal(hits.length, 2);
+  const kinds = hits.map(h => h.kind).sort();
+  assert.deepEqual(kinds, ['combined authority', 'region']);
+});
+
+test('matching is case insensitive and ignores surrounding space', () => {
+  assert.equal(matchAreas('  london ', AREAS)[0].code, 'E12000007');
+});
+
+test('a prefix matches, so typing partly through a name finds it', () => {
+  assert.equal(matchAreas('Lond', AREAS)[0].code, 'E12000007');
+});
+
+test('a query matching nothing returns nothing', () => {
+  assert.deepEqual(matchAreas('Atlantis', AREAS), []);
+  assert.deepEqual(matchAreas('', AREAS), []);
+  assert.deepEqual(matchAreas('London', null), []);
+});
+
+test('an area reports its districts, and an unknown code reports none', () => {
+  assert.equal(areaDistricts('E12000007', AREAS).length, 2);
+  assert.deepEqual(areaDistricts('ZZ', AREAS), []);
+  assert.deepEqual(areaDistricts('E12000007', null), []);
+});
+```
+
+- [ ] **Step 8: Run it to verify it fails, then write the module**
+
+Run: `node --test tests/js/areas.test.js`
+Expected: FAIL, cannot find module `areas.js`.
+
+Write `app/assets/lib/areas.js` exporting `matchAreas(query, areas)` and
+`areaDistricts(code, areas)`, pure, with no DOM access. `matchAreas` returns
+`[{code, name, kind, districts}]`, exact matches before prefix matches before
+substring matches, and returns **every** match for a colliding name.
+
+- [ ] **Step 9: Add the route and the page, in one commit**
+
+All of this lands together, because adding `areas` to `ROUTER_HEADS` before the
+handler exists is the defect this project has hit four times:
+
+1. `app/assets/lib/routes.js`: add `areas` to `ROUTER_HEADS`.
+2. `app/assets/lib/entry.js`: bridge `matchAreas` and `areaDistricts`.
+3. `app/index.html`: a `<div class="view" data-view="areas" id="viewAreas" hidden>` with an inner container for the builder to fill, following the shape of the sibling views.
+4. `app/assets/shell.js`: a `route()` branch for `head === 'areas'`, an entry in `DOCS` and `TITLES_PUBLIC`, and `buildAreaPage(code)`.
+
+The page must carry, in this order:
+
+- the area's name and, explicitly, its kind, because West Midlands is two things
+- how many districts it covers
+- each question's whole-area figure, **each stating the rule that produced it**:
+  a recomputed percentage says it was recomputed from the summed parts, a sum
+  says it is a total, a weighted mean names the quantity that weighted it
+- for a question that is not combinable, the refusal and why, with no number
+- the districts as a list, each linking to its own place page
+
+Wire every link through `firstServable`, as the global constraints require.
+
+- [ ] **Step 10: Make the search find an area**
+
+In `buildHome()`'s `draw`, put area matches **above** district matches, each
+labelled with its kind, so `London` offers the region first and `City of
+London` still reaches its own district page. A colliding name shows both rows.
+
+Do not change the postcode branch Task 3 added.
+
+- [ ] **Step 11: Verify in a browser**
+
+At 375 and 1440, both themes. Confirm:
+
+- `London` offers the region, and choosing it lists 33 districts
+- `West Midlands` offers two rows, labelled region and combined authority, with
+  30 and 7 districts respectively
+- `Greater Manchester` reaches an area page with 10 districts
+- `City of London` still reaches `#/places/E09000001`
+- `Camden` still reaches its district page
+- a Welsh district page is unchanged and offers no area
+- Bellwether on an area page shows the refusal, not a number
+- one visible `h1` per page, no horizontal overflow, console clean
+
+- [ ] **Step 12: Run every gate and commit**
 
 ```bash
 cd platform && .venv/bin/python -m pytest && cd ..
