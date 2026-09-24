@@ -73,7 +73,6 @@
 
   <div class="view" data-view="home" id="viewHome" hidden>
     <section class="find">
-      <h2 class="find__h">What does the public record say about your area?</h2>
       <p class="find__s">Type a council or district name. Every figure on the page that follows is
         computed from a published government file, and says which one.</p>
       <div class="find__box">
@@ -113,7 +112,6 @@
   </div>
 
   <div class="view" data-view="unusual" id="viewUnusual" hidden>
-    <h2 class="place__h">What looks unusual right now</h2>
     <p class="find__s" style="text-align:left;margin-left:0">Where a place sits furthest from the figure
       it is published against. Every row carries its source, so a reporter can check it before quoting it.
       It ranks within each question, then shows the widest of each, so one question's larger gaps cannot
@@ -137,8 +135,6 @@
        and last the limits -- what cannot be answered end to end, and what
        fails an anonymous request. -->
   <div class="view" data-view="about" id="viewAbout" hidden>
-    <h2 class="place__h">How this is built</h2>
-
     <h3 class="qlist__h" style="margin-top:1rem">The two joins, and how a record finds its place</h3>
     <section class="card" style="margin-top:1rem">
       <div class="card__hd"><div><div class="card__t">How a record finds its place</div>
@@ -251,15 +247,19 @@
 
   </div>
 
+  <!-- The question index. This was a grid of thirteen preview cards, under a
+       lede ("Thirteen questions nobody can currently answer") that
+       contradicted its own heading ("Every question, and what the record
+       says"), drawn by an inline drawSystems() at the foot of this file.
+       It is a list now, in the same register as the front page and the place
+       page: one row per question, built by buildQuestions() in
+       app/assets/shell.js, over the prerendered block below, which the app
+       overwrites the moment scripts run. -->
   <div class="view" data-view="systems" id="viewSystems" hidden>
-  <div class="secmark rise" id="mark-03"><div><div class="secmark__k">What it answers</div><h2 class="secmark__t">Every question, and what the record says</h2><div class="secmark__s">Thirteen questions nobody can currently answer. Each runs only on data anyone can download.</div></div></div>
-  <section class="card rise" id="systems" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">All thirteen questions, with what the record answers</div>
-      <div class="card__s" id="sysCount">&nbsp;</div></div>
-      <div class="spacer"></div>
-      <a class="cmpcta" href="#compare">What · Where · Who, compare all 13 →</a>
-      <div class="row" id="filters" style="margin-left:.6rem"></div></div>
-    <div class="card__b"><div class="grid g3" id="sysGrid">
+    <p class="qlist__lede">Thirteen questions, each answered from a published government file.
+      Every figure below is the national picture; open a question for how it is computed, what it
+      rests on, and what it cannot tell you.</p>
+    <div class="qlist"><div id="qIndexBody">
 <!-- generated:static-content -->
 <section class="static-summary">
 <h2>The thirteen questions, and what each one found</h2>
@@ -299,9 +299,7 @@ unauthenticated request on the last run. Computed 2026-09-11.</p>
 cannot tell you.</p>
 </section>
 <!-- /generated:static-content -->
-</div></div>
-  </section>
-
+    </div></div>
   </div>
 
   <!-- This view is never routed to: #/sources redirects to #/about
@@ -646,77 +644,11 @@ cannot tell you.</p>
   const richest = list.slice().sort((a, b) => b.systems - a.systems)[0];
   if (richest) showPlace(richest.code);
 
-  const badge = st => st==='live' ? '<span class="tag tag--ok">LIVE</span>' : '<span class="tag tag--warn">BETA</span>';
-  const spineTag = sp => sp==='both' ? '<span class="tag">WHERE + WHO</span>'
-    : sp==='place' ? '<span class="tag">WHERE</span>' : '<span class="tag">WHO</span>';
-  const srcFor = id => (Platform.sourceSummary().rows || [])
-    .filter(r => (r.systems||'').split(',').map(x=>x.trim()).includes(id));
-  const freshFor = id => {
-    const fed = srcFor(id).filter(r => r.fetched_at || r.provenance==='unlogged');
-    if (!fed.length) return GT.freshness(null, null);
-    const latest = fed.map(r=>r.fetched_at).filter(Boolean).sort().slice(-1)[0];
-    const cad = (fed[0]||{}).cadence;
-    return GT.freshness(cad, latest || Date.now());
-  };
-  const drawSystems = (f='all') => {
-    const list = SYSTEMS.filter(s => f==='all' || s.spine===f);
-    document.getElementById('sysGrid').innerHTML = list.map(s=>{
-      const spec = CARDS.SPEC[s.id];
-      const d = Platform.sys(s.id);
-      let statHTML='', pvHTML='';
-      if (spec && d) {
-        const h = spec.headline(d);
-        const v = h.dec!=null ? Number(h.value).toFixed(h.dec) : CARDS.fmt(h.value);
-        const trend = h.trend!=null
-          ? `<span class="syscard__trend ${h.trend>=0?'up':'down'}">${h.trend>=0?'▲':'▼'} ${Math.abs(h.trend)}%</span>` : '';
-        statHTML = `<div class="syscard__stat">
-            <span class="syscard__v">${h.prefix||''}${v}</span>
-            <span class="syscard__u">${h.unit||''}</span>${trend}</div>
-          <div class="syscard__lab">${h.label}</div>
-          <div class="syscard__ctx">${h.context||''}</div>`;
-        try { pvHTML = `<div class="syscard__pv">${GT.preview(spec.preview(d))}</div>`; } catch(e){ pvHTML=''; }
-      } else {
-        statHTML = `<div class="syscard__stat"><span class="card__s">not built yet</span></div>`;
-      }
-      const fr = freshFor(s.id);
-      return `<a class="syscard rise" id="sys-${s.id}" data-sysid="${s.id}" href="#/systems/${s.id}">
-        <div class="syscard__hd">
-          <span class="syscard__ico">${spec?spec.icon:'▦'}</span>
-          <div style="min-width:0">
-            <div class="syscard__name">${s.n}</div>
-            <div class="syscard__dom">${(spec?spec.domain:s.dom).toUpperCase()} · ${s.spine==='both'?'WHERE + WHO':s.spine==='place'?'WHERE':'WHO'}</div>
-          </div>
-        </div>
-        <div class="syscard__purpose">${spec?spec.purpose:s.s}</div>
-        ${statHTML}
-        ${pvHTML}
-        <div class="syscard__foot">
-          <span class="fresh ${fr.state}"><i></i>${fr.label}</span>
-          <span class="syscard__explore">Explore question →</span>
-        </div>
-        ${(typeof JOINS!=='undefined'&&JOINS[s.id])?(()=>{const j=JOINS[s.id];const none='<span class=\"wwwr__none\">no join</span>';return `
-        <div class="wwwr">
-          <div class="wwwr__r"><span class="wwwr__k">WHAT</span><span>${j.what}</span></div>
-          <div class="wwwr__r wwwr__r--where"><span class="wwwr__k">WHERE</span><span>${j.where||none}</span></div>
-          <div class="wwwr__r wwwr__r--who"><span class="wwwr__k">WHO</span><span>${j.who||none}</span></div>
-        </div>`;})():''}
-      </a>`;}).join('');
-    document.getElementById('sysCount').textContent =
-      `${list.length} shown · all reading live platform output`;
-    GT.reveal();
-    // animate preview fills into view
-    requestAnimationFrame(()=>document.querySelectorAll('#sysGrid .pv__gaugefill, #sysGrid .pv__bt i, #sysGrid .pv__cmpt i').forEach(el=>{
-      const w=el.style.width; el.style.width='0'; requestAnimationFrame(()=>el.style.width=w);
-    }));
-  };
-  document.getElementById('filters').innerHTML =
-    [['all','All 13'],['place','Where'],['entity','Who'],['both','Both']]
-    .map(([k,l],i)=>`<button class="btn ${i?'btn--ghost':''}" data-f="${k}">${l}</button>`).join('');
-  document.querySelectorAll('#filters [data-f]').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#filters [data-f]').forEach(o=>o.classList.add('btn--ghost'));
-    b.classList.remove('btn--ghost'); drawSystems(b.dataset.f);
-  }));
-  drawSystems();
+  // The thirteen-card grid that used to live here (drawSystems, its spine
+  // filters and the badge/spineTag/srcFor/freshFor helpers that only it
+  // used) drew #/questions as a grid of preview cards. That page is a list
+  // now, built by buildQuestions() in app/assets/shell.js from the same
+  // SYSTEMS array and Platform.systemResult, so nothing here fills it.
 
   // The donut, the source tally sentence, the feed table and the "N of M"
   // header line all read the same array once, so the three counts this page

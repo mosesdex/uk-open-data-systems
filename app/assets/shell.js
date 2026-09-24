@@ -54,8 +54,11 @@ const Shell = (() => {
     { id: 'about',   candidates: ['#/about', '#/method'],   label: 'About' },
   ];
 
+  /* Second element is the visible <h1> in .pagehead; first is the admin
+     crumb. The front page's heading is the question it asks, because the
+     hero's own copy of it is gone: one title per page, in one place. */
   const TITLES_PUBLIC = {
-    '':        ['Explore', 'Find your area'],
+    '':        ['Explore', 'What does the public record say about your area?'],
     places:    ['Explore · Places', 'Places'],
     systems:   ['Explore · What it answers', 'The thirteen questions'],
     orgs:      ['Explore · Organisations', 'Organisations'],
@@ -65,6 +68,7 @@ const Shell = (() => {
     compare:   ['Explore · Compare', 'Compare every district'],
     unusual:   ['Explore · Unusual', 'What looks unusual right now'],
     about:     ['Evidence · How this is built', 'How this is built'],
+    questions: ['Explore · What it answers', 'The thirteen questions'],
   };
 
   /* One shell, two consoles. The public app and the admin console are the same
@@ -916,7 +920,7 @@ const Shell = (() => {
   const DOCS = {
     '':        ['Find your area', 'Type a council or district name and see what the connected record holds for it: school places, planning speed, flood defences, care ownership and connectivity, each from a published government file.'],
     places:    ['Places', 'Every district, with school places, planning speed, flood defences, care ownership and connectivity read side by side.'],
-    systems:   ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    systems:   ['The thirteen questions', 'The thirteen questions the connected record answers, each computed from a published government file.'],
     orgs:      ['Organisations', 'Companies and public bodies resolved to one identifier across procurement, care and ownership records.'],
     sources:   ['Sources', 'Every source the record reads, when it was last fetched, and what failed.'],
     method:    ['Method', 'The two joins, what each figure assumes, and every correction published so far.'],
@@ -927,7 +931,7 @@ const Shell = (() => {
     // Same content as 'systems': #/questions/<id> renders the identical view
     // (see the questions branch in route()), so it needs the same fallback
     // copy here for the rare direct visit to the bare #/questions with no id.
-    questions: ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    questions: ['The thirteen questions', 'The thirteen questions the connected record answers, each computed from a published government file.'],
   };
 
   let docName = '';
@@ -986,6 +990,37 @@ const Shell = (() => {
   // route() runs on every hash change, so this flag keeps the warning below
   // to a single occurrence instead of spamming the console on each navigation.
   let warnedMissingLib = false;
+
+  /* The question index at #/questions. One row per question, in the same
+     register as the front page's list and the place page's answers: what it
+     is called, what it answers in a line, and its national headline figure
+     where the payload publishes one. The row for a question with no measured
+     output says so rather than showing a blank, because an absence is a
+     finding here too. Overwrites the prerendered block in #qIndexBody that
+     tools/app-content.mjs leaves for crawlers. */
+  function buildQuestions() {
+    const host = $('#qIndexBody');
+    if (!host) return;
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    host.innerHTML = SYSTEMS.map(s => {
+      const qid = esc(s.id);
+      const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
+      let r = null;
+      try { r = Platform.systemResult(s.id); } catch (e) { r = null; }
+      const figure = r && r.headline != null && r.headline !== ''
+        ? `<span class="qrow__f"><b>${esc(r.headline)}</b> ${esc(r.label || '')}${
+            r.sub ? `, ${esc(r.sub)}` : ''}</span>`
+        : `<span class="qrow__f">No measured output yet.</span>`;
+      return `<a class="qrow" href="${href}">
+         <span class="qrow__n">${esc(s.n)}</span>
+         <span class="qrow__s">${esc(s.s || '')}</span>
+         ${figure}
+       </a>`;
+    }).join('');
+  }
 
   /* The front page does one thing. Everything else on it is a signpost. */
   function buildHome() {
@@ -1236,8 +1271,9 @@ const Shell = (() => {
             <a class="answer__go" href="${method(s.id)}">How this is computed</a>
           </article>`).join('');
 
+    // No heading here: .pagehead's <h1> is already this place's name, set by
+    // setDoc() from the same placeList() entry, at the size this h2 used.
     host.innerHTML = `
-      <h2 class="place__h">${esc(name)}</h2>
       ${authority ? `<p class="place__t">${esc(authority)}</p>` : ''}
       <p class="place__k">${shown.size} of ${SYSTEMS.length} questions answered here</p>
       ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
@@ -1365,7 +1401,7 @@ const Shell = (() => {
         scrollTop();
         return;
       }
-      show('systems'); setChrome('systems'); scrollTop();
+      show('systems'); setChrome('systems'); safely(buildQuestions, '#qIndexBody'); scrollTop();
       return;
     }
 
@@ -1380,7 +1416,7 @@ const Shell = (() => {
         scrollTop();
         return;
       }
-      show('systems'); setChrome('systems'); scrollTop();
+      show('systems'); setChrome('systems'); safely(buildQuestions, '#qIndexBody'); scrollTop();
       return;
     }
 

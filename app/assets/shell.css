@@ -228,14 +228,19 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
    navigation now, not navigation-plus-title, so this renders it as the
    page's own heading, above the content, below the nav rather than inside
    it. Still the same single <h1> for every route, including detail routes.
-   Kept modest on purpose: several routes (a place, a question, "What looks
-   unusual", "How this is built") already render their own large heading as
-   the first thing in their content, sometimes the identical words this
-   carries. Sized as a wayfinding label above that heading rather than a
-   second one competing with it, the same relationship a kicker has to an
-   article title. */
-.pagehead{max-width:72rem;margin:0 auto;padding:1.1rem 1.6rem 0}
-.pagehead .top__title{font-size:13.5px;font-weight:600;color:var(--ink-2);margin:0}
+   It is the page's real title, at full size: the views it sits above
+   (a place, a question, "What looks unusual", "How this is built", the
+   front page) used to each render their own large heading with the same
+   words, so the title appeared twice, once as a 13px label and once at
+   38px. Those per-view headings are gone; this is the only one. */
+.pagehead{max-width:72rem;margin:0 auto;padding:1.5rem 1.6rem 0}
+.pagehead .top__title{font-size:clamp(28px,4.2vw,40px);line-height:1.12;letter-spacing:-.03em;
+  font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+
+/* The front page's hero is a centred column: one question and one field.
+   The title band is that question, so on this one route it takes the hero's
+   width and centring instead of the full-width document band above. */
+body.is-home .pagehead{max-width:44rem;text-align:center;padding-top:3.2rem}
 
 /* The front page's hero carries its own place search immediately below the
    fold; the header's copy of the same search would just be the same box
@@ -270,8 +275,9 @@ body.is-home .topsearch{display:none}
   .top__title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:9rem}
   .live{display:none}
   .tiles{grid-template-columns:1fr}
-  .pagehead{padding:.85rem .9rem 0}
-  .pagehead .top__title{font-size:12.5px;white-space:normal;overflow:visible;text-overflow:clip;max-width:none}
+  .pagehead{padding:1.1rem .9rem 0}
+  .pagehead .top__title{font-size:28px;white-space:normal;overflow:visible;text-overflow:clip;max-width:none}
+  body.is-home .pagehead{padding-top:2rem}
 }
 @media(max-width:860px) and (prefers-reduced-motion: reduce){.side{transition:none}}
 

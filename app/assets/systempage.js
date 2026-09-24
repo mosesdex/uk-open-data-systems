@@ -297,7 +297,6 @@ const SystemPage = (() => {
         <div class="sp-hero__ico">${icon}</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">${domain.toUpperCase()} · ${spineLabel} · ${meta.st.toUpperCase()}</div>
-          <h2 class="sp-hero__h">${meta.n}</h2>
           <p class="sp-hero__sub">${view.whatIs ? info.question : info.question}</p>
         </div>
         <div class="fresh fresh--${fr.state} sp-hero__fresh"><i></i>${fr.label}</div>
@@ -479,7 +478,6 @@ const SystemPage = (() => {
         <div class="sp-hero__ico">◉</div>
         <div class="sp-hero__tx">
           <div class="sp-hero__kick">THE WHO SPINE</div>
-          <h2 class="sp-hero__h">Organisations</h2>
           <p class="sp-hero__sub">Every question resolves the organisations it names to one Companies House number. That shared identifier is the join: an organisation seen in more than one answer is one entity from two angles. ${n(orgs.length)} shown, ${cross} appearing in more than one.</p>
         </div>
       </div>
