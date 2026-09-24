@@ -5,15 +5,19 @@ goes through the normal spec and plan cycle before anything is built.
 
 ## What the site does today, measured
 
-- 13 questions, 45 registered sources, 318 English districts.
+- 13 questions, 45 registered sources, 318 districts: **296 in England and 22 in
+  Wales**, not 318 English ones as first stated here.
 - **9 of the 45 sources are fetched on every run and answer nothing.** The
   pipeline already pays the cost of collecting them.
 - **4 of the 13 questions are national only** (Sentinel, Junction, Watchman,
   Baseline), so they are blank on all 318 place pages by construction.
 - A typical place page therefore shows 4 to 9 answers, not 13. City of London
   shows 4.
-- England only. Wales, Scotland and Northern Ireland are absent, which is
-  roughly 16% of the UK population.
+- **Not England only, and not fully England either.** All 22 Welsh districts
+  carry a real gigabit figure, because BDUK's open market review covers Wales;
+  none carries a school-places figure, because DfE capacity data does not.
+  Scotland and Northern Ireland are absent entirely. Corrected on 24 September
+  after the payload was measured rather than assumed.
 
 ## The "London" result, checked
 

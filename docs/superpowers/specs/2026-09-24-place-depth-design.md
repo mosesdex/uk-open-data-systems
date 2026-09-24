@@ -8,13 +8,16 @@ The owner searched London and got City of London: one district of about 8,000
 residents, with 4 of 13 questions answered. That is the honest state of the
 product, and it has three separate causes, all measured:
 
-1. **The lookup is district-only.** `places.names` holds 318 English district
-   names. No district is called London, Greater Manchester or West Midlands, so
-   the words most people type match nothing useful.
+1. **The lookup is district-only.** `places.names` holds 318 district names,
+   296 in England and 22 in Wales. No district is called London, Greater
+   Manchester or West Midlands, so the words most people type match nothing
+   useful.
 2. **Four of the thirteen questions carry no per-place data at all.** Baseline,
    Sentinel, Junction and Watchman are absent from `places.byLad` for every one
    of the 318 districts. A place page can therefore never show more than nine
-   answers, and most show fewer. Ledger reaches only 58 districts.
+   answers, and most show fewer. Ledger reaches only 58 districts, and a Welsh
+   district shows exactly one: its gigabit figure, the only question whose
+   source covers Wales.
 3. **A figure with no comparison is not a finding.** "89.5% of school places in
    use" tells a reader nothing without knowing whether that is high, low, or
    moving.
@@ -126,6 +129,13 @@ delivery address is the better join and is preferred where present.
 **Honest limit:** the corpus holds 2,065 releases. Spread over 318 districts
 that is about six per district, so most districts will carry a small count. The
 page shows the count, so a reader can judge it.
+
+**Correction 4, found during Task 3.** This spec twice called the 318 districts
+English. They are 296 English and 22 Welsh. Every Welsh district carries a real
+BDUK gigabit figure, so the platform is not England only, and two shipped
+sentences that said it was have been narrowed to what is true. The Welsh
+districts' catchment blocks carry a null utilisation, so a Welsh place page
+shows one answer of thirteen.
 
 ### Geography above the district
 
