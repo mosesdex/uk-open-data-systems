@@ -40,6 +40,19 @@ const Shell = (() => {
     ]},
   ];
 
+  // The same four destinations the drawer opens with (bar the front page,
+  // which the mark itself already links to, and Organisations, which stays
+  // a drawer-only destination), rendered as real links in the header at
+  // laptop width instead of gated behind the hamburger. Same
+  // candidates/firstServable shape as NAV_PUBLIC above, read by
+  // renderTopNav() below.
+  const TOPNAV_PUBLIC = [
+    { id: 'places',  candidates: ['#/places'],              label: 'Places' },
+    { id: 'compare', candidates: ['#/compare', '#/places'], label: 'Compare' },
+    { id: 'unusual', candidates: ['#/unusual'],             label: 'Unusual' },
+    { id: 'about',   candidates: ['#/about', '#/method'],   label: 'About' },
+  ];
+
   const TITLES_PUBLIC = {
     '':        ['Explore', 'Find your area'],
     places:    ['Explore · Places', 'Places'],
@@ -57,7 +70,7 @@ const Shell = (() => {
      product and were two implementations of a sidebar, a top bar and a router.
      Everything below is driven by this config instead. */
   const DEFAULTS = {
-    nav: null, titles: null, views: null, legacy: null,
+    nav: null, titles: null, views: null, legacy: null, topnav: null,
     // Three destinations, not the old four: the front page now carries the
     // navigation, so the bottom bar only needs the way in, the way to see
     // every district side by side, and the way to how this is built.
@@ -80,6 +93,7 @@ const Shell = (() => {
   };
   let CFG = DEFAULTS;
   const nav = () => CFG.nav || NAV_PUBLIC;
+  const topnav = () => CFG.topnav || TOPNAV_PUBLIC;
   const titles = () => CFG.titles || TITLES_PUBLIC;
   const views = () => CFG.views || VIEWS_PUBLIC;
   const legacy = () => CFG.legacy || LEGACY_PUBLIC;
@@ -109,6 +123,25 @@ const Shell = (() => {
     `).join('') + (CFG.systemList === false ? '' : `
       <div class="side__group">Jump to a question</div>
       <div id="navSystems">${systemNav()}</div>`);
+  }
+
+  /* The header's own primary nav at laptop width: #topNav is absent from
+     the admin console's markup, so this is a no-op there and the drawer
+     stays its only navigation, same as renderNav() above degrades safely
+     when .side__scroll is missing. */
+  function renderTopNav() {
+    const box = $('#topNav');
+    if (!box) return;
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    box.innerHTML = topnav().map(it => {
+      const href = pick(it.candidates, canRender);
+      if (!href) return '';
+      const key = href.slice(2).split('/')[0];
+      return `<a data-topnav="${key}" href="${href}">${esc(it.label)}</a>`;
+    }).join('');
   }
 
   /* The system list used to be anchors into one long page, with a scroll-spy
@@ -845,14 +878,27 @@ const Shell = (() => {
   function setChrome(key) {
     const T = titles();
     const [crumb, title] = T[key] || T[''] || ['', ''];
+    // .top__crumb and .live are admin-only now (app/index.html carries
+    // neither any more); both guards below simply no-op on the public shell.
     const c = $('.top__crumb'), t = $('.top__title');
     if (c) c.textContent = (CFG.crumb || DEFAULTS.crumb) + ' · ' + crumb;
     // A detail route names the thing itself; the section name is the fallback.
     if (t) t.textContent = docName || title;
-    $$('[data-nav]').forEach(a => a.classList.toggle('is-on', a.dataset.nav === key));
+    // The front page's hero carries its own place search (shell.css hides
+    // .topsearch under this class); every other route shows the header's.
+    document.body.classList.toggle('is-home', key === '');
+    // The active destination gets both a visible style and aria-current, in
+    // the drawer, the header's own primary nav and the phone tab bar alike.
+    const markCurrent = (sel, isOn) => $$(sel).forEach(a => {
+      const on = isOn(a);
+      a.classList.toggle('is-on', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    markCurrent('[data-nav]', a => a.dataset.nav === key);
+    markCurrent('[data-topnav]', a => a.dataset.topnav === key);
+    markCurrent('[data-tab]', a => a.dataset.tab === key);
     const activeSys = (location.hash.match(/^#\/systems\/([a-z0-9_-]+)/i) || [])[1] || '';
     $$('[data-sysnav]').forEach(a => a.classList.toggle('is-on', a.dataset.sysnav === activeSys));
-    $$('[data-tab]').forEach(a => a.classList.toggle('is-on', a.dataset.tab === key));
     const s = $('.side');
     if (s) s.classList.remove('on');
   }
@@ -1533,6 +1579,7 @@ const Shell = (() => {
   function boot(cfg) {
     CFG = Object.assign({}, DEFAULTS, cfg || {});
     renderNav();
+    renderTopNav();
     renderTabbar();
 
     // The skip link is the first tab stop on every page. Its href="#top" used

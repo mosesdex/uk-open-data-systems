@@ -63,7 +63,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .side{background:var(--blue-900);color:#C9D4EE;display:flex;flex-direction:column;
   position:sticky;top:0;height:100vh;overflow:hidden}
 .side__brand{display:flex;align-items:center;gap:.65rem;padding:1.15rem 1.15rem .95rem}
-.mark{width:31px;height:31px;border-radius:8px;background:linear-gradient(145deg,var(--blue-500),var(--uk-blue));
+/* background-color carries the same dark end of the gradient as a solid
+   fallback beneath it: invisible (the gradient paints over it completely),
+   but it gives tools/contrast-check.mjs a real colour to measure against
+   instead of the transparent the gradient shorthand leaves behind, since it
+   samples background-color and not gradient layers. Inside the navy drawer
+   this made no visible difference either way; in the header, where the
+   mark now also sits directly on the page background, it is what keeps the
+   measured contrast honest. */
+.mark{width:31px;height:31px;border-radius:8px;background-color:var(--uk-blue);
+  background-image:linear-gradient(145deg,var(--blue-500),var(--uk-blue));
   display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:#fff;font-size:15px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
 .side__name{font-weight:650;color:#fff;letter-spacing:-.01em}
@@ -107,6 +116,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .top__title{font-size:15px;font-weight:650;margin:0}
 .top__crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .spacer{margin-left:auto}
+
+/* The header's own link home: the mark tile plus the wordmark, standing in
+   for the mono crumb the console version carried. The wordmark drops at
+   phone width (shell.css), leaving only the 31px tile -- min-width keeps
+   the link's own tap target at the 44px floor even then. */
+.brand{display:flex;align-items:center;justify-content:center;gap:.55rem;
+  min-height:44px;min-width:44px;color:inherit}
+.brand__name{font-weight:650;letter-spacing:-.01em;font-size:15px;color:var(--ink);transition:color .16s var(--ease)}
+.brand:hover .brand__name{color:var(--uk-blue)}
+[data-theme="dark"] .brand:hover .brand__name{color:var(--blue-300)}
 
 .switch{display:flex;background:var(--blue-050);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
 .switch a{font-size:12px;padding:.3rem .62rem;border-radius:7px;color:var(--ink-2);
@@ -734,9 +753,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 
 /* ---- top-bar search trigger ---- */
+/* Compact by design: this sits beside a full nav bar now, not alone next to
+   a crumb, and the front page hides it altogether (shell.css) since the
+   hero field there does the same job. */
 .topsearch{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:9px;
-  padding:.4rem .7rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;
-  min-width:270px;flex:0 1 340px;transition:border-color .14s,background .14s}
+  padding:.4rem .65rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;
+  min-width:0;width:200px;flex:0 1 200px;transition:border-color .14s,background .14s}
 .topsearch:hover{border-color:var(--blue-300);background:var(--blue-050);color:var(--ink-2)}
 .topsearch:focus-within{border-color:var(--blue-500);background:var(--surface);
   box-shadow:0 0 0 3px var(--blue-100)}
