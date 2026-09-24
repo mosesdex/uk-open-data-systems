@@ -393,20 +393,22 @@ Expected: 5 passed.
 
 - [ ] **Step 5: Write it out beside the payload**
 
-In `platform/groundtruth/publish.py`, find where `platform.json` is written and add beside it:
+`platform/groundtruth/publish.py` writes the payload in `write(con, dest)` at
+line 493, where `dest` is `app/data/platform.json`, so the index belongs beside
+it at `dest.parent`. `_exists(con, schema, table)` is already defined at line 39.
+
+Add this to `write()`, immediately after the first `_dump(payload, dest)` call,
+so the index is written even if the audit or history steps below it raise:
 
 ```python
     # The postcode index is a separate file on purpose. It is about 200 KB, and
     # a reader browsing by district name should never pay for it; the front page
     # fetches it only when a postcode is actually typed.
     from . import postcodes as PC
-    idx = PC.sector_index(con) if _exists(con, "silver", "place_postcode") else None
-    if idx is not None:
-        (out_dir / "postcodes.json").write_text(
-            json.dumps(idx, separators=(",", ":")), encoding="utf8")
+    if _exists(con, "silver", "place_postcode"):
+        (dest.parent / "postcodes.json").write_text(
+            json.dumps(PC.sector_index(con), separators=(",", ":")), encoding="utf8")
 ```
-
-Match the surrounding code's names for `out_dir` and its JSON writing style; read the function before editing rather than assuming.
 
 - [ ] **Step 6: Build it against the real database and check the measured claims**
 
