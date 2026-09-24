@@ -155,6 +155,32 @@ const QUESTIONS = [
     caveat: p => `An amount is stated on ${p.amount_coverage_pct}% of ${n(p.contributions)} contributions, and ${p.with_location === 0 ? 'none of them carries a location' : `${n(p.with_location)} of them carry a location`}.`,
   },
   {
+    id: 'sentinel',
+    name: 'Sentinel',
+    question: 'What share of public contracts awarded here skipped open competition?',
+    unit: '%',
+    figure: p => p.closed_pct,
+    // systems.sentinel carries no national block at all: the national closed
+    // share is not a field anywhere in the payload, but it is derivable, from
+    // the same method breakdown the system-level page already renders.
+    // closed here means exactly what the district figure means -- direct and
+    // limited awards, the same two methods gold.sentinel_district counts --
+    // so the two figures cannot disagree about what "closed" is even though
+    // one is summed in Python and the other here in JS.
+    against: (p, s) => {
+      const methods = (s.sentinel && s.sentinel.method) || [];
+      const closed = methods.filter(m => m.method === 'direct' || m.method === 'limited');
+      if (!closed.length) return null;
+      const pct = closed.reduce((sum, m) => sum + (Number(m.share_pct) || 0), 0);
+      return Math.round(pct * 10) / 10;
+    },
+    againstLabel: 'the national share',
+    caveat: p => `Over ${n(p.awards)} award${p.awards === 1 ? '' : 's'} placed in this district, a `
+      + `small base: ${p.placed_pct}% of the whole corpus could be located, and the corpus itself `
+      + `is a sample rather than every award. A notice is placed by where the work is delivered `
+      + `where it says, and by the buyer's own address otherwise, which is often a head office.`,
+  },
+  {
     id: 'junction',
     name: 'Junction',
     question: 'How much generation and storage capacity is connected to the grid here, and how much more is accepted but not yet built?',

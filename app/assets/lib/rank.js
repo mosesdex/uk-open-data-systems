@@ -29,6 +29,7 @@ const POLARITY = {
   ledger: 'high-is-better',
   compass: 'none',
   junction: 'high-is-better',
+  sentinel: 'high-is-worse',
 };
 
 const ORDINAL = n => {

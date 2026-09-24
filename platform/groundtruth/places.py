@@ -213,6 +213,7 @@ TIERED = {
 PLACED = {
     "baseline": "lad_code",
     "junction": "lad_code",
+    "sentinel": "lad_code",
 }
 
 

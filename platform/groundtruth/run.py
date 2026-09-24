@@ -146,8 +146,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
         paths = [p for p in (B / "contracts_finder_bulk.json", B / "find_a_tender.json")
                  if p.exists()]
         c = sentinel.load(con, *paths); sentinel.build(con)
+        # Placed by district right after the national build, the same order
+        # junction's stage already places its own connections in.
+        sentinel.by_district(con)
+        districts = con.execute("SELECT count(*) FROM gold.sentinel_district").fetchone()[0]
         return (f"{c.awards:,} awards, {c.pct(c.suppliers_identified, c.awards):.1f}% "
-                f"identified (+{c.identified_via_register:,} via the register)")
+                f"identified (+{c.identified_via_register:,} via the register), "
+                f"placed across {districts} districts")
     _stage(r, "sentinel", _sentinel)
 
     def _watchman():
