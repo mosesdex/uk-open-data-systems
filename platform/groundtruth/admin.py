@@ -20,7 +20,7 @@ SYSTEM_TABLES = {
     "sentinel":   ["gold.sentinel_buyer", "gold.sentinel_method", "gold.sentinel_repeat", "gold.sentinel_control_footprint", "gold.sentinel_shared_control"],
     "highwater":  ["gold.highwater_outcome", "gold.highwater_trend", "gold.highwater_authority", "gold.highwater_district"],
     "plumbline":  ["gold.plumbline_quarter", "gold.plumbline_authority"],
-    "junction":   ["gold.junction_register"],
+    "junction":   ["gold.junction_register", "gold.junction_district"],
     "ledger":     ["gold.ledger_authority", "gold.ledger_purpose", "gold.ledger_funding_status"],
     "bellwether": ["gold.bellwether_care", "gold.bellwether_group", "gold.bellwether_footprint", "gold.bellwether_district"],
     "sightline":  ["gold.sightline_reason", "gold.sightline_authority", "gold.sightline_wq_authority", "gold.sightline_wq_district", "gold.sightline_wq_theme"],

@@ -10,10 +10,10 @@ const CODES = Object.keys(byLad);
 // The real, published payload, not the four-place fixture above: whether a
 // question is genuinely national, genuinely the county's, or simply absent
 // for one place only shows up at real scale, across all 318 places and the
-// app's full 13-question list. sentinel, junction and watchman carry no
-// per-place object anywhere in the real payload; baseline is absent from the
-// small fixture above too, but is now placed per district in the real one
-// (see the test below, which reads that from the payload rather than
+// app's full 13-question list. sentinel and watchman carry no per-place
+// object anywhere in the real payload; baseline and junction are absent from
+// the small fixture above too, but are now placed per district in the real
+// one (see the test below, which reads that from the payload rather than
 // assuming it). Asserting the classification against invented fixture
 // numbers would prove nothing about what a reader actually sees.
 const REAL_PAYLOAD = JSON.parse(
@@ -213,16 +213,17 @@ test('the authority type comes from the payload, and is silent when it cannot', 
 });
 
 test('a question never published per place is classified as national for every place', () => {
-  // sentinel, junction and watchman never carry a per-place object anywhere
-  // in the real payload: they are measured only nationally, so every one of
-  // the 318 places must call them national, and never upper-tier or merely
-  // unanswered here. baseline used to belong on this list too, but the
-  // shipped payload now places it per district (see places.py's PLACED
-  // block), so the set this test checks is read from the payload itself,
-  // never hardcoded, and only the resulting membership is asserted below.
+  // sentinel and watchman never carry a per-place object anywhere in the
+  // real payload: they are measured only nationally, so every one of the
+  // 318 places must call them national, and never upper-tier or merely
+  // unanswered here. baseline and junction used to belong on this list too,
+  // but the shipped payload now places each of them per district (see
+  // places.py's PLACED block), so the set this test checks is read from the
+  // payload itself, never hardcoded, and only the resulting membership is
+  // asserted below.
   const neverPerPlace = ALL_IDS.filter(id =>
     !REAL_CODES.some(code => REAL_PAYLOAD.places.byLad[code][id] !== undefined));
-  assert.deepEqual(neverPerPlace.sort(), ['junction', 'sentinel', 'watchman']);
+  assert.deepEqual(neverPerPlace.sort(), ['sentinel', 'watchman']);
 
   for (const code of REAL_CODES) {
     const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);

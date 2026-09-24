@@ -212,6 +212,7 @@ TIERED = {
 # is published as the question's figures.
 PLACED = {
     "baseline": "lad_code",
+    "junction": "lad_code",
 }
 
 

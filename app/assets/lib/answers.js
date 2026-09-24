@@ -154,6 +154,19 @@ const QUESTIONS = [
     value: p => p.total_amount,
     caveat: p => `An amount is stated on ${p.amount_coverage_pct}% of ${n(p.contributions)} contributions, and ${p.with_location === 0 ? 'none of them carries a location' : `${n(p.with_location)} of them carry a location`}.`,
   },
+  {
+    id: 'junction',
+    name: 'Junction',
+    question: 'How much generation and storage capacity is connected to the grid here, and how much more is accepted but not yet built?',
+    unit: ' MW',
+    figure: p => p.connected_mw,
+    against: p => p.accepted_mw,
+    againstLabel: 'accepted to connect but not yet connected',
+    caveat: p => `Across ${n(p.connections)} connection${p.connections === 1 ? '' : 's'} in the `
+      + `distribution operators' own capacity registers, of which ${p.placed_pct}% of all register `
+      + `rows could be located at all. The connection is where the equipment is, not who the power `
+      + `serves.`,
+  },
 ];
 
 /* The list above is a whitelist, so the two internal keys a place object also

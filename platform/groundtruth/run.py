@@ -229,7 +229,15 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
             time.sleep(1)
         junction.load(con, states)
         g = junction.catalogue_gap(states)
-        return f"{g['returned']:,} of {g['advertised']:,} records served"
+        # The registers themselves -- on disk regardless of what the anonymous
+        # export above could reach today -- loaded and placed by district right
+        # after the register metadata, the same order this stage already builds
+        # its other gold table in.
+        rows = junction.load_connections(con, B)
+        junction.by_district(con)
+        districts = con.execute("SELECT count(*) FROM gold.junction_district").fetchone()[0]
+        return (f"{g['returned']:,} of {g['advertised']:,} records served, "
+                f"{rows:,} connections placed across {districts} districts")
     _stage(r, "junction", _junction)
 
     def _entity():
