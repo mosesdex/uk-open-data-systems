@@ -497,6 +497,14 @@ def write(con: duckdb.DuckDBPyConnection, dest: Path) -> dict:
     dest.parent.mkdir(parents=True, exist_ok=True)
     _dump(payload, dest)
 
+    # The postcode index is a separate file on purpose. It is about 200 KB, and
+    # a reader browsing by district name should never pay for it; the front page
+    # fetches it only when a postcode is actually typed.
+    from . import postcodes as PC
+    if _exists(con, "silver", "place_postcode"):
+        (dest.parent / "postcodes.json").write_text(
+            json.dumps(PC.sector_index(con), separators=(",", ":")), encoding="utf8")
+
     # Each headline is recorded with where it came from before the audit
     # measures how much of the publication can say so.
     from . import evidence as _evidence
