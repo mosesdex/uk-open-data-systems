@@ -810,9 +810,15 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .find__box input:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
 .find__hits{position:absolute;left:0;right:0;top:calc(100% + .4rem);z-index:20;background:var(--surface);
   border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);overflow:hidden}
-.find__hit{display:block;width:100%;text-align:left;min-height:44px;padding:.6rem 1rem;border:0;
+.find__hit{display:flex;align-items:center;justify-content:space-between;gap:.6rem;width:100%;
+  text-align:left;min-height:44px;padding:.6rem 1rem;border:0;
   background:none;font:inherit;font-size:16px;color:var(--ink);cursor:pointer}
 .find__hit:hover,.find__hit:focus-visible{background:var(--blue-050)}
+/* Labels an area result with its kind (region / combined authority), so a
+   colliding name such as West Midlands never silently picks one for the
+   reader -- both rows show, each saying plainly what it is. */
+.find__hitkind{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);flex:none}
 .find__note{margin:.6rem 0 0;font-size:14px;color:var(--ink-2)}
 .find__eg{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:1.1rem 0 0}
 .chip{display:inline-flex;align-items:center;min-height:44px;padding:0 .8rem;border-radius:999px;
@@ -911,3 +917,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .place__take{margin:1.4rem 0 .5rem}
 .place__csv{background:none;font-family:inherit;cursor:pointer}
 .place__csv:hover{border-color:var(--blue-300);color:var(--blue-600)}
+
+/* ---------- a region or combined authority, as a document ---------- */
+/* The district list on an area page: up to 33 links (.chip already carries
+   the 44px target and the pill), left-aligned rather than .find__eg's
+   centred layout, which exists for the front page's three examples only. */
+.arealist{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 1.4rem}

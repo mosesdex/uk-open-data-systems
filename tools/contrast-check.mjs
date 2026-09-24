@@ -56,6 +56,11 @@ const ROUTES = [
   '#/search',
   '#/questions',
   '#/questions/plumbline',
+  // The area page Task 7 added: its own text classes (.place__t, .answer__c,
+  // .find__hitkind, .arealist .chip) are otherwise never checked by this
+  // tool. London carries a figure for every combinable question, including
+  // Bellwether's refusal text, so this one route exercises the whole page.
+  '#/areas/E12000007',
 ];
 
 const THEMES = ['light', 'dark'];

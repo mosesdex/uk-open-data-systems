@@ -63,12 +63,17 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     B = bronze
 
     # The county lookup loads before any system builds: three of them hand
-    # county figures to districts through it.
+    # county figures to districts through it. The region and combined
+    # authority lookups load here too, for the same reason: areas.py reads
+    # silver.lad_area at publish time, and publish never loads anything itself.
     _stage(r, "place spine", lambda: (
         f"{loader.load_codepoint(con, B / 'os_code_point_open.zip'):,} postcodes, "
         f"{loader.load_lad_boundaries(con, B / 'ons_lad_boundaries.geojson')} districts"
         + (f", {loader.load_lad_county(con, B / 'ons_lad_county.json')} county links"
-           if (B / "ons_lad_county.json").exists() else ", no county lookup")))
+           if (B / "ons_lad_county.json").exists() else ", no county lookup")
+        + (f", {loader.load_lad_area(con, B / 'ons_lad_region.json', B / 'ons_lad_cauth.json')} area links"
+           if (B / "ons_lad_region.json").exists() or (B / "ons_lad_cauth.json").exists()
+           else ", no area lookup")))
 
     def _catchment():
         c = catchment.build(con, B / "gias_establishments.csv")

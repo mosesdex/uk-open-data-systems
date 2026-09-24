@@ -391,6 +391,12 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         "capacityTrend": pv.get("capacity", {}),
     }
 
+    # Region and combined authority membership, and the whole-area figures the
+    # rules in areas.py say can honestly be combined. A question that cannot is
+    # published as a refusal rather than left out, so the page can say why.
+    from . import areas as AR
+    out["areas"] = AR.build(con) if _exists(con, "silver", "lad_area") else {}
+
     # Operator view: everything traceable to a row, nothing invented.
     from . import admin as A
     out["admin"] = A.build(con, Path(__file__).resolve().parent.parent / "data" / "bronze")

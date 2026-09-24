@@ -30,7 +30,7 @@ export const ANCHOR = {
 // is the authoritative copy: shell.js and the test suite both read it
 // instead of keeping their own hand-copied list in step.
 export const ROUTER_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search',
-  'compare', 'unusual', 'about', 'questions']);
+  'compare', 'unusual', 'about', 'questions', 'areas']);
 
 function resolve(hash) {
   if (Object.prototype.hasOwnProperty.call(ANCHOR, hash)) return ANCHOR[hash];
