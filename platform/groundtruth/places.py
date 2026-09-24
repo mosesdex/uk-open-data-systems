@@ -299,11 +299,17 @@ def place_view(con: duckdb.DuckDBPyConnection) -> dict:
             # of the dictionary does not already say.
             places.setdefault(code, {})[system] = {k: v for k, v in r.items() if k != key}
         resolution[system] = {
+            # No name was ever matched here, so a consumer must not read this
+            # the way it reads SOURCES/TIERED resolution.
+            "kind": "placed",
             "names": len(index_codes),
             "matched": len(placed & index_codes),
             "rate": round(100 * len(placed & index_codes) / len(index_codes), 1)
                     if index_codes else 0.0,
-            "unmatched": sorted(placed - index_codes)[:12],
+            # Districts the platform knows about that this system carries no
+            # row for. Not a failed join -- there was no name to fail on --
+            # so these are the districts with nothing recorded, not misses.
+            "unmatched": sorted(index_codes - placed)[:12],
         }
 
     # School capacity is returned per education authority, so a two-tier
