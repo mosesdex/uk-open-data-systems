@@ -8,9 +8,10 @@ import { sectorKey, sectorDistricts } from './postcode.js';
 import { districtChoice } from './coverage.js';
 import { placeSummary } from './summary.js';
 import { unusualRows, unusualTotal } from './unusual.js';
-import { placeAnswers, placeAuthority, placeAbsences } from './answers.js';
+import { placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes } from './answers.js';
 import { rankFor, rankSentence } from './rank.js';
 
 window.GT_LIB = Object.assign(window.GT_LIB || {},
   { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, sectorKey, sectorDistricts, districtChoice,
-    placeSummary, unusualRows, unusualTotal, placeAnswers, placeAuthority, placeAbsences, rankFor, rankSentence });
+    placeSummary, unusualRows, unusualTotal, placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes,
+    rankFor, rankSentence });

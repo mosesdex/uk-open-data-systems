@@ -1326,6 +1326,14 @@ const Shell = (() => {
     const upperTier = absences ? absences.upperTier.map(byId) : [];
     const noFigure = absences ? absences.noFigure.map(byId)
       : SYSTEMS.filter(s => !shown.has(s.id));
+    // Some questions know a specific reason a place can carry nothing for
+    // them (Sentinel's sample, Junction's withholding operators); most do
+    // not, and the generic sentence above already covers those honestly.
+    // Read straight off the raw noFigure ids, before they are mapped to
+    // SYSTEMS entries above, since placeAbsenceNotes wants ids, not names.
+    const absenceNotes = lib.placeAbsenceNotes
+      ? lib.placeAbsenceNotes(absences ? absences.noFigure : [])
+      : [];
 
     // "How this is computed" belongs on the question's method tab, not its
     // summary tab: #/questions/<id>/method exists and SysTabs reads the
@@ -1401,6 +1409,7 @@ const Shell = (() => {
              }, so ${noFigure.length === 1 ? 'it is' : 'they are'} not covered here.`
           : `The published record carries no figure for ${noFigure.length === 1 ? 'it' : 'them'} at this place.`
         }</p>` : ''}
+      ${absenceNotes.map(a => `<p class="place__none">${esc(a.note)}</p>`).join('')}
       ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
         id="placeCsv">Download these ${answers.length} figure${answers.length === 1 ? '' : 's'} as CSV</button></p>` : ''}`;
 

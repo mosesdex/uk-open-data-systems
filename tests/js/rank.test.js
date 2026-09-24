@@ -98,6 +98,33 @@ test('ledger is ranked, using the raw amount behind its formatted figure', () =>
 // keep the teens from reading as "11st, 12nd, 13rd". These ranks are only
 // reachable through rankSentence, so the wording is exercised the same way a
 // reader sees it rather than by reaching into the unexported helper.
+// Sutton's real Sentinel figure (3 awards, 33.3% closed) used to render as
+// "17th of 199 districts": a rank built on a 3-award base sitting beside
+// districts with hundreds of awards is false precision, not a finding (see
+// RANKABLE's comment in rank.js). This pins that defect shut: given a
+// payload carrying both a thin Sentinel corpus and a comparable Junction
+// one, Sentinel must never produce a rank, and Junction must still produce
+// a real one.
+test('sentinel declines to rank; junction still ranks', () => {
+  const payload = {
+    systems: {},
+    places: { byLad: {
+      A: { sentinel: { closed_pct: 33.3, awards: 3, placed_pct: 98.5 },
+           junction: { connected_mw: 40, accepted_mw: 10, connections: 5, placed_pct: 95 } },
+      B: { sentinel: { closed_pct: 10, awards: 200, placed_pct: 98.5 },
+           junction: { connected_mw: 20, accepted_mw: 5, connections: 3, placed_pct: 95 } },
+    } },
+  };
+
+  assert.equal(rankFor('A', 'sentinel', payload), null);
+  assert.equal(rankFor('B', 'sentinel', payload), null);
+
+  const junctionRank = rankFor('A', 'junction', payload);
+  assert.ok(junctionRank, 'junction still produces a rank');
+  assert.equal(junctionRank.rank, 1);
+  assert.equal(junctionRank.of, 2);
+});
+
 test('ordinal suffixes are correct for the teens and the round numbers after them', () => {
   const many = { systems: {}, places: { byLad: {} } };
   // 111 districts: rank 1 goes to the top figure, rank 111 to the bottom, so a

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { placeAnswers, placeAuthority, placeAbsences } from '../../app/assets/lib/answers.js';
+import { placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes } from '../../app/assets/lib/answers.js';
 
 const PAYLOAD = JSON.parse(readFileSync(new URL('./fixtures/payload.json', import.meta.url)));
 const byLad = PAYLOAD.places.byLad;
@@ -284,6 +284,34 @@ test('a single-tier authority never blames the county for its own missing questi
 test('an unknown place has no absences rather than a guessed one', () => {
   assert.equal(placeAbsences('E99999999', PAYLOAD, ALL_IDS), null);
   assert.equal(placeAbsences('E07000032', null, ALL_IDS), null);
+});
+
+// Only junction and sentinel declare a reason a place can carry nothing for
+// them at all (see the absence field on each QUESTIONS entry in answers.js).
+// Every other question has none, and the generic absence sentence on the
+// place page already covers those honestly on its own.
+test('an absence note comes back for junction and sentinel, and for no question that declares none', () => {
+  const notes = placeAbsenceNotes(ALL_IDS);
+  const byId = Object.fromEntries(notes.map(n => [n.id, n.note]));
+
+  assert.ok(byId.junction, 'junction has a note');
+  assert.match(byId.junction, /Northern Powergrid/);
+  assert.doesNotMatch(byId.junction, /\u2014|\u2013/);
+
+  assert.ok(byId.sentinel, 'sentinel has a note');
+  assert.match(byId.sentinel, /sample/);
+  assert.doesNotMatch(byId.sentinel, /\u2014|\u2013/);
+
+  // Every question with a per-place figure but no declared absence: no note.
+  for (const id of ['catchment', 'plumbline', 'lastmile', 'ledger', 'baseline']) {
+    assert.ok(!(id in byId), `${id} should carry no absence note`);
+  }
+});
+
+test('placeAbsenceNotes only returns notes for the ids it is asked about', () => {
+  assert.deepEqual(placeAbsenceNotes(['catchment']), []);
+  assert.deepEqual(placeAbsenceNotes([]), []);
+  assert.deepEqual(placeAbsenceNotes(['sentinel']).map(n => n.id), ['sentinel']);
 });
 
 test('the lastmile comparator names the population it actually covers', () => {

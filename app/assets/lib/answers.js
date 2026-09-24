@@ -45,7 +45,15 @@ const join = (...parts) => parts.filter(Boolean).join(' ') || null;
    numeric to compare, without parsing a display string back into a number:
    that parsing is what broke ledger's rank in the first place, and a second
    question formatted for display in future would break the same way if
-   ranking had to keep guessing how to undo the formatting. */
+   ranking had to keep guessing how to undo the formatting.
+
+   `absence` is optional too, and is the opposite case: a sentence for when
+   this question has nothing at all for a place, read by placeAbsenceNotes
+   below. Most questions leave it unset, because the generic "no figure here"
+   sentence the place page already prints is the whole honest story for them.
+   It exists for the two questions where that generic sentence would itself
+   mislead: Sentinel and Junction each have nothing for most places for a
+   specific, statable reason, not because nothing happened to be recorded. */
 const QUESTIONS = [
   {
     id: 'plumbline',
@@ -159,6 +167,14 @@ const QUESTIONS = [
     name: 'Sentinel',
     question: 'What share of public contracts awarded here skipped open competition?',
     unit: '%',
+    // Why a place can carry nothing for this question at all, stated once
+    // here rather than left to the generic absence sentence, which would
+    // otherwise read as if the record covers every contract and simply found
+    // none here. It does not: the corpus is a sample of Contracts Finder, not
+    // the complete register of every award, so an empty district may just be
+    // one that had no sampled award placed in it.
+    absence: 'Sentinel draws on a sample of Contracts Finder awards, not every award made, so a '
+      + 'district with nothing here may simply have had no sampled award placed in it.',
     figure: p => p.closed_pct,
     // systems.sentinel carries no national block at all: the national closed
     // share is not a field anywhere in the payload, but it is derivable, from
@@ -185,6 +201,16 @@ const QUESTIONS = [
     name: 'Junction',
     question: 'How much generation and storage capacity is connected to the grid here, and how much more is accepted but not yet built?',
     unit: ' MW',
+    // Why a place can carry nothing here: the generic absence sentence would
+    // read as "there is no grid capacity data about where you live", which is
+    // not what is true for most of the country. Named plainly instead: only
+    // one of the four electricity distribution operators publishes its
+    // register with rows in it; the other three publish nothing. Which
+    // operator serves any one absent district is not itself in the payload,
+    // so that is as far as this goes; the reader is left to draw the rest.
+    absence: 'Only one of the four electricity distribution operators, Northern Powergrid, publishes '
+      + 'its capacity register openly; UK Power Networks, Electricity North West and SP Energy Networks '
+      + 'each serve an export with a header row and no data at all.',
     figure: p => p.connected_mw,
     against: p => p.accepted_mw,
     againstLabel: 'accepted to connect but not yet connected',
@@ -307,4 +333,29 @@ export function placeAbsences(code, payload, allIds) {
     noFigure.push(id);
   }
   return { national, upperTier, noFigure, countyName };
+}
+
+/* The specific reason, where one is known, that a question can carry nothing
+   for a place at all -- Sentinel's sampling, Junction's operator withholding
+   -- read off the same QUESTIONS entries placeAnswers already reads, rather
+   than duplicated in a second table that could drift out of step with it.
+
+   A sibling to placeAbsences rather than a field folded into its return: that
+   function classifies WHERE an absence belongs (national, the county's, or
+   simply unanswered here), a question about payload structure that is the
+   same for every question. This answers a different question, WHY, which is
+   known for only two questions today and is a fixed fact about the question
+   itself, not about the place or which of placeAbsences's three buckets the
+   absence landed in. Folding the two together would mean every caller of
+   placeAbsences receives notes whether it wants them or not, and would key
+   the reason to a bucket it does not actually depend on.
+
+   ids is deliberately whatever the caller already has to hand -- shell.js
+   passes the noFigure list placeAbsences just returned, so a note only ever
+   accompanies the generic sentence for a question actually missing here, and
+   is never in a class of general project-wide caveats printed everywhere. */
+export function placeAbsenceNotes(ids) {
+  const wanted = new Set(ids || []);
+  return QUESTIONS.filter(q => q.absence && wanted.has(q.id))
+    .map(q => ({ id: q.id, name: q.name, note: q.absence }));
 }
