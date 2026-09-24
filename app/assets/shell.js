@@ -18,25 +18,26 @@ const Shell = (() => {
   const num = v => v == null || Number.isNaN(Number(v)) ? 'n/a' : Number(v).toLocaleString('en-GB');
 
   /* ---------------------------------------------------------------- nav ---- */
-  // The drawer used to list six destinations by a hardcoded id ("#/" + id),
-  // three of which (systems, sources, method) had been retired and now only
-  // redirect elsewhere -- so "What it answers" landed on the home page and
-  // "Sources"/"Method" both landed on the same "About" entry already below
-  // them. This lists the structure the site now has instead: the front page,
-  // compare, unusual, about and organisations, each with an ORDERED LIST of
-  // candidate hrefs in `candidates` -- the same firstServable idea
-  // app/assets/lib/routes.js applies to URLs and renderTabbar already applies
-  // to the bottom bar -- so renderNav() picks a route that actually renders
-  // today instead of a hardcoded href that might redirect. A count is kept
-  // only where it names a real, useful quantity (districts, organisations);
-  // "About" and "What looks unusual" are not collections and carry none.
+  // The drawer is the phone menu now, not a console rail: it used to open
+  // on a PUBLIC badge, mono section labels and the thirteen questions
+  // listed with their live figures, every one of them a sign this was the
+  // operations sidebar wearing a public skin. This lists the structure the
+  // site actually has instead: the front page, Places, Compare, Unusual,
+  // About and Organisations, each with an ORDERED LIST of candidate hrefs
+  // in `candidates` -- the same firstServable idea app/assets/lib/routes.js
+  // applies to URLs and renderTabbar already applies to the bottom bar --
+  // so renderNav() picks a route that actually renders today instead of a
+  // hardcoded href that might redirect. A count is kept only where it
+  // names a real, useful quantity (districts, organisations); "Compare",
+  // "Unusual" and "About" are not collections of their own and carry none.
   const NAV_PUBLIC = [
     { group: 'Explore', items: [
-      { id: '',        candidates: ['#/'],       icon: '◉', label: 'Find your area' },
-      { id: 'compare', candidates: ['#/compare'], icon: '⇄', label: 'Compare every district', count: () => Platform.placeList().length },
-      { id: 'unusual', candidates: ['#/unusual'], icon: '◆', label: 'What looks unusual' },
-      { id: 'about',   candidates: ['#/about'],   icon: 'ⓘ', label: 'How this is built' },
-      { id: 'orgs',    candidates: ['#/orgs'],    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
+      { id: '',        candidates: ['#/'],                      icon: '◉', label: 'Find your area' },
+      { id: 'places',  candidates: ['#/places'],                 icon: '▣', label: 'Places', count: () => Platform.placeList().length },
+      { id: 'compare', candidates: ['#/compare', '#/places'],    icon: '⇄', label: 'Compare' },
+      { id: 'unusual', candidates: ['#/unusual'],                icon: '◆', label: 'Unusual' },
+      { id: 'about',   candidates: ['#/about', '#/method'],      icon: 'ⓘ', label: 'About' },
+      { id: 'orgs',    candidates: ['#/orgs'],                   icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
     ]},
   ];
 
@@ -146,7 +147,9 @@ const Shell = (() => {
 
   /* The system list used to be anchors into one long page, with a scroll-spy
      keeping up. Each one is a destination now, so it is a link and nothing
-     needs to watch the scroll position. */
+     needs to watch the scroll position. It used to also carry each
+     system's live headline figure, which read as a dashboard row rather
+     than a menu item; this is a plain link, its name and domain only. */
   function systemNav() {
     // #/systems/<id> is a renamed route (app/assets/lib/routes.js) that now
     // redirects to #/questions/<id>: linking straight at the renamed route
@@ -160,17 +163,11 @@ const Shell = (() => {
       const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[s.id];
       const ico = (spec && spec.icon) || '•';
       const dom = (spec && spec.domain) || s.dom || '';
-      let fig = '';
-      try {
-        const r = Platform.systemResult(s.id);
-        if (r && r.headline) fig = r.headline;
-      } catch (e) { fig = ''; }
       const href = pick(['#/questions/' + s.id, '#/systems/' + s.id], canRender) || ('#/systems/' + s.id);
       return `<a class="navx" data-sysnav="${esc(s.id)}" href="${href}">
         <span class="navx__ico" aria-hidden="true">${ico}</span>
         <span class="navx__tx"><span class="navx__nm">${esc(s.n)}</span>${
           dom ? `<span class="navx__dm">${esc(dom)}</span>` : ''}</span>
-        ${fig ? `<span class="navx__fig">${esc(fig)}</span>` : ''}
       </a>`;
     }).join('');
   }

@@ -32,23 +32,19 @@
 <div class="flagrule"><i></i><i></i><i></i></div>
 <div class="app">
 
+<!-- The phone menu now matches the site's real structure instead of the
+     console rail this drawer started as: the front page, then every
+     destination the header's own nav also links to, then the thirteen
+     questions. renderNav() (app/assets/shell.js) rebuilds everything below
+     .side__scroll from that same list on boot, through firstServable, so
+     this starting markup is only what a reader sees for the instant before
+     JS runs. -->
 <aside class="side" id="sideNav">
   <div class="side__brand">
-    <div class="mark">G</div>
-    <div><div class="side__name">UK GroundTruth</div><div class="side__sub">Public</div></div>
+    <div class="mark" aria-hidden="true">G</div>
+    <div class="side__name">UK GroundTruth</div>
   </div>
-  <div class="side__scroll">
-    <div class="side__group">The story</div>
-    <a class="navi is-on" href="#top"><i class="navi__dot"></i>What it is</a>
-    <a class="navi" href="#mark-01"><i class="navi__dot"></i>The evidence</a>
-    <a class="navi" href="#place"><i class="navi__dot"></i>Your area</a>
-    <a class="navi" href="#systems"><i class="navi__dot"></i>What it answers</a>
-    <a class="navi" href="#spines"><i class="navi__dot"></i>How they connect</a>
-    <a class="navi" href="#feeds"><i class="navi__dot"></i>The evidence base</a>
-    <a class="navi" href="#honesty"><i class="navi__dot"></i>What it cannot do</a>
-    <div class="side__group">Jump to a system</div>
-    <div id="navSystems"></div>
-  </div>
+  <div class="side__scroll"></div>
 </aside>
 
 <a class="skip" href="#top">Skip to content</a>
