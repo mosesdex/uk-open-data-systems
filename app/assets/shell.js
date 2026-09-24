@@ -1066,9 +1066,11 @@ const Shell = (() => {
     };
 
     // The index carries Wales and Scotland as well as England: 9,113 English
-    // sectors, 592 Welsh, 1,136 Scottish. That is deliberate. This platform's
-    // sources are England only, and a Welsh reader who types a real postcode is
-    // owed that sentence, not "not in the index", which would be false.
+    // sectors, 592 Welsh, 1,136 Scottish. That is deliberate: a Welsh sector
+    // resolves to a district this platform does carry, so it falls through to
+    // the ordinary lookup below. A Scottish or Northern Irish reader who types
+    // a real postcode is owed the true reason nothing shows, not "not in the
+    // index", which would be false.
     const COUNTRY = { W: 'Wales', S: 'Scotland', N: 'Northern Ireland' };
 
     const resolvePostcode = q => {
@@ -1085,7 +1087,7 @@ const Shell = (() => {
           // The sector resolved, to somewhere this platform does not cover.
           const where = COUNTRY[String(all[0])[0]];
           say(where
-            ? `That postcode is in ${where}. Every source this platform reads is England only, so there is nothing to show for it yet.`
+            ? `That postcode is in ${where}. This platform carries no districts there yet, so there is nothing to show for it.`
             : 'That postcode resolves to a district this platform does not carry.');
           return;
         }
@@ -1341,9 +1343,9 @@ const Shell = (() => {
         published for ${esc(absences.countyName)} County Council, not for this district.</p>` : ''}
       ${noFigure.length ? `<p class="place__none">No answer here for ${
         noFigure.map(s => esc(s.n)).join(', ')}. ${isWales
-          ? `${noFigure.length === 1 ? 'It is' : 'They are'} published for Wales too, but this
-             platform's sources are England only, so ${noFigure.length === 1 ? 'it is' : 'they are'}
-             not covered here.`
+          ? `${noFigure.length === 1 ? 'It is' : 'They are'} published for Wales too, but from ${
+              noFigure.length === 1 ? 'a source that only covers England' : 'sources that only cover England'
+             }, so ${noFigure.length === 1 ? 'it is' : 'they are'} not covered here.`
           : `The published record carries no figure for ${noFigure.length === 1 ? 'it' : 'them'} at this place.`
         }</p>` : ''}
       ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
