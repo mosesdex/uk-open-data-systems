@@ -389,9 +389,13 @@ const SystemPage = (() => {
       }));
     }
 
+    // No body scroll lock here. #syshost was a slide-over panel with its own
+    // inner scroller, so freezing the page behind it was right. It is a plain
+    // route in normal flow now (#syshost is display:block, no height, no
+    // overflow), so locking the body simply froze the page: every question
+    // page, the organisation index at 39,736px and search were unscrollable,
+    // and everything below the fold was unreachable.
     host.classList.add('on');
-    document.body.style.overflow = 'hidden';
-    root.scrollTop = 0;
   }
 
   // The comparison matrix: all 13 systems on one screen, WHAT/WHERE/WHO plus a
@@ -445,9 +449,13 @@ const SystemPage = (() => {
     // (close() never touched the hash, which left the URL here with
     // nothing rendered to show for it).
     root.querySelector('#spBack').addEventListener('click', () => { location.hash = '#/'; });
+    // No body scroll lock here. #syshost was a slide-over panel with its own
+    // inner scroller, so freezing the page behind it was right. It is a plain
+    // route in normal flow now (#syshost is display:block, no height, no
+    // overflow), so locking the body simply froze the page: every question
+    // page, the organisation index at 39,736px and search were unscrollable,
+    // and everything below the fold was unreachable.
     host.classList.add('on');
-    document.body.style.overflow = 'hidden';
-    root.scrollTop = 0;
   }
 
   // ---- organisation knowledge graph (the WHO spine) ----
@@ -502,7 +510,13 @@ const SystemPage = (() => {
     };
     q.addEventListener('input', filter);
     cx.addEventListener('change', filter);
-    host.classList.add('on'); document.body.style.overflow = 'hidden'; root.scrollTop = 0;
+    // No body scroll lock here. #syshost was a slide-over panel with its own
+    // inner scroller, so freezing the page behind it was right. It is a plain
+    // route in normal flow now (#syshost is display:block, no height, no
+    // overflow), so locking the body simply froze the page: every question
+    // page, the organisation index at 39,736px and search were unscrollable,
+    // and everything below the fold was unreachable.
+    host.classList.add('on');
   }
 
   function orgProfile(id) {
@@ -567,7 +581,13 @@ const SystemPage = (() => {
       <footer class="sp-foot card__s">Every figure is computed from published records on one machine. Nothing is estimated.</footer>`;
     root.querySelector('#spBack').addEventListener('click', () => { location.hash = 'org'; });
     GT.countAll(root);
-    host.classList.add('on'); document.body.style.overflow = 'hidden'; root.scrollTop = 0;
+    // No body scroll lock here. #syshost was a slide-over panel with its own
+    // inner scroller, so freezing the page behind it was right. It is a plain
+    // route in normal flow now (#syshost is display:block, no height, no
+    // overflow), so locking the body simply froze the page: every question
+    // page, the organisation index at 39,736px and search were unscrollable,
+    // and everything below the fold was unreachable.
+    host.classList.add('on');
   }
 
   // ---- cross-system search: one box over systems, organisations, locations ----
@@ -633,7 +653,13 @@ const SystemPage = (() => {
     input.addEventListener('input', () => render(input.value));
     if (pendingQuery) { input.value = pendingQuery; pendingQuery = ''; }
     render(input.value);
-    host.classList.add('on'); document.body.style.overflow = 'hidden'; root.scrollTop = 0;
+    // No body scroll lock here. #syshost was a slide-over panel with its own
+    // inner scroller, so freezing the page behind it was right. It is a plain
+    // route in normal flow now (#syshost is display:block, no height, no
+    // overflow), so locking the body simply froze the page: every question
+    // page, the organisation index at 39,736px and search were unscrollable,
+    // and everything below the fold was unreachable.
+    host.classList.add('on');
     setTimeout(() => input.focus(), 50);
   }
 
