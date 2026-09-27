@@ -594,6 +594,14 @@ const Platform = (() => {
     const r = placeResolution()[id];
     if (!r || !r.names) return null;
     const miss = r.names - r.matched;
+    // A placed system was never matched by name at all: its gold table
+    // already carried a district code, so there was nothing to fail a join.
+    // A district with no row here has nothing recorded, not a miss, so the
+    // sentence must not say "matched" or "did not" the way a name join does.
+    if (r.kind === 'placed') {
+      if (!miss) return `Place join: this system’s figures are placed by location, not matched to an authority name. All ${_n(r.names)} districts carry a figure.`;
+      return `Place join: this system’s figures are placed by location, not matched to an authority name. ${_n(r.matched)} of ${_n(r.names)} districts carry a figure (${r.rate}%); the other ${_n(miss)} ${miss === 1 ? 'has' : 'have'} none recorded, which is not a failed match.`;
+    }
     // Upper-tier systems are matched to councils, and a county's figures go to
     // every district it covers, so the note says how far they reach.
     const verb = r.counties != null ? 'matched a council' : 'matched a district';

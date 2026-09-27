@@ -63,7 +63,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .side{background:var(--blue-900);color:#C9D4EE;display:flex;flex-direction:column;
   position:sticky;top:0;height:100vh;overflow:hidden}
 .side__brand{display:flex;align-items:center;gap:.65rem;padding:1.15rem 1.15rem .95rem}
-.mark{width:31px;height:31px;border-radius:8px;background:linear-gradient(145deg,var(--blue-500),var(--uk-blue));
+/* background-color carries the same dark end of the gradient as a solid
+   fallback beneath it: invisible (the gradient paints over it completely),
+   but it gives tools/contrast-check.mjs a real colour to measure against
+   instead of the transparent the gradient shorthand leaves behind, since it
+   samples background-color and not gradient layers. Inside the navy drawer
+   this made no visible difference either way; in the header, where the
+   mark now also sits directly on the page background, it is what keeps the
+   measured contrast honest. */
+.mark{width:31px;height:31px;border-radius:8px;background-color:var(--uk-blue);
+  background-image:linear-gradient(145deg,var(--blue-500),var(--uk-blue));
   display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:#fff;font-size:15px;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
 .side__name{font-weight:650;color:#fff;letter-spacing:-.01em}
@@ -107,6 +116,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .top__title{font-size:15px;font-weight:650;margin:0}
 .top__crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .spacer{margin-left:auto}
+
+/* The header's own link home: the mark tile plus the wordmark, standing in
+   for the mono crumb the console version carried. The wordmark drops at
+   phone width (shell.css), leaving only the 31px tile -- min-width keeps
+   the link's own tap target at the 44px floor even then. */
+.brand{display:flex;align-items:center;justify-content:center;gap:.55rem;
+  min-height:44px;min-width:44px;color:inherit}
+.brand__name{font-weight:650;letter-spacing:-.01em;font-size:15px;color:var(--ink);transition:color .16s var(--ease)}
+.brand:hover .brand__name{color:var(--uk-blue)}
+[data-theme="dark"] .brand:hover .brand__name{color:var(--blue-300)}
 
 .switch{display:flex;background:var(--blue-050);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
 .switch a{font-size:12px;padding:.3rem .62rem;border-radius:7px;color:var(--ink-2);
@@ -496,7 +515,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   background:var(--blue-050);border:1px solid var(--line)}
 .sp-hero__kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--ink-3)}
 .sp-hero__h{font-size:32px;letter-spacing:-.02em;margin:.15rem 0 .3rem;line-height:1.05}
-.sp-hero__sub{font-size:15px;color:var(--ink-2);max-width:60ch;line-height:1.4}
+/* The hero's own title is gone (the page's <h1> in .pagehead carries it),
+   so this sentence is what the reader lands on: the question itself. */
+.sp-hero__sub{font-size:17px;color:var(--ink-2);max-width:60ch;line-height:1.45;margin:.2rem 0 0}
 .sp-hero__fresh{align-self:start;white-space:nowrap}
 
 .sp-nav{position:sticky;top:57px;z-index:4;display:flex;gap:.3rem;overflow-x:auto;padding:.5rem 0;
@@ -734,9 +755,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 
 /* ---- top-bar search trigger ---- */
+/* Compact by design: this sits beside a full nav bar now, not alone next to
+   a crumb, and the front page hides it altogether (shell.css) since the
+   hero field there does the same job. */
 .topsearch{display:flex;align-items:center;gap:.5rem;border:1px solid var(--line);border-radius:9px;
-  padding:.4rem .7rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;
-  min-width:270px;flex:0 1 340px;transition:border-color .14s,background .14s}
+  padding:.4rem .65rem;background:var(--surface);color:var(--ink-3);font-size:12.5px;
+  min-width:0;width:200px;flex:0 1 200px;transition:border-color .14s,background .14s}
 .topsearch:hover{border-color:var(--blue-300);background:var(--blue-050);color:var(--ink-2)}
 .topsearch:focus-within{border-color:var(--blue-500);background:var(--surface);
   box-shadow:0 0 0 3px var(--blue-100)}
@@ -778,9 +802,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .gs__rsys{display:flex;gap:.3rem;flex:none}
 
 /* ---------- the front door ---------- */
-.find{max-width:44rem;margin:3.5rem auto 3rem;text-align:center}
-.find__h{font-size:clamp(26px,4.4vw,40px);line-height:1.15;letter-spacing:-.03em;font-weight:700;
-  margin:0 0 .7rem;text-wrap:balance}
+.find{max-width:44rem;margin:.9rem auto 3rem;text-align:center}
 .find__s{font-size:17px;line-height:1.6;color:var(--ink-2);margin:0 auto 1.6rem;max-width:34rem}
 .find__box{position:relative;text-align:left}
 .find__box input{width:100%;min-height:56px;font-size:17px;padding:0 1rem;border-radius:12px;
@@ -788,9 +810,15 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .find__box input:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
 .find__hits{position:absolute;left:0;right:0;top:calc(100% + .4rem);z-index:20;background:var(--surface);
   border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-2);overflow:hidden}
-.find__hit{display:block;width:100%;text-align:left;min-height:44px;padding:.6rem 1rem;border:0;
+.find__hit{display:flex;align-items:center;justify-content:space-between;gap:.6rem;width:100%;
+  text-align:left;min-height:44px;padding:.6rem 1rem;border:0;
   background:none;font:inherit;font-size:16px;color:var(--ink);cursor:pointer}
 .find__hit:hover,.find__hit:focus-visible{background:var(--blue-050)}
+/* Labels an area result with its kind (region / combined authority), so a
+   colliding name such as West Midlands never silently picks one for the
+   reader -- both rows show, each saying plainly what it is. */
+.find__hitkind{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3);flex:none}
 .find__note{margin:.6rem 0 0;font-size:14px;color:var(--ink-2)}
 .find__eg{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:1.1rem 0 0}
 .chip{display:inline-flex;align-items:center;min-height:44px;padding:0 .8rem;border-radius:999px;
@@ -816,11 +844,22 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .qrow:hover .qrow__n{color:var(--blue-600)}
 .qrow__n{font-weight:600;font-size:15.5px}
 .qrow__s{font-size:14.5px;color:var(--ink-2)}
+/* #/questions lists the same thirteen rows as the front page, with each
+   question's national headline figure under what it answers. */
+.qlist__lede{font-size:17px;line-height:1.6;color:var(--ink-2);max-width:48rem;margin:0 0 1.6rem}
+/* On the front page the list sits under a centred hero, so .qlist centres
+   with it. #/questions is a document: its list lines up with the page title
+   in .pagehead instead of floating in the middle of the band. */
+#viewSystems .qlist{margin-left:0;margin-right:0}
+.qrow__f{grid-column:2;margin:.3rem 0 0;font-size:14px;color:var(--ink-2)}
+.qrow__f b{font-family:var(--mono);font-weight:600;font-size:15px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
 @media (max-width:700px){
-  .find{margin-top:2rem}
+  .find{margin-top:.8rem}
   .door{grid-template-columns:1fr;gap:.15rem}
   .door__n{grid-row:auto}
   .qrow{grid-template-columns:1fr}
+  .qrow__f{grid-column:1}
 }
 
 /* Available to assistive technology, absent from the design. Duplicated from
@@ -854,6 +893,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 /* What the figure is measured against, and the caveat, which is never omitted. */
 .answer__v{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:0 0 .3rem;max-width:40rem;
   font-variant-numeric:tabular-nums}
+/* The rank line: where this figure sits among the other districts that carry
+   one. Same tone as the caveat below it, not the figure above it, since a
+   rank is context, not a headline number. */
+.answer__r{margin:.25rem 0 0;font-size:14px;color:var(--ink-3)}
 .answer__c{font-size:13.5px;line-height:1.55;color:var(--ink-3);margin:0 0 .2rem;max-width:40rem}
 .answer__src{font-size:12.5px;line-height:1.5;color:var(--ink-3);margin:0 0 .4rem;max-width:40rem}
 .answer__src a{color:var(--blue-600);text-decoration:none}
@@ -874,3 +917,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .place__take{margin:1.4rem 0 .5rem}
 .place__csv{background:none;font-family:inherit;cursor:pointer}
 .place__csv:hover{border-color:var(--blue-300);color:var(--blue-600)}
+
+/* ---------- a region or combined authority, as a document ---------- */
+/* The district list on an area page: up to 33 links (.chip already carries
+   the 44px target and the pill), left-aligned rather than .find__eg's
+   centred layout, which exists for the front page's three examples only. */
+.arealist{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 1.4rem}

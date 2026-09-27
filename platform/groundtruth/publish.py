@@ -391,6 +391,12 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         "capacityTrend": pv.get("capacity", {}),
     }
 
+    # Region and combined authority membership, and the whole-area figures the
+    # rules in areas.py say can honestly be combined. A question that cannot is
+    # published as a refusal rather than left out, so the page can say why.
+    from . import areas as AR
+    out["areas"] = AR.build(con) if _exists(con, "silver", "lad_area") else {}
+
     # Operator view: everything traceable to a row, nothing invented.
     from . import admin as A
     out["admin"] = A.build(con, Path(__file__).resolve().parent.parent / "data" / "bronze")
@@ -496,6 +502,14 @@ def write(con: duckdb.DuckDBPyConnection, dest: Path) -> dict:
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     _dump(payload, dest)
+
+    # The postcode index is a separate file on purpose. It is about 200 KB, and
+    # a reader browsing by district name should never pay for it; the front page
+    # fetches it only when a postcode is actually typed.
+    from . import postcodes as PC
+    if _exists(con, "silver", "place_postcode"):
+        (dest.parent / "postcodes.json").write_text(
+            json.dumps(PC.sector_index(con), separators=(",", ":")), encoding="utf8")
 
     # Each headline is recorded with where it came from before the audit
     # measures how much of the publication can say so.

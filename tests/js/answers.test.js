@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { placeAnswers, placeAuthority, placeAbsences } from '../../app/assets/lib/answers.js';
+import { placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes } from '../../app/assets/lib/answers.js';
 
 const PAYLOAD = JSON.parse(readFileSync(new URL('./fixtures/payload.json', import.meta.url)));
 const byLad = PAYLOAD.places.byLad;
@@ -10,9 +10,11 @@ const CODES = Object.keys(byLad);
 // The real, published payload, not the four-place fixture above: whether a
 // question is genuinely national, genuinely the county's, or simply absent
 // for one place only shows up at real scale, across all 318 places and the
-// app's full 13-question list (four of which, sentinel, junction, watchman
-// and baseline, carry no per-place object anywhere and are not in the
-// fixture at all). Asserting the classification against invented fixture
+// app's full 13-question list. watchman carries no per-place object
+// anywhere in the real payload; baseline, junction and sentinel are absent
+// from the small fixture above too, but are now placed per district in the
+// real one (see the test below, which reads that from the payload rather
+// than assuming it). Asserting the classification against invented fixture
 // numbers would prove nothing about what a reader actually sees.
 const REAL_PAYLOAD = JSON.parse(
   readFileSync(new URL('../../app/data/platform.json', import.meta.url))
@@ -173,6 +175,25 @@ test('the sharpest known figures come through exactly as published', () => {
   assert.equal(ledger.againstLabel, null);
 });
 
+test('ledger carries its formatted figure and the raw number that backs it, side by side', () => {
+  // figure is what the place page renders; value is what a module ranking
+  // districts (app/assets/lib/rank.js) compares. Ledger is the one question
+  // whose figure is a display string, not a number, so this is the only
+  // case where the two genuinely differ.
+  const ledger = placeAnswers('E07000032', PAYLOAD).find(a => a.id === 'ledger');
+  assert.equal(ledger.figure, '£5,099,873');
+  assert.equal(typeof ledger.figure, 'string');
+  assert.equal(ledger.value, 5099873);
+  assert.equal(typeof ledger.value, 'number');
+  assert.equal(byLad.E07000032.ledger.total_amount, 5099873);
+
+  // lastmile's figure is already a number, so value carries the same number,
+  // not a second, independently derived one.
+  const lastmile = placeAnswers('E07000032', PAYLOAD).find(a => a.id === 'lastmile');
+  assert.equal(typeof lastmile.figure, 'number');
+  assert.equal(lastmile.value, lastmile.figure);
+});
+
 test('the authority type comes from the payload, and is silent when it cannot', () => {
   // A district whose capacity figure belongs to its county council.
   assert.equal(byLad.E07000032._capacity.figure_for, 'county');
@@ -192,13 +213,17 @@ test('the authority type comes from the payload, and is silent when it cannot', 
 });
 
 test('a question never published per place is classified as national for every place', () => {
-  // sentinel, junction, watchman and baseline never carry a per-place object
-  // anywhere in the real payload: they are measured only nationally, so every
-  // one of the 318 places must call them national, and never upper-tier or
-  // merely unanswered here.
+  // watchman never carries a per-place object anywhere in the real payload:
+  // it is measured only nationally, so every one of the 318 places must
+  // call it national, and never upper-tier or merely unanswered here.
+  // baseline, junction and sentinel used to belong on this list too, but the
+  // shipped payload now places each of them per district (see places.py's
+  // PLACED block), so the set this test checks is read from the payload
+  // itself, never hardcoded, and only the resulting membership is asserted
+  // below.
   const neverPerPlace = ALL_IDS.filter(id =>
     !REAL_CODES.some(code => REAL_PAYLOAD.places.byLad[code][id] !== undefined));
-  assert.deepEqual(neverPerPlace.sort(), ['baseline', 'junction', 'sentinel', 'watchman']);
+  assert.deepEqual(neverPerPlace.sort(), ['watchman']);
 
   for (const code of REAL_CODES) {
     const a = placeAbsences(code, REAL_PAYLOAD, ALL_IDS);
@@ -261,6 +286,34 @@ test('an unknown place has no absences rather than a guessed one', () => {
   assert.equal(placeAbsences('E07000032', null, ALL_IDS), null);
 });
 
+// Only junction and sentinel declare a reason a place can carry nothing for
+// them at all (see the absence field on each QUESTIONS entry in answers.js).
+// Every other question has none, and the generic absence sentence on the
+// place page already covers those honestly on its own.
+test('an absence note comes back for junction and sentinel, and for no question that declares none', () => {
+  const notes = placeAbsenceNotes(ALL_IDS);
+  const byId = Object.fromEntries(notes.map(n => [n.id, n.note]));
+
+  assert.ok(byId.junction, 'junction has a note');
+  assert.match(byId.junction, /Northern Powergrid/);
+  assert.doesNotMatch(byId.junction, /\u2014|\u2013/);
+
+  assert.ok(byId.sentinel, 'sentinel has a note');
+  assert.match(byId.sentinel, /sample/);
+  assert.doesNotMatch(byId.sentinel, /\u2014|\u2013/);
+
+  // Every question with a per-place figure but no declared absence: no note.
+  for (const id of ['catchment', 'plumbline', 'lastmile', 'ledger', 'baseline']) {
+    assert.ok(!(id in byId), `${id} should carry no absence note`);
+  }
+});
+
+test('placeAbsenceNotes only returns notes for the ids it is asked about', () => {
+  assert.deepEqual(placeAbsenceNotes(['catchment']), []);
+  assert.deepEqual(placeAbsenceNotes([]), []);
+  assert.deepEqual(placeAbsenceNotes(['sentinel']).map(n => n.id), ['sentinel']);
+});
+
 test('the lastmile comparator names the population it actually covers', () => {
   // lastmile.other_pct is coverage among premises outside new-build
   // postcodes (platform/groundtruth/systems/lastmile.py), compared here
@@ -273,4 +326,26 @@ test('the lastmile comparator names the population it actually covers', () => {
   assert.equal(a.against, 83.5);                  // systems.lastmile.other_pct
   assert.match(a.againstLabel, /outside new-build postcodes/);
   assert.doesNotMatch(a.againstLabel, /^the national share$/);
+});
+
+// baseline carries no block in the shared fixture above (it is one of the
+// four questions never published per place there, asserted earlier in this
+// file), so its own answer and its singular/plural wording are checked here
+// against a small payload built for the purpose, not the shared fixture.
+const BASELINE_PAYLOAD = {
+  systems: {},
+  places: { byLad: { E07000032: { baseline: { outlets: 14, adjusted_spills: 812.5, reported_spills: 790 } } } },
+};
+
+test('baseline answers with its adjusted figure, against the reported one', () => {
+  const a = placeAnswers('E07000032', BASELINE_PAYLOAD).find(x => x.id === 'baseline');
+  assert.equal(a.figure, 812.5);
+  assert.equal(a.against, 790);
+  assert.match(a.caveat, /14 monitored storm overflows/);
+});
+
+test('a district with one outlet is not described in the plural', () => {
+  const one = { systems: {}, places: { byLad: { X: { baseline: { outlets: 1, adjusted_spills: 3, reported_spills: 3 } } } } };
+  const a = placeAnswers('X', one).find(x => x.id === 'baseline');
+  assert.match(a.caveat, /1 monitored storm overflow /);
 });

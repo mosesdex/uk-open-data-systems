@@ -104,5 +104,5 @@ function inject(file, container, block) {
 }
 
 // One interface, so one page to fill. mobile.html is a handoff to '/' now.
-const n1 = inject('app/index.html', 'sysGrid', systemsBlock());
+const n1 = inject('app/index.html', 'qIndexBody', systemsBlock());
 console.log(`static content injected: app/index.html (${n1} bytes)`);

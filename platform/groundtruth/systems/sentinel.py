@@ -28,6 +28,7 @@ from pathlib import Path
 import duckdb
 
 from .. import entity
+from ..place import resolve_postcode
 from ..store import insert_many
 
 # Methods that skip open competition. 'direct' is an award with no competition
@@ -51,6 +52,31 @@ class Coverage:
     def pct(self, n: int, of: int | None = None) -> float:
         d = of or self.releases
         return 100 * n / d if d else 0.0
+
+
+def _postcodes(release: dict) -> tuple[str | None, str | None]:
+    """The buyer's address and where the work is delivered, if either is given.
+
+    Delivery is the better answer to "where is this happening" and is preferred
+    downstream; the buyer address is the fallback, and is a registered office as
+    often as it is a place of work. Both are published so the weaker one can be
+    argued with rather than silently relied on.
+    """
+    buyer = None
+    for party in release.get("parties") or []:
+        if "buyer" in (party.get("roles") or []):
+            buyer = ((party.get("address") or {}).get("postalCode") or "").strip() or None
+            break
+    delivery = None
+    for item in ((release.get("tender") or {}).get("items") or []):
+        for addr in item.get("deliveryAddresses") or []:
+            got = (addr.get("postalCode") or "").strip()
+            if got:
+                delivery = got
+                break
+        if delivery:
+            break
+    return buyer, delivery
 
 
 def load(con: duckdb.DuckDBPyConnection, *paths: Path) -> Coverage:
@@ -77,6 +103,9 @@ def load(con: duckdb.DuckDBPyConnection, *paths: Path) -> Coverage:
                 ident = p.get("identifier") or {}
                 if ident.get("scheme") == "GB-COH" and ident.get("id"):
                     party_num[p.get("id")] = str(ident["id"])
+            # One release, one pair of addresses -- read once per release
+            # rather than once per award/supplier row below.
+            buyer_pc, delivery_pc = _postcodes(rel)
 
             for award in rel.get("awards", []) or []:
                 value = (award.get("value") or {}).get("amount")
@@ -105,6 +134,7 @@ def load(con: duckdb.DuckDBPyConnection, *paths: Path) -> Coverage:
                         tender.get("mainProcurementCategory"),
                         float(value) if value else None,
                         str(award.get("date") or "")[:10],
+                        buyer_pc, delivery_pc,
                     ))
 
     con.execute("DROP TABLE IF EXISTS silver.procurement_award")
@@ -113,9 +143,10 @@ def load(con: duckdb.DuckDBPyConnection, *paths: Path) -> Coverage:
           ocid VARCHAR, buyer_id VARCHAR, buyer VARCHAR,
           supplier VARCHAR, supplier_key VARCHAR, company_number VARCHAR,
           method VARCHAR, method_detail VARCHAR, category VARCHAR,
-          value DOUBLE, award_date VARCHAR
+          value DOUBLE, award_date VARCHAR,
+          buyer_postcode VARCHAR, delivery_postcode VARCHAR
         )""")
-    insert_many(con, "INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?)", rows)
+    insert_many(con, "INSERT INTO silver.procurement_award VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     return Coverage(releases, awards, with_value, with_method, with_tenderers,
                     identified, via_register)
 
@@ -313,3 +344,69 @@ def uncompeted_share(con: duckdb.DuckDBPyConnection) -> tuple[int, int, float]:
         SELECT count(*) FILTER (WHERE method IN {UNCOMPETED}), count(*)
         FROM silver.procurement_award""").fetchone()
     return row[0], row[1], round(100 * row[0] / row[1], 1) if row[1] else 0.0
+
+
+# A method that did not go to open competition. The task brief that specified
+# by_district proposed ("limited", "direct", "negotiated"); checked against
+# this module's own national "skipped open competition" figure
+# (uncompeted_share above, and the identical predicate in evidence.py's
+# _sentinel) before writing this, and neither counts "negotiated" -- it does
+# not occur in the method breakdown at all (selective, not stated, open,
+# direct, limited only). Aliased to UNCOMPETED, rather than restated as a
+# second tuple that happens to match today, so the district figure and the
+# national one are structurally unable to disagree about what "closed" means,
+# including if a future method value is ever added to one predicate and not
+# the other. selective is not closed by this definition: it is 54.3% of
+# awards, and counting it would make every district read around 60% closed,
+# contradicting the platform's own published national headline of 6.2%.
+_CLOSED = UNCOMPETED
+
+
+def by_district(con: duckdb.DuckDBPyConnection) -> None:
+    """Awards and value per district, and how many skipped open competition.
+
+    Placed by the delivery address where the notice gives one, and by the
+    buyer's address otherwise. Both are weak: a buyer address is frequently a
+    head office. placed_pct is published beside the figures so a reader can see
+    how much of the corpus reached a district at all, and the corpus is small,
+    about six awards per district.
+    """
+    rows = con.execute("""
+        SELECT method, value, buyer_postcode, delivery_postcode
+        FROM silver.procurement_award
+    """).fetchall()
+
+    agg: dict[str, list] = {}
+    placed = unplaced = 0
+    for method, value, buyer_pc, delivery_pc in rows:
+        code = None
+        for pc in (delivery_pc, buyer_pc):
+            if not pc:
+                continue
+            ref = resolve_postcode(con, pc)
+            if ref.lad_code:
+                code = ref.lad_code
+                break
+        if code is None:
+            unplaced += 1
+            continue
+        placed += 1
+        a = agg.setdefault(code, [0, 0.0, 0])
+        a[0] += 1
+        a[1] += value or 0.0
+        if str(method or "").lower() in _CLOSED:
+            a[2] += 1
+
+    total = placed + unplaced
+    pct = round(100 * placed / total, 1) if total else 0.0
+
+    con.execute("DROP TABLE IF EXISTS gold.sentinel_district")
+    con.execute("""CREATE TABLE gold.sentinel_district
+                   (lad_code VARCHAR, awards INTEGER, total_value DOUBLE,
+                    closed_awards INTEGER, closed_pct DOUBLE, placed_pct DOUBLE)""")
+    if agg:
+        con.executemany(
+            "INSERT INTO gold.sentinel_district VALUES (?, ?, ?, ?, ?, ?)",
+            [(c, v[0], round(v[1], 2), v[2],
+              round(100 * v[2] / v[0], 1) if v[0] else 0.0, pct)
+             for c, v in agg.items()])

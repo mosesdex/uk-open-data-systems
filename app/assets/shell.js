@@ -18,30 +18,47 @@ const Shell = (() => {
   const num = v => v == null || Number.isNaN(Number(v)) ? 'n/a' : Number(v).toLocaleString('en-GB');
 
   /* ---------------------------------------------------------------- nav ---- */
-  // The drawer used to list six destinations by a hardcoded id ("#/" + id),
-  // three of which (systems, sources, method) had been retired and now only
-  // redirect elsewhere -- so "What it answers" landed on the home page and
-  // "Sources"/"Method" both landed on the same "About" entry already below
-  // them. This lists the structure the site now has instead: the front page,
-  // compare, unusual, about and organisations, each with an ORDERED LIST of
-  // candidate hrefs in `candidates` -- the same firstServable idea
-  // app/assets/lib/routes.js applies to URLs and renderTabbar already applies
-  // to the bottom bar -- so renderNav() picks a route that actually renders
-  // today instead of a hardcoded href that might redirect. A count is kept
-  // only where it names a real, useful quantity (districts, organisations);
-  // "About" and "What looks unusual" are not collections and carry none.
+  // The drawer is the phone menu now, not a console rail: it used to open
+  // on a PUBLIC badge, mono section labels and the thirteen questions
+  // listed with their live figures, every one of them a sign this was the
+  // operations sidebar wearing a public skin. This lists the structure the
+  // site actually has instead: the front page, Places, Compare, Unusual,
+  // About and Organisations, each with an ORDERED LIST of candidate hrefs
+  // in `candidates` -- the same firstServable idea app/assets/lib/routes.js
+  // applies to URLs and renderTabbar already applies to the bottom bar --
+  // so renderNav() picks a route that actually renders today instead of a
+  // hardcoded href that might redirect. A count is kept only where it
+  // names a real, useful quantity (districts, organisations); "Compare",
+  // "Unusual" and "About" are not collections of their own and carry none.
   const NAV_PUBLIC = [
     { group: 'Explore', items: [
-      { id: '',        candidates: ['#/'],       icon: '◉', label: 'Find your area' },
-      { id: 'compare', candidates: ['#/compare'], icon: '⇄', label: 'Compare every district', count: () => Platform.placeList().length },
-      { id: 'unusual', candidates: ['#/unusual'], icon: '◆', label: 'What looks unusual' },
-      { id: 'about',   candidates: ['#/about'],   icon: 'ⓘ', label: 'How this is built' },
-      { id: 'orgs',    candidates: ['#/orgs'],    icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
+      { id: '',        candidates: ['#/'],                      icon: '◉', label: 'Find your area' },
+      { id: 'places',  candidates: ['#/places'],                 icon: '▣', label: 'Places', count: () => Platform.placeList().length },
+      { id: 'compare', candidates: ['#/compare', '#/places'],    icon: '⇄', label: 'Compare' },
+      { id: 'unusual', candidates: ['#/unusual'],                icon: '◆', label: 'Unusual' },
+      { id: 'about',   candidates: ['#/about', '#/method'],      icon: 'ⓘ', label: 'About' },
+      { id: 'orgs',    candidates: ['#/orgs'],                   icon: '⬢', label: 'Organisations', count: () => (Platform.organisations() || []).length },
     ]},
   ];
 
+  // The same four destinations the drawer opens with (bar the front page,
+  // which the mark itself already links to, and Organisations, which stays
+  // a drawer-only destination), rendered as real links in the header at
+  // laptop width instead of gated behind the hamburger. Same
+  // candidates/firstServable shape as NAV_PUBLIC above, read by
+  // renderTopNav() below.
+  const TOPNAV_PUBLIC = [
+    { id: 'places',  candidates: ['#/places'],              label: 'Places' },
+    { id: 'compare', candidates: ['#/compare', '#/places'], label: 'Compare' },
+    { id: 'unusual', candidates: ['#/unusual'],             label: 'Unusual' },
+    { id: 'about',   candidates: ['#/about', '#/method'],   label: 'About' },
+  ];
+
+  /* Second element is the visible <h1> in .pagehead; first is the admin
+     crumb. The front page's heading is the question it asks, because the
+     hero's own copy of it is gone: one title per page, in one place. */
   const TITLES_PUBLIC = {
-    '':        ['Explore', 'Find your area'],
+    '':        ['Explore', 'What does the public record say about your area?'],
     places:    ['Explore · Places', 'Places'],
     systems:   ['Explore · What it answers', 'The thirteen questions'],
     orgs:      ['Explore · Organisations', 'Organisations'],
@@ -51,13 +68,15 @@ const Shell = (() => {
     compare:   ['Explore · Compare', 'Compare every district'],
     unusual:   ['Explore · Unusual', 'What looks unusual right now'],
     about:     ['Evidence · How this is built', 'How this is built'],
+    questions: ['Explore · What it answers', 'The thirteen questions'],
+    areas:     ['Explore · Areas', 'Regions and combined authorities'],
   };
 
   /* One shell, two consoles. The public app and the admin console are the same
      product and were two implementations of a sidebar, a top bar and a router.
      Everything below is driven by this config instead. */
   const DEFAULTS = {
-    nav: null, titles: null, views: null, legacy: null,
+    nav: null, titles: null, views: null, legacy: null, topnav: null,
     // Three destinations, not the old four: the front page now carries the
     // navigation, so the bottom bar only needs the way in, the way to see
     // every district side by side, and the way to how this is built.
@@ -80,6 +99,7 @@ const Shell = (() => {
   };
   let CFG = DEFAULTS;
   const nav = () => CFG.nav || NAV_PUBLIC;
+  const topnav = () => CFG.topnav || TOPNAV_PUBLIC;
   const titles = () => CFG.titles || TITLES_PUBLIC;
   const views = () => CFG.views || VIEWS_PUBLIC;
   const legacy = () => CFG.legacy || LEGACY_PUBLIC;
@@ -111,9 +131,30 @@ const Shell = (() => {
       <div id="navSystems">${systemNav()}</div>`);
   }
 
+  /* The header's own primary nav at laptop width: #topNav is absent from
+     the admin console's markup, so this is a no-op there and the drawer
+     stays its only navigation, same as renderNav() above degrades safely
+     when .side__scroll is missing. */
+  function renderTopNav() {
+    const box = $('#topNav');
+    if (!box) return;
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    box.innerHTML = topnav().map(it => {
+      const href = pick(it.candidates, canRender);
+      if (!href) return '';
+      const key = href.slice(2).split('/')[0];
+      return `<a data-topnav="${key}" href="${href}">${esc(it.label)}</a>`;
+    }).join('');
+  }
+
   /* The system list used to be anchors into one long page, with a scroll-spy
      keeping up. Each one is a destination now, so it is a link and nothing
-     needs to watch the scroll position. */
+     needs to watch the scroll position. It used to also carry each
+     system's live headline figure, which read as a dashboard row rather
+     than a menu item; this is a plain link, its name and domain only. */
   function systemNav() {
     // #/systems/<id> is a renamed route (app/assets/lib/routes.js) that now
     // redirects to #/questions/<id>: linking straight at the renamed route
@@ -127,17 +168,11 @@ const Shell = (() => {
       const spec = (typeof CARDS !== 'undefined') && CARDS.SPEC && CARDS.SPEC[s.id];
       const ico = (spec && spec.icon) || '•';
       const dom = (spec && spec.domain) || s.dom || '';
-      let fig = '';
-      try {
-        const r = Platform.systemResult(s.id);
-        if (r && r.headline) fig = r.headline;
-      } catch (e) { fig = ''; }
       const href = pick(['#/questions/' + s.id, '#/systems/' + s.id], canRender) || ('#/systems/' + s.id);
       return `<a class="navx" data-sysnav="${esc(s.id)}" href="${href}">
         <span class="navx__ico" aria-hidden="true">${ico}</span>
         <span class="navx__tx"><span class="navx__nm">${esc(s.n)}</span>${
           dom ? `<span class="navx__dm">${esc(dom)}</span>` : ''}</span>
-        ${fig ? `<span class="navx__fig">${esc(fig)}</span>` : ''}
       </a>`;
     }).join('');
   }
@@ -826,11 +861,12 @@ const Shell = (() => {
   }
 
   /* -------------------------------------------------------------- router --- */
-  // 'unusual' and 'about' have their own <div data-view> in app/index.html
-  // (compare has none: it reuses 'places'), so both must be listed here or
-  // show('unusual')/show('about') would hide every view, including their own,
-  // and the destination would render as a blank page.
-  const VIEWS_PUBLIC = ['home', 'overview', 'places', 'systems', 'sources', 'method', 'detail', 'unusual', 'about'];
+  // 'unusual', 'about' and 'areas' each have their own <div data-view> in
+  // app/index.html (compare has none: it reuses 'places'), so all three must
+  // be listed here or show('unusual')/show('about')/show('areas') would hide
+  // every view, including their own, and the destination would render as a
+  // blank page.
+  const VIEWS_PUBLIC = ['home', 'overview', 'places', 'systems', 'sources', 'method', 'detail', 'unusual', 'about', 'areas'];
 
   function show(view) {
     views().forEach(v => {
@@ -845,14 +881,27 @@ const Shell = (() => {
   function setChrome(key) {
     const T = titles();
     const [crumb, title] = T[key] || T[''] || ['', ''];
+    // .top__crumb and .live are admin-only now (app/index.html carries
+    // neither any more); both guards below simply no-op on the public shell.
     const c = $('.top__crumb'), t = $('.top__title');
     if (c) c.textContent = (CFG.crumb || DEFAULTS.crumb) + ' · ' + crumb;
     // A detail route names the thing itself; the section name is the fallback.
     if (t) t.textContent = docName || title;
-    $$('[data-nav]').forEach(a => a.classList.toggle('is-on', a.dataset.nav === key));
+    // The front page's hero carries its own place search (shell.css hides
+    // .topsearch under this class); every other route shows the header's.
+    document.body.classList.toggle('is-home', key === '');
+    // The active destination gets both a visible style and aria-current, in
+    // the drawer, the header's own primary nav and the phone tab bar alike.
+    const markCurrent = (sel, isOn) => $$(sel).forEach(a => {
+      const on = isOn(a);
+      a.classList.toggle('is-on', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    markCurrent('[data-nav]', a => a.dataset.nav === key);
+    markCurrent('[data-topnav]', a => a.dataset.topnav === key);
+    markCurrent('[data-tab]', a => a.dataset.tab === key);
     const activeSys = (location.hash.match(/^#\/systems\/([a-z0-9_-]+)/i) || [])[1] || '';
     $$('[data-sysnav]').forEach(a => a.classList.toggle('is-on', a.dataset.sysnav === activeSys));
-    $$('[data-tab]').forEach(a => a.classList.toggle('is-on', a.dataset.tab === key));
     const s = $('.side');
     if (s) s.classList.remove('on');
   }
@@ -873,7 +922,7 @@ const Shell = (() => {
   const DOCS = {
     '':        ['Find your area', 'Type a council or district name and see what the connected record holds for it: school places, planning speed, flood defences, care ownership and connectivity, each from a published government file.'],
     places:    ['Places', 'Every district, with school places, planning speed, flood defences, care ownership and connectivity read side by side.'],
-    systems:   ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    systems:   ['The thirteen questions', 'The thirteen questions the connected record answers, each computed from a published government file.'],
     orgs:      ['Organisations', 'Companies and public bodies resolved to one identifier across procurement, care and ownership records.'],
     sources:   ['Sources', 'Every source the record reads, when it was last fetched, and what failed.'],
     method:    ['Method', 'The two joins, what each figure assumes, and every correction published so far.'],
@@ -884,7 +933,11 @@ const Shell = (() => {
     // Same content as 'systems': #/questions/<id> renders the identical view
     // (see the questions branch in route()), so it needs the same fallback
     // copy here for the rare direct visit to the bare #/questions with no id.
-    questions: ['What it answers', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    questions: ['The thirteen questions', 'The thirteen questions the connected record answers, each computed from a published government file.'],
+    // A region or combined authority: #/areas/<code>. Same fallback-then-
+    // specific shape as 'places' below, since the bare #/areas is never a
+    // real destination of its own (there is no index page, only search).
+    areas:     ['Regions and combined authorities', 'What a region or combined authority’s districts add up to, each figure stating how it was combined.'],
   };
 
   let docName = '';
@@ -898,6 +951,12 @@ const Shell = (() => {
         if (pl) { name = pl.name;
           desc = `What the connected record says about ${pl.name}: school places, planning speed, flood `
                + `defences, care ownership and connectivity, each computed from a published file.`; }
+      } else if (head === 'areas' && seg[1]) {
+        const payload = Platform.payload ? Platform.payload() : null;
+        const area = payload && payload.areas && payload.areas[seg[1]];
+        if (area) { name = area.name;
+          desc = `${area.name}, a ${area.kind}: what its ${(area.districts || []).length} districts `
+               + `add up to, each figure stating how it was combined.`; }
       } else if ((head === 'systems' || head === 'questions') && seg[1]) {
         // #/questions/<id> renders the identical page as #/systems/<id> (see
         // the questions branch in route()), so it earns the same specific
@@ -926,7 +985,7 @@ const Shell = (() => {
   // has not loaded and window.GT_LIB.ROUTER_HEADS is unavailable; keep it
   // matching route()'s branches so the degraded behaviour still makes sense.
   const FALLBACK_HEADS = new Set(['', 'places', 'systems', 'orgs', 'sources', 'method', 'search',
-    'compare', 'unusual', 'about', 'questions']);
+    'compare', 'unusual', 'about', 'questions', 'areas']);
 
   // Mirrors firstServable in app/assets/lib/routes.js; only a fallback for
   // the same (should not happen) case as FALLBACK_HEADS above, used by
@@ -944,6 +1003,37 @@ const Shell = (() => {
   // to a single occurrence instead of spamming the console on each navigation.
   let warnedMissingLib = false;
 
+  /* The question index at #/questions. One row per question, in the same
+     register as the front page's list and the place page's answers: what it
+     is called, what it answers in a line, and its national headline figure
+     where the payload publishes one. The row for a question with no measured
+     output says so rather than showing a blank, because an absence is a
+     finding here too. Overwrites the prerendered block in #qIndexBody that
+     tools/app-content.mjs leaves for crawlers. */
+  function buildQuestions() {
+    const host = $('#qIndexBody');
+    if (!host) return;
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    host.innerHTML = SYSTEMS.map(s => {
+      const qid = esc(s.id);
+      const href = pick(['#/questions/' + qid, '#/systems/' + qid], canRender) || ('#/systems/' + qid);
+      let r = null;
+      try { r = Platform.systemResult(s.id); } catch (e) { r = null; }
+      const figure = r && r.headline != null && r.headline !== ''
+        ? `<span class="qrow__f"><b>${esc(r.headline)}</b> ${esc(r.label || '')}${
+            r.sub ? `, ${esc(r.sub)}` : ''}</span>`
+        : `<span class="qrow__f">No measured output yet.</span>`;
+      return `<a class="qrow" href="${href}">
+         <span class="qrow__n">${esc(s.n)}</span>
+         <span class="qrow__s">${esc(s.s || '')}</span>
+         ${figure}
+       </a>`;
+    }).join('');
+  }
+
   /* The front page does one thing. Everything else on it is a signpost. */
   function buildHome() {
     const lib = window.GT_LIB || {};
@@ -957,32 +1047,158 @@ const Shell = (() => {
     const input = $('#findPlace'), hits = $('#findHits'), note = $('#findNote');
     if (!input || !hits) return;
 
-    const go = code => { location.hash = '#/places/' + code; };
+    // #viewHome is the static container route() toggles with `hidden` (see
+    // show() above); buildHome only ever runs right after show('home') makes
+    // it visible, so capturing it once here is safe. A postcode lookup is
+    // asynchronous -- the reader can navigate to #/about or anywhere else
+    // while the index is still loading or a candidate list is still waiting
+    // to be chosen -- and #findPlace itself is never cleared on navigation,
+    // so its stale value cannot be trusted to prove the reader is still
+    // here. Checking whether the page itself is still on screen is the only
+    // guard that actually catches "the reader went somewhere else".
+    const viewHome = $('#viewHome');
+    const onHomeView = () => !!viewHome && !viewHome.hidden;
 
+    // kind is only ever set on an area hit (see draw() below); a district
+    // hit carries none, and goes to its own place page as before. Routed
+    // through firstServable, same as every other link this page builds, so
+    // an area result degrades to the district index rather than dead-ending
+    // if #/areas is ever unservable.
+    const go = (code, kind) => {
+      if (!onHomeView()) return;
+      const dest = kind
+        ? pick(['#/areas/' + code, '#/places'], canRender)
+        : pick(['#/places/' + code], canRender);
+      if (dest) location.hash = dest;
+    };
+
+    // The sector index is about 200 KB and only a postcode needs it, so it is
+    // fetched on first use rather than on page load. One in-flight request at
+    // a time; every later call reuses the resolved value -- but only once
+    // that value is a real index. A failed fetch (network drop, a non-OK
+    // response, bad JSON) must not be memoised, or the first bad request of
+    // the session disables postcode search for everyone who types one after
+    // it: clearing pcPending on failure lets the next keystroke try again.
+    let pcIndex = null, pcPending = null;
+    const loadIndex = () => {
+      if (pcIndex) return Promise.resolve(pcIndex);
+      if (!pcPending) {
+        pcPending = fetch('data/postcodes.json')
+          .then(r => (r.ok ? r.json() : null))
+          .catch(() => null)
+          .then(j => {
+            if (j) { pcIndex = j; } else { pcPending = null; }
+            return j;
+          });
+      }
+      return pcPending;
+    };
+
+    // Both of these write into the page the reader asked for -- a note or a
+    // candidate list left behind in a view that has since been hidden is as
+    // wrong as navigating the reader away without asking, so both no-op once
+    // #viewHome is no longer the one on screen.
+    const say = text => {
+      if (!note || !onHomeView()) return;
+      note.textContent = text || '';
+      note.hidden = !text;
+    };
+
+    const showCandidates = codes => {
+      if (!onHomeView()) return;
+      hits.innerHTML = codes.map(code =>
+        `<button class="find__hit" role="option" data-code="${esc(code)}">${
+          esc(names[code] || code)}</button>`).join('');
+      hits.hidden = !codes.length;
+    };
+
+    // The index carries Wales and Scotland as well as England: 9,113 English
+    // sectors, 592 Welsh, 1,136 Scottish. That is deliberate: a Welsh sector
+    // resolves to a district this platform does carry, so it falls through to
+    // the ordinary lookup below. A Scottish or Northern Irish reader who types
+    // a real postcode is owed the true reason nothing shows, not "not in the
+    // index", which would be false.
+    const COUNTRY = { W: 'Wales', S: 'Scotland', N: 'Northern Ireland' };
+
+    const resolvePostcode = q => {
+      loadIndex().then(idx => {
+        // The field may have moved on while the index was loading.
+        if (input.value !== q) return;
+        const all = lib.sectorDistricts ? lib.sectorDistricts(q, idx) : [];
+        if (!all.length) {
+          say('That postcode is not in the index. Try the council or district name.');
+          return;
+        }
+        // districtChoice decides ambiguity from the raw sector, before any
+        // country filtering -- a sector spanning two districts where only
+        // one is covered (five of them, all on the England/Scotland border:
+        // TD124, TD151, TD58, TD90, DG165) is exactly as ambiguous as one
+        // where both are covered. Filtering first and checking `.length===1`
+        // on what survives, as this used to do, made that cross-border case
+        // look unambiguous and silently sent the reader to the covered side
+        // -- the one thing an ambiguous sector must never do.
+        const choice = lib.districtChoice
+          ? lib.districtChoice(all, names)
+          : { ambiguous: all.length > 1, covered: all.filter(c => names[c]), missing: all.filter(c => !names[c]) };
+        const { ambiguous, covered, missing } = choice;
+        if (!covered.length) {
+          // The sector resolved, to somewhere this platform does not cover.
+          const where = COUNTRY[String(all[0])[0]];
+          say(where
+            ? `That postcode is in ${where}. This platform carries no districts there yet, so there is nothing to show for it.`
+            : 'That postcode resolves to a district this platform does not carry.');
+          return;
+        }
+        if (!ambiguous) { go(covered[0]); return; }
+        showCandidates(covered);
+        if (missing.length) {
+          // At least one of the raw sector's districts is not covered --
+          // true of the cross-border sectors above, where showCandidates
+          // above renders the single covered district as the one choice on
+          // offer. Naming the missing side is only honest because COUNTRY
+          // is derived from the code's own first letter, the same source
+          // the fully-uncovered branch above already trusts.
+          const where = COUNTRY[String(missing[0])[0]];
+          say(where
+            ? `That postcode sector also covers a district in ${where}, which this platform does not carry yet. Which of these is yours?`
+            : 'That postcode sector spans more than one district, including one this platform does not carry.');
+        } else {
+          say('That postcode sector spans more than one district. Which one?');
+        }
+      });
+    };
+
+    // Area matches are drawn above district matches: London should offer the
+    // region before it offers the one district actually named London (City
+    // of London, about 8,000 people), which is the complaint this task
+    // answers. A colliding name (West Midlands) shows a row per kind, each
+    // labelled, rather than one silently standing in for the other.
     const draw = () => {
       const q = input.value;
-      const found = lib.matchPlaces ? lib.matchPlaces(q, names) : [];
-      hits.innerHTML = found.map(h =>
+      const areasPayload = (Platform.payload && Platform.payload().areas) || null;
+      const areaHits = lib.matchAreas ? lib.matchAreas(q, areasPayload) : [];
+      const placeHits = lib.matchPlaces ? lib.matchPlaces(q, names) : [];
+      hits.innerHTML = areaHits.map(h =>
+        `<button class="find__hit" role="option" data-code="${esc(h.code)}" data-kind="${esc(h.kind)}">
+           <span>${esc(h.name)}</span><span class="find__hitkind">${esc(h.kind)}</span></button>`).join('')
+        + placeHits.map(h =>
         `<button class="find__hit" role="option" data-code="${esc(h.code)}">${esc(h.name)}</button>`).join('');
-      hits.hidden = !found.length;
-      const postcode = lib.looksLikePostcode && lib.looksLikePostcode(q) && !found.length;
-      if (note) {
-        note.textContent = postcode
-          ? 'Postcodes are not matched yet. Type the council or district name instead.'
-          : (q.trim() && !found.length ? 'No district of that name. Try the council that covers it.' : '');
-        note.hidden = !note.textContent;
-      }
+      const found = areaHits.length + placeHits.length;
+      hits.hidden = !found;
+      if (found) { say(''); return; }
+      if (lib.sectorKey && lib.sectorKey(q)) { say('Looking that postcode up.'); resolvePostcode(q); return; }
+      say(q.trim() ? 'No district of that name. Try the council that covers it.' : '');
     };
 
     input.oninput = draw;
     input.onkeydown = e => {
       if (e.key !== 'Enter') return;
       const first = hits.querySelector('.find__hit');
-      if (first) go(first.dataset.code);
+      if (first) go(first.dataset.code, first.dataset.kind);
     };
     hits.onclick = e => {
       const b = e.target.closest('.find__hit');
-      if (b) go(b.dataset.code);
+      if (b) go(b.dataset.code, b.dataset.kind);
     };
 
     // Three real examples, so the field is obviously usable.
@@ -1144,6 +1360,14 @@ const Shell = (() => {
     const upperTier = absences ? absences.upperTier.map(byId) : [];
     const noFigure = absences ? absences.noFigure.map(byId)
       : SYSTEMS.filter(s => !shown.has(s.id));
+    // Some questions know a specific reason a place can carry nothing for
+    // them (Sentinel's sample, Junction's withholding operators); most do
+    // not, and the generic sentence above already covers those honestly.
+    // Read straight off the raw noFigure ids, before they are mapped to
+    // SYSTEMS entries above, since placeAbsenceNotes wants ids, not names.
+    const absenceNotes = lib.placeAbsenceNotes
+      ? lib.placeAbsenceNotes(absences ? absences.noFigure : [])
+      : [];
 
     // "How this is computed" belongs on the question's method tab, not its
     // summary tab: #/questions/<id>/method exists and SysTabs reads the
@@ -1182,6 +1406,11 @@ const Shell = (() => {
               a.unit ? `<span class="answer__fu">${esc(a.unit)}</span>` : ''}</p>
             ${a.against != null ? `<p class="answer__v">Measured against ${esc(num(a.against))}${
               esc(a.unit || '')}, ${esc(a.againstLabel || '')}.</p>` : ''}
+            ${(() => {
+              const r = lib.rankFor && lib.rankFor(code, a.id, Platform.payload());
+              const s = r && lib.rankSentence && lib.rankSentence(r);
+              return s ? `<p class="answer__r">${esc(s)}</p>` : '';
+            })()}
             ${a.caveat ? `<p class="answer__c">${esc(a.caveat)}</p>` : ''}
             ${answerSource(a)}
             <a class="answer__go" href="${method(a.id)}">How this is computed</a>
@@ -1193,8 +1422,9 @@ const Shell = (() => {
             <a class="answer__go" href="${method(s.id)}">How this is computed</a>
           </article>`).join('');
 
+    // No heading here: .pagehead's <h1> is already this place's name, set by
+    // setDoc() from the same placeList() entry, at the size this h2 used.
     host.innerHTML = `
-      <h2 class="place__h">${esc(name)}</h2>
       ${authority ? `<p class="place__t">${esc(authority)}</p>` : ''}
       <p class="place__k">${shown.size} of ${SYSTEMS.length} questions answered here</p>
       ${summary.map(line => `<p class="place__sum">${esc(line)}</p>`).join('')}
@@ -1208,11 +1438,12 @@ const Shell = (() => {
         published for ${esc(absences.countyName)} County Council, not for this district.</p>` : ''}
       ${noFigure.length ? `<p class="place__none">No answer here for ${
         noFigure.map(s => esc(s.n)).join(', ')}. ${isWales
-          ? `${noFigure.length === 1 ? 'It is' : 'They are'} published for Wales too, but this
-             platform's sources are England only, so ${noFigure.length === 1 ? 'it is' : 'they are'}
-             not covered here.`
+          ? `${noFigure.length === 1 ? 'It is' : 'They are'} published for Wales too, but from ${
+              noFigure.length === 1 ? 'a source that only covers England' : 'sources that only cover England'
+             }, so ${noFigure.length === 1 ? 'it is' : 'they are'} not covered here.`
           : `The published record carries no figure for ${noFigure.length === 1 ? 'it' : 'them'} at this place.`
         }</p>` : ''}
+      ${absenceNotes.map(a => `<p class="place__none">${esc(a.note)}</p>`).join('')}
       ${answers && answers.length ? `<p class="place__take"><button type="button" class="chip place__csv"
         id="placeCsv">Download these ${answers.length} figure${answers.length === 1 ? '' : 's'} as CSV</button></p>` : ''}`;
 
@@ -1230,6 +1461,142 @@ const Shell = (() => {
     // place's document is on screen.
     if (legacy) legacy.hidden = true;
     if (lede) lede.hidden = true;
+  }
+
+  /* ---------------------------------------------------------------- areas --- */
+  // The twelve questions platform/groundtruth/areas.py declares a combine
+  // rule for -- every question in its RULES table except the one it never
+  // touches, Watchman, which is about a company's exposure, not a place's.
+  // Kept as its own list, not filtered off SYSTEMS, so a district-page
+  // question the area rule table has no row for (Watchman) is never listed
+  // as "missing" here: it was never asked of an area to begin with, which is
+  // a different, true statement from "no district here answered it".
+  const AREA_QUESTIONS = ['catchment', 'lastmile', 'highwater', 'bulwark', 'ledger', 'baseline',
+    'sightline', 'plumbline', 'compass', 'sentinel', 'junction', 'bellwether'];
+
+  // Which field of a combined figure is its headline number, its unit and a
+  // plain label -- the one piece of knowledge app/assets/lib/areas.js
+  // deliberately does not carry, since that module stays pure and DOM-free.
+  // Mirrors the RULES table in platform/groundtruth/areas.py: a question
+  // with no row here (Bellwether) is always "not combinable" and never
+  // reaches this lookup, since areaRuleSentence prints its refusal instead.
+  const AREA_HEADLINE = {
+    catchment:  { field: 'utilisation_pct',     unit: '%',   label: 'of school capacity used, across the area' },
+    lastmile:   { field: 'gigabit_pct',         unit: '%',   label: 'of premises can already take a gigabit connection' },
+    highwater:  { field: 'override_rate_pct',   unit: '%',   label: 'of objections were granted against anyway' },
+    bulwark:    { field: 'graded_pct',          unit: '%',   label: 'of flood defences carry a condition grade' },
+    ledger:     { field: 'amount_coverage_pct', unit: '%',   label: 'of contributions state an amount' },
+    baseline:   { field: 'adjusted_spills',     unit: null,  label: 'adjusted sewage spills' },
+    sightline:  { field: 'water_objections',    unit: null,  label: 'water quality objections raised' },
+    plumbline:  { field: 'statutory_pct',       unit: '%',   label: 'of major decisions inside the statutory 13 weeks' },
+    compass:    { field: 'projected_change_pct',unit: '%',   label: 'projected three year change in education, health and care plans' },
+    sentinel:   { field: 'closed_pct',          unit: '%',   label: 'of contracts skipped open competition' },
+    junction:   { field: 'connected_mw',        unit: ' MW', label: 'connected to the grid' },
+  };
+
+  // One sentence naming how a figure was reached, generic over any question:
+  // the global constraint is that an area figure states its combination, not
+  // just its value. rule is read off the figure itself (areas.py stamps
+  // every one), so a new rule only needs a new branch here, never a new
+  // per-question block.
+  function areaRuleSentence(fig) {
+    const d = fig.districts, districts = `${num(d)} district${d === 1 ? '' : 's'}`;
+    if (fig.rule === 'sum') return `Total across ${districts}.`;
+    if (fig.rule === 'recomputed') return `Recomputed from the summed figures across ${districts}, `
+      + `not averaged: an average would weight a small district the same as a large one.`;
+    if (fig.rule === 'weighted' || fig.rule === 'dedupe-weighted') {
+      const by = Object.values(fig.weighted_by || {}).join(' and ');
+      if (fig.rule === 'dedupe-weighted') {
+        const a = fig.authorities;
+        return `Weighted mean across ${num(a)} distinct authorit${a === 1 ? 'y' : 'ies'} covering `
+          + `${districts} here, weighted by ${by}. This is published per upper-tier authority and copied `
+          + `onto every district it covers, so combining by district would count one authority's figure `
+          + `once for each of those districts.`;
+      }
+      return `Weighted mean across ${districts}, weighted by ${by}, because the number behind the `
+        + `percentage is not itself published.`;
+    }
+    return '';
+  }
+
+  /* One area, as a document: its name, its kind (West Midlands is two
+     things), how many districts it covers, then every question that can
+     honestly be combined across them, each stating the rule that produced
+     it, and last the districts themselves, each linking to its own page. */
+  function buildAreaPage(code) {
+    const host = $('#areaPage');
+    if (!host) return;
+    const payload = Platform.payload ? Platform.payload() : null;
+    const areas = (payload && payload.areas) || {};
+    const area = areas[code];
+    if (!area) {
+      host.innerHTML = `<div class="state state--bad"><div class="state__t">No such area</div>
+        <p class="state__p"><span class="mono">${esc(code)}</span> does not match any region or combined
+        authority this record covers. <a href="#/places">See every district</a>.</p></div>`;
+      host.hidden = false;
+      return;
+    }
+
+    const lib = window.GT_LIB || {};
+    const heads = lib.ROUTER_HEADS || FALLBACK_HEADS;
+    const pick = lib.firstServable || fallbackFirstServable;
+    const canRender = head => heads.has(head);
+    const names = (payload.places && payload.places.names) || {};
+    const districts = area.districts || [];
+    const figures = area.figures || {};
+
+    const computedDate = payload && payload.generated ? String(payload.generated).slice(0, 10) : null;
+    const answerSource = qid => {
+      const src = sourceForQuestion(qid);
+      const srcHtml = src
+        ? (src.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.text)}</a>` : esc(src.text))
+        : 'no source resolved for this figure';
+      return `<p class="answer__src">Source: ${srcHtml}${computedDate ? `. Figure computed ${esc(computedDate)}.` : '.'}</p>`;
+    };
+
+    const asked = AREA_QUESTIONS.map(id => SYSTEMS.find(s => s.id === id) || { id, n: id });
+    const answered = asked.filter(s => figures[s.id]);
+    const missing = asked.filter(s => !figures[s.id]);
+
+    const blocks = answered.map(s => {
+      const fig = figures[s.id];
+      const head = AREA_HEADLINE[s.id];
+      const headline = (fig.rule !== 'not combinable' && head && fig[head.field] != null)
+        ? `<p class="answer__f"><span class="answer__fv">${esc(num(fig[head.field]))}</span>${
+            head.unit ? `<span class="answer__fu">${esc(head.unit)}</span>` : ''}</p>
+           <p class="answer__v">${esc(head.label)}</p>`
+        : '';
+      return `
+        <article class="answer">
+          <p class="answer__n">${esc(s.n)}</p>
+          <h3 class="answer__q">${esc(s.s || s.n)}</h3>
+          ${headline}
+          <p class="answer__c">${esc(areaRuleSentence(fig))}</p>
+          ${fig.rule === 'not combinable' ? `<p class="answer__c">${esc(fig.reason)}</p>` : ''}
+          ${answerSource(s.id)}
+          <a class="answer__go" href="${
+            pick(['#/questions/' + s.id + '/method', '#/systems/' + s.id + '/method'], canRender)
+              || ('#/systems/' + s.id + '/method')}">How this is computed</a>
+        </article>`;
+    }).join('');
+
+    const districtLinks = districts.map(d =>
+      `<a class="chip" href="${pick(['#/places/' + d], canRender) || '#/places'}">${esc(names[d] || d)}</a>`
+    ).join('');
+
+    // No heading here: .pagehead's <h1> is already this area's name, set by
+    // setDoc() from the same payload.areas entry, the same way buildPlacePage
+    // leaves the heading to setDoc() for a place.
+    host.innerHTML = `
+      <p class="place__t">${esc(area.name)} is a ${esc(area.kind)}.</p>
+      <p class="place__k">${num(districts.length)} district${districts.length === 1 ? '' : 's'}</p>
+      <div class="answers">${blocks}</div>
+      ${missing.length ? `<p class="place__none">No area figure for ${
+        missing.map(s => esc(s.n)).join(', ')}: no district here carries a row for ${
+          missing.length === 1 ? 'it' : 'them'}.</p>` : ''}
+      <h2 class="qlist__h" style="margin-top:1.4rem">Districts in ${esc(area.name)}</h2>
+      <div class="arealist">${districtLinks}</div>`;
+    host.hidden = false;
   }
 
   function route() {
@@ -1315,6 +1682,11 @@ const Shell = (() => {
       return;
     }
 
+    if (head === 'areas') {
+      show('areas'); setChrome('areas'); safely(() => buildAreaPage(seg[1]), '#areaPage'); scrollTop();
+      return;
+    }
+
     if (head === 'systems') {
       if (seg[1] && SYSTEMS.some(s => s.id === seg[1])) {
         show('detail'); setChrome('systems');
@@ -1322,7 +1694,7 @@ const Shell = (() => {
         scrollTop();
         return;
       }
-      show('systems'); setChrome('systems'); scrollTop();
+      show('systems'); setChrome('systems'); safely(buildQuestions, '#qIndexBody'); scrollTop();
       return;
     }
 
@@ -1337,7 +1709,7 @@ const Shell = (() => {
         scrollTop();
         return;
       }
-      show('systems'); setChrome('systems'); scrollTop();
+      show('systems'); setChrome('systems'); safely(buildQuestions, '#qIndexBody'); scrollTop();
       return;
     }
 
@@ -1533,6 +1905,7 @@ const Shell = (() => {
   function boot(cfg) {
     CFG = Object.assign({}, DEFAULTS, cfg || {});
     renderNav();
+    renderTopNav();
     renderTabbar();
 
     // The skip link is the first tab stop on every page. Its href="#top" used

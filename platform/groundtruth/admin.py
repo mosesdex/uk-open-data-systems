@@ -17,10 +17,10 @@ from . import sources as S
 # Tables a system writes, used to report freshness and size per system.
 SYSTEM_TABLES = {
     "catchment":  ["gold.catchment_district", "gold.catchment_school", "gold.catchment_specialist", "gold.catchment_district_trend", "gold.catchment_trend", "gold.catchment_trend_by_district"],
-    "sentinel":   ["gold.sentinel_buyer", "gold.sentinel_method", "gold.sentinel_repeat", "gold.sentinel_control_footprint", "gold.sentinel_shared_control"],
+    "sentinel":   ["gold.sentinel_buyer", "gold.sentinel_method", "gold.sentinel_repeat", "gold.sentinel_control_footprint", "gold.sentinel_shared_control", "gold.sentinel_district"],
     "highwater":  ["gold.highwater_outcome", "gold.highwater_trend", "gold.highwater_authority", "gold.highwater_district"],
     "plumbline":  ["gold.plumbline_quarter", "gold.plumbline_authority"],
-    "junction":   ["gold.junction_register"],
+    "junction":   ["gold.junction_register", "gold.junction_district"],
     "ledger":     ["gold.ledger_authority", "gold.ledger_purpose", "gold.ledger_funding_status"],
     "bellwether": ["gold.bellwether_care", "gold.bellwether_group", "gold.bellwether_footprint", "gold.bellwether_district"],
     "sightline":  ["gold.sightline_reason", "gold.sightline_authority", "gold.sightline_wq_authority", "gold.sightline_wq_district", "gold.sightline_wq_theme"],

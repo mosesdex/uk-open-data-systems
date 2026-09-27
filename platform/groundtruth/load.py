@@ -571,3 +571,42 @@ def load_lad_county(con: duckdb.DuckDBPyConnection, json_path: Path) -> int:
         county_code VARCHAR, county_name VARCHAR)""")
     insert_many(con, "INSERT INTO silver.lad_county VALUES (?, ?, ?, ?)", rows)
     return con.execute("SELECT count(*) FROM silver.lad_county").fetchone()[0]
+
+
+def load_lad_area(con: duckdb.DuckDBPyConnection, region_path: Path, cauth_path: Path) -> int:
+    """ONS's district-to-region and district-to-combined-authority lookups, merged.
+
+    One row per district per area, not deduplicated by name: West Midlands,
+    East Midlands and North East are each both a region and a combined
+    authority, covering different districts, so a district inside one of
+    those three combined authorities carries two rows here, one per kind, and
+    losing either would misreport how many districts the name covers.
+
+    Both lookups are English-only geographies -- Wales appears in neither, and
+    that is correct rather than a gap silently filled. Either file may be
+    missing (a source can fail to fetch without blocking the other, the same
+    tolerance load_lad_county already gets from its caller); only the
+    combination of both missing is an error, since then there is nothing to
+    load.
+    """
+    import json
+
+    def _features(path: Path, code_field: str, name_field: str, kind: str):
+        if not path.exists():
+            return []
+        doc = json.loads(path.read_text())
+        if doc.get("exceededTransferLimit"):
+            raise LoadError(f"{path.name} is one page of a longer answer; it needs paging")
+        return [(a.get("LAD24CD"), a.get(code_field), a.get(name_field), kind)
+                for a in (f.get("attributes") or {} for f in doc.get("features", []))]
+
+    rows = (_features(region_path, "RGN24CD", "RGN24NM", "region")
+            + _features(cauth_path, "CAUTH24CD", "CAUTH24NM", "combined authority"))
+    rows = [r for r in rows if r[0] and r[1]]
+    if not rows:
+        raise LoadError(f"neither {region_path.name} nor {cauth_path.name} produced a row")
+    con.execute("DROP TABLE IF EXISTS silver.lad_area")
+    con.execute("""CREATE TABLE silver.lad_area (
+        lad_code VARCHAR, area_code VARCHAR, area_name VARCHAR, kind VARCHAR)""")
+    insert_many(con, "INSERT INTO silver.lad_area VALUES (?, ?, ?, ?)", rows)
+    return con.execute("SELECT count(*) FROM silver.lad_area").fetchone()[0]

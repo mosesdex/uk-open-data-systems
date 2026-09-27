@@ -1,15 +1,8 @@
 /* The front page takes a council or district name. The payload ships
    places.names, 318 of them, which is the whole index this needs.
 
-   Postcodes are deliberately not resolved here: the payload carries counts
-   about the postcode spine, not a lookup, and a full index is far too large to
-   ship. The field recognises one so it can say so plainly. */
-
-const POSTCODE = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i;
-
-export function looksLikePostcode(query) {
-  return POSTCODE.test(String(query || '').trim());
-}
+   A typed postcode is resolved by postcode.js against a sector index served
+   separately, so this module stays the name index and nothing more. */
 
 export function matchPlaces(query, names, limit = 8) {
   const q = String(query || '').trim().toLowerCase();

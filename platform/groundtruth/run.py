@@ -63,12 +63,17 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
     B = bronze
 
     # The county lookup loads before any system builds: three of them hand
-    # county figures to districts through it.
+    # county figures to districts through it. The region and combined
+    # authority lookups load here too, for the same reason: areas.py reads
+    # silver.lad_area at publish time, and publish never loads anything itself.
     _stage(r, "place spine", lambda: (
         f"{loader.load_codepoint(con, B / 'os_code_point_open.zip'):,} postcodes, "
         f"{loader.load_lad_boundaries(con, B / 'ons_lad_boundaries.geojson')} districts"
         + (f", {loader.load_lad_county(con, B / 'ons_lad_county.json')} county links"
-           if (B / "ons_lad_county.json").exists() else ", no county lookup")))
+           if (B / "ons_lad_county.json").exists() else ", no county lookup")
+        + (f", {loader.load_lad_area(con, B / 'ons_lad_region.json', B / 'ons_lad_cauth.json')} area links"
+           if (B / "ons_lad_region.json").exists() or (B / "ons_lad_cauth.json").exists()
+           else ", no area lookup")))
 
     def _catchment():
         c = catchment.build(con, B / "gias_establishments.csv")
@@ -146,8 +151,13 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
         paths = [p for p in (B / "contracts_finder_bulk.json", B / "find_a_tender.json")
                  if p.exists()]
         c = sentinel.load(con, *paths); sentinel.build(con)
+        # Placed by district right after the national build, the same order
+        # junction's stage already places its own connections in.
+        sentinel.by_district(con)
+        districts = con.execute("SELECT count(*) FROM gold.sentinel_district").fetchone()[0]
         return (f"{c.awards:,} awards, {c.pct(c.suppliers_identified, c.awards):.1f}% "
-                f"identified (+{c.identified_via_register:,} via the register)")
+                f"identified (+{c.identified_via_register:,} via the register), "
+                f"placed across {districts} districts")
     _stage(r, "sentinel", _sentinel)
 
     def _watchman():
@@ -229,7 +239,15 @@ def build_everything(con: duckdb.DuckDBPyConnection, bronze: Path) -> RunReport:
             time.sleep(1)
         junction.load(con, states)
         g = junction.catalogue_gap(states)
-        return f"{g['returned']:,} of {g['advertised']:,} records served"
+        # The registers themselves -- on disk regardless of what the anonymous
+        # export above could reach today -- loaded and placed by district right
+        # after the register metadata, the same order this stage already builds
+        # its other gold table in.
+        rows = junction.load_connections(con, B)
+        junction.by_district(con)
+        districts = con.execute("SELECT count(*) FROM gold.junction_district").fetchone()[0]
+        return (f"{g['returned']:,} of {g['advertised']:,} records served, "
+                f"{rows:,} connections placed across {districts} districts")
     _stage(r, "junction", _junction)
 
     def _entity():

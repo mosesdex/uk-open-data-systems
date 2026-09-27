@@ -151,6 +151,8 @@ def cmd_load(args) -> int:
         ("postcodes",  lambda: load_mod.load_codepoint(con, BRONZE / "os_code_point_open.zip")),
         ("boundaries", lambda: load_mod.load_lad_boundaries(con, BRONZE / "ons_lad_boundaries.geojson")),
         ("counties",   lambda: load_mod.load_lad_county(con, BRONZE / "ons_lad_county.json")),
+        ("areas",      lambda: load_mod.load_lad_area(con, BRONZE / "ons_lad_region.json",
+                                                       BRONZE / "ons_lad_cauth.json")),
         ("properties", lambda: load_mod.load_uprn(con, BRONZE / "os_open_uprn.zip")),
         # Corroboration sources: each is a second route to something the
         # platform already publishes, so the cross-checks have something to

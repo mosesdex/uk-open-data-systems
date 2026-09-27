@@ -130,6 +130,14 @@ const GT = (() => {
       const targets = paths.map(p => {
         const v = vals[p.dataset.c];
         p.dataset.v = (v==null ? '' : v);
+        // The tooltip needs a pointer, which a phone does not have and a screen
+        // reader does not use, so the district's own <title> carries the same
+        // sentence. Without this the map is unreadable on touch and silent to
+        // assistive technology, which is most of the ways it is looked at.
+        const ttl = p.querySelector('title');
+        if (ttl) ttl.textContent = v == null
+          ? `${p.dataset.n}, no value published here`
+          : `${p.dataset.n}, ${withValue(lbl, v)}`;
         if (v == null) return NO_DATA;
         const t = hi>lo ? (v-lo)/(hi-lo) : .5;
         return ramp(t, rk);
@@ -177,6 +185,30 @@ const GT = (() => {
     }
     const resetZoom = () => zoomTo(null);
 
+    /* The number, then what it counts.
+
+       This read `label.replace('{}', value)`, so a label was expected to carry
+       a {} placeholder saying where its figure went. Not one of the call sites
+       ever passed one, on this map or any other, so replace() matched nothing
+       and returned the label untouched: every choropleth on the site showed a
+       district's name and the name of the metric, and silently dropped the
+       figure itself. With no legend either, there was no way to read a number
+       off any map at all.
+
+       Substitution still works where a label wants the figure mid-sentence.
+       A label without a placeholder now gets the value in front of it rather
+       than losing it, so the next label written without one cannot reintroduce
+       this. */
+    function withValue(label, v) {
+      const shown = (+v).toLocaleString('en-GB');
+      const text = String(label || '');
+      if (text.includes('{}')) return text.replace('{}', shown);
+      if (!text) return shown;
+      // A label that opens with its own unit, "% of places in use", closes up
+      // against the figure: "103.3% of places in use", not "103.3 % of ...".
+      return /^[%£$]/.test(text) ? `${shown}${text}` : `${shown} ${text}`;
+    }
+
     paths.forEach(p => {
       p.addEventListener('mousemove', ev => {
         const r = el.getBoundingClientRect();
@@ -184,7 +216,7 @@ const GT = (() => {
         const has = v !== '' && v != null;
         const note = has && (current.notes || {})[p.dataset.c];
         tip.innerHTML = `<b>${p.dataset.n}</b><span>${has
-          ? current.label.replace('{}', (+v).toLocaleString('en-GB'))
+          ? withValue(current.label, v)
           : 'no value published here'}</span>${note
           ? `<em>${String(note).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}</em>` : ''}`;
         tip.classList.add('on');

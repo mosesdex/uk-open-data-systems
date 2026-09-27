@@ -204,6 +204,49 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
   transition:transform .18s var(--ease-out)}
 .side.on{transform:none;box-shadow:var(--shadow-3)}
 
+/* ---------- primary nav (laptop width) ---------- */
+/* The four primary destinations, as real links in the header itself. At
+   this width the drawer is no longer the only way to navigate, so the
+   hamburger that used to gate all of it goes too -- scoped to the public
+   shell (body.shell-public): the admin console has no #topNav and keeps
+   navigating through its own drawer at every width. */
+.topnav{display:none}
+@media(min-width:861px){
+  body.shell-public [data-side-toggle]{display:none}
+  .topnav{display:flex;align-items:center;gap:.15rem}
+  .topnav a{display:flex;align-items:center;min-height:44px;padding:.4rem .75rem;
+    border-radius:9px;font-size:13.5px;color:var(--ink-2);white-space:nowrap;
+    transition:background .16s var(--ease),color .16s var(--ease)}
+  .topnav a:hover{background:var(--blue-050);color:var(--ink)}
+  .topnav a.is-on{background:var(--blue-050);color:var(--blue-700);font-weight:650}
+  [data-theme="dark"] .topnav a.is-on{color:var(--blue-300)}
+}
+
+/* ---------- page head ---------- */
+/* The route heading the router updates (app/assets/shell.js, setChrome())
+   used to sit crammed into the header row next to the crumb; that row is
+   navigation now, not navigation-plus-title, so this renders it as the
+   page's own heading, above the content, below the nav rather than inside
+   it. Still the same single <h1> for every route, including detail routes.
+   It is the page's real title, at full size: the views it sits above
+   (a place, a question, "What looks unusual", "How this is built", the
+   front page) used to each render their own large heading with the same
+   words, so the title appeared twice, once as a 13px label and once at
+   38px. Those per-view headings are gone; this is the only one. */
+.pagehead{max-width:72rem;margin:0 auto;padding:1.5rem 1.6rem 0}
+.pagehead .top__title{font-size:clamp(28px,4.2vw,40px);line-height:1.12;letter-spacing:-.03em;
+  font-weight:700;color:var(--ink);margin:0;text-wrap:balance}
+
+/* The front page's hero is a centred column: one question and one field.
+   The title band is that question, so on this one route it takes the hero's
+   width and centring instead of the full-width document band above. */
+body.is-home .pagehead{max-width:44rem;text-align:center;padding-top:3.2rem}
+
+/* The front page's hero carries its own place search immediately below the
+   fold; the header's copy of the same search would just be the same box
+   twice on the one page that least needs it. */
+body.is-home .topsearch{display:none}
+
 /* ---------- mobile: the shell collapses to a tab bar ---------- */
 .tabbar{display:none}
 @media(max-width:860px){
@@ -221,15 +264,20 @@ a[href^="https://find-and-update.company-information.service.gov.uk"]:hover{colo
   .tabbar i{font-style:normal;font-size:15px;line-height:1}
   .dpanel{width:100%;border-left:0}
   .vhead__t{font-size:19px}
-  /* The top bar has a menu button, a title and a search box to fit into 390px.
-     The crumb and the "/" hint are the two that carry least, so they go. */
-  .top__in{gap:.55rem;padding:.55rem .8rem}
+  /* The top bar has a menu button, the mark, a search box and the theme
+     toggle to fit into 375px. The crumb (admin only now) and the wordmark
+     beside the mark are the two that carry least, so they go; the drawer
+     still keeps the hamburger reachable, unlike at laptop width above. */
+  .top__in{gap:.5rem;padding:.55rem .7rem}
   .top__crumb{display:none}
-  .topsearch{min-width:0;flex:1 1 auto}
-  .topsearch__k{display:none}
+  .brand__name{display:none}
+  .topsearch{min-width:0;width:auto;flex:1 1 auto}
   .top__title{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:9rem}
   .live{display:none}
   .tiles{grid-template-columns:1fr}
+  .pagehead{padding:1.1rem .9rem 0}
+  .pagehead .top__title{font-size:28px;white-space:normal;overflow:visible;text-overflow:clip;max-width:none}
+  body.is-home .pagehead{padding-top:2rem}
 }
 @media(max-width:860px) and (prefers-reduced-motion: reduce){.side{transition:none}}
 

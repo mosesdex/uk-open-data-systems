@@ -738,6 +738,42 @@ REGISTRY: tuple[Source, ...] = (
         ),
     ),
     Source(
+        id="ons_lad_region",
+        name="ONS local authority district to region lookup (May 2024)",
+        publisher="Office for National Statistics",
+        url=("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+             "LAD24_RGN24_EN_LU/FeatureServer/0/query?where=1%3D1&outFields=*&f=json"),
+        fmt="json", role="place_spine", licence="OGL v3", cadence="annual",
+        expect_content=("application/json", "text/plain"),
+        systems=(),
+        notes=(
+            "Which region each English district sits in. Without it the word most "
+            "people type, London, matches only City of London, a district of about "
+            "8,000 residents, because no district is named London. Regions are an "
+            "English geography, so the 22 Welsh districts appear in neither this nor "
+            "the combined authority lookup, which is correct rather than a gap. Same "
+            "May 2024 vintage as the boundaries the map is drawn from."
+        ),
+    ),
+    Source(
+        id="ons_lad_cauth",
+        name="ONS local authority district to combined authority lookup (May 2024)",
+        publisher="Office for National Statistics",
+        url=("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/"
+             "LAD24_CAUTH24_EN_LU/FeatureServer/0/query?where=1%3D1&outFields=*&f=json"),
+        fmt="json", role="place_spine", licence="OGL v3", cadence="annual",
+        expect_content=("application/json", "text/plain"),
+        systems=(),
+        notes=(
+            "Which combined authority each district sits in, where there is one. "
+            "Greater Manchester and West Midlands are what a reader types and neither "
+            "is a district. Only 72 of the 296 English districts belong to one, so "
+            "this does not replace the region lookup. Note that West Midlands, East "
+            "Midlands and North East are each both a region and a combined authority, "
+            "covering different districts, so an area carries which kind it is."
+        ),
+    ),
+    Source(
         id="naptan_access_nodes",
         name="NaPTAN public transport access nodes",
         publisher="Department for Transport",

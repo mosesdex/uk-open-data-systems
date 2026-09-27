@@ -28,27 +28,23 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://ukgroundtruth.co.uk/#organisation", "name": "Dexter DCL", "url": "https://ukgroundtruth.co.uk/", "email": "moses@dextercyberlab.com", "description": "An independent UK company. UK GroundTruth is a platform built by Dexter DCL on published UK government data. It is not a government publication and carries no government endorsement."}, {"@type": "WebSite", "@id": "https://ukgroundtruth.co.uk/#website", "url": "https://ukgroundtruth.co.uk/", "name": "UK GroundTruth", "inLanguage": "en-GB", "publisher": {"@id": "https://ukgroundtruth.co.uk/#organisation"}, "license": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"}, {"@type": "WebPage", "@id": "https://ukgroundtruth.co.uk/#webpage", "url": "https://ukgroundtruth.co.uk/", "name": "UK GroundTruth \u2014 public interface", "description": "One connected record of UK public data: what it covers, the thirteen questions it answers, and the free government sources behind every figure.", "inLanguage": "en-GB", "isPartOf": {"@id": "https://ukgroundtruth.co.uk/#website"}, "publisher": {"@id": "https://ukgroundtruth.co.uk/#organisation"}, "isAccessibleForFree": true}]}</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23012169'/><text y='68' x='50' text-anchor='middle' font-size='52' font-family='monospace' font-weight='700' fill='white'>G</text></svg>">
 </head>
-<body>
+<body class="shell-public">
 <div class="flagrule"><i></i><i></i><i></i></div>
 <div class="app">
 
+<!-- The phone menu now matches the site's real structure instead of the
+     console rail this drawer started as: the front page, then every
+     destination the header's own nav also links to, then the thirteen
+     questions. renderNav() (app/assets/shell.js) rebuilds everything below
+     .side__scroll from that same list on boot, through firstServable, so
+     this starting markup is only what a reader sees for the instant before
+     JS runs. -->
 <aside class="side" id="sideNav">
   <div class="side__brand">
-    <div class="mark">G</div>
-    <div><div class="side__name">UK GroundTruth</div><div class="side__sub">Public</div></div>
+    <div class="mark" aria-hidden="true">G</div>
+    <div class="side__name">UK GroundTruth</div>
   </div>
-  <div class="side__scroll">
-    <div class="side__group">The story</div>
-    <a class="navi is-on" href="#top"><i class="navi__dot"></i>What it is</a>
-    <a class="navi" href="#mark-01"><i class="navi__dot"></i>The evidence</a>
-    <a class="navi" href="#place"><i class="navi__dot"></i>Your area</a>
-    <a class="navi" href="#systems"><i class="navi__dot"></i>What it answers</a>
-    <a class="navi" href="#spines"><i class="navi__dot"></i>How they connect</a>
-    <a class="navi" href="#feeds"><i class="navi__dot"></i>The evidence base</a>
-    <a class="navi" href="#honesty"><i class="navi__dot"></i>What it cannot do</a>
-    <div class="side__group">Jump to a system</div>
-    <div id="navSystems"></div>
-  </div>
+  <div class="side__scroll"></div>
 </aside>
 
 <a class="skip" href="#top">Skip to content</a>
@@ -56,23 +52,27 @@
 <div class="main">
 <header class="top"><div class="top__in">
   <button class="iconbtn" data-side-toggle aria-label="Menu">☰</button>
-  <div><div class="top__crumb">UK GroundTruth · Public interface</div><h1 class="top__title">National picture</h1></div>
+  <a class="brand" href="#/" aria-label="UK GroundTruth, home">
+    <span class="mark" aria-hidden="true">G</span>
+    <span class="brand__name" aria-hidden="true">UK GroundTruth</span>
+  </a>
+  <nav class="topnav" id="topNav" aria-label="Primary"></nav>
   <div class="spacer"></div>
   <div class="topsearch">
     <span class="topsearch__ico" aria-hidden="true">⌕</span>
     <input id="topSearch" type="search" autocomplete="off" spellcheck="false"
-           placeholder="Search organisations, places, questions"
-           aria-label="Search organisations, places and questions">
-    <span class="topsearch__k" aria-hidden="true">/</span></div>
-  <span class="live"><i></i>ONE CONNECTED RECORD</span>
+           placeholder="Search"
+           aria-label="Search places, organisations and questions">
+  </div>
   <button class="iconbtn" data-theme-toggle aria-label="Theme">◐</button>
 </div></header>
+
+<div class="pagehead"><h1 class="top__title">National picture</h1></div>
 
 <main class="pad" id="top" tabindex="-1">
 
   <div class="view" data-view="home" id="viewHome" hidden>
     <section class="find">
-      <h2 class="find__h">What does the public record say about your area?</h2>
       <p class="find__s">Type a council or district name. Every figure on the page that follows is
         computed from a published government file, and says which one.</p>
       <div class="find__box">
@@ -112,7 +112,6 @@
   </div>
 
   <div class="view" data-view="unusual" id="viewUnusual" hidden>
-    <h2 class="place__h">What looks unusual right now</h2>
     <p class="find__s" style="text-align:left;margin-left:0">Where a place sits furthest from the figure
       it is published against. Every row carries its source, so a reporter can check it before quoting it.
       It ranks within each question, then shows the widest of each, so one question's larger gaps cannot
@@ -136,8 +135,6 @@
        and last the limits -- what cannot be answered end to end, and what
        fails an anonymous request. -->
   <div class="view" data-view="about" id="viewAbout" hidden>
-    <h2 class="place__h">How this is built</h2>
-
     <h3 class="qlist__h" style="margin-top:1rem">The two joins, and how a record finds its place</h3>
     <section class="card" style="margin-top:1rem">
       <div class="card__hd"><div><div class="card__t">How a record finds its place</div>
@@ -250,22 +247,34 @@
 
   </div>
 
+  <!-- A region or combined authority: #/areas/<code>, built by buildAreaPage()
+       in app/assets/shell.js. Follows the same shape as #viewPlaces above --
+       one container the router fills, no heading of its own (.pagehead's
+       <h1> already carries the area's name, set by setDoc()). -->
+  <div class="view" data-view="areas" id="viewAreas" hidden>
+    <div id="areaPage"></div>
+  </div>
+
+  <!-- The question index. This was a grid of thirteen preview cards, under a
+       lede ("Thirteen questions nobody can currently answer") that
+       contradicted its own heading ("Every question, and what the record
+       says"), drawn by an inline drawSystems() at the foot of this file.
+       It is a list now, in the same register as the front page and the place
+       page: one row per question, built by buildQuestions() in
+       app/assets/shell.js, over the prerendered block below, which the app
+       overwrites the moment scripts run. -->
   <div class="view" data-view="systems" id="viewSystems" hidden>
-  <div class="secmark rise" id="mark-03"><div><div class="secmark__k">What it answers</div><h2 class="secmark__t">Every question, and what the record says</h2><div class="secmark__s">Thirteen questions nobody can currently answer. Each runs only on data anyone can download.</div></div></div>
-  <section class="card rise" id="systems" style="margin-top:1rem">
-    <div class="card__hd"><div><div class="card__t">All thirteen questions, with what the record answers</div>
-      <div class="card__s" id="sysCount">&nbsp;</div></div>
-      <div class="spacer"></div>
-      <a class="cmpcta" href="#compare">What · Where · Who, compare all 13 →</a>
-      <div class="row" id="filters" style="margin-left:.6rem"></div></div>
-    <div class="card__b"><div class="grid g3" id="sysGrid">
+    <p class="qlist__lede">Thirteen questions, each answered from a published government file.
+      Every figure below is the national picture; open a question for how it is computed, what it
+      rests on, and what it cannot tell you.</p>
+    <div class="qlist"><div id="qIndexBody">
 <!-- generated:static-content -->
 <section class="static-summary">
 <h2>The thirteen questions, and what each one found</h2>
 <p>Every figure below is computed from a published government record and carries
 the coverage it rests on. 13 of 13 questions have measured
-output; 43 of 45 registered sources returned data to an
-unauthenticated request on the last run. Computed 2026-09-11.</p>
+output; 45 of 47 registered sources returned data to an
+unauthenticated request on the last run. Computed 2026-09-24.</p>
 <ul>
 <li><a href="systems/catchment.html"><strong>Catchment</strong></a>
 : School place planning at the geography that matters. <p class="card__s"><strong>89.5%</strong> of mainstream school places in use, 633 specialist settings over capacity</p></li>
@@ -286,7 +295,7 @@ unauthenticated request on the last run. Computed 2026-09-11.</p>
 <li><a href="systems/lastmile.html"><strong>Lastmile</strong></a>
 : Gigabit compliance for new homes. <p class="card__s"><strong>83.3%</strong> gigabit in new-build postcodes, against 83.5% everywhere else</p></li>
 <li><a href="systems/bulwark.html"><strong>Bulwark</strong></a>
-: Who owns and maintains flood defences. <p class="card__s"><strong>11,919</strong> inspections overdue, maintainer known on 91% of 141,469 defences</p></li>
+: Who owns and maintains flood defences. <p class="card__s"><strong>14,067</strong> inspections overdue, maintainer known on 91% of 141,469 defences</p></li>
 <li><a href="systems/watchman.html"><strong>Watchman</strong></a>
 : Insolvency exposure across public suppliers. <p class="card__s"><strong>0</strong> exposures found in the sample, the register must accumulate before this produces signal</p></li>
 <li><a href="systems/compass.html"><strong>Compass</strong></a>
@@ -298,9 +307,7 @@ unauthenticated request on the last run. Computed 2026-09-11.</p>
 cannot tell you.</p>
 </section>
 <!-- /generated:static-content -->
-</div></div>
-  </section>
-
+    </div></div>
   </div>
 
   <!-- This view is never routed to: #/sources redirects to #/about
@@ -645,77 +652,11 @@ cannot tell you.</p>
   const richest = list.slice().sort((a, b) => b.systems - a.systems)[0];
   if (richest) showPlace(richest.code);
 
-  const badge = st => st==='live' ? '<span class="tag tag--ok">LIVE</span>' : '<span class="tag tag--warn">BETA</span>';
-  const spineTag = sp => sp==='both' ? '<span class="tag">WHERE + WHO</span>'
-    : sp==='place' ? '<span class="tag">WHERE</span>' : '<span class="tag">WHO</span>';
-  const srcFor = id => (Platform.sourceSummary().rows || [])
-    .filter(r => (r.systems||'').split(',').map(x=>x.trim()).includes(id));
-  const freshFor = id => {
-    const fed = srcFor(id).filter(r => r.fetched_at || r.provenance==='unlogged');
-    if (!fed.length) return GT.freshness(null, null);
-    const latest = fed.map(r=>r.fetched_at).filter(Boolean).sort().slice(-1)[0];
-    const cad = (fed[0]||{}).cadence;
-    return GT.freshness(cad, latest || Date.now());
-  };
-  const drawSystems = (f='all') => {
-    const list = SYSTEMS.filter(s => f==='all' || s.spine===f);
-    document.getElementById('sysGrid').innerHTML = list.map(s=>{
-      const spec = CARDS.SPEC[s.id];
-      const d = Platform.sys(s.id);
-      let statHTML='', pvHTML='';
-      if (spec && d) {
-        const h = spec.headline(d);
-        const v = h.dec!=null ? Number(h.value).toFixed(h.dec) : CARDS.fmt(h.value);
-        const trend = h.trend!=null
-          ? `<span class="syscard__trend ${h.trend>=0?'up':'down'}">${h.trend>=0?'▲':'▼'} ${Math.abs(h.trend)}%</span>` : '';
-        statHTML = `<div class="syscard__stat">
-            <span class="syscard__v">${h.prefix||''}${v}</span>
-            <span class="syscard__u">${h.unit||''}</span>${trend}</div>
-          <div class="syscard__lab">${h.label}</div>
-          <div class="syscard__ctx">${h.context||''}</div>`;
-        try { pvHTML = `<div class="syscard__pv">${GT.preview(spec.preview(d))}</div>`; } catch(e){ pvHTML=''; }
-      } else {
-        statHTML = `<div class="syscard__stat"><span class="card__s">not built yet</span></div>`;
-      }
-      const fr = freshFor(s.id);
-      return `<a class="syscard rise" id="sys-${s.id}" data-sysid="${s.id}" href="#/systems/${s.id}">
-        <div class="syscard__hd">
-          <span class="syscard__ico">${spec?spec.icon:'▦'}</span>
-          <div style="min-width:0">
-            <div class="syscard__name">${s.n}</div>
-            <div class="syscard__dom">${(spec?spec.domain:s.dom).toUpperCase()} · ${s.spine==='both'?'WHERE + WHO':s.spine==='place'?'WHERE':'WHO'}</div>
-          </div>
-        </div>
-        <div class="syscard__purpose">${spec?spec.purpose:s.s}</div>
-        ${statHTML}
-        ${pvHTML}
-        <div class="syscard__foot">
-          <span class="fresh ${fr.state}"><i></i>${fr.label}</span>
-          <span class="syscard__explore">Explore question →</span>
-        </div>
-        ${(typeof JOINS!=='undefined'&&JOINS[s.id])?(()=>{const j=JOINS[s.id];const none='<span class=\"wwwr__none\">no join</span>';return `
-        <div class="wwwr">
-          <div class="wwwr__r"><span class="wwwr__k">WHAT</span><span>${j.what}</span></div>
-          <div class="wwwr__r wwwr__r--where"><span class="wwwr__k">WHERE</span><span>${j.where||none}</span></div>
-          <div class="wwwr__r wwwr__r--who"><span class="wwwr__k">WHO</span><span>${j.who||none}</span></div>
-        </div>`;})():''}
-      </a>`;}).join('');
-    document.getElementById('sysCount').textContent =
-      `${list.length} shown · all reading live platform output`;
-    GT.reveal();
-    // animate preview fills into view
-    requestAnimationFrame(()=>document.querySelectorAll('#sysGrid .pv__gaugefill, #sysGrid .pv__bt i, #sysGrid .pv__cmpt i').forEach(el=>{
-      const w=el.style.width; el.style.width='0'; requestAnimationFrame(()=>el.style.width=w);
-    }));
-  };
-  document.getElementById('filters').innerHTML =
-    [['all','All 13'],['place','Where'],['entity','Who'],['both','Both']]
-    .map(([k,l],i)=>`<button class="btn ${i?'btn--ghost':''}" data-f="${k}">${l}</button>`).join('');
-  document.querySelectorAll('#filters [data-f]').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#filters [data-f]').forEach(o=>o.classList.add('btn--ghost'));
-    b.classList.remove('btn--ghost'); drawSystems(b.dataset.f);
-  }));
-  drawSystems();
+  // The thirteen-card grid that used to live here (drawSystems, its spine
+  // filters and the badge/spineTag/srcFor/freshFor helpers that only it
+  // used) drew #/questions as a grid of preview cards. That page is a list
+  // now, built by buildQuestions() in app/assets/shell.js from the same
+  // SYSTEMS array and Platform.systemResult, so nothing here fills it.
 
   // The donut, the source tally sentence, the feed table and the "N of M"
   // header line all read the same array once, so the three counts this page

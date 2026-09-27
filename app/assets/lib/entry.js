@@ -3,11 +3,17 @@
    the one bridge between the two: it runs deferred, before DOMContentLoaded, so
    the router finds it by the time any route is handled. */
 import { canonicalHash, ROUTER_HEADS, firstServable } from './routes.js';
-import { matchPlaces, looksLikePostcode } from './places.js';
+import { matchPlaces } from './places.js';
+import { matchAreas, areaDistricts } from './areas.js';
+import { sectorKey, sectorDistricts } from './postcode.js';
+import { districtChoice } from './coverage.js';
 import { placeSummary } from './summary.js';
 import { unusualRows, unusualTotal } from './unusual.js';
-import { placeAnswers, placeAuthority, placeAbsences } from './answers.js';
+import { placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes } from './answers.js';
+import { rankFor, rankSentence } from './rank.js';
 
 window.GT_LIB = Object.assign(window.GT_LIB || {},
-  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, looksLikePostcode, placeSummary, unusualRows, unusualTotal,
-    placeAnswers, placeAuthority, placeAbsences });
+  { canonicalHash, ROUTER_HEADS, firstServable, matchPlaces, matchAreas, areaDistricts,
+    sectorKey, sectorDistricts, districtChoice,
+    placeSummary, unusualRows, unusualTotal, placeAnswers, placeAuthority, placeAbsences, placeAbsenceNotes,
+    rankFor, rankSentence });
