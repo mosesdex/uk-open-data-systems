@@ -629,15 +629,24 @@ REGISTRY: tuple[Source, ...] = (
         id="epc_domestic",
         name="Energy Performance Certificate register",
         publisher="MHCLG",
-        url="https://epc.opendatacommunities.org/api/v1/domestic/search?size=2",
+        # The old endpoint, epc.opendatacommunities.org/api/v1/domestic/search,
+        # now answers 301 and is gone. Recorded at the service that replaced it,
+        # so this entry cites something that exists.
+        url="https://get-energy-performance-data.communities.gov.uk/",
         fmt="json",
         role="domain",
         licence="OGL v3",
         cadence="daily",
         expect_content=("application/json",),
         blocked=(
-            "Returns HTTP 200 with a sign-in page to an anonymous client. Advertised "
-            "as open; is not. Lastmile uses Price Paid Data instead."
+            "Moved, and still not open. The old API endpoint at "
+            "epc.opendatacommunities.org returns 301 to this service, which "
+            "offers two routes, a CSV download and a developer API, and sends "
+            "both through GOV.UK One Login: requesting the download anonymously "
+            "lands on One Login's own error page. An account is outside this "
+            "platform's rule that every source is retrieved without an account, "
+            "a key or a fee, so it stays unread and stays listed. Lastmile uses "
+            "Price Paid Data instead. Checked 27 September 2026."
         ),
     ),
     Source(
