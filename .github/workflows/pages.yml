@@ -52,6 +52,23 @@ jobs:
           cp .nojekyll LICENSE CNAME _site/ 2>/dev/null || true
 
 
+      - name: Version the module graph
+        run: |
+          # assets/lib/ is ten ES modules: index.html loads entry.js and entry.js
+          # imports the other nine by relative path. Each is cached separately
+          # under max-age=600, so for ten minutes after a deploy a returning
+          # visitor could hold a new entry.js beside an old answers.js. A name a
+          # module no longer exports is a module-graph SyntaxError rather than a
+          # missing property, so nothing in the graph runs and window.GT_LIB is
+          # never assigned: search, postcode lookup, area lookup and route
+          # aliasing all stop at once. That happened on the 27 September deploy.
+          #
+          # Renaming the directory to carry a hash of its contents makes the mix
+          # impossible: a relative import resolves against its own module's URL,
+          # so the whole graph moves together and the browser has never seen the
+          # new directory to have anything stale in it.
+          node tools/version-modules.mjs _site
+
       - name: Refuse to publish the system
         run: |
           # The engine never ships. It holds the fetchers, the source registry and
@@ -75,7 +92,22 @@ jobs:
             echo "::error::_site/index.html is not the app"
             exit 1
           fi
-          echo "checked: app at root, engine absent, console absent"
+          # The module graph must have been versioned, or a returning visitor can
+          # be served half of it. The versioning step fails loudly on its own, so
+          # this catches only the case where it was removed or reordered.
+          if [ -d _site/assets/lib ]; then
+            echo "::error::_site/assets/lib is unversioned; the versioning step did not run"
+            exit 1
+          fi
+          if ! ls -d _site/assets/lib-* >/dev/null 2>&1; then
+            echo "::error::no versioned module directory in _site/assets"
+            exit 1
+          fi
+          if grep -qE '(src|href)="[^"]*assets/lib/' _site/index.html; then
+            echo "::error::index.html still loads from the unversioned assets/lib/"
+            exit 1
+          fi
+          echo "checked: app at root, engine absent, console absent, module graph versioned"
 
       - name: Check every sitemap URL ships
         run: |
