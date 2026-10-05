@@ -353,7 +353,13 @@ REGISTRY: tuple[Source, ...] = (
         id="cqc_hsca_locations",
         name="CQC active locations under the Health and Social Care Act",
         publisher="Care Quality Commission",
-        url="https://www.cqc.org.uk/system/files/2026-08/04_August_2026_HSCA_Active_Locations.ods",
+        # CQC republishes this at a new dated path every month and 403s the
+        # previous one, so this URL goes stale on a schedule rather than
+        # staying put. The current path is linked from
+        # https://www.cqc.org.uk/about-us/transparency/using-cqc-data as the
+        # only HSCA_Active_Locations link on that page. Refreshed 5 October
+        # 2026, when the August path began answering 403.
+        url="https://www.cqc.org.uk/system/files/2026-10/01_October_2026_HSCA_Active_Locations.ods",
         fmt="zip-csv",
         role="domain",
         licence="OGL v3",
